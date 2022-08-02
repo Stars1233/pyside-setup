@@ -203,7 +203,10 @@ def python_version():
 
 
 def get_python_include_path():
-    return sysconfig.get_path('include')
+    if sys.platform == 'win32':
+        return sysconfig.get_path('include')
+    else:
+        return sysconfig.get_path('include', scheme="posix_prefix")
 
 
 def python_link_flags_qmake():

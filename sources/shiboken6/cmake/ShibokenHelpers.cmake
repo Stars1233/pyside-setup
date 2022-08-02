@@ -117,14 +117,21 @@ macro(shiboken_internal_set_python_site_packages)
     else()
         execute_process(
             COMMAND ${Python_EXECUTABLE} -c "if True:
+                import sys
                 import sysconfig
                 from os.path import sep
 
                 # /home/qt/dev/env/lib/python3.9/site-packages
-                lib_path = sysconfig.get_path('purelib')
+                if sys.platform == 'win32':
+                    lib_path = sysconfig.get_path('purelib')
+                else:
+                    lib_path = sysconfig.get_path('purelib', scheme='posix_prefix')
 
                 # /home/qt/dev/env
-                data_path = sysconfig.get_path('data')
+                if sys.platform == 'win32':
+                    data_path = sysconfig.get_path('data')
+                else:
+                    data_path = sysconfig.get_path('data', scheme='posix_prefix')
 
                 # /lib/python3.9/site-packages
                 rel_path = lib_path.replace(data_path, '')
