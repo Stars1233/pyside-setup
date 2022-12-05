@@ -42,7 +42,7 @@ from .utils import (copydir, copyfile, detect_clang,
                     linux_fix_rpaths_for_library, macos_fix_rpaths_for_library, parse_modules,
                     platform_cmake_options, remove_tree, run_process,
                     run_process_output, update_env_path, which)
-from . import PYSIDE, PYSIDE_MODULE, SHIBOKEN
+from . import PYSIDE, PYSIDE_MODULE, SHIBOKEN, SHIBOKEN_GENERATOR
 from .wheel_override import get_bdist_wheel_override, wheel_module_exists
 from .wheel_utils import (get_package_timestamp, get_package_version,
                           macos_plat_name, macos_pyside_min_deployment_target)
@@ -380,9 +380,9 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
         self.build_tests = OPTION["BUILDTESTS"]
 
-        # Save the shiboken build dir path for clang deployment
+        # Save the shiboken generator build dir path for clang deployment
         # purposes.
-        self.shiboken_build_dir = self.build_dir / SHIBOKEN
+        self.shiboken_generator_build_dir = self.build_dir / SHIBOKEN_GENERATOR
 
         self.log_pre_build_info()
 
@@ -404,8 +404,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             with open(self.internal_cmake_install_dir_query_file_path, 'w') as f:
                 f.write(os.fspath(self.install_dir))
 
-        if (not OPTION["ONLYPACKAGE"]
-                and not config.is_internal_shiboken_generator_build_and_part_of_top_level_all()):
+        if not OPTION["ONLYPACKAGE"]:
             # Build extensions
             for ext in config.get_buildable_extensions():
                 self.build_extension(ext)
@@ -994,7 +993,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             "-L",         # Lists variables
             "-N",         # Just inspects the cache (faster)
             "-B",         # Specifies the build dir
-            str(self.shiboken_build_dir)
+            str(self.shiboken_generator_build_dir)
         ]
         out = run_process_output(cmake_cmd)
         lines = [s.strip() for s in out]

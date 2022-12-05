@@ -126,7 +126,7 @@ class SetupRunner:
             # instead of shiboken_generator_option_name, but it will
             # actually build the generator.
             host_cmd = self.new_setup_internal_invocation(
-                initialized_config.shiboken_module_option_name,
+                initialized_config.shiboken_generator_option_name,
                 extra_args=extra_host_args,
                 replace_command_with="build")
 
@@ -228,18 +228,13 @@ class SetupRunner:
             # target invocations.
             if config.is_cross_compile():
                 extra_args = self.add_host_tools_setup_internal_invocation(config)
+            else:
+                self.add_setup_internal_invocation(
+                    config.shiboken_generator_option_name)
 
             self.add_setup_internal_invocation(
                 config.shiboken_module_option_name,
                 extra_args=extra_args)
-
-            # Reuse the shiboken build for the generator package instead
-            # of rebuilding it again.
-            # Don't build it in a cross-build though.
-            if not config.is_cross_compile():
-                self.add_setup_internal_invocation(
-                    config.shiboken_generator_option_name,
-                    reuse_build=True)
 
             self.add_setup_internal_invocation(config.pyside_option_name,
                                                extra_args=extra_args)

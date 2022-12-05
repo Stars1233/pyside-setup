@@ -33,10 +33,6 @@ else()
     shiboken_find_required_python()
 endif()
 
-if(SHIBOKEN_BUILD_TOOLS)
-    setup_clang()
-endif()
-
 set(shiboken6_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
 set(shiboken6_library_so_version "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}")
 

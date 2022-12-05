@@ -10,22 +10,16 @@ set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Type")
 
 include(".cmake.conf")
 project(shiboken6)
+
 include(cmake/ShibokenSetup.cmake)
 
 get_rpath_base_token(base)
 
 set(CMAKE_INSTALL_RPATH ${base}/)
 
-if(SHIBOKEN_BUILD_TOOLS)
-    add_subdirectory(ApiExtractor) # Uses libclang
-    add_subdirectory(generator) # Uses ApiExtractor And QtCore
-endif()
-
-if(SHIBOKEN_BUILD_LIBS)
-    add_subdirectory(libshiboken) # Uses Python
-    add_subdirectory(shibokenmodule) # Uses libshiboken
-    add_subdirectory(data)
-endif()
+add_subdirectory(libshiboken) # Uses Python
+add_subdirectory(shibokenmodule) # Uses libshiboken
+add_subdirectory(data)
 
 add_subdirectory(doc)
 

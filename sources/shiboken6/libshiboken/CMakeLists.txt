@@ -106,7 +106,6 @@ signature/signature_helper.cpp
 set_property(SOURCE "pep384impl.cpp" PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
 
 add_library(libshiboken SHARED ${libshiboken_SRC})
-add_library(Shiboken6::libshiboken ALIAS libshiboken)
 
 target_include_directories(libshiboken PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

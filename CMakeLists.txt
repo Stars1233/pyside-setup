@@ -15,11 +15,12 @@ endif()
 # Used to prevent overriding message function in both shiboken6 and pyside6.
 set(is_pyside6_superproject_build 1)
 
+add_subdirectory(sources/shiboken6_generator)
 add_subdirectory(sources/shiboken6)
 
 # Ensure Shiboken6 and Shiboken6Tools packags are found during super-build
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/sources/shiboken6/data")
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/sources/shiboken6/generator")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/sources/shiboken6_generator/generator")
 add_subdirectory(sources/pyside6)
 
 add_subdirectory(sources/pyside-tools)

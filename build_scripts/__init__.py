@@ -6,6 +6,7 @@ from pathlib import Path
 PYSIDE = 'pyside6'
 PYSIDE_MODULE = 'PySide6'
 SHIBOKEN = 'shiboken6'
+SHIBOKEN_GENERATOR = 'shiboken6_generator'
 
 PYSIDE_PYTHON_TOOLS = ["metaobjectdump",
                        "deploy",

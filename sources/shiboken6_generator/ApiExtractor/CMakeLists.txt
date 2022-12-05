@@ -131,8 +131,6 @@ target_compile_definitions(apiextractor
                            PRIVATE CMAKE_CXX_COMPILER="${CMAKE_CXX_COMPILER}"
                            PRIVATE QT_LEAN_HEADERS=1)
 
-set(LIB_INSTALL_DIR "lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
-
 if (BUILD_TESTS)
     find_package(Qt6 REQUIRED COMPONENTS Test)
     set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/tests)

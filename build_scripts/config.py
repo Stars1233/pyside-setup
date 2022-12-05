@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from . import PYPROJECT_PATH, PYSIDE, PYSIDE_MODULE, SHIBOKEN
+from . import PYPROJECT_PATH, PYSIDE, PYSIDE_MODULE, SHIBOKEN, SHIBOKEN_GENERATOR
 from .log import LogLevel, log
 from .utils import available_pyside_tools, Singleton
 
@@ -240,7 +240,7 @@ class Config(metaclass=Singleton):
         if self.is_internal_shiboken_module_build():
             return SHIBOKEN
         elif self.is_internal_shiboken_generator_build():
-            return f"{SHIBOKEN}_generator"
+            return SHIBOKEN_GENERATOR
         elif self.is_internal_pyside_build():
             return PYSIDE_MODULE
         else:
@@ -299,7 +299,9 @@ class Config(metaclass=Singleton):
         Used by PysideBuild.run to build the CMake projects.
         :return: A list of directory names under the sources directory.
         """
-        if self.is_internal_shiboken_module_build() or self.is_internal_shiboken_generator_build():
+        if self.is_internal_shiboken_generator_build():
+            return [SHIBOKEN_GENERATOR]
+        if self.is_internal_shiboken_module_build():
             return [SHIBOKEN]
         elif self.is_internal_pyside_build():
             return [PYSIDE, 'pyside-tools']

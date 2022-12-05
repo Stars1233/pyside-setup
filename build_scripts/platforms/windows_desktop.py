@@ -12,9 +12,11 @@ from pathlib import Path
 from ..log import log
 from ..config import config
 from ..options import OPTION
-from ..utils import (copydir, copyfile, copy_qt_metatypes, download_and_extract_7z,
-                     filter_match, makefile, in_coin, coin_job_id, copy_cmake_config_dirs)
-from .. import PYSIDE, SHIBOKEN, PYSIDE_WINDOWS_BIN_TOOLS, PYSIDE_MULTIMEDIA_LIBS
+from ..utils import (copydir, copyfile, copy_qt_metatypes,
+                     download_and_extract_7z, filter_match, makefile, in_coin, coin_job_id,
+                     copy_cmake_config_dirs)
+from .. import (PYSIDE, SHIBOKEN, PYSIDE_WINDOWS_BIN_TOOLS, PYSIDE_MULTIMEDIA_LIBS,
+                SHIBOKEN_GENERATOR)
 
 
 def prepare_packages_win32(pyside_build, _vars):
@@ -90,7 +92,7 @@ def prepare_packages_win32(pyside_build, _vars):
         # {shibokenmodule}.pdb file.
         # Task-number: PYSIDE-615
         copydir(
-            f"{{build_dir}}/{SHIBOKEN}/generator", destination_dir,
+            f"{{build_dir}}/{SHIBOKEN_GENERATOR}/generator", destination_dir,
             _filter=pdbs,
             recursive=False, _vars=_vars)
 
@@ -370,12 +372,12 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
             file_filter_function=qt_dll_filter,
             recursive=False, _vars=_vars)
 
+    pdb_pattern = "*{}.pdb"
     if copy_plugins:
         is_pypy = "pypy" in pyside_build.build_classifiers
         # <qt>/plugins/* -> <setup>/{st_package_name}/plugins
         plugins_target = f"{destination_qt_dir}/plugins"
         plugin_dll_patterns = ["*{}.dll"]
-        pdb_pattern = "*{}.pdb"
         if copy_pdbs:
             plugin_dll_patterns += [pdb_pattern]
         plugin_dll_filter = functools.partial(qt_build_config_filter, plugin_dll_patterns)

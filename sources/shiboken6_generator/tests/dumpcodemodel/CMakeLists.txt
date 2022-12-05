@@ -3,6 +3,8 @@
 
 add_executable(dumpcodemodel main.cpp)
 
+find_package(Qt6 COMPONENTS Core)
+
 target_include_directories(dumpcodemodel
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}

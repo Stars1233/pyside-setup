@@ -180,41 +180,6 @@ macro(set_python_config_suffix)
     endif()
 endmacro()
 
-macro(setup_clang)
-    # Find libclang using the environment variables LLVM_INSTALL_DIR,
-    # CLANG_INSTALL_DIR using standard cmake.
-    # Use CLANG_INCLUDE_DIRS and link to libclang.
-    if(DEFINED ENV{LLVM_INSTALL_DIR})
-        list(PREPEND CMAKE_PREFIX_PATH "$ENV{LLVM_INSTALL_DIR}")
-        list(PREPEND CMAKE_FIND_ROOT_PATH "$ENV{LLVM_INSTALL_DIR}")
-    elseif(DEFINED ENV{CLANG_INSTALL_DIR})
-        list(PREPEND CMAKE_PREFIX_PATH "$ENV{CLANG_INSTALL_DIR}")
-        list(PREPEND CMAKE_FIND_ROOT_PATH "$ENV{CLANG_INSTALL_DIR}")
-    endif()
-
-    find_package(Clang CONFIG REQUIRED)
-    # Need to explicitly handle the version check, because the Clang package doesn't.
-    set(REQUIRED_LLVM "18.0")
-
-    if (LLVM_PACKAGE_VERSION AND LLVM_PACKAGE_VERSION VERSION_LESS "${REQUIRED_LLVM}")
-        message(WARNING "You need LLVM version ${REQUIRED_LLVM} or greater to build PySide "
-            "without issues, and ${LLVM_PACKAGE_VERSION} was found. "
-            "A lower version might case problems, specially on Windows.")
-        # Exception to enable Yocto builds (Kirkstone) - 6.8.x
-        set(REQUIRED_LLVM "14.0")
-        if (LLVM_PACKAGE_VERSION AND LLVM_PACKAGE_VERSION VERSION_LESS "${REQUIRED_LLVM}")
-            message(FATAL_ERROR "Using a LLVM version ${REQUIRED_LLVM} is the minimum allowed "
-                "to work pyside in some systems, however ${LLVM_PACKAGE_VERSION} was found.")
-        endif()
-    endif()
-
-    # CLANG_LIBRARY is read out from the cmake cache to deploy libclang
-    get_target_property(CLANG_BUILD_TYPE libclang IMPORTED_CONFIGURATIONS)
-    get_target_property(CLANG_LIBRARY_NAME libclang IMPORTED_LOCATION_${CLANG_BUILD_TYPE})
-    set(CLANG_LIBRARY "${CLANG_LIBRARY_NAME}" CACHE FILEPATH "libclang")
-    message(STATUS "CLANG: ${Clang_DIR}, ${CLANG_LIBRARY} detected")
-endmacro()
-
 macro(set_quiet_build)
     # Don't display "up-to-date / install" messages when installing, to reduce visual clutter.
     set(CMAKE_INSTALL_MESSAGE NEVER)
@@ -551,18 +516,6 @@ function(shiboken_internal_detect_if_cross_building)
 endfunction()
 
 function(shiboken_internal_decide_parts_to_build)
-    set(build_libs_default ON)
-    option(SHIBOKEN_BUILD_LIBS "Build shiboken libraries" ${build_libs_default})
-    message(STATUS "SHIBOKEN_BUILD_LIBS: ${SHIBOKEN_BUILD_LIBS}")
-
-    if(SHIBOKEN_IS_CROSS_BUILD)
-        set(build_tools_default OFF)
-    else()
-        set(build_tools_default ON)
-    endif()
-    option(SHIBOKEN_BUILD_TOOLS "Build shiboken tools" ${build_tools_default})
-    message(STATUS "SHIBOKEN_BUILD_TOOLS: ${SHIBOKEN_BUILD_TOOLS}")
-
     if(SHIBOKEN_IS_CROSS_BUILD)
         set(_shiboken_build_tests_default OFF)
     elseif(SHIBOKEN_BUILD_LIBS)
@@ -573,23 +526,22 @@ function(shiboken_internal_decide_parts_to_build)
 endfunction()
 
 function(shiboken_internal_find_host_shiboken_tools)
-    if(SHIBOKEN_IS_CROSS_BUILD)
-        set(find_package_extra_args)
-        if(QFP_SHIBOKEN_HOST_PATH)
-            list(APPEND find_package_extra_args PATHS "${QFP_SHIBOKEN_HOST_PATH}/lib/cmake")
-            list(PREPEND CMAKE_FIND_ROOT_PATH "${QFP_SHIBOKEN_HOST_PATH}")
-        endif()
-        find_package(
-            Shiboken6Tools 6 CONFIG
-            ${find_package_extra_args}
-        )
+    set(find_package_extra_args)
+    if(QFP_SHIBOKEN_HOST_PATH)
+        list(APPEND find_package_extra_args PATHS "${QFP_SHIBOKEN_HOST_PATH}/lib/cmake")
+        list(PREPEND CMAKE_FIND_ROOT_PATH "${QFP_SHIBOKEN_HOST_PATH}")
+    endif()
+    set(SHIBOKEN6TOOLS_SKIP_FIND_DEPENDENCIES TRUE)
+    find_package(
+        Shiboken6Tools 6 CONFIG
+        ${find_package_extra_args}
+    )
 
-        if(NOT Shiboken6Tools_DIR)
-            message(FATAL_ERROR
-                "Shiboken6Tools package was not found. "
-                "Please set QFP_SHIBOKEN_HOST_PATH to the location where the Shiboken6Tools CMake "
-                "package is installed.")
-        endif()
+    if(NOT Shiboken6Tools_DIR AND QFP_SHIBOKEN_HOST_PATH)
+        message(FATAL_ERROR
+            "Shiboken6Tools package was not found. "
+            "Please set QFP_SHIBOKEN_HOST_PATH to the location where the Shiboken6Tools CMake "
+            "package is installed.")
     endif()
 endfunction()
 

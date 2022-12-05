@@ -10,8 +10,9 @@ set(CMAKE_AUTOMOC ON)
 find_package(Qt6 COMPONENTS Core)
 find_package(Qt6 COMPONENTS Test)
 
-set(generator_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../generator)
-set(api_extractor_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../ApiExtractor)
+set(shiboken_generator_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../../shiboken6_generator)
+set(generator_src_dir ${shiboken_generator_src_dir}/generator)
+set(api_extractor_src_dir ${shiboken_generator_src_dir}/ApiExtractor)
 
 set(qtxmltosphinxtest_SRC
     ${generator_src_dir}/qtdoc/qtxmltosphinx.cpp

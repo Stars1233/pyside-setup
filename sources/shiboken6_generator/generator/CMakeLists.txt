@@ -6,11 +6,6 @@ set(package_name "Shiboken6Tools")
 
 set(CMAKE_AUTOMOC ON)
 
-if(NOT (Qt${QT_MAJOR_VERSION}Core_FOUND AND Python_Interpreter_FOUND))
-    message(WARNING "Some dependencies were not found: shiboken6 generator compilation disabled!")
-    return()
-endif()
-
 set(shiboken6_SRC
 defaultvalue.cpp defaultvalue.h
 generator.cpp generator.h
@@ -60,6 +55,10 @@ if (NOT DISABLE_DOCSTRINGS)
     target_compile_definitions(shiboken6 PUBLIC DOCSTRINGS_ENABLED QT_LEAN_HEADERS=1)
 endif()
 
+# TODO: We are not actually using the tool_wrapper, but we need to make sure
+# the properties for the tool are properly set
+shiboken_get_tool_shell_wrapper(shiboken tool_wrapper)
+
 configure_file(shibokenconfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/shibokenconfig.h" @ONLY)
 
 install(TARGETS shiboken6
@@ -103,7 +102,7 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../shiboken_tool.py
 
 # Use absolute path instead of relative path, to avoid ninja build errors due to
 # duplicate file dependency inconsistency.
-set(shiboken_version_relative_path "${CMAKE_CURRENT_SOURCE_DIR}/../shiboken_version.py")
+set(shiboken_version_relative_path "${CMAKE_CURRENT_SOURCE_DIR}/../../shiboken6/shiboken_version.py")
 get_filename_component(shiboken_version_path ${shiboken_version_relative_path} ABSOLUTE)
 configure_file("${shiboken_version_path}"
                "${CMAKE_CURRENT_BINARY_DIR}/_git_shiboken_generator_version.py" @ONLY)

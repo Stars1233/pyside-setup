@@ -53,6 +53,10 @@ options.append(("--shiboken-include-path",
                 lambda: get_package_include_path(Package.SHIBOKEN_MODULE),
                 pyside_error,
                 "Print shiboken module include paths"))
+options.append(("--shiboken-generator-include-path",
+                lambda: get_package_include_path(Package.SHIBOKEN_GENERATOR),
+                pyside_error,
+                "Print shiboken generator include paths"))
 options.append(("--pyside-include-path",
                 lambda: get_package_include_path(Package.PYSIDE_MODULE),
                 pyside_error,

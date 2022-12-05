@@ -83,15 +83,3 @@ foreach(test_file ${TEST_FILES})
         set_tests_properties(${test_name} PROPERTIES WILL_FAIL TRUE)
     endif()
 endforeach()
-
-# dumpcodemodel depends on apiextractor which is not cross-built.
-if(SHIBOKEN_BUILD_TOOLS)
-    add_subdirectory(dumpcodemodel)
-endif()
-
-# FIXME Skipped until add an option to choose the generator
-# add_subdirectory(test_generator)
-
-if (NOT APIEXTRACTOR_DOCSTRINGS_DISABLED)
-    add_subdirectory(qtxmltosphinxtest)
-endif()
