@@ -500,8 +500,6 @@ LIBSHIBOKEN_API PyObject *PepType_GetDict(PyTypeObject *type);
 // is no longer considered to be accessible, we treat it as such.
 LIBSHIBOKEN_API int PepType_SetDict(PyTypeObject *type, PyObject *dict);
 
-LIBSHIBOKEN_API void *PepType_GetSlot(PyTypeObject *type, int aSlot);
-
 // Runtime support for Python 3.13 stable ABI
 
 // Return dictionary of the global variables in the current execution frame

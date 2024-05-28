@@ -1049,8 +1049,8 @@ if (msec == 0) {
     // %FUNCTION_NAME() - disable generation of c++ function call
     Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
     auto *timerType = Shiboken::SbkType<QTimer>();
-    auto newFunc = reinterpret_cast<newfunc>(PepType_GetSlot(timerType, Py_tp_new));
-    auto initFunc = reinterpret_cast<initproc>(PepType_GetSlot(timerType, Py_tp_init));
+    auto newFunc = reinterpret_cast<newfunc>(PyType_GetSlot(timerType, Py_tp_new));
+    auto initFunc = reinterpret_cast<initproc>(PyType_GetSlot(timerType, Py_tp_init));
     auto *pyTimer = newFunc(Shiboken::SbkType<QTimer>(), emptyTuple, nullptr);
     initFunc(pyTimer, emptyTuple, nullptr);
 
@@ -1084,8 +1084,8 @@ if (msec == 0) {
 } else {
     Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
     auto *timerType = Shiboken::SbkType<QTimer>();
-    auto newFunc = reinterpret_cast<newfunc>(PepType_GetSlot(timerType, Py_tp_new));
-    auto initFunc = reinterpret_cast<initproc>(PepType_GetSlot(timerType, Py_tp_init));
+    auto newFunc = reinterpret_cast<newfunc>(PyType_GetSlot(timerType, Py_tp_new));
+    auto initFunc = reinterpret_cast<initproc>(PyType_GetSlot(timerType, Py_tp_init));
     auto *pyTimer = newFunc(Shiboken::SbkType<QTimer>(), emptyTuple, nullptr);
     initFunc(pyTimer, emptyTuple, nullptr);
 

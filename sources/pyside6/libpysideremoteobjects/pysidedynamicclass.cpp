@@ -71,7 +71,8 @@ struct SourceDefs
 
     static int tp_init(PyObject *self, PyObject *args, PyObject *kwds)
     {
-        static initproc initFunc = reinterpret_cast<initproc>(PepType_GetSlot(getSbkType(), Py_tp_init));
+        static initproc initFunc = reinterpret_cast<initproc>(PyType_GetSlot(getSbkType(),
+                                                                             Py_tp_init));
         int res = initFunc(self, args, kwds);
         if (res < 0) {
             PyErr_Print();
@@ -223,7 +224,7 @@ struct ReplicaDefs
 
     static int tp_init(PyObject *self, PyObject *args, PyObject *kwds)
     {
-        static initproc initFunc = reinterpret_cast<initproc>(PepType_GetSlot(getSbkType(),
+        static initproc initFunc = reinterpret_cast<initproc>(PyType_GetSlot(getSbkType(),
                                                                               Py_tp_init));
         QRemoteObjectReplica *replica = nullptr;
         if (PyTuple_Size(args) == 0) {
@@ -347,14 +348,15 @@ struct ReplicaDefs
 
 static int DynamicType_traverse(PyObject *self, visitproc visit, void *arg)
 {
-    auto traverseProc = reinterpret_cast<traverseproc>(PepType_GetSlot(SbkObject_TypeF(),
-                                                                       Py_tp_traverse));
+    auto traverseProc = reinterpret_cast<traverseproc>(PyType_GetSlot(SbkObject_TypeF(),
+                                                                      Py_tp_traverse));
     return traverseProc(self, visit, arg);
 }
 
 static int DynamicType_clear(PyObject *self)
 {
-    auto clearProc = reinterpret_cast<inquiry>(PepType_GetSlot(SbkObject_TypeF(), Py_tp_clear));
+    auto clearProc = reinterpret_cast<inquiry>(PyType_GetSlot(SbkObject_TypeF(),
+                                                              Py_tp_clear));
     return clearProc(self);
 }
 

@@ -118,7 +118,7 @@ struct pyTypeGetSlot
 
 TextStream &operator<<(TextStream &str, const pyTypeGetSlot &p)
 {
-    str << "reinterpret_cast<" << p.m_funcType << ">(PepType_GetSlot("
+    str << "reinterpret_cast<" << p.m_funcType << ">(PyType_GetSlot("
         << p.m_typeObject << ", " << p.m_slot << "));\n";
     return str;
 }

@@ -9,7 +9,7 @@
 /// Returns the allocator slot of the PyTypeObject.
 inline allocfunc PepExt_Type_GetAllocSlot(PyTypeObject *t)
 {
-    return reinterpret_cast<allocfunc>(PepType_GetSlot(t, Py_tp_alloc));
+    return reinterpret_cast<allocfunc>(PyType_GetSlot(t, Py_tp_alloc));
 }
 
 /// Invokes the allocator slot of the PyTypeObject.
@@ -23,19 +23,19 @@ inline Type *PepExt_TypeCallAlloc(PyTypeObject *t, Py_ssize_t nitems)
 /// Returns the getattro slot of the PyTypeObject.
 inline getattrofunc PepExt_Type_GetGetAttroSlot(PyTypeObject *t)
 {
-    return reinterpret_cast<getattrofunc>(PepType_GetSlot(t, Py_tp_getattro));
+    return reinterpret_cast<getattrofunc>(PyType_GetSlot(t, Py_tp_getattro));
 }
 
 /// Returns the setattro slot of the PyTypeObject.
 inline setattrofunc PepExt_Type_GetSetAttroSlot(PyTypeObject *t)
 {
-    return reinterpret_cast<setattrofunc>(PepType_GetSlot(t, Py_tp_setattro));
+    return reinterpret_cast<setattrofunc>(PyType_GetSlot(t, Py_tp_setattro));
 }
 
 /// Returns the descr_get slot of the PyTypeObject.
 inline descrgetfunc PepExt_Type_GetDescrGetSlot(PyTypeObject *t)
 {
-    return reinterpret_cast<descrgetfunc>(PepType_GetSlot(t, Py_tp_descr_get));
+    return reinterpret_cast<descrgetfunc>(PyType_GetSlot(t, Py_tp_descr_get));
 }
 
 /// Invokes the descr_get slot of the PyTypeObject.
@@ -47,31 +47,31 @@ inline PyObject *PepExt_Type_CallDescrGet(PyObject *self, PyObject *obj, PyObjec
 /// Returns the descr_set slot of the PyTypeObject.
 inline descrsetfunc PepExt_Type_GetDescrSetSlot(PyTypeObject *t)
 {
-    return reinterpret_cast<descrsetfunc>(PepType_GetSlot(t, Py_tp_descr_set));
+    return reinterpret_cast<descrsetfunc>(PyType_GetSlot(t, Py_tp_descr_set));
 }
 
 /// Returns the call slot of the PyTypeObject.
 inline ternaryfunc PepExt_Type_GetCallSlot(PyTypeObject *t)
 {
-    return reinterpret_cast<ternaryfunc>(PepType_GetSlot(t, Py_tp_call));
+    return reinterpret_cast<ternaryfunc>(PyType_GetSlot(t, Py_tp_call));
 }
 
 /// Returns the new slot of the PyTypeObject.
 inline newfunc PepExt_Type_GetNewSlot(PyTypeObject *t)
 {
-    return reinterpret_cast<newfunc>(PepType_GetSlot(t, Py_tp_new));
+    return reinterpret_cast<newfunc>(PyType_GetSlot(t, Py_tp_new));
 }
 
 /// Returns the init slot of the PyTypeObject.
 inline initproc PepExt_Type_GetInitSlot(PyTypeObject *t)
 {
-    return reinterpret_cast<initproc>(PepType_GetSlot(t, Py_tp_init));
+    return reinterpret_cast<initproc>(PyType_GetSlot(t, Py_tp_init));
 }
 
 /// Returns the free slot of the PyTypeObject.
 inline freefunc PepExt_Type_GetFreeSlot(PyTypeObject *t)
 {
-    return reinterpret_cast<freefunc>(PepType_GetSlot(t, Py_tp_free));
+    return reinterpret_cast<freefunc>(PyType_GetSlot(t, Py_tp_free));
 }
 
 /// Invokes the free slot of the PyTypeObject.
