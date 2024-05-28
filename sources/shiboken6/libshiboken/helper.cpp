@@ -91,19 +91,17 @@ static void formatPyTypeObject(PyTypeObject *obj, std::ostream &str, bool verbos
         if (obj->tp_flags & Py_TPFLAGS_HAVE_VECTORCALL)
             str << " [vectorcall]";
 #  endif // !Py_LIMITED_API
-#  if PY_VERSION_HEX >= 0x030A0000
         immutableType = (obj->tp_flags & Py_TPFLAGS_IMMUTABLETYPE) != 0;
         if (immutableType)
             str << " [immutabletype]";
         if (obj->tp_flags & Py_TPFLAGS_DISALLOW_INSTANTIATION)
             str << " [disallow_instantiation]";
-#  ifndef Py_LIMITED_API
+#ifndef Py_LIMITED_API
         if (obj->tp_flags & Py_TPFLAGS_MAPPING)
             str << " [mapping]";
         if (obj->tp_flags & Py_TPFLAGS_SEQUENCE)
             str << " [sequence]";
-#       endif // !Py_LIMITED_API
-#  endif // 3.10
+#endif // !Py_LIMITED_API
         if (obj->tp_basicsize != 0)
             str << ", basicsize=" << obj->tp_basicsize;
         if (verbose) {
@@ -640,20 +638,20 @@ bool isCompiledMethod(PyObject *method)
         && PyObject_HasAttr(method, Shiboken::PyMagicName::code()) != 0;
 }
 
-#if !defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030A0000 && !defined(PYPY_VERSION)
+#if !defined(Py_LIMITED_API) && !defined(PYPY_VERSION)
 static int _getPyVerbose()
 {
     PyConfig config;
     PyConfig_InitPythonConfig(&config);
     return config.verbose;
 }
-#endif // !Py_LIMITED_API >= 3.10
+#endif // !Py_LIMITED_API && PYPY_VERSION
 
 int pyVerbose()
 {
 #ifdef Py_LIMITED_API
     return Pep_GetVerboseFlag();
-#elif PY_VERSION_HEX >= 0x030A0000 && !defined(PYPY_VERSION)
+#elif !defined(PYPY_VERSION)
     static const int result = _getPyVerbose();
     return result;
 #else

@@ -1273,9 +1273,9 @@ static const char vectorCallCondition[] =
 
 // PyObject_CallNoArgs(): since 3.9, stable API since 3.10
 static const char noArgsCallCondition[] =
-    "#if !defined(PYPY_VERSION) && ((defined(Py_LIMITED_API) && Py_LIMITED_API >= 0x030A0000) || !defined(Py_LIMITED_API))\n";
+    "#if !defined(PYPY_VERSION)\n";
 static const char inverseNoArgsCallCondition[] =
-    "#if defined(PYPY_VERSION) || (defined(Py_LIMITED_API) && Py_LIMITED_API < 0x030A0000)\n";
+    "#if defined(PYPY_VERSION)\n";
 
 static inline void writeVirtualMethodStaticReturnVar(TextStream &s, const AbstractMetaFunctionCPtr &func)
 {

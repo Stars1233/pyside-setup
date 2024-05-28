@@ -482,11 +482,7 @@ void SbkObjectType_tp_dealloc(PyTypeObject *sbkType)
 
     PyObject_GC_UnTrack(pyObj);
 #if !defined(Py_LIMITED_API) && !defined(PYPY_VERSION)
-#  if PY_VERSION_HEX >= 0x030A0000
     Py_TRASHCAN_BEGIN(pyObj, 1);
-#  else
-    Py_TRASHCAN_SAFE_BEGIN(pyObj);
-#  endif
 #endif
     if (sotp) {
         if (sotp->user_data && sotp->d_func) {
@@ -500,11 +496,7 @@ void SbkObjectType_tp_dealloc(PyTypeObject *sbkType)
         PepType_SOTP_delete(sbkType);
     }
 #if !defined(Py_LIMITED_API) && !defined(PYPY_VERSION)
-#  if PY_VERSION_HEX >= 0x030A0000
     Py_TRASHCAN_END;
-#  else
-    Py_TRASHCAN_SAFE_END(pyObj);
-#  endif
 #endif
     // PYSIDE-939: Handling references correctly.
     // This was not needed before Python 3.8 (Python issue 35810)
@@ -583,20 +575,7 @@ static PyTypeObject *SbkObjectType_tp_new(PyTypeObject *metatype, PyObject *args
         }
     }
 
-    // PYSIDE-939: This is still a temporary patch that circumvents the problem
-    //             with Py_TPFLAGS_METHOD_DESCRIPTOR. The problem exists in Python 3.8
-    //             until 3.9.12, only. We check the runtime and hope for this version valishing.
-    //             https://github.com/python/cpython/issues/92112 will not be fixed for 3.8 :/
-    PyTypeObject *newType{};
-    static auto triplet = _PepRuntimeVersion();
-    if (triplet >= (3 << 16 | 8 << 8 | 0) && triplet < (3 << 16 | 9 << 8 | 13)) {
-        auto hold = PyMethodDescr_Type.tp_flags;
-        PyMethodDescr_Type.tp_flags &= ~Py_TPFLAGS_METHOD_DESCRIPTOR;
-        newType = PepType_Type_tp_new(metatype, args, kwds);
-        PyMethodDescr_Type.tp_flags = hold;
-    } else {
-        newType = PepType_Type_tp_new(metatype, args, kwds);
-    }
+    PyTypeObject *newType = PepType_Type_tp_new(metatype, args, kwds);
 
     if (!newType)
         return nullptr;

@@ -99,7 +99,7 @@ function(shiboken_generator_create_binding)
 
     # set limited API
     if(arg_FORCE_LIMITED_API OR FORCE_LIMITED_API)
-        target_compile_definitions(${arg_EXTENSION_TARGET} PRIVATE -DPy_LIMITED_API=0x03090000)
+        target_compile_definitions(${arg_EXTENSION_TARGET} PRIVATE -DPy_LIMITED_API=0x030A0000)
     endif()
 
 

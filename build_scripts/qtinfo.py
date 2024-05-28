@@ -228,9 +228,7 @@ class QtInfo:
                 self._query_dict[key] = result
 
             # Get mkspecs variables and cache them.
-            # FIXME Python 3.9 self._query_dict |= other_dict
-            for key, value in self._get_cmake_mkspecs_variables().items():
-                self._query_dict[key] = value
+            self._query_dict |= self._get_cmake_mkspecs_variables().items()
 
         def _get_cmake_mkspecs_variables(self):
             setup_script_dir = Path.cwd()

@@ -106,8 +106,6 @@ static PyTypeObject *createPyClassPropertyType()
         PyClassProperty_slots,
     };
 
-    if (_PepRuntimeVersion() >= 0x030A00)
-        PyClassProperty_spec.basicsize = sizeof(propertyobject310);
     return SbkType_FromSpecWithMeta(&PyClassProperty_spec, PyClassPropertyType_TypeF());
 }
 

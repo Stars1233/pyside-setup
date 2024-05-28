@@ -755,7 +755,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         cmake_cmd.append(f"-DPACKAGE_SETUP_PY_PACKAGE_TIMESTAMP={timestamp}")
 
         if extension.lower() in [SHIBOKEN]:
-            cmake_cmd.append("-DUSE_PYTHON_VERSION=3.9")
+            cmake_cmd.append("-DUSE_PYTHON_VERSION=3.10")
 
         cmake_cmd += platform_cmake_options()
 

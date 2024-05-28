@@ -136,9 +136,6 @@ class Formatter(Writer):
         # Replace all "NoneType" strings by "None" which is a typing convention.
         return source.replace("NoneType", "None")
 
-    if sys.version_info[:2] < (3, 10):
-        last_fixups = optional_replacer
-
     # self.level is maintained by enum_sig.py
     # self.is_method() is true for non-plain functions.
 

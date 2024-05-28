@@ -47,10 +47,10 @@ def formatannotation(annotation, base_module=None):
     return repr(annotation)
 
 
-# PYSIDE-3012: Patching Python < 3.9.8 or Python < 3.10.1
+# PYSIDE-3012: Patching Python < 3.10.1
 def install_typing_patch():
     v = sys.version_info[:3]
-    if v[1] == 9 and v[2] < 8 or v[1] == 10 and v[2] < 1:
+    if v[1] == 10 and v[2] < 1:
         inspect.formatannotation = formatannotation
 
 
@@ -408,9 +408,5 @@ def create_signature(props, key):
     else:
         res = transform(res)
     return res
-
-
-if sys.version_info[:2] < (3, 10):
-    create_signature = create_signature_union    # noqa F:811
 
 # end of file
