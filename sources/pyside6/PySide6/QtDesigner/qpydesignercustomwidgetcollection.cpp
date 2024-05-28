@@ -17,8 +17,9 @@ QT_BEGIN_NAMESPACE
 
 static QString pyStringToQString(PyObject *s)
 {
-    const char *utf8 = _PepUnicode_AsString(s);
-    return utf8 ? QString::fromUtf8(utf8) : QString();
+    Py_ssize_t size{};
+    const char *utf8 = PyUnicode_AsUTF8AndSize(s, &size);
+    return utf8 ? QString::fromUtf8(utf8, size) : QString{};
 }
 
 // Return a string from keyword argument dict

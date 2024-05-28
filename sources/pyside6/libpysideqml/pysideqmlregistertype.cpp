@@ -107,7 +107,7 @@ static QByteArray getGlobalString(const char *name)
     if (globalVar == nullptr || PyUnicode_Check(globalVar) == 0)
         return {};
 
-    const char *stringValue = _PepUnicode_AsString(globalVar);
+    const char *stringValue = PyUnicode_AsUTF8AndSize(globalVar, nullptr);
     return stringValue != nullptr ? QByteArray(stringValue) : QByteArray{};
 }
 

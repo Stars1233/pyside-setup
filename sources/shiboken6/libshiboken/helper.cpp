@@ -28,8 +28,11 @@ static std::optional<std::string> getStringAttr(PyObject *obj, const char *what)
 {
     if (PyObject_HasAttrString(obj, what) != 0) { // Check first to suppress error.
         Shiboken::AutoDecRef result(PyObject_GetAttrString(obj, what));
-        if (PyUnicode_Check(result.object()) != 0)
-            return _PepUnicode_AsString(result.object());
+        if (PyUnicode_Check(result.object()) != 0) {
+            Py_ssize_t size{};
+            const char *utf8 = PyUnicode_AsUTF8AndSize(result.object(), &size);
+            return std::string(utf8, size_t(size));
+        }
     }
     return std::nullopt;
 }
@@ -210,7 +213,7 @@ static void formatCharSequence(const Char *s, std::ostream &str)
 static void formatPyUnicode(PyObject *obj, std::ostream &str)
 {
     // Note: The below call create the PyCompactUnicodeObject.utf8 representation
-    str << '"' << _PepUnicode_AsString(obj) << '"';
+    str << '"' << PyUnicode_AsUTF8AndSize(obj, nullptr) << '"';
     if (!verbose)
         return;
 
@@ -277,8 +280,12 @@ static void formatPyUnicode(PyObject *obj, std::ostream &str)
 static std::string getQualName(PyObject *obj)
 {
     Shiboken::AutoDecRef result(PyObject_GetAttr(obj, Shiboken::PyMagicName::qualname()));
-    return result.object() != nullptr
-        ? _PepUnicode_AsString(result.object()) : std::string{};
+    if (!result.isNull()) {
+        Py_ssize_t size{};
+        const char *utf8 = PyUnicode_AsUTF8AndSize(result.object(), &size);
+        return std::string(utf8, size_t(size));
+    }
+    return {};
 }
 
 static void formatPyFunction(PyObject *obj, std::ostream &str)

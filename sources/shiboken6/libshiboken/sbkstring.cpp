@@ -83,7 +83,7 @@ const char *toCString(PyObject *str)
     if (str == Py_None)
         return nullptr;
     if (PyUnicode_Check(str))
-        return _PepUnicode_AsString(str);
+        return PyUnicode_AsUTF8AndSize(str, nullptr);
     if (PyBytes_Check(str))
         return PyBytes_AsString(str);
     return nullptr;
@@ -101,7 +101,7 @@ const char *toCString(PyObject *str, Py_ssize_t *len)
        *len = PyBytes_Size(uniStr.object());
         // Return unicode from str instead of uniStr, because the lifetime of the returned pointer
         // depends on the lifetime of str.
-        return _PepUnicode_AsString(str);
+        return PyUnicode_AsUTF8AndSize(str, nullptr);
     }
     if (PyBytes_Check(str)) {
         *len = PyBytes_Size(str);

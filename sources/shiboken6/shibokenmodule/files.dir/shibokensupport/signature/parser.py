@@ -73,9 +73,6 @@ def _get_flag_enum_option():
             flag = False        # turn a forbidden option into an error
     p = f"\n    *** Python is at version {'.'.join(map(str, pyminver or (0,)))} now."
     q = f"\n    *** PySide is at version {'.'.join(map(str, ver[:2]))} now."
-    # _PepUnicode_AsString: Fix a broken promise
-    if pyminver and pyminver >= (3, 10):
-        warnings.warn(f"{p} _PepUnicode_AsString can now be replaced by PyUnicode_AsUTF8! ***")
     # PYSIDE-1960: Emit a warning when we may remove bufferprocs_py37.(cpp|h)
     if pyminver and pyminver >= (3, 11):
         warnings.warn(f"{p} The files bufferprocs_py37.(cpp|h) should be removed ASAP! ***")

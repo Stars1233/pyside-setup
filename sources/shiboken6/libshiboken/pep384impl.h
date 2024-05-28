@@ -226,12 +226,7 @@ inline void PepException_SetArgs(PyObject *ex, PyObject *args)
 // needed a debug Python.
 //
 
-// Unfortunately, we cannot ask this at runtime
-// #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030A0000
-// FIXME: Python 3.10: Replace _PepUnicode_AsString by PyUnicode_AsUTF8
 #ifdef Py_LIMITED_API
-
-LIBSHIBOKEN_API const char *_PepUnicode_AsString(PyObject *);
 
 enum PepUnicode_Kind {
 #if PY_VERSION_HEX < 0x030C0000
@@ -259,7 +254,6 @@ enum PepUnicode_Kind {
     PepUnicode_4BYTE_KIND =  PyUnicode_4BYTE_KIND
 };
 
-#define _PepUnicode_AsString     PyUnicode_AsUTF8
 #define _PepUnicode_KIND         PyUnicode_KIND
 #define _PepUnicode_DATA         PyUnicode_DATA
 #define _PepUnicode_IS_COMPACT   PyUnicode_IS_COMPACT
@@ -276,7 +270,7 @@ enum PepUnicode_Kind {
 
 using PyCFunctionObject = struct _pycfunc;
 #define PepCFunction_GET_NAMESTR(func) \
-    _PepUnicode_AsString(PyObject_GetAttrString((PyObject *)func, "__name__"))
+    PyUnicode_AsUTF8AndSize(PyObject_GetAttrString(reinterpret_cast<PyObject *>(func), "__name__"), nullptr);
 #else
 #define PepCFunction_GET_NAMESTR(func) \
     (reinterpret_cast<const PyCFunctionObject *>(func)->m_ml->ml_name)

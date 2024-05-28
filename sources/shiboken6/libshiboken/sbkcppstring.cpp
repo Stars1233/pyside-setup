@@ -31,8 +31,11 @@ void toCppString(PyObject *str, std::string *value)
         return;
 
     if (PyUnicode_Check(str)) {
-        if (PyUnicode_GetLength(str) > 0)
-            value->assign(_PepUnicode_AsString(str));
+        if (PyUnicode_GetLength(str) > 0) {
+            Py_ssize_t size{};
+            const char *utf8 = PyUnicode_AsUTF8AndSize(str, &size);
+            value->assign(utf8, size_t(size));
+        }
         return;
     }
 
