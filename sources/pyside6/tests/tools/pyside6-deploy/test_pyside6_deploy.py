@@ -14,13 +14,32 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 from unittest import mock
+from functools import lru_cache
 
 sys.path.append(os.fspath(Path(__file__).resolve().parents[2]))
 from init_paths import init_test_paths, _get_qt_lib_dir  # noqa: E402
 
 init_test_paths(False)
 
+import PySide6
 
+QML_MODULES = {"Core", "Gui", "Qml", "Quick", "Network", "OpenGL"}
+WEBENGINE_MODULES = {"Core", "Gui", "Quick", "Qml", "WebEngineQuick", "Network",
+                     "OpenGL", "Positioning", "WebEngineCore", "WebChannel",
+                     "WebChannelQuick", "QmlModels"}
+MSG_CUSTOM_BUILD = ("You seem to be using a custom build of PySide6. Certain modules required for "
+                    "this test are not found.")
+
+
+@lru_cache(maxsize=None)
+def pyside_modules():
+    """
+    Returns all the modules installed with PySide6 after removing the `Qt` prefix.
+    """
+    return {module[2:] for module in PySide6.__all__}
+
+
+@lru_cache(maxsize=None)
 def is_pyenv_python():
     pyenv_root = os.environ.get("PYENV_ROOT")
     if pyenv_root and (resolved_exe := str(Path(sys.executable).resolve())):
@@ -238,6 +257,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
 
 @unittest.skipIf(sys.platform == "darwin" and int(platform.mac_ver()[0].split('.')[0]) <= 11,
                  "Test only works on macOS version 12+")
+@unittest.skipIf(not QML_MODULES.issubset(pyside_modules()), MSG_CUSTOM_BUILD)
 @patch("deploy_lib.config.QtDependencyReader.find_plugin_dependencies")
 class TestPySide6DeployQml(DeployTestBase):
     @classmethod
@@ -356,6 +376,7 @@ class TestPySide6DeployQml(DeployTestBase):
 
 @unittest.skipIf(sys.platform == "darwin" and int(platform.mac_ver()[0].split('.')[0]) <= 11,
                  "Test only works on macOS version 12+")
+@unittest.skipIf(not WEBENGINE_MODULES.issubset(pyside_modules()), MSG_CUSTOM_BUILD)
 class TestPySide6DeployWebEngine(DeployTestBase):
     @classmethod
     def setUpClass(cls):
