@@ -20,8 +20,8 @@ import dis
 class ListConnectionTest(unittest.TestCase):
 
     def testEnumVisibility(self):
-        self.assertEqual(Enum1.Option1, 1)
-        self.assertEqual(Enum1.Option2, 2)
+        self.assertEqual(Enum1.Option1.value, 1)
+        self.assertEqual(Enum1.Option2.value, 2)
         self.assertEqual(TestObjectWithoutNamespace.Enum2.Option3, 3)
         self.assertEqual(TestObjectWithoutNamespace.Enum2.Option4, 4)
 
