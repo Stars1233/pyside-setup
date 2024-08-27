@@ -40,11 +40,7 @@ class Nuitka:
                                      "generic"  # plugins that error with Nuitka
                                      ]
 
-        # .webp are considered to be dlls by Nuitka instead of data files causing
-        # the packaging to fail
-        # https://github.com/Nuitka/Nuitka/issues/2854
-        # TODO: Remove .webp when the issue is fixed
-        self.files_to_ignore = [".cpp.o", ".qsb", ".webp"]
+        self.files_to_ignore = [".cpp.o", ".qsb"]
 
     @staticmethod
     def icon_option():

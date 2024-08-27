@@ -42,7 +42,8 @@ excluded_qml_plugins =
 # Qt modules used. Comma separated
 modules =
 
-# Qt plugins used by the application
+# Qt plugins used by the application. Only relevant for desktop deployment. For Qt plugins used
+# in Android application see [android][plugins]
 plugins =
 
 [android]

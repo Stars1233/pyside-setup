@@ -64,7 +64,7 @@ class DeployTestBase(LongSortedOptionTest):
         cls.deploy_lib = importlib.import_module("deploy_lib")
         cls.deploy = importlib.import_module("deploy")
         sys.modules["deploy"] = cls.deploy
-        files_to_ignore = [".cpp.o", ".qsb", ".webp"]
+        files_to_ignore = [".cpp.o", ".qsb"]
         cls.dlls_ignore_nuitka = " ".join([f"--noinclude-dlls=*{file}"
                                            for file in files_to_ignore])
 
@@ -439,9 +439,9 @@ class TestLongCommand(DeployTestBase):
 
         # check if deploy_main.py startes with # nuitka-project:
         with open(self.temp_example_qml / "deploy_main.py", "r") as file:
-            # check if 517 lines start with # nuitka-project:
+            # check if 516 lines start with # nuitka-project:
             self.assertEqual(len([line for line in file.readlines()
-                                  if line.startswith("# nuitka-project:")]), 517)
+                                  if line.startswith("# nuitka-project:")]), 516)
 
 
 @unittest.skipIf(sys.platform == "darwin" and int(platform.mac_ver()[0].split('.')[0]) <= 11,
