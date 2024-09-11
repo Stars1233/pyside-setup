@@ -642,6 +642,7 @@
       </modify-argument>
     </modify-function>
   </value-type>
+  <value-type name="QFontVariableAxis" since="6.9"/>
   <value-type name="QTextTableCell" >
     <extra-includes>
       <include file-name="QTextCursor" location="global"/>
@@ -2014,6 +2015,16 @@
     <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
         <inject-code file="../glue/qtgui.cpp" snippet="qpainter-exit"/>
     </add-function>
+  </object-type>
+
+  <object-type name="QPainterStateGuard" since="6.9">
+      <enum-type name="InitialState"/>
+      <add-function signature="__enter__()" return-type="QPainterStateGuard">
+          <inject-code file="../glue/qtcore.cpp" snippet="default-enter"/>
+      </add-function>
+      <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
+          <inject-code file="../glue/qtgui.cpp" snippet="qpainterstateguard-restore"/>
+      </add-function>
   </object-type>
 
   <value-type name="QGenericMatrix" generate="no"/>

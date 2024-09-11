@@ -1597,6 +1597,7 @@
     <configuration condition="QT_CONFIG(thread)"/>
     <inject-code file="../glue/qtcore.cpp" class="native" position="beginning" snippet="qthread_pthread_cleanup"/>
     <enum-type name="Priority"/>
+    <enum-type name="QualityOfService" since="6.9"/>
     <modify-function signature="currentThreadId()" remove="all"/>
     <modify-function signature="run()" allow-thread="yes">
         <inject-code file="../glue/qtcore.cpp" class="native" position="beginning"
@@ -2418,11 +2419,11 @@
         <inject-code file="../glue/qtcore.cpp" snippet="qcryptographichash-adddata"/>
     </modify-function>
   </object-type>
-  <value-type name="QOperatingSystemVersionBase" since="6.3">
-      <enum-type name="OSType"/>
-  </value-type>
+  <value-type name="QOperatingSystemVersionBase" since="6.3"
+              default-constructor="QOperatingSystemVersionBase(QOperatingSystemVersionBase::Unknown, 1)"/>
   <value-type name="QOperatingSystemVersionUnexported" since="6.3" generate="false"/>
   <value-type name="QOperatingSystemVersion">
+      <enum-type name="OSType"/>
       <modify-function signature="QOperatingSystemVersion(const QOperatingSystemVersionBase&amp;)" remove="all"/>
   </value-type>
   <object-type name="QLibrary">
@@ -2492,6 +2493,7 @@
     <configuration condition="QT_CONFIG(thread)"/>
     <modify-function signature="lock()" allow-thread="yes"/>
     <modify-function signature="tryLock()" allow-thread="yes"/>
+    <modify-field name="FutexAlwaysAvailable" remove="yes"/>
   </object-type>
 
   <object-type name="QMutex">
@@ -2644,6 +2646,7 @@
   <object-type name="QCommandLineParser">
     <enum-type name="OptionsAfterPositionalArgumentsMode"/>
     <enum-type name="SingleDashWordOptionMode"/>
+    <enum-type name="MessageType" since="6.9"/>
   </object-type>
 
   <object-type name="QCoreApplication">

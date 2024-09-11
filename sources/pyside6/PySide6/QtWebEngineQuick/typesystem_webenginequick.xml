@@ -15,5 +15,7 @@
         <enum-type name="PersistentCookiesPolicy"/>
         <enum-type name="PersistentPermissionsPolicy" since="6.8"/>
     </object-type>
+    <object-type name="QQuickWebEngineDownloadRequest" since="6.9"/>
+
 
 </typesystem>

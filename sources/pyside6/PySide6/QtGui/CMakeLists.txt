@@ -138,6 +138,7 @@ ${QtGui_GEN_DIR}/qfontdatabase_wrapper.cpp
 ${QtGui_GEN_DIR}/qfontinfo_wrapper.cpp
 ${QtGui_GEN_DIR}/qfontmetrics_wrapper.cpp
 ${QtGui_GEN_DIR}/qfontmetricsf_wrapper.cpp
+${QtGui_GEN_DIR}/qfontvariableaxis_wrapper.cpp
 ${QtGui_GEN_DIR}/qglyphrun_wrapper.cpp
 ${QtGui_GEN_DIR}/qgradient_wrapper.cpp
 ${QtGui_GEN_DIR}/qguiapplication_wrapper.cpp
@@ -191,6 +192,7 @@ ${QtGui_GEN_DIR}/qpainter_wrapper.cpp
 ${QtGui_GEN_DIR}/qpainterpath_element_wrapper.cpp
 ${QtGui_GEN_DIR}/qpainterpath_wrapper.cpp
 ${QtGui_GEN_DIR}/qpainterpathstroker_wrapper.cpp
+${QtGui_GEN_DIR}/qpainterstateguard_wrapper.cpp
 ${QtGui_GEN_DIR}/qpaintevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qpalette_wrapper.cpp
 ${QtGui_GEN_DIR}/qpdfoutputintent_wrapper.cpp

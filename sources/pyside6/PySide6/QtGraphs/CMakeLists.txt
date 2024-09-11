@@ -34,6 +34,7 @@ ${QtGraphs_GEN_DIR}/qlegenddata_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qscatter3dseries_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qscatterdataitem_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qscatterdataproxy_wrapper.cpp
+${QtGraphs_GEN_DIR}/qspline3dseries_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qsurface3dseries_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qsurfacedataitem_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qsurfacedataproxy_wrapper.cpp

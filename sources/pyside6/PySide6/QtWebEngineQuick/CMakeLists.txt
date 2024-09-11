@@ -4,6 +4,7 @@
 project(QtWebEngineQuick)
 
 set(QtWebEngineQuick_SRC
+${QtWebEngineQuick_GEN_DIR}/qquickwebenginedownloadrequest_wrapper.cpp
 ${QtWebEngineQuick_GEN_DIR}/qquickwebengineprofile_wrapper.cpp
 ${QtWebEngineQuick_GEN_DIR}/qtwebenginequick_wrapper.cpp
 # module is always needed

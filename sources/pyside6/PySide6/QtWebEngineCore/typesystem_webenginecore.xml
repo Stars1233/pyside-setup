@@ -202,6 +202,8 @@
     </add-function>
   </object-type>
 
+  <object-type name="QWebEngineProfileBuilder" since="6.9"/>
+
   <object-type name="QWebEngineNewWindowRequest">
       <enum-type name="DestinationType"/>
   </object-type>

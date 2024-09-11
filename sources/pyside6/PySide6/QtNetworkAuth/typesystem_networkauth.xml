@@ -24,6 +24,7 @@
         </add-function>
     </object-type>
     <object-type name="QAbstractOAuth2">
+        <enum-type name="NonceMode" since="6.9"/>
         <modify-function signature="head(const QUrl&amp;,const QMap&lt;QString,QVariant&gt;&amp;)">
             <modify-argument index="return">
                 <define-ownership class="target" owner="default"/>
@@ -70,6 +71,7 @@
             </modify-argument>
         </modify-function>
     </object-type>
+    <object-type name="QOAuth2DeviceAuthorizationFlow" since="6.9"/>
     <object-type name="QAbstractOAuthReplyHandler"/>
     <object-type name="QOAuth1">
         <enum-type name="SignatureMethod"/>

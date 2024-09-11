@@ -10,6 +10,7 @@ ${QtNetworkAuth_GEN_DIR}/qabstractoauthreplyhandler_wrapper.cpp
 ${QtNetworkAuth_GEN_DIR}/qoauth1_wrapper.cpp
 ${QtNetworkAuth_GEN_DIR}/qoauth1signature_wrapper.cpp
 ${QtNetworkAuth_GEN_DIR}/qoauth2authorizationcodeflow_wrapper.cpp
+${QtNetworkAuth_GEN_DIR}/qoauth2deviceauthorizationflow_wrapper.cpp
 ${QtNetworkAuth_GEN_DIR}/qoauthhttpserverreplyhandler_wrapper.cpp
 ${QtNetworkAuth_GEN_DIR}/qoauthoobreplyhandler_wrapper.cpp
 ${QtNetworkAuth_GEN_DIR}/qoauthurischemereplyhandler_wrapper.cpp

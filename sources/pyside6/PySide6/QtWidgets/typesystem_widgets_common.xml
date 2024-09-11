@@ -2828,6 +2828,7 @@
   </object-type>
   <object-type name="QComboBox">
     <enum-type name="InsertPolicy"/>
+    <enum-type name="LabelDrawingMode" since="6.9"/>
     <enum-type name="SizeAdjustPolicy"/>
     <modify-function signature="setCompleter(QCompleter*)">
       <modify-argument index="1">

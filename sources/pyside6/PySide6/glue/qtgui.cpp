@@ -934,6 +934,10 @@ return %CONVERTTOPYTHON[QRect](cppResult);
 %CPPSELF.%FUNCTION_NAME(%1, %2.size(), %2.constData(), %3, %4, %5);
 // @snippet qrhi-commandbuffer-setvertexinput
 
+// @snippet qpainterstateguard-restore
+%CPPSELF.restore();
+// @snippet qpainterstateguard-restore
+
 /*********************************************************************
  * CONVERSIONS
  ********************************************************************/

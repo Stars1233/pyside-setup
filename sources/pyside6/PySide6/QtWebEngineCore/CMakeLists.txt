@@ -37,6 +37,7 @@ ${QtWebEngineCore_GEN_DIR}/qwebenginenotification_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginepage_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginepermission_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineprofile_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebengineprofilebuilder_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginequotarequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineregisterprotocolhandlerrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginescript_wrapper.cpp
