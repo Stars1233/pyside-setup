@@ -22,6 +22,16 @@
     </object-type>
     <object-type name="QQuick3DInstancing">
         <value-type name="InstanceTableEntry"/>
+        <add-function signature="getInstanceBufferOverride()"
+                      return-type="std::pair&lt;QByteArray,int&gt;" python-override="true"/>
+        <modify-function signature="getInstanceBuffer(int*)">
+          <inject-code class="shell" position="override" file="../glue/qtquick3d.cpp"
+                       snippet="qquick3dinstancing-getinstancebuffer-virtual-redirect"/>
+          <modify-argument index="return" pyi-type="Tuple[bool, str]"/>
+          <modify-argument index="1"><remove-default-expression/><remove-argument/></modify-argument>
+          <inject-code class="target" position="beginning" file="../glue/qtquick3d.cpp"
+                       snippet="qquick3dinstancing-getinstancebuffer-return"/>
+        </modify-function>
     </object-type>
     <object-type name="QQuick3DTextureData">
         <enum-type name="Format"/>
