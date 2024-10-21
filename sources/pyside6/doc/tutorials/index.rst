@@ -161,15 +161,25 @@ Quick/QML: Basic tutorials
 
         Extending an Qt Quick Controls example
 
+    .. grid-item-card:: Finance Manager Tutorial
+        :class-item: cover-img
+        :link: tutorial_financemanager
+        :link-type: ref
+        :img-top: finance_manager/part1/resources/finance_manager.webp
+
+        Finance Manager Tutorial using QtQuick, SQLAlchemy, and FastAPI demonstrating how
+        PySide6 can be used to interact with other popular packages in the Python ecosystem.
+
 .. toctree::
     :maxdepth: 1
     :hidden:
 
     basictutorial/qml.rst
-    qmlintegration/qmlintegration.rst
+    qmlintegration/qmlintegration.rstsourc
     qmlapp/qmlapplication.rst
     qmlsqlintegration/qmlsqlintegration.rst
     extendedexplorer/extendedexplorer.md
+    finance_manager/index.md
 
 General Applications
 --------------------
