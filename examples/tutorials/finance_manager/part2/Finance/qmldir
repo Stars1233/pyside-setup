@@ -1,0 +1,6 @@
+module Finance
+Main 1.0 Main.qml
+FinanceView 1.0 FinanceView.qml
+FinancePieChart 1.0 FinancePieChart.qml
+FinanceDelegate 1.0 FinanceDelegate.qml
+AddDialog 1.0 AddDialog.qml

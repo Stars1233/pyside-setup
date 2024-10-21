@@ -1,0 +1,14 @@
+{
+    "files": [
+        "database.py",
+        "main.py",
+        "financemodel.py",
+        "Finance/AddDialog.qml",
+        "Finance/FinanceDelegate.qml",
+        "Finance/FinancePieChart.qml",
+        "Finance/FinanceView.qml",
+        "Finance/Main.qml",
+        "Finance/qmldir",
+        "requirements.txt"
+    ]
+}
