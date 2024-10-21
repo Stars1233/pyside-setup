@@ -33,6 +33,7 @@ REST API integration.
   operations through the API.
 - **Connecting FastAPI with PySide6**: Making HTTP requests from the PySide6 application and
   displaying data fetched from the API in the UI.
+- For more details, see {ref}`tutorial_financemanager_partthree`.
 
 Each part ends with instructions on how to deploy the application using {ref}`pyside6-deploy`.
 This structured approach ensures that readers can follow along and understand each concept before
@@ -48,3 +49,4 @@ moving on to the next one, resulting in a robust and scalable finance manager ap
 
 part1/part1.md
 part2/part2.md
+part3/part3.md
