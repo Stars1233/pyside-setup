@@ -1,0 +1,16 @@
+{
+    "files": [
+        "Backend/database.py",
+        "Backend/main.py",
+        "Backend/rest_api.py",
+        "Frontend/Finance/AddDialog.qml",
+        "Frontend/Finance/FinanceDelegate.qml",
+        "Frontend/Finance/FinancePieChart.qml",
+        "Frontend/Finance/FinanceView.qml",
+        "Frontend/Finance/Main.qml",
+        "Frontend/Finance/qmldir",
+        "Frontend/financemodel.py",
+        "Frontend/main.py",
+        "requirements.txt"
+    ]
+}
