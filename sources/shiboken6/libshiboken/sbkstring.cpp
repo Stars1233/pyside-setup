@@ -152,7 +152,7 @@ Py_ssize_t len(PyObject *str)
         return 0;
 
     if (PyUnicode_Check(str))
-        return PepUnicode_GetLength(str);
+        return PyUnicode_GetLength(str);
 
     if (PyBytes_Check(str))
         return PyBytes_GET_SIZE(str);

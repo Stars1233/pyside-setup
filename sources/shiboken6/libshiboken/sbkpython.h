@@ -15,26 +15,11 @@
 #if defined(slots) && (defined(__GNUC__) || defined(_MSC_VER) || defined(__clang__))
 #  pragma push_macro("slots")
 #  undef slots
-/*
- * Python 2 has function _Py_Mangle directly in Python.h .
- * This creates wrong language binding unless we define 'extern "C"' here.
- */
+
 extern "C" {
-/*
- * Python 2 uses the "register" keyword, which is deprecated in C++ 11
- * and forbidden in C++17.
- */
-#  if defined(__clang__)
-#    pragma clang diagnostic push
-#    pragma clang diagnostic ignored "-Wdeprecated-register"
-#  endif
-
 #  include <Python.h>
-
-#  if defined(__clang__)
-#    pragma clang diagnostic pop
-#  endif
 }
+
 #  include <structmember.h>
 // Now we have the usual variables from Python.h .
 #  include "shibokenmacros.h"
@@ -45,21 +30,9 @@ extern "C" {
 #else
 
 extern "C" {
-/*
- * Python 2 uses the "register" keyword, which is deprecated in C++ 11
- * and forbidden in C++17.
- */
-#  if defined(__clang__)
-#    pragma clang diagnostic push
-#    pragma clang diagnostic ignored "-Wdeprecated-register"
-#  endif
-
 #  include <Python.h>
-
-#  if defined(__clang__)
-#    pragma clang diagnostic pop
-#  endif
 }
+
 #  include <structmember.h>
 // Now we have the usual variables from Python.h .
 #  include "shibokenmacros.h"

@@ -225,9 +225,6 @@ LIBSHIBOKEN_API void PepException_SetArgs(PyObject *ex, PyObject *args);
 // needed a debug Python.
 //
 
-// PyUnicode_GetSize is deprecated in favor of PyUnicode_GetLength.
-#define PepUnicode_GetLength(op)    PyUnicode_GetLength((PyObject *)(op))
-
 // Unfortunately, we cannot ask this at runtime
 // #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030A0000
 // FIXME: Python 3.10: Replace _PepUnicode_AsString by PyUnicode_AsUTF8

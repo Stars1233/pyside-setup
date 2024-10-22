@@ -743,7 +743,7 @@ static PyTypeObject *getFunctionType(void)
         "from types import FunctionType as result\n";
     return reinterpret_cast<PyTypeObject *>(PepRun_GetResult(prog));
 }
-#endif // Py_LIMITED_API || Python 2
+#endif // Py_LIMITED_API
 
 /*****************************************************************************
  *
@@ -920,12 +920,6 @@ PyTypeObject *PepType_Type_tp_new(PyTypeObject *metatype, PyObject *args, PyObje
  *
  */
 
-#ifdef Py_LIMITED_API
-// We keep these definitions local, because they don't work in Python 2.
-# define PyUnicode_GET_LENGTH(op)    PyUnicode_GetLength((PyObject *)(op))
-# define PyUnicode_READ_CHAR(u, i)   PyUnicode_ReadChar((PyObject *)(u), (i))
-#endif // Py_LIMITED_API
-
 PyObject *
 _Pep_PrivateMangle(PyObject *self, PyObject *name)
 {
@@ -934,15 +928,15 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
      * This function is modelled after _Py_Mangle, but is optimized
      * a little for our purpose.
      */
-    if (PyUnicode_READ_CHAR(name, 0) != '_' ||
-        PyUnicode_READ_CHAR(name, 1) != '_') {
+    if (PyUnicode_ReadChar(name, 0) != '_' ||
+        PyUnicode_ReadChar(name, 1) != '_') {
         Py_INCREF(name);
         return name;
     }
-    const Py_ssize_t nlen = PyUnicode_GET_LENGTH(name);
+    const Py_ssize_t nlen = PyUnicode_GetLength(name);
     /* Don't mangle __id__ or names with dots. */
-    if ((PyUnicode_READ_CHAR(name, nlen-1) == '_' &&
-         PyUnicode_READ_CHAR(name, nlen-2) == '_') ||
+    if ((PyUnicode_ReadChar(name, nlen-1) == '_' &&
+         PyUnicode_ReadChar(name, nlen-2) == '_') ||
         PyUnicode_FindChar(name, '.', 0, nlen, 1) != -1) {
         Py_INCREF(name);
         return name;
@@ -953,10 +947,10 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
     // PYSIDE-1436: _Py_Mangle is no longer exposed; implement it always.
     // The rest of this function is our own implementation of _Py_Mangle.
     // Please compare the original function in compile.c .
-    Py_ssize_t plen = PyUnicode_GET_LENGTH(privateobj.object());
+    Py_ssize_t plen = PyUnicode_GetLength(privateobj.object());
     /* Strip leading underscores from class name */
     Py_ssize_t ipriv = 0;
-    while (PyUnicode_READ_CHAR(privateobj.object(), ipriv) == '_')
+    while (PyUnicode_ReadChar(privateobj.object(), ipriv) == '_')
         ipriv++;
     if (ipriv == plen) {
         Py_INCREF(name);

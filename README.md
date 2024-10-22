@@ -90,7 +90,7 @@ using `setup.py build`:
  * `--ignore-git`, will skip the fetching and checkout steps for supermodule
    and all submodules.
  * `--limited-api=yes|no`, default yes if applicable. Set or clear the limited
-   API flag. Ignored for Python 2.
+   API flag.
  * `--module-subset`, allows for specifying the Qt modules to be built.
    A minimal set is: `--module-subset=Core,Gui,Test,Widgets`.
  * `--package-timestamp`, allows specifying the timestamp that will be used as

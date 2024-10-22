@@ -311,7 +311,7 @@ class SimplifyingEnumerator(ExactEnumerator):
         ret = self.result_type()
         signature = get_sig(func, 'existence')
         sig = stringify(signature) if signature is not None else None
-        if sig is not None and func_name not in ("next", "__next__", "__div__"):
+        if sig is not None:
             with self.fmt.function(func_name, sig) as key:
                 ret[key] = sig
         return ret
