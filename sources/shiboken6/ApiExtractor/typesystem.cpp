@@ -670,6 +670,7 @@ public:
     QString m_namespaceBegin;
     QString m_namespaceEnd;
     QString m_docTargetLangPackage;
+    TypeSystem::DocMode m_docMode = TypeSystem::DocMode::Nested;
 };
 
 TypeSystemTypeEntry::TypeSystemTypeEntry(const QString &entryName, const QVersionNumber &vr,
@@ -735,6 +736,18 @@ void TypeSystemTypeEntry::setDocTargetLangPackage(const QString &p)
 {
     S_D(TypeSystemTypeEntry);
     d->m_docTargetLangPackage = p;
+}
+
+TypeSystem::DocMode TypeSystemTypeEntry::docMode() const
+{
+    S_D(const TypeSystemTypeEntry);
+    return d->m_docMode;
+}
+
+void TypeSystemTypeEntry::setDocMode(TypeSystem::DocMode m)
+{
+    S_D(TypeSystemTypeEntry);
+    d->m_docMode = m;
 }
 
 const QString &TypeSystemTypeEntry::namespaceBegin() const

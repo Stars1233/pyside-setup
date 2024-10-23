@@ -50,7 +50,8 @@ It can have a number of attributes, described below.
                 snake-case="yes | no | both"
                 namespace-begin="..."
                 namespace-end="..."
-                doc-package="..." >
+                doc-package="..."
+                doc-mode = "nested | flat" >
     </typesystem>
 
 The **package** attribute is a string describing the package to be used,
@@ -92,6 +93,12 @@ for the documentation. This is used for finding the ``qdoc`` or ``doxygen``
 files for the documentation generation. It is mainly relevant for Qt where for
 example the documentation of the ``QtMultimediaWidgets`` module is generated
 into the ``QtMultimedia`` module.
+
+The *optional* attribute **doc-mode** determines whether to nest the
+documentation of inner classes into the outer classes' pages. Its default value
+is **nested**. It is possible to turn this off by specifying **flat** in case
+too many classes are cointained in a namespace, causing excessively long pages.
+However, the referencing may then not fully work.
 
 .. _load-typesystem:
 

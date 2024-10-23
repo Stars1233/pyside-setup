@@ -46,6 +46,11 @@ enum DocModificationMode {
     DocModificationXPathReplace
 };
 
+enum class DocMode {
+    Nested,
+    Flat
+};
+
 enum class ExceptionHandling {
     Unspecified,
     Off,

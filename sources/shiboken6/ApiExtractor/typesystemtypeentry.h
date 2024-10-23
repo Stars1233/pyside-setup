@@ -30,6 +30,8 @@ public:
     bool hasDocTargetLangPackage() const;
     QString docTargetLangPackage() const;
     void setDocTargetLangPackage(const QString &p);
+    TypeSystem::DocMode docMode() const;
+    void setDocMode(TypeSystem::DocMode m);
 
     const QString &namespaceBegin() const;
     void setNamespaceBegin(const QString &n);

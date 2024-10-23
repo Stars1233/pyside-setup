@@ -89,6 +89,7 @@ constexpr auto overloadNumberAttribute = "overload-number"_L1;
 constexpr auto ownershipAttribute = "owner"_L1;
 constexpr auto packageAttribute = "package"_L1;
 constexpr auto docPackageAttribute = "doc-package"_L1;
+constexpr auto docModeAttribute = "doc-mode"_L1;
 constexpr auto polymorphicBaseAttribute = "polymorphic-base"_L1;
 constexpr auto positionAttribute = "position"_L1;
 constexpr auto preferredConversionAttribute = "preferred-conversion"_L1;
@@ -257,6 +258,14 @@ ENUM_LOOKUP_BEGIN(TypeSystem::PythonEnumType, Qt::CaseSensitive,
         {u"Flag", TypeSystem::PythonEnumType::Flag},
         {u"IntFlag", TypeSystem::PythonEnumType::IntFlag},
     };
+ENUM_LOOKUP_LINEAR_SEARCH
+
+ENUM_LOOKUP_BEGIN(TypeSystem::DocMode, Qt::CaseSensitive,
+                  docModeFromAttribute)
+{
+        {u"nested", TypeSystem::DocMode::Nested},
+        {u"flat", TypeSystem::DocMode::Flat},
+};
 ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(TypeSystem::QtMetaTypeRegistration, Qt::CaseSensitive,
@@ -2096,6 +2105,7 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
     QString namespaceBegin;
     QString namespaceEnd;
     QString docPackage;
+    std::optional<TypeSystem::DocMode> docModeOpt;
 
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
@@ -2103,6 +2113,13 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
             m_defaultPackage = attributes->takeAt(i).value().toString();
         } else if (name == docPackageAttribute) {
            docPackage = attributes->takeAt(i).value().toString();
+        } else if (name == docModeAttribute) {
+            const auto attribute = attributes->takeAt(i);
+            docModeOpt = docModeFromAttribute(attribute.value());
+            if (!docModeOpt.has_value()) {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
         } else if (name == defaultSuperclassAttribute) {
             m_defaultSuperclass = attributes->takeAt(i).value().toString();
         } else if (name == exceptionHandlingAttribute) {
@@ -2158,6 +2175,8 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
     }
     if (!docPackage.isEmpty())
         moduleEntry->setDocTargetLangPackage(docPackage);
+    if (docModeOpt.has_value())
+        moduleEntry->setDocMode(docModeOpt.value());
     moduleEntry->setCodeGeneration(m_generate);
     moduleEntry->setSnakeCase(snakeCase);
     if (!namespaceBegin.isEmpty())

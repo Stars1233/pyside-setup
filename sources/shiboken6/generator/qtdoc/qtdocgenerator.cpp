@@ -28,6 +28,7 @@
 #include <complextypeentry.h>
 #include <flagstypeentry.h>
 #include <primitivetypeentry.h>
+#include <typesystemtypeentry.h>
 #include <qtdocparser.h>
 #include <doxygenparser.h>
 
@@ -430,12 +431,47 @@ void QtDocGenerator::generateClass(TextStream &s, const QString &targetDir,
                                    const GeneratorContext &classContext,
                                    QList<GeneratorContext> *contexts)
 {
-    Q_UNUSED(targetDir)
-    Q_UNUSED(contexts)
-    AbstractMetaClassCPtr metaClass = classContext.metaClass();
-    qCDebug(lcShibokenDoc).noquote().nospace() << "Generating Documentation for " << metaClass->fullName();
+    generateClassRecursion(s, targetDir, classContext, contexts);
+}
+
+static inline TypeSystem::DocMode classDocMode(const AbstractMetaClassCPtr &metaClass)
+{
+    return typeSystemTypeEntry(metaClass->typeEntry())->docMode();
+}
+
+void QtDocGenerator::generateClassRecursion(TextStream &s, const QString &targetDir,
+                                            const GeneratorContext &classContext,
+                                            QList<GeneratorContext> *contexts)
+{
+    const AbstractMetaClassCPtr &metaClass = classContext.metaClass();
+
+    qCDebug(lcShibokenDoc, "Generating Documentation for %s", qPrintable(metaClass->fullName()));
 
     m_packages[metaClass->package()].classPages << fileNameForContext(classContext);
+
+    doGenerateClass(s, targetDir, metaClass);
+
+    if (classDocMode(metaClass) == TypeSystem::DocMode::Nested) {
+        QList<GeneratorContext> innerContexts;
+        for (qsizetype i = 0; i < contexts->size(); ) {
+            if (contexts->at(i).metaClass()->targetLangEnclosingClass() == metaClass)
+                innerContexts.append(contexts->takeAt(i));
+            else
+                ++i;
+        }
+        if (!innerContexts.isEmpty()) {
+            s << indent;
+            for (const auto &innerClassContext : std::as_const(innerContexts))
+                generateClassRecursion(s, targetDir, innerClassContext, contexts);
+            s << outdent;
+        }
+    }
+}
+
+void QtDocGenerator::doGenerateClass(TextStream &s, const QString &targetDir,
+                                     const AbstractMetaClassCPtr &metaClass)
+{
+    qCDebug(lcShibokenDoc).noquote().nospace() << "Generating Documentation for " << metaClass->fullName();
 
     m_docParser->setPackageName(metaClass->package());
     const QString sourceFile =

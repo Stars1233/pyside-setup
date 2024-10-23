@@ -64,6 +64,11 @@ protected:
     bool finishGeneration() override;
 
 private:
+    void generateClassRecursion(TextStream &s, const QString &targetDir,
+                                const GeneratorContext &classContext,
+                                QList<GeneratorContext> *contexts);
+    void doGenerateClass(TextStream &ts, const QString &targetDir,
+                         const AbstractMetaClassCPtr &metaClass);
     void writeEnums(TextStream &s, const AbstractMetaEnumList &enums,
                     const QString &scope, QtXmlToSphinxImages *images) const;
 
