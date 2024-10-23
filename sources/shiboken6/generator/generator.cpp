@@ -234,26 +234,16 @@ void Generator::setOutputDirectory(const QString &outDir)
     m_d->outDir = outDir;
 }
 
-bool Generator::generateFileForContext(const GeneratorContext &context)
+QString Generator::directoryForContext(const GeneratorContext &context) const
 {
-    const auto cls = context.metaClass();
-    auto typeEntry = cls->typeEntry();
+    return m_d->outDir + u'/'
+        + subDirectoryForPackage(context.metaClass()->typeEntry()->targetLangPackage());
+}
 
-    if (!shouldGenerate(typeEntry))
-        return true;
-
-    const QString fileName = fileNameForContext(context);
-    if (fileName.isEmpty())
-        return true;
-
-    const QString targetDirectory = outputDirectory() + u'/'
-        + subDirectoryForPackage(typeEntry->targetLangPackage());
-    FileOut fileOut(targetDirectory + u'/' + fileName);
-
-    generateClass(fileOut.stream, targetDirectory, context);
-
-    fileOut.done();
-    return true;
+void Generator::generateSmartPointerClass(TextStream &,
+                                          const QString &,
+                                          const GeneratorContext &)
+{
 }
 
 QString Generator::getFileNameBaseForSmartPointer(const AbstractMetaType &smartPointerType)
@@ -290,22 +280,38 @@ GeneratorContext
 
 bool Generator::generate()
 {
+    QList<GeneratorContext> contexts;
+    contexts.reserve(m_d->api.classes().size());
+
     for (const auto &cls : m_d->api.classes()) {
-        if (!generateFileForContext(contextForClass(cls)))
-            return false;
         auto te = cls->typeEntry();
-        if (shouldGenerate(te) && te->isPrivate())
-            m_d->m_hasPrivateClasses = true;
+        if (shouldGenerate(te)) {
+            contexts.append(contextForClass(cls));
+            if (te->isPrivate())
+                m_d->m_hasPrivateClasses = true;
+        }
     }
 
+    while (!contexts.isEmpty()) {
+        const auto context = contexts.takeFirst();
+        const QString targetDirectory = directoryForContext(context);
+        FileOut fileOut(targetDirectory + u'/' + fileNameForContext(context));
+        generateClass(fileOut.stream, targetDirectory, context, &contexts);
+        fileOut.done();
+    }
+
+    // Generate smart pointers.
     for (const auto &smp: m_d->api.instantiatedSmartPointers()) {
-        AbstractMetaClassCPtr pointeeClass;
-        const auto instantiatedType = smp.type.instantiations().constFirst().typeEntry();
-        if (instantiatedType->isComplex()) // not a C++ primitive
-            pointeeClass = AbstractMetaClass::findClass(m_d->api.classes(), instantiatedType);
-        if (!generateFileForContext(contextForSmartPointer(smp.specialized, smp.type,
-                                                           pointeeClass))) {
-            return false;
+        if (shouldGenerate(smp.specialized->typeEntry())) {
+            AbstractMetaClassCPtr pointeeClass;
+            const auto instantiatedType = smp.type.instantiations().constFirst().typeEntry();
+            if (instantiatedType->isComplex()) // not a C++ primitive
+                pointeeClass = AbstractMetaClass::findClass(m_d->api.classes(), instantiatedType);
+            const auto context = contextForSmartPointer(smp.specialized, smp.type, pointeeClass);
+            const QString targetDirectory = directoryForContext(context);
+            FileOut fileOut(targetDirectory + u'/' + fileNameForContext(context));
+            generateSmartPointerClass(fileOut.stream, targetDirectory, context);
+            fileOut.done();
         }
     }
     return finishGeneration();

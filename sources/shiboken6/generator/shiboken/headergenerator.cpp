@@ -109,9 +109,21 @@ static void writeProtectedEnums(TextStream &s, const AbstractMetaClassCPtr &meta
     }
 }
 
-void HeaderGenerator::generateClass(TextStream &s,
-                                    const QString & /* targetDir */,
-                                    const GeneratorContext &classContext)
+void HeaderGenerator::generateClass(TextStream &s, const QString &,
+                                    const GeneratorContext &classContext,
+                                    QList<GeneratorContext> *)
+{
+    doGenerateClass(s, classContext);
+}
+
+void HeaderGenerator::generateSmartPointerClass(TextStream &s,
+                                                const QString &,
+                                                const GeneratorContext &classContext)
+{
+    doGenerateClass(s, classContext);
+}
+
+void HeaderGenerator::doGenerateClass(TextStream &s, const GeneratorContext &classContext) const
 {
     const AbstractMetaClassCPtr metaClass = classContext.metaClass();
 

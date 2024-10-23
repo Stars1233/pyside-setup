@@ -28,13 +28,18 @@ public:
 protected:
     QString fileNameForContext(const GeneratorContext &context) const override;
     void generateClass(TextStream &s, const QString &targetDir,
-                       const GeneratorContext &classContext) override;
+                       const GeneratorContext &classContext,
+                       QList<GeneratorContext> *contexts) override;
+    void generateSmartPointerClass(TextStream &s,
+                                   const QString &targetDir,
+                                   const GeneratorContext &classContext) override;
     bool finishGeneration() override;
 
 private:
     using InheritedOverloadSet = QSet<AbstractMetaFunctionCPtr>;
     using IndexValues = QList<IndexValue>;
 
+    void doGenerateClass(TextStream &s, const GeneratorContext &classContext) const;
     IndexValues collectTypeIndexes(const AbstractMetaClassCList &classList);
     IndexValues collectConverterIndexes() const;
 

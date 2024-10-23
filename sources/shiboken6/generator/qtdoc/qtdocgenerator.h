@@ -59,7 +59,8 @@ protected:
     static QString fileNameSuffix();
     QString fileNameForContext(const GeneratorContext &context) const override;
     void generateClass(TextStream &ts, const QString &targetDir,
-                       const GeneratorContext &classContext) override;
+                       const GeneratorContext &classContext,
+                       QList<GeneratorContext> *contexts) override;
     bool finishGeneration() override;
 
 private:

@@ -622,13 +622,9 @@ static void writeAddedTypeSignatures(TextStream &s, const ComplexTypeEntryCPtr &
 /// \param classContext the pointer to metaclass information
 void CppGenerator::generateClass(TextStream &s,
                                  const QString & /* targetDir */,
-                                 const GeneratorContext &classContext)
+                                 const GeneratorContext &classContext,
+                                 QList<GeneratorContext> *)
 {
-    if (classContext.forSmartPointer()) {
-        generateSmartPointerClass(s, classContext);
-        return;
-    }
-
     s.setLanguage(TextStream::Language::Cpp);
     AbstractMetaClassCPtr metaClass = classContext.metaClass();
     const auto typeEntry = metaClass->typeEntry();

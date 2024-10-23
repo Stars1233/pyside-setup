@@ -91,7 +91,9 @@ static bool hasParameterPredicate(const AbstractMetaFunctionCPtr &f)
     return !f->arguments().isEmpty();
 }
 
-void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorContext &classContext)
+void CppGenerator::generateSmartPointerClass(TextStream &s,
+                                             const QString & /* targetDir */,
+                                             const GeneratorContext &classContext)
 {
     s.setLanguage(TextStream::Language::Cpp);
     AbstractMetaClassCPtr metaClass = classContext.metaClass();

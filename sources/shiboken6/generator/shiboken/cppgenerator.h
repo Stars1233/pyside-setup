@@ -47,7 +47,10 @@ public:
 protected:
     QString fileNameForContext(const GeneratorContext &context) const override;
     void generateClass(TextStream &s, const QString &targetDir,
-                       const GeneratorContext &classContext) override;
+                       const GeneratorContext &classContext,
+                       QList<GeneratorContext> *contexts) override;
+    void generateSmartPointerClass(TextStream &s, const QString &targetDir,
+                                   const GeneratorContext &classContext) override;
     bool finishGeneration() override;
 
 private:
@@ -57,8 +60,6 @@ private:
         bool needsReference = false;
     };
 
-
-    void generateSmartPointerClass(TextStream &s, const GeneratorContext &classContext);
     void generateIncludes(TextStream &s, const GeneratorContext &classContext,
                           const IncludeGroupList &includes = {},
                           const AbstractMetaClassCList &innerClasses = {}) const;

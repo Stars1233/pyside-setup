@@ -427,9 +427,11 @@ static void writeInheritedFromList(TextStream &s, const AbstractMetaClassCPtr &m
 }
 
 void QtDocGenerator::generateClass(TextStream &s, const QString &targetDir,
-                                   const GeneratorContext &classContext)
+                                   const GeneratorContext &classContext,
+                                   QList<GeneratorContext> *contexts)
 {
     Q_UNUSED(targetDir)
+    Q_UNUSED(contexts)
     AbstractMetaClassCPtr metaClass = classContext.metaClass();
     qCDebug(lcShibokenDoc).noquote().nospace() << "Generating Documentation for " << metaClass->fullName();
 

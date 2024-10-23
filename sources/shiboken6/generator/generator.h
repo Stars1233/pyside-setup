@@ -141,9 +141,6 @@ protected:
         contextForSmartPointer(const AbstractMetaClassCPtr &c, const AbstractMetaType &t,
                            const AbstractMetaClassCPtr &pointeeClass = {});
 
-    /// Generates a file for given AbstractMetaClass or AbstractMetaType (smart pointer case).
-    bool generateFileForContext(const GeneratorContext &context);
-
     /// Returns the file base name for a smart pointer.
     static QString getFileNameBaseForSmartPointer(const AbstractMetaType &smartPointerType);
 
@@ -206,14 +203,18 @@ protected:
     virtual bool doSetup() = 0;
 
     /**
-     *   Write the bindding code for an AbstractMetaClass.
+     *   Write the binding code for an AbstractMetaClass.
      *   This is called by generate method.
      *   \param  s   text stream to write the generated output
      *   \param  metaClass  the class that should be generated
      */
     virtual void generateClass(TextStream &s,
                                const QString &targetDir,
-                               const GeneratorContext &classContext) = 0;
+                               const GeneratorContext &classContext,
+                               QList<GeneratorContext> *contexts) = 0;
+    virtual void generateSmartPointerClass(TextStream &s,
+                                           const QString &targetDir,
+                                           const GeneratorContext &classContext);
     virtual bool finishGeneration() = 0;
 
     /**
@@ -233,6 +234,8 @@ protected:
     static QString m_gsp;
 
 private:
+    QString directoryForContext(const GeneratorContext &context) const;
+
     struct GeneratorPrivate;
     GeneratorPrivate *m_d;
 };
