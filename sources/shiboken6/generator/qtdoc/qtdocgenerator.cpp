@@ -450,6 +450,8 @@ void QtDocGenerator::generateClass(TextStream &s, const QString &targetDir,
                                    const GeneratorContext &classContext,
                                    QList<GeneratorContext> *contexts)
 {
+    // PYSIDE-2689: Write a (dummy) headline to fix the search contexts.
+    s << headline(classContext.metaClass()->fullName(), '#');
     generateClassRecursion(s, targetDir, classContext, contexts);
 }
 
