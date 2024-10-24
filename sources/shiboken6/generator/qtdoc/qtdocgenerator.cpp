@@ -45,6 +45,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <unordered_set>
 
 using namespace Qt::StringLiterals;
 
@@ -53,9 +54,21 @@ static inline QString classScope(const AbstractMetaClassCPtr &metaClass)
     return metaClass->fullName();
 }
 
+struct DocClassEntry
+{
+    QString name;
+    QString fullName;
+    QString file;
+};
+
+static bool classEntryLessThan(const DocClassEntry &e1, const DocClassEntry &e2)
+{
+    return e1.name < e2.name;
+}
+
 struct DocPackage
 {
-    QStringList classPages;
+    QList<DocClassEntry> classPages;
     QStringList decoratorPages;
     AbstractMetaFunctionCList globalFunctions;
     AbstractMetaEnumList globalEnums;
@@ -220,7 +233,8 @@ static void readExtraDoc(const QFileInfo &fi,
                          DocPackage *docPackage, QStringList *extraTocEntries)
 {
     // Strip to "Property.rst" in output directory
-    const QString newFileName = fi.fileName().mid(moduleName.size() + 1);
+    const QString newFileName = fi.fileName().sliced(moduleName.size() + 1);
+    const QString fullClassName = fi.completeBaseName().sliced(moduleName.size() + 1);
     QFile sourceFile(fi.absoluteFilePath());
     if (!sourceFile.open(QIODevice::ReadOnly|QIODevice::Text)) {
         qCWarning(lcShibokenDoc, "%s", qPrintable(msgCannotOpenForReading(sourceFile)));
@@ -234,10 +248,15 @@ static void readExtraDoc(const QFileInfo &fi,
         return;
     }
     targetFile.write(contents);
-    if (contents.contains("decorator::"))
+    if (contents.contains("decorator::")) {
         docPackage->decoratorPages.append(newFileName);
-    else
-        docPackage->classPages.append(newFileName);
+    } else {
+        QString name = fullClassName;
+        auto dot = name.lastIndexOf(u'.');
+        if (dot != -1)
+            name.remove(0, dot + 1);
+        docPackage->classPages.append({name, fullClassName, newFileName});
+    }
     extraTocEntries->append(fileNameToTocEntry(newFileName));
 }
 
@@ -447,7 +466,8 @@ void QtDocGenerator::generateClassRecursion(TextStream &s, const QString &target
 
     qCDebug(lcShibokenDoc, "Generating Documentation for %s", qPrintable(metaClass->fullName()));
 
-    m_packages[metaClass->package()].classPages << fileNameForContext(classContext);
+    m_packages[metaClass->package()].classPages.append({metaClass->name(), metaClass->fullName(),
+                                                        fileNameForContext(classContext)});
 
     doGenerateClass(s, targetDir, metaClass);
 
@@ -1017,34 +1037,7 @@ void QtDocGenerator::writeFunctionDocumentation(TextStream &s, const AbstractMet
                              func, scope, images);
 }
 
-static QStringList fileListToToc(const QStringList &items)
-{
-    QStringList result;
-    result.reserve(items.size());
-    std::transform(items.cbegin(), items.cend(), std::back_inserter(result),
-                   fileNameToTocEntry);
-    return result;
-}
-
-static QStringList functionListToToc(const AbstractMetaFunctionCList &functions)
-{
-    QStringList result;
-    result.reserve(functions.size());
-    for (const auto &f : functions)
-        result.append(f->name());
-    // Functions are sorted by the Metabuilder; erase overloads
-    result.erase(std::unique(result.begin(), result.end()), result.end());
-    return result;
-}
-
-static QStringList enumListToToc(const AbstractMetaEnumList &enums)
-{
-    QStringList result;
-    result.reserve(enums.size());
-    for (const auto &e : enums)
-        result.append(e.name());
-    return result;
-}
+using TocMap = QMap<QChar, QStringList>;
 
 // Sort entries for a TOC by first character, dropping the
 // leading common Qt prefixes like 'Q'.
@@ -1065,18 +1058,56 @@ static QChar sortKey(const QString &key)
     return idx < size ? key.at(idx).toUpper() : u'A';
 }
 
+static TocMap classEntryListToToc(const QList<DocClassEntry> &entries,
+                                  TypeSystem::DocMode docMode)
+{
+    const bool fullyQualified = docMode == TypeSystem::DocMode::Nested;
+    TocMap result;
+    // Sort by name, use full href
+    for (const auto &e : entries)
+         result[sortKey(e.name)] << (fullyQualified ? e.fullName : e.name);
+    return result;
+}
+
+static TocMap fileListToToc(const QStringList &items)
+{
+    TocMap result;
+    for (const auto &item : items) {
+        const QString entry = fileNameToTocEntry(item);
+        result[sortKey(entry)] << entry;
+    }
+    return result;
+}
+
+static TocMap functionListToToc(const AbstractMetaFunctionCList &functions)
+{
+    TocMap result;
+    // Functions are sorted by the Metabuilder; erase overloads
+    std::unordered_set<QString> seenNames;
+    for (const auto &f : functions) {
+        const QString &name = f->name();
+        if (seenNames.find(name) == seenNames.end()) {
+            seenNames.insert(name);
+            result[sortKey(name)] << name;
+        }
+    }
+    return result;
+}
+
+static TocMap enumListToToc(const AbstractMetaEnumList &enums)
+{
+    TocMap result;
+    for (const auto &e : enums)
+        result[sortKey(e.name())] << e.name();
+    return result;
+}
+
 static void writeFancyToc(TextStream& s, QAnyStringView title,
-                          const QStringList& items,
+                          const TocMap &tocMap,
                           QLatin1StringView referenceType)
 {
-    using TocMap = QMap<QChar, QStringList>;
-
-    if (items.isEmpty())
+    if (tocMap.isEmpty())
         return;
-
-    TocMap tocMap;
-    for (const QString &item : items)
-        tocMap[sortKey(item)] << item;
 
     qsizetype maxColumnCount = 0;
     for (auto it = tocMap.cbegin(), end = tocMap.cend(); it != end; ++it) {
@@ -1096,7 +1127,10 @@ static void writeFancyToc(TextStream& s, QAnyStringView title,
                 row.clear();
                 row << QtXmlToSphinx::TableCell(QString{});
             }
-            const QString entry = "* :"_L1 + referenceType + ":`"_L1 + item + u'`';
+            QString entry = "* :"_L1 + referenceType + ":`"_L1;
+            if (item.contains(u'.'))
+                entry += u'~';
+            entry += item + u'`';
             row << QtXmlToSphinx::TableCell(entry);
         }
         if (row.size() > 1) {
@@ -1194,9 +1228,10 @@ static bool imagesFromRstDocs(const QByteArray &rstDoc, const QString &scope,
 
 void QtDocGenerator::writeModuleDocumentation()
 {
+    auto *typeDb = TypeDatabase::instance();
     for (auto it = m_packages.begin(), end = m_packages.end(); it != end; ++it) {
         auto &docPackage = it.value();
-        std::sort(docPackage.classPages.begin(), docPackage.classPages.end());
+        std::sort(docPackage.classPages.begin(), docPackage.classPages.end(), classEntryLessThan);
 
         QString key = it.key();
         key.replace(u'.', u'/');
@@ -1244,8 +1279,8 @@ void QtDocGenerator::writeModuleDocumentation()
             << ":maxdepth: 1\n\n";
         if (hasGlobals)
             s << globalsPage << '\n';
-        for (const QString &className : std::as_const(docPackage.classPages))
-            s << className << '\n';
+        for (const auto &e : std::as_const(docPackage.classPages))
+            s << e.file << '\n';
         s << "\n\n" << outdent << outdent << headline("Detailed Description");
 
         // module doc is always wrong and C++istic, so go straight to the extra directory!
@@ -1279,7 +1314,10 @@ void QtDocGenerator::writeModuleDocumentation()
             }
         }
 
-        writeFancyToc(s, "List of Classes", fileListToToc(docPackage.classPages),
+        TypeSystemTypeEntryCPtr typeSystemEntry = typeDb->findTypeSystemType(it.key());
+        Q_ASSERT(typeSystemEntry);
+        writeFancyToc(s, "List of Classes", classEntryListToToc(docPackage.classPages,
+                                                                typeSystemEntry->docMode()),
                       "class"_L1);
         writeFancyToc(s, "List of Decorators", fileListToToc(docPackage.decoratorPages),
                       "deco"_L1);
