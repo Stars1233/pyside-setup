@@ -1,6 +1,8 @@
 import os
 import sys
 from pathlib import Path
+from types import ModuleType
+# mypy: disable-error-code="name-defined"
 
 # __all__ is computed below.
 __pre_all__ = [@init_modules@]
@@ -60,6 +62,7 @@ def _setupQtDirectories():
     try:
         # PYSIDE-1497: we use the build dir or install dir or site-packages, whatever the path
         #              setting dictates. There is no longer a difference in path structure.
+        global Shiboken
         from shiboken6 import Shiboken
     except Exception:
         paths = ', '.join(sys.path)
@@ -121,4 +124,18 @@ def __getattr__(name: str) -> list[str]:
     raise AttributeError(f"module '{__name__}' has no attribute '{name}' :)")
 
 
+# Be prepared that people can access the module dict instead.
+class ModuleDict(dict):
+    def __missing__(self, key):
+        if key == "__all__":
+            self[key] = __all__ if "__all__" in globals() else __getattr__("__all__")
+            return __all__
+        raise KeyError(f"dict of module '{__name__}' has no key '{key}' :)")
+
+
+class SubModule(ModuleType):
+    pass
+
+
 _setupQtDirectories()
+Shiboken.replaceModuleDict(sys.modules["PySide6"], SubModule, ModuleDict(globals()))

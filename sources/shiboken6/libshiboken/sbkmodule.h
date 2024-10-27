@@ -84,6 +84,11 @@ LIBSHIBOKEN_API void registerTypeConverters(PyObject *module, SbkConverter **con
  */
 LIBSHIBOKEN_API SbkConverter **getTypeConverters(PyObject *module);
 
+/**
+ *  Replace the dictionary of a module. This allows to use `__missing__`.
+ */
+LIBSHIBOKEN_API bool replaceModuleDict(PyObject *module, PyObject *modClass, PyObject *dict);
+
 } // namespace Shiboken::Module
 
 #endif // SBK_MODULE_H

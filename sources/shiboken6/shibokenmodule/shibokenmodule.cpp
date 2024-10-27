@@ -75,6 +75,11 @@ if (!Shiboken::Object::checkType(%1)) {
 }
 // @snippet dump
 
+// @snippet replacemoduledict
+const bool ok = Shiboken::Module::replaceModuleDict(%1, %2, %3);
+%PYARG_0 = %CONVERTTOPYTHON[bool](ok);
+// @snippet replacemoduledict
+
 // @snippet getallvalidwrappers
 const auto setAll = Shiboken::BindingManager::instance().getAllPyObjects();
 PyObject* listAll = PyList_New(0);

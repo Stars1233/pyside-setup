@@ -41,6 +41,10 @@
         <inject-code file="shibokenmodule.cpp" snippet="disassembleframe"/>
     </add-function>
 
+    <add-function signature="replaceModuleDict(PyObject*, PyObject*, PyObject*)" return-type="bool">
+        <inject-code file="shibokenmodule.cpp" snippet="replacemoduledict"/>
+    </add-function>
+
     <add-function signature="dump(PyObject*)" return-type="const char *">
         <inject-code file="shibokenmodule.cpp" snippet="dump"/>
     </add-function>

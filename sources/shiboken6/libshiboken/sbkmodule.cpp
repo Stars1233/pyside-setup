@@ -539,4 +539,29 @@ SbkConverter **getTypeConverters(PyObject *module)
     return (iter == moduleConverters.end()) ? 0 : iter->second;
 }
 
+// Replace the dictionary of a module by a different dict.
+// The dict should be filled with the content of the old dict, before.
+// Reason: Creating a module dict with __missing__ support.
+typedef struct {
+    PyObject_HEAD
+    PyObject *md_dict;
+} StartOf_PyModuleObject;
+
+bool replaceModuleDict(PyObject *module, PyObject *modClass, PyObject *dict)
+{
+    if (!(PyModule_Check(module) && PyType_Check(modClass) && PyDict_Check(dict)))
+        return false;
+    auto *modict = PyModule_GetDict(module);
+    auto *modIntern = reinterpret_cast<StartOf_PyModuleObject *>(module);
+    if (modict != modIntern->md_dict)
+        Py_FatalError("The layout of modules is incompatible");
+    auto *hold = modIntern->md_dict;
+    modIntern->md_dict = dict;
+    Py_INCREF(dict);
+    Py_DECREF(hold);
+    Py_INCREF(modClass);
+    module->ob_type = reinterpret_cast<PyTypeObject *>(modClass);
+    return true;
+}
+
 } } // namespace Shiboken::Module
