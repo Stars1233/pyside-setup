@@ -143,10 +143,13 @@ def remove_variables(vars):
 
 
 def setup_virtualenv(python, exe, env, pip, log):
-    run_instruction(
-        [str(python), "-m", "pip", "install", "--user", "virtualenv==20.7.2"],
-        "Failed to pin virtualenv",
-    )
+    # Within Ubuntu 24.04 one can't install anything with pip to outside of
+    # virtual env. Trust that we already have proper virtualenv installed.
+    if os.environ.get("HOST_OSVERSION_COIN") != "ubuntu_24_04":
+        run_instruction(
+            [str(python), "-m", "pip", "install", "--user", "virtualenv==20.7.2"],
+            "Failed to pin virtualenv",
+        )
     # installing to user base might not be in PATH by default.
     env_path = Path(str(site.USER_BASE)) / "bin"
     v_env = env_path / "virtualenv"

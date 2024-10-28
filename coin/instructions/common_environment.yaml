@@ -248,21 +248,6 @@ instructions:
           - condition: property
             property: host.os
             equals_value: Linux
-    - type: ExecuteCommand
-      command: "python3 -m pip install -r requirements-coin.txt"
-      maxTimeInSeconds: 14400
-      maxTimeBetweenOutput: 1200
-      enable_if:
-          condition: and
-          conditions:
-            - condition: property
-              property: host.os
-              equals_value: Linux
-            - condition: property
-              property: host.arch
-              equals_value: AARCH64
-      userMessageOnFailure: >
-          Failed to install requirements-coin.txt on Linux (aarch64)
     - type: EnvironmentVariable
       variableName: interpreter
       variableValue: "python3.11"

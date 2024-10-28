@@ -57,14 +57,14 @@ accept_configuration:
     - condition: and # Restore LoA config
       conditions:
         - condition: property
-          property: host.osVersion
-          equals_value: Debian_11_6
+          property: host.os
+          equals_value: Linux
         - condition: property
           property: host.arch
           equals_value: AARCH64
         - condition: property
-          property: features
-          not_contains_value: DebianPackaging
+          property: target.arch
+          equals_value: AARCH64
         - condition: property
           property: features
           contains_value: Packaging
