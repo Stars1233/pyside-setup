@@ -31,9 +31,20 @@ class MypyCorrectnessTest(unittest.TestCase):
         self.pyside_dir = Path(PySide6.__file__).parent
         self.build_dir = self.pyside_dir.parent.parent
         os.chdir(self.build_dir)
+        self.project_dir = Path(__file__).resolve().parents[4]
+        # Check if the project dir can be written. If so, put the mypy cache there.
+        test_fname = self.project_dir / ".tmp test writable"
+        try:
+            with test_fname.open("w") as f:
+                f.write("works!")
+                f.close()
+                test_fname.unlink()
+            self.cache_dir = self.project_dir / f".pyside{PySide6.__version__}_mypy_cache"
+        except Exception:
+            self.cache_dir = ".mypy_cache"  # This is the mypy default.
 
     def testMypy(self):
-        cmd = [sys.executable, "-m", "mypy", f"{os.fspath(self.pyside_dir)}"]
+        cmd = [sys.executable, "-m", "mypy", "--cache-dir", self.cache_dir, self.pyside_dir]
         time_pre = time.time()
         ret = subprocess.run(cmd, capture_output=True)
         time_post = time.time()
