@@ -22,8 +22,13 @@ except ModuleNotFoundError:
 import PySide6
 from PySide6 import SKIP_MYPY_TEST
 
+qtest_env = os.environ.get("QTEST_ENVIRONMENT", "")
+is_ci = qtest_env == "ci"
+# When we are in COIN, we enforce mypy existence, to prevent misconfigurations.
+USE_MYPY = True if is_ci else HAVE_MYPY
 
-@unittest.skipIf(not HAVE_MYPY, "The mypy test was skipped because mypy is not installed")
+
+@unittest.skipIf(not USE_MYPY, "The mypy test was skipped because mypy is not installed")
 @unittest.skipIf(SKIP_MYPY_TEST, "The mypy test was disabled")
 class MypyCorrectnessTest(unittest.TestCase):
 
@@ -32,6 +37,8 @@ class MypyCorrectnessTest(unittest.TestCase):
         self.build_dir = self.pyside_dir.parent.parent
         os.chdir(self.build_dir)
         self.project_dir = Path(__file__).resolve().parents[4]
+        # For safety about future changes, check that we are sitting above the sources dir.
+        self.assertTrue((self.project_dir / "sources").exists())
         # Check if the project dir can be written. If so, put the mypy cache there.
         test_fname = self.project_dir / ".tmp test writable"
         try:
@@ -44,6 +51,7 @@ class MypyCorrectnessTest(unittest.TestCase):
             self.cache_dir = ".mypy_cache"  # This is the mypy default.
 
     def testMypy(self):
+        self.assertTrue(HAVE_MYPY)
         cmd = [sys.executable, "-m", "mypy", "--cache-dir", self.cache_dir, self.pyside_dir]
         time_pre = time.time()
         ret = subprocess.run(cmd, capture_output=True)
