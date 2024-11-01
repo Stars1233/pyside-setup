@@ -945,48 +945,6 @@ def get_python_dict(python_script_path):
         raise
 
 
-def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
-    _pExe = "python"
-    _env = f"{os.environ.get('PYSIDE_VIRTUALENV') or 'env'+python_ver}"
-    env_python = f"{_env}/bin/python"
-    env_pip = f"{_env}/bin/pip"
-
-    if host == "Windows":
-        log.info("New virtualenv to build {targetArch} in {hostArch} host")
-        _pExe = "python.exe"
-        # With windows we are creating building 32-bit target in 64-bit host
-        if hostArch == "X86_64" and targetArch == "X86":
-            if python_ver.startswith("3"):
-                var = f"PYTHON{python_ver}-32_PATH"
-                log.info(f"Try to find python from {var} env variable")
-                _path = Path(os.getenv(var, ""))
-                _pExe = _path / "python.exe"
-                if not _pExe.is_file():
-                    log.warning(f"Can't find python.exe from {_pExe}, using default python3")
-                    _pExe = Path(os.getenv("PYTHON3_32_PATH")) / "python.exe"
-            else:
-                _pExe = Path(os.getenv("PYTHON2_32_PATH")) / "python.exe"
-        else:
-            if python_ver.startswith("3"):
-                var = f"PYTHON{python_ver}-64_PATH"
-                log.info(f"Try to find python from {var} env variable")
-                _path = Path(os.getenv(var, ""))
-                _pExe = _path / "python.exe"
-                if not _pExe.is_file():
-                    log.warning(f"Can't find python.exe from {_pExe}, using default python3")
-                    _pExe = Path(os.getenv("PYTHON3_PATH")) / "python.exe"
-        env_python = f"{_env}\\Scripts\\python.exe"
-        env_pip = f"{_env}\\Scripts\\pip.exe"
-    else:
-        _pExe = f"python{python_ver}"
-        try:
-            run_instruction([_pExe, "--version"], f"Failed to guess python version {_pExe}")
-        except Exception as e:
-            print(f"Exception {type(e).__name__}: {e}")
-            _pExe = "python3"
-    return (_pExe, _env, env_pip, env_python)
-
-
 def run_instruction(instruction, error, initial_env=None):
     if initial_env is None:
         initial_env = os.environ
@@ -995,26 +953,6 @@ def run_instruction(instruction, error, initial_env=None):
     if result != 0:
         log.error(f"ERROR : {error}")
         exit(result)
-
-
-def get_ci_qtpaths_path(ci_install_dir, ci_host_os):
-    qtpaths_path = f"--qtpaths={ci_install_dir}"
-    if ci_host_os == "MacOS":
-        return f"{qtpaths_path}/bin/qtpaths"
-    elif ci_host_os == "Windows":
-        return f"{qtpaths_path}\\bin\\qtpaths.exe"
-    else:
-        return f"{qtpaths_path}/bin/qtpaths"
-
-
-def get_ci_qmake_path(ci_install_dir, ci_host_os):
-    qmake_path = f"--qmake={ci_install_dir}"
-    if ci_host_os == "MacOS":
-        return f"{qmake_path}/bin/qmake"
-    elif ci_host_os == "Windows":
-        return f"{qmake_path}\\bin\\qmake.exe"
-    else:
-        return f"{qmake_path}/bin/qmake"
 
 
 def parse_cmake_conf_assignments_by_key(source_dir):
