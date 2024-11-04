@@ -255,10 +255,11 @@
 
   <object-type name="QWebEngineUrlSchemeHandler"/>
 
-  <!-- FIXME  not in snapshot yet
-  <value-type name="QWebEngineDesktopMediaRequest" since="6.7"/>
-  <object-type name="QWebEngineMediaSourceModel" since="6.7"/>
-  -->
+  <!-- No default constructor. Used in signal QWebEnginePage.desktopMediaRequested(),
+       but not in any other function. -->
+  <value-type name="QWebEngineDesktopMediaRequest" since="6.7">
+      <modify-function signature="swap(QWebEngineDesktopMediaRequest&amp;)" remove="yes"/>
+  </value-type>
   <value-type name="QWebEngineWebAuthPinRequest" since="6.7"/>
   <object-type name="QWebEngineWebAuthUxRequest" since="6.7">
       <enum-type name="WebAuthUxState"/>

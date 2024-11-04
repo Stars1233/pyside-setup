@@ -18,7 +18,7 @@ ${QtWebEngineCore_GEN_DIR}/qwebengineclienthints_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecontextmenurequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_filterrequest_wrapper.cpp
-# FIXME ${QtWebEngineCore_GEN_DIR}/qwebenginedesktopmediarequest_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebenginedesktopmediarequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginedownloadrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefilesystemaccessrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefindtextresult_wrapper.cpp
@@ -32,7 +32,6 @@ ${QtWebEngineCore_GEN_DIR}/qwebenginehistorymodel_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginehttprequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginenavigationrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineloadinginfo_wrapper.cpp
-# FIXME ${QtWebEngineCore_GEN_DIR}/qwebenginemediasourcemodel_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginenewwindowrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginenotification_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginepage_wrapper.cpp
