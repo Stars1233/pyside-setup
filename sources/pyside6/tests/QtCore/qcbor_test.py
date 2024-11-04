@@ -15,8 +15,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import (QByteArray, QCborStreamReader, QCborStreamWriter,
-                            QCborTag, QCborValue)
+from PySide6.QtCore import QByteArray, QCborStreamReader, QCborStreamWriter, QCborValue
 
 
 class TestCbor(unittest.TestCase):
@@ -33,7 +32,7 @@ class TestCbor(unittest.TestCase):
         value = reader.toInteger()
         self.assertEqual(value, 42)
 
-    def testReader(self):
+    def anotherTestReader(self):
         ba = QByteArray()
         writer = QCborStreamWriter(ba)
         writer.append("hello")
@@ -43,15 +42,10 @@ class TestCbor(unittest.TestCase):
         self.assertTrue(not ba.isEmpty())
         reader = QCborStreamReader(ba)
         self.assertTrue(reader.hasNext())
-        if (reader.isByteArray()):  # Python 2
-            value = reader.readByteArray()
-            self.assertTrue(value)
-            self.assertEqual(value.data, "hello")
-        else:
-            self.assertTrue(reader.isString())
-            value = reader.readString()
-            self.assertTrue(value)
-            self.assertEqual(value.data, "hello")
+        self.assertTrue(reader.isString())
+        value = reader.readString()
+        self.assertTrue(value)
+        self.assertEqual(value.data, "hello")
 
     def testValue(self):
         value = QCborValue('hello')

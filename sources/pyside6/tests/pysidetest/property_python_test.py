@@ -27,9 +27,6 @@ init_test_paths(False)
 
 from PySide6.QtCore import Property, QObject
 
-# This are the original imports.
-import sys
-import unittest
 has_test = False
 try:
     from test import support
@@ -203,7 +200,7 @@ class PropertyTests(unittest.TestCase):
         sub.__class__.spam.__doc__ = 'Spam'
         self.assertEqual(sub.__class__.spam.__doc__, 'Spam')
 
-    if has_test:  # This test has no support in Python 2
+    if has_test:
         @support.refcount_test
         def test_refleaks_in___init__(self):
             gettotalrefcount = support.get_attribute(sys, 'gettotalrefcount')

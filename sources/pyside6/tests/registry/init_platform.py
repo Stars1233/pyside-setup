@@ -189,10 +189,7 @@ def generate_all():
             {build}
 
             There are no default values, no variable names and no self
-            parameter. Only types are present after simplification. The
-            functions 'next' resp. '__next__' are removed to make the output
-            identical for Python 2 and 3. '__div__' is also removed,
-            since it exists in Python 2, only.
+            parameter. Only types are present after simplification.
             """
             '''))
         fmt.print("import sys")

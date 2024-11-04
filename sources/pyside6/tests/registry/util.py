@@ -48,7 +48,6 @@ def check_warnings():
         if mod:
             reg = getattr(mod, warn_name, None)
             if reg:
-                # XXX We need to filter warnings for Python 2.
                 # This should be avoided by renaming the duplicate folders.
                 for k in reg:
                     if type(k) is tuple and re.match(ignore_re, k[0]):

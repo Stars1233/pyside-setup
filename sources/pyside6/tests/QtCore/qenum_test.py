@@ -33,8 +33,8 @@ class TestEnum(unittest.TestCase):
     def testEnumNew_NoLeak(self):
         gc.collect()
         total = sys.gettotalrefcount()
-        for idx in range(1000):
-            ret = Qt.Key(42)
+        for _ in range(1000):
+            ret = Qt.Key(42)  # noqa: F841
 
         gc.collect()
         delta = sys.gettotalrefcount() - total
@@ -65,9 +65,9 @@ class TestQFlags(unittest.TestCase):
 
     def testNonExtensibleEnums(self):
         try:
-            om = QIODevice.OpenMode(QIODevice.WriteOnly)
+            om = QIODevice.OpenMode(QIODevice.WriteOnly)  # noqa: F841
             self.assertFail()
-        except:
+        except:  # noqa: E722
             pass
 
 
@@ -88,9 +88,7 @@ class TestEnumPickling(unittest.TestCase):
 
         # This works also with nested classes for Python 3, after we
         # introduced the correct __qualname__ attribute.
-
-        # Note: For Python 2, we would need quite strange patches.
-        func = lambda: pickle.loads(pickle.dumps(Qt.Key))
+        func = lambda: pickle.loads(pickle.dumps(Qt.Key))  # noqa: E731
         func()
 
 # PYSIDE-957: The QEnum macro
@@ -101,7 +99,7 @@ try:
     HAVE_ENUM = True
 except ImportError:
     HAVE_ENUM = False
-    QEnum = QFlag = lambda x: x
+    QEnum = QFlag = lambda x: x  # noqa: F811
     import types
 
     class Enum:
@@ -144,7 +142,7 @@ class SomeClass(QObject):
         class InnerEnum(enum.Enum):
             X = 42
 
-    class SomeEnum(enum.Enum):
+    class SomeEnum(enum.Enum):  # noqa: F811
         A = 4
         B = 5
         C = 6
@@ -166,10 +164,9 @@ class TestQEnumMacro(unittest.TestCase):
             int(SomeClass.SomeEnum.C) == 6
         self.assertEqual(SomeClass.OtherEnum.C, 3)
 
-    @unittest.skipIf(sys.version_info[0] < 3, "we cannot support nested classes in Python 2")
     def testInnerClass(self):
         self.assertEqual(SomeClass.InnerClass.InnerEnum.__qualname__,
-            "SomeClass.InnerClass.InnerEnum")
+                         "SomeClass.InnerClass.InnerEnum")
         with self.assertRaises(TypeError):
             int(SomeClass.InnerClass.InnerEnum.X) == 42
 
@@ -194,8 +191,8 @@ class TestQEnumMacro(unittest.TestCase):
         self.assertEqual(mo.enumerator(1).name(), "SomeEnum")
         moi = SomeClass.InnerClass.staticMetaObject
         self.assertEqual(moi.enumerator(0).name(), "InnerEnum")
-        ## Question: Should that scope not better be  "SomeClass.InnerClass"?
-        ## But we have __qualname__ already:
+        # Question: Should that scope not better be  "SomeClass.InnerClass"?
+        # But we have __qualname__ already:
         self.assertEqual(moi.enumerator(0).scope(), "InnerClass")
 
 

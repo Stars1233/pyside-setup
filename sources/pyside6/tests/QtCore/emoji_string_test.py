@@ -41,10 +41,7 @@ class TestStuff(QObject):
         self.testsig.emit(emoji_str)
 
     def plausi(self):
-        # Python 2 may be built with UCS-2 or UCS-4 support.
-        # UCS-2 creates 2 surrogate code points. See
-        # https://stackoverflow.com/questions/30775689/python-length-of-unicode-string-confusion
-        assert len(emoji_str) == 2 if sys.maxunicode > 0xffff else 3
+        assert len(emoji_str) == 2
 
 
 if __name__ == "__main__":
