@@ -17,38 +17,44 @@ class ClassFlag(Flag):
 
 
 _QT_CLASS_FLAGS = {
-    "QBrush": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
-    "QGradient": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
-    "QIcon": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
+    # QtCore
+    "QCoreApplication": ClassFlag.INSTANTIATE_ON_STACK,
+    "QFile": ClassFlag.PASS_BY_REF | ClassFlag.INSTANTIATE_ON_STACK,
+    "QFileInfo": ClassFlag.INSTANTIATE_ON_STACK,
     "QLine": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
     "QLineF": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
-    "QPixmap": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
+    "QModelIndex": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
+    "QPoint": ClassFlag.PASS_BY_VALUE | ClassFlag.INSTANTIATE_ON_STACK,
     "QPointF": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
     "QRect": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
     "QRectF": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
+    "QSaveFile": ClassFlag.INSTANTIATE_ON_STACK,
+    "QSettings": ClassFlag.PASS_BY_REF | ClassFlag.INSTANTIATE_ON_STACK,
+    "QSize": ClassFlag.PASS_BY_VALUE | ClassFlag.INSTANTIATE_ON_STACK,
     "QSizeF": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
     "QString": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
-    "QFile": ClassFlag.PASS_BY_REF | ClassFlag.INSTANTIATE_ON_STACK,
-    "QSettings": ClassFlag.PASS_BY_REF | ClassFlag.INSTANTIATE_ON_STACK,
     "QTextStream": ClassFlag.PASS_BY_REF | ClassFlag.INSTANTIATE_ON_STACK,
+    # QtGui
+    "QBrush": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
     "QColor": ClassFlag.PASS_BY_VALUE | ClassFlag.INSTANTIATE_ON_STACK,
-    "QPoint": ClassFlag.PASS_BY_VALUE | ClassFlag.INSTANTIATE_ON_STACK,
-    "QSize": ClassFlag.PASS_BY_VALUE | ClassFlag.INSTANTIATE_ON_STACK,
-    "QApplication": ClassFlag.INSTANTIATE_ON_STACK,
-    "QColorDialog": ClassFlag.INSTANTIATE_ON_STACK,
-    "QCoreApplication": ClassFlag.INSTANTIATE_ON_STACK,
-    "QFileDialog": ClassFlag.INSTANTIATE_ON_STACK,
-    "QFileInfo": ClassFlag.INSTANTIATE_ON_STACK,
-    "QFontDialog": ClassFlag.INSTANTIATE_ON_STACK,
+    "QGradient": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
     "QGuiApplication": ClassFlag.INSTANTIATE_ON_STACK,
-    "QMessageBox": ClassFlag.INSTANTIATE_ON_STACK,
+    "QIcon": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
     "QPainter": ClassFlag.INSTANTIATE_ON_STACK,
     "QPen": ClassFlag.INSTANTIATE_ON_STACK,
+    "QPixmap": ClassFlag.PASS_BY_CONSTREF | ClassFlag.INSTANTIATE_ON_STACK,
+    # QtWidgets
+    "QApplication": ClassFlag.INSTANTIATE_ON_STACK,
+    "QColorDialog": ClassFlag.INSTANTIATE_ON_STACK,
+    "QFileDialog": ClassFlag.INSTANTIATE_ON_STACK,
+    "QFontDialog": ClassFlag.INSTANTIATE_ON_STACK,
+    "QMessageBox": ClassFlag.INSTANTIATE_ON_STACK,
+    # QtQml
     "QQmlApplicationEngine": ClassFlag.INSTANTIATE_ON_STACK,
     "QQmlComponent": ClassFlag.INSTANTIATE_ON_STACK,
     "QQmlEngine": ClassFlag.INSTANTIATE_ON_STACK,
-    "QQuickView": ClassFlag.INSTANTIATE_ON_STACK,
-    "QSaveFile": ClassFlag.INSTANTIATE_ON_STACK
+    # QtQuick
+    "QQuickView": ClassFlag.INSTANTIATE_ON_STACK
 }
 
 
