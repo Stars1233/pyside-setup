@@ -353,7 +353,7 @@ PyObject *BindingManager::getOverride(const void *cptr,
         return method;
     }
 
-    PyObject *method = PyObject_GetAttr(reinterpret_cast<PyObject *>(wrapper), pyMethodName);
+    PyObject *method = PyObject_GetAttr(obWrapper, pyMethodName);
 
     PyObject *function = nullptr;
 
@@ -362,7 +362,7 @@ PyObject *BindingManager::getOverride(const void *cptr,
     if (method) {
         // PYSIDE-535: This macro is redefined in a compatible way in pep384
         if (PyMethod_Check(method)) {
-            if (PyMethod_GET_SELF(method) == reinterpret_cast<PyObject *>(wrapper)) {
+            if (PyMethod_GET_SELF(method) == obWrapper) {
                 function = PyMethod_GET_FUNCTION(method);
             } else {
                 Py_DECREF(method);
@@ -375,7 +375,7 @@ PyObject *BindingManager::getOverride(const void *cptr,
             // Not retaining a reference inline with what PyMethod_GET_SELF does.
             Py_DECREF(im_self);
 
-            if (im_self == reinterpret_cast<PyObject *>(wrapper)) {
+            if (im_self == obWrapper) {
                 function = PyObject_GetAttr(method, PyName::im_func());
                 // Not retaining a reference inline with what PyMethod_GET_FUNCTION does.
                 Py_DECREF(function);
@@ -390,20 +390,16 @@ PyObject *BindingManager::getOverride(const void *cptr,
     }
 
     if (method != nullptr) {
-        PyObject *defaultMethod{};
         PyObject *mro = Py_TYPE(wrapper)->tp_mro;
 
-        int size = PyTuple_GET_SIZE(mro);
         bool defaultFound = false;
         // The first class in the mro (index 0) is the class being checked and it should not be tested.
         // The last class in the mro (size - 1) is the base Python object class which should not be tested also.
-        for (int idx = 1; idx < size - 1; ++idx) {
+        for (Py_ssize_t idx = 1, size = PyTuple_GET_SIZE(mro); idx < size - 1; ++idx) {
             auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
-            AutoDecRef tpDict(PepType_GetDict(parent));
-            auto *parentDict = tpDict.object();
+            AutoDecRef parentDict(PepType_GetDict(parent));
             if (parentDict) {
-                defaultMethod = PyDict_GetItem(parentDict, pyMethodName);
-                if (defaultMethod) {
+                if (PyObject *defaultMethod = PyDict_GetItem(parentDict.object(), pyMethodName)) {
                     defaultFound = true;
                     if (function != defaultMethod)
                         return method;
