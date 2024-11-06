@@ -173,7 +173,7 @@ PyObject *GetSignature_Function(PyObject *obfunc, PyObject *modifier)
     if (props == nullptr)
         Py_RETURN_NONE;
 
-    int flags = PyCFunction_GET_FLAGS(obfunc);
+    int flags = PyCFunction_GetFlags(obfunc);
     PyObject *func_kind;
     if (PyModule_Check(obtype_mod.object()))
         func_kind = PyName::function();

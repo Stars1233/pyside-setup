@@ -239,7 +239,7 @@ PyObject *_get_class_of_bm(PyObject *ob_bm)
 
 PyObject *_get_class_of_cf(PyObject *ob_cf)
 {
-    PyObject *selftype = PyCFunction_GET_SELF(ob_cf);
+    PyObject *selftype = PyCFunction_GetSelf(ob_cf);
     if (selftype == nullptr) {
         selftype = PyDict_GetItem(pyside_globals->map_dict, ob_cf);
         if (selftype == nullptr) {

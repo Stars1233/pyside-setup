@@ -274,9 +274,6 @@ enum PepUnicode_Kind {
 #ifdef Py_LIMITED_API
 
 using PyCFunctionObject = struct _pycfunc;
-#define PyCFunction_GET_FUNCTION(func)  PyCFunction_GetFunction((PyObject *)func)
-#define PyCFunction_GET_SELF(func)      PyCFunction_GetSelf((PyObject *)func)
-#define PyCFunction_GET_FLAGS(func)     PyCFunction_GetFlags((PyObject *)func)
 #define PepCFunction_GET_NAMESTR(func) \
     _PepUnicode_AsString(PyObject_GetAttrString((PyObject *)func, "__name__"))
 #else

@@ -111,7 +111,7 @@ static GetReceiverResult getReceiver(QMetaMethod signal, PyObject *callback)
         result.receiver = PySide::convertToQObject(result.self, false);
 #endif
     } else if (PyCFunction_Check(callback)) {
-        result.self = PyCFunction_GET_SELF(callback);
+        result.self = PyCFunction_GetSelf(callback);
         result.receiver = PySide::convertToQObject(result.self, false);
     } else if (PySide::isCompiledMethod(callback)) {
         result.self = PyObject_GetAttr(callback, Shiboken::PyName::im_self());

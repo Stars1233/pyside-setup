@@ -764,7 +764,7 @@ static PyObject *signalCall(PyObject *self, PyObject *args, PyObject *kw)
     Shiboken::AutoDecRef homonymousMethod(PepExt_Type_CallDescrGet(signal->homonymousMethod,
                                                                    nullptr, nullptr));
     if (PyCFunction_Check(homonymousMethod.object())
-            && (PyCFunction_GET_FLAGS(homonymousMethod.object()) & METH_STATIC))
+            && (PyCFunction_GetFlags(homonymousMethod.object()) & METH_STATIC))
         return PyObject_Call(homonymousMethod, args, kw);
 
     // Assumes homonymousMethod is not a static method.
@@ -1248,10 +1248,9 @@ QByteArray getCallbackSignature(QMetaMethod signal, QObject *receiver,
         }
 #endif
     } else if (PyCFunction_Check(callback)) {
-        const auto *funcObj = reinterpret_cast<const PyCFunctionObject *>(callback);
-        functionName = PepCFunction_GET_NAMESTR(funcObj);
-        useSelf = PyCFunction_GET_SELF(funcObj) != nullptr ? 1 : 0;
-        const int flags = PyCFunction_GET_FLAGS(funcObj);
+        functionName = PepCFunction_GET_NAMESTR(callback);
+        useSelf = PyCFunction_GetSelf(callback) != nullptr ? 1 : 0;
+        const int flags = PyCFunction_GetFlags(callback);
 
         if (receiver) {
             // Search for signature on metaobject

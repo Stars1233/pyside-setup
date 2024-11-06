@@ -84,12 +84,8 @@ Needed to avoid the GIL when accessing dictionaries.
 methodobject.h
 ~~~~~~~~~~~~~~
 
-``PyCFunction_GET_FUNCTION``, ``PyCFunction_GET_SELF`` and ``PyCFunction_GET_FLAGS``
-were redefined as function calls.
-
 Direct access to the methoddef structure is not available, and we defined
 ``PepCFunction_GET_NAMESTR`` as accessor for name strings.
-
 
 pythonrun.h
 ~~~~~~~~~~~
