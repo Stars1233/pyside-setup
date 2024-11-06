@@ -297,17 +297,6 @@ enum PepUnicode_Kind {
 
 /*****************************************************************************
  *
- * RESOLVED: listobject.h
- *
- */
-#ifdef Py_LIMITED_API
-#define PyList_GET_ITEM(op, i)      PyList_GetItem(op, i)
-#define PyList_SET_ITEM(op, i, v)   PyList_SetItem(op, i, v)
-#define PyList_GET_SIZE(op)         PyList_Size(op)
-#endif
-
-/*****************************************************************************
- *
  * RESOLVED: methodobject.h
  *
  */

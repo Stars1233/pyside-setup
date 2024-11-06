@@ -90,14 +90,6 @@ tupleobject.h
 ``PyTuple_GET_ITEM``, ``PyTuple_SET_ITEM`` and ``PyTuple_GET_SIZE`` were redefined as
 function calls.
 
-
-listobject.h
-~~~~~~~~~~~~
-
-``PyList_GET_ITEM``, ``PyList_SET_ITEM`` and ``PyList_GET_SIZE`` were redefined as
-function calls.
-
-
 dictobject.h
 ~~~~~~~~~~~~
 

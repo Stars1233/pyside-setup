@@ -218,7 +218,7 @@
             Py_ssize_t idx = 0;
             for (const auto &amp;s : %in) {
                 PStr cppItem(s);
-                PyList_SET_ITEM(%out, idx++, %CONVERTTOPYTHON[PStr](cppItem));
+                PyList_SetItem(%out, idx++, %CONVERTTOPYTHON[PStr](cppItem));
             }
             return %out;
             </native-to-target>
@@ -356,7 +356,7 @@
     Py_ssize_t idx = 0;
     for (auto it = %in.cbegin(), end = %in.cend(); it != end; ++it, ++idx) {
         %INTYPE_0 cppItem(*it);
-        PyList_SET_ITEM(%out, idx, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
+        PyList_SetItem(%out, idx, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
     }
     return %out;
     </template>
@@ -1604,7 +1604,7 @@
                 <conversion-rule class="target">
                 PyObject* %out = PyList_New(count);
                 for (int i = 0; i &lt; count; ++i)
-                    PyList_SET_ITEM(%out, i, %CONVERTTOPYTHON[int](%in[i]));
+                    PyList_SetItem(%out, i, %CONVERTTOPYTHON[int](%in[i]));
                 </conversion-rule>
             </modify-argument>
         </modify-function>

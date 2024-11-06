@@ -11,7 +11,7 @@ const Py_ssize_t vertexCount = %CPPSELF->vertexCount();
 %PYARG_0 = PyList_New(vertexCount);
 for (Py_ssize_t i = 0; i < vertexCount; ++i) {
     QSGGeometry::Point2D p = points[i];
-    PyList_SET_ITEM(%PYARG_0, i, %CONVERTTOPYTHON[QSGGeometry::Point2D](p));
+    PyList_SetItem(%PYARG_0, i, %CONVERTTOPYTHON[QSGGeometry::Point2D](p));
 }
 // @snippet qsgeometry-vertexdataaspoint2d
 

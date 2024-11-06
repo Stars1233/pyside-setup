@@ -6,7 +6,7 @@
         PyObject *%out = PyList_New(int(%in.size()));
         int idx  = 0;
         for (const auto &amp;cppItem : %in)
-            PyList_SET_ITEM(%out, idx++, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
+            PyList_SetItem(%out, idx++, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
         return %out;
     </template>
     <template name="pyseq_to_cpplist_convertion">

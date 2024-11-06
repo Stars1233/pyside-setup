@@ -100,7 +100,7 @@ static PyObject *settingsTypeCoercion(const QVariant &out, PyTypeObject *typeObj
         // Convert any string, etc, to a list of 1 element
         if (auto *primitiveValue = convertToPrimitiveType(out, out.typeId())) {
             PyObject *list = PyList_New(1);
-            PyList_SET_ITEM(list, 0, primitiveValue);
+            PyList_SetItem(list, 0, primitiveValue);
             return list;
         }
 
@@ -113,7 +113,7 @@ static PyObject *settingsTypeCoercion(const QVariant &out, PyTypeObject *typeObj
         PyObject *list = PyList_New(valuesSize);
         for (Py_ssize_t i = 0; i < valuesSize; ++i) {
             PyObject *item = PyUnicode_FromString(valuesList.at(i).constData());
-            PyList_SET_ITEM(list, i, item);
+            PyList_SetItem(list, i, item);
         }
         return list;
     }

@@ -13,9 +13,9 @@
             PyObject *pyRow = PyList_New(columnCount);
             for (Py_ssize_t c = 0; c &lt; columnCount; ++c) {
                 const %INTYPE_0 &amp;cppItem = row->at(c);
-                PyList_SET_ITEM(pyRow, c, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
+                PyList_SetItem(pyRow, c, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
             }
-            PyList_SET_ITEM(%out, r, pyRow);
+            PyList_SetItem(%out, r, pyRow);
         }
         return %out;
     </template>

@@ -355,7 +355,7 @@ for (Py_ssize_t i = 0; i < count; ++i){
     int x, y;
     %CPPSELF.point(i, &x, &y);
     QPoint pt{x, y};
-    PyList_SET_ITEM(points, i, %CONVERTTOPYTHON[QPoint](pt));
+    PyList_SetItem(points, i, %CONVERTTOPYTHON[QPoint](pt));
 }
 // @snippet qpolygon-reduce
 

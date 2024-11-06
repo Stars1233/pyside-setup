@@ -483,7 +483,7 @@ bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, const char *defa
     Shiboken::AutoDecRef args(PySequence_Fast(argList, nullptr));
     Py_ssize_t numArgs = PySequence_Size(argList);
     for (Py_ssize_t i = 0; i < numArgs; ++i) {
-        PyObject *item = PyList_GET_ITEM(args.object(), i);
+        PyObject *item = PyList_GetItem(args.object(), i);
         if (!PyBytes_Check(item) && !PyUnicode_Check(item))
             return false;
     }
@@ -502,7 +502,7 @@ bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, const char *defa
         (*argv)[0] = strdup(appName ? Shiboken::String::toCString(appName) : defaultAppName);
     } else {
         for (int i = 0; i < numArgs; ++i) {
-            PyObject *item = PyList_GET_ITEM(args.object(), i);
+            PyObject *item = PyList_GetItem(args.object(), i);
             char *string = nullptr;
             if (Shiboken::String::check(item)) {
 #ifdef _WIN32

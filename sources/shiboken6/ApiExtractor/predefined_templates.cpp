@@ -114,7 +114,7 @@ static QString cppMultiMapToPyDict(bool isQMultiMap)
         Py_ssize_t idx = 0;
         for (; it != upper; ++it, ++idx) {
             const auto &cppItem = it.value();
-            PyList_SET_ITEM(pyValues, idx, %CONVERTTOPYTHON[%INTYPE_1](cppItem));
+            PyList_SetItem(pyValues, idx, %CONVERTTOPYTHON[%INTYPE_1](cppItem));
         }
         PyDict_SetItem(%out, pyKey, pyValues);
         Py_DECREF(pyKey);
@@ -138,7 +138,7 @@ static QString cppMultiHashToPyDict(bool isQMultiHash)
         Py_ssize_t idx = 0;
         for (; it != range.second; ++it, ++idx) {
             const auto &cppItem = it.value();
-            PyList_SET_ITEM(pyValues, idx, %CONVERTTOPYTHON[%INTYPE_1](cppItem));
+            PyList_SetItem(pyValues, idx, %CONVERTTOPYTHON[%INTYPE_1](cppItem));
         }
         PyDict_SetItem(%out, pyKey, pyValues);
         Py_DECREF(pyKey);
@@ -195,7 +195,7 @@ return %out;
 Py_ssize_t idx = 0;
 for (auto it = std::cbegin(%in), end = std::cend(%in); it != end; ++it, ++idx) {
     const auto &cppItem = *it;
-    PyList_SET_ITEM(%out, idx, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
+    PyList_SetItem(%out, idx, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
 }
 return %out;)"_s},
 
