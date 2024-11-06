@@ -1505,9 +1505,9 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         // Python argument on the binding virtual method.
         static const QRegularExpression pyArgsAttributionRegex("%PYARG_(\\d+)\\s*=[^=]\\s*([^;]+)"_L1);
         Q_ASSERT(pyArgsAttributionRegex.isValid());
-        code.replace(pyArgsAttributionRegex, u"PyTuple_SET_ITEM("_s
+        code.replace(pyArgsAttributionRegex, u"PyTuple_SetItem("_s
                      + PYTHON_ARGS + u".object(), \\1-1, \\2)"_s);
-        code.replace(pyArgsRegex, u"PyTuple_GET_ITEM("_s
+        code.replace(pyArgsRegex, u"PyTuple_GetItem("_s
                      + PYTHON_ARGS + u".object(), \\1-1)"_s);
     }
 

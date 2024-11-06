@@ -243,9 +243,8 @@ static PyObject *lookupUnqualifiedOrOldEnum(PyTypeObject *type, PyObject *name)
     PyObject *mro = type->tp_mro;
     PyObject *result{};
     assert(PyTuple_Check(mro));
-    Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
-    for (idx = 0; idx < n; ++idx) {
-        auto *base = PyTuple_GET_ITEM(mro, idx);
+    for (Py_ssize_t idx = 0, n = PyTuple_Size(mro); idx < n; ++idx) {
+        auto *base = PyTuple_GetItem(mro, idx);
         auto *type_base = reinterpret_cast<PyTypeObject *>(base);
         if (!SbkObjectType_Check(type_base))
             continue;

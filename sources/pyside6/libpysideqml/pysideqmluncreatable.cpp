@@ -50,7 +50,7 @@ int PySideQmlUncreatablePrivate::tp_init(PyObject *self, PyObject *args, PyObjec
     if (argsCount == 0) {
         result = 0; // QML-generated reason
     } else if (argsCount == 1) {
-        PyObject *arg = PyTuple_GET_ITEM(args, 0);
+        PyObject *arg = PyTuple_GetItem(args, 0);
         result = arg == Py_None
             ? 0 // QML-generated reason
             : convertToString(self, args);

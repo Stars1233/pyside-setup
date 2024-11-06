@@ -21,8 +21,8 @@ void QAbstractOAuthModifyFunctor::operator()(QAbstractOAuth::Stage stage,
     Shiboken::GilState state;
     QMultiMap<QString, QVariant> dict = *dictPointer;
     Shiboken::AutoDecRef arglist(PyTuple_New(2));
-    PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QAbstractOAuth::Stage](stage));
-    PyTuple_SET_ITEM(arglist, 1, %CONVERTTOPYTHON[QMultiMap<QString, QVariant>](dict));
+    PyTuple_SetItem(arglist, 0, %CONVERTTOPYTHON[QAbstractOAuth::Stage](stage));
+    PyTuple_SetItem(arglist, 1, %CONVERTTOPYTHON[QMultiMap<QString, QVariant>](dict));
     Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
 
     if (!ret.isNull() && PyDict_Check(ret.object()) != 0) {

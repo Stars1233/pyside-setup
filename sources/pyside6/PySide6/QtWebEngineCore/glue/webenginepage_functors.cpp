@@ -22,7 +22,7 @@ void RunJavascriptFunctor::operator()(const QVariant &result)
     case QMetaType::Bool: {
         PyObject *pyValue = result.toBool() ? Py_True : Py_False;
         Py_INCREF(pyValue);
-        PyTuple_SET_ITEM(arglist, 0, pyValue);
+        PyTuple_SetItem(arglist, 0, pyValue);
     }
     break;
     case QMetaType::Int:
@@ -30,11 +30,11 @@ void RunJavascriptFunctor::operator()(const QVariant &result)
     case QMetaType::LongLong:
     case QMetaType::ULongLong:
     case QMetaType::Double:
-        PyTuple_SET_ITEM(arglist, 0, PyFloat_FromDouble(result.toDouble()));
+        PyTuple_SetItem(arglist, 0, PyFloat_FromDouble(result.toDouble()));
     break;
     default: {
         const QString value = result.toString();
-        PyTuple_SET_ITEM(arglist, 0, PySide::qStringToPyUnicode(value));
+        PyTuple_SetItem(arglist, 0, PySide::qStringToPyUnicode(value));
     }
     break;
     }
@@ -49,7 +49,7 @@ void PrintToPdfFunctor::operator()(const QByteArray &pdf)
 
     Shiboken::Conversions::SpecificConverter converter("QByteArray");
     PyObject *pyPdf = converter.toPython(&pdf);
-    PyTuple_SET_ITEM(arglist, 0, pyPdf);
+    PyTuple_SetItem(arglist, 0, pyPdf);
     Shiboken::AutoDecRef ret(PyObject_CallObject(object(), arglist));
     release(); // single shot
 }

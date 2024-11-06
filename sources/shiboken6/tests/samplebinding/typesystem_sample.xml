@@ -317,7 +317,7 @@
         PyObject* result = PyTuple_New(size);
         for (int i = 0; i &lt; size; ++i) {
             Shiboken::Conversions::SpecificConverter converter(typeName[i]);
-            PyTuple_SET_ITEM(result, i, converter.toPython(values[i]));
+            PyTuple_SetItem(result, i, converter.toPython(values[i]));
         }
         return result;
     }
@@ -858,27 +858,27 @@
 
     <template name="boolptr_fix_end">
         PyObject* _tuple_ = PyTuple_New(2);
-        PyTuple_SET_ITEM(_tuple_, 0, %PYARG_0);
+        PyTuple_SetItem(_tuple_, 0, %PYARG_0);
         PyObject* _item_ = %CONVERTTOPYTHON[bool](__ok__);
-        PyTuple_SET_ITEM(_tuple_, 1, _item_);
+        PyTuple_SetItem(_tuple_, 1, _item_);
         %PYARG_0 = _tuple_;
     </template>
 
     <template name="return_4_arguments_as_tuple">
         %PYARG_0 = PyTuple_New(4);
-        PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
-        PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG2_TYPE](%2));
-        PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[%ARG3_TYPE](%3));
-        PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[%ARG4_TYPE](%4));
+        PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
+        PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG2_TYPE](%2));
+        PyTuple_SetItem(%PYARG_0, 2, %CONVERTTOPYTHON[%ARG3_TYPE](%3));
+        PyTuple_SetItem(%PYARG_0, 3, %CONVERTTOPYTHON[%ARG4_TYPE](%4));
     </template>
 
     <template name="return_5_arguments_as_tuple">
         %PYARG_0 = PyTuple_New(5);
-        PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
-        PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG2_TYPE](%2));
-        PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[%ARG3_TYPE](%3));
-        PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[%ARG4_TYPE](%4));
-        PyTuple_SET_ITEM(%PYARG_0, 4, %CONVERTTOPYTHON[%ARG5_TYPE](%5));
+        PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
+        PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG2_TYPE](%2));
+        PyTuple_SetItem(%PYARG_0, 2, %CONVERTTOPYTHON[%ARG3_TYPE](%3));
+        PyTuple_SetItem(%PYARG_0, 3, %CONVERTTOPYTHON[%ARG4_TYPE](%4));
+        PyTuple_SetItem(%PYARG_0, 4, %CONVERTTOPYTHON[%ARG5_TYPE](%5));
     </template>
 
     <template name="return_none">
@@ -1162,8 +1162,8 @@
         </template>
         <template name="differenceOfPointCoordinates_returnTarget">
         %PYARG_0 = PyTuple_New(2);
-        PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[bool](*%2));
-        PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
+        PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[bool](*%2));
+        PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
         </template>
         <modify-function signature="differenceOfPointCoordinates(const Point*, bool*)">
             <modify-argument index="2">
@@ -1216,8 +1216,8 @@
           %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(&amp;tmpObject);
           %END_ALLOW_THREADS
           %PYARG_0 = PyTuple_New(2);
-          PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
-          PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[ObjectType*](tmpObject));
+          PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
+          PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[ObjectType*](tmpObject));
           </inject-code>
         </modify-function>
         <modify-function signature="passOddBool(OddBool)" rename="invertBoolean">
@@ -1350,9 +1350,9 @@
             <inject-code class="target" position="end">
                 %PYARG_0 = PyTuple_New(2);
                 PyObject* _item_ = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
-                PyTuple_SET_ITEM(%PYARG_0, 0, _item_);
+                PyTuple_SetItem(%PYARG_0, 0, _item_);
                 _item_ = %CONVERTTOPYTHON[Str*](_str_arg_);
-                PyTuple_SET_ITEM(%PYARG_0, 1, _item_);
+                PyTuple_SetItem(%PYARG_0, 1, _item_);
             </inject-code>
         </modify-function>
         <modify-function signature="callCreateStr(const char*, Str*&amp;)">
@@ -1369,9 +1369,9 @@
             <inject-code class="target" position="end">
                 %PYARG_0 = PyTuple_New(2);
                 PyObject* _item_ = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
-                PyTuple_SET_ITEM(%PYARG_0, 0, _item_);
+                PyTuple_SetItem(%PYARG_0, 0, _item_);
                 _item_ = %CONVERTTOPYTHON[Str*](_str_arg_);
-                PyTuple_SET_ITEM(%PYARG_0, 1, _item_);
+                PyTuple_SetItem(%PYARG_0, 1, _item_);
             </inject-code>
         </modify-function>
         <template name="fix_int*,int*,int*,int*">
@@ -1380,10 +1380,10 @@
         %CPPSELF->::%TYPE::%FUNCTION_NAME(&amp;a0, &amp;a1, &amp;a2, &amp;a3);
         %END_ALLOW_THREADS
         %PYARG_0 = PyTuple_New(4);
-        PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](a0));
-        PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[int](a1));
-        PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[int](a2));
-        PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](a3));
+        PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[int](a0));
+        PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[int](a1));
+        PyTuple_SetItem(%PYARG_0, 2, %CONVERTTOPYTHON[int](a2));
+        PyTuple_SetItem(%PYARG_0, 3, %CONVERTTOPYTHON[int](a3));
         </template>
         <template name="fix_native_return_int*,int*,int*,int*">
             PyObject* _obj = %PYARG_0;
@@ -2318,7 +2318,7 @@
 
     <add-function signature="countVarargs(int, ...)" return-type="int">
         <inject-code class="target" position="beginning">
-        %RETURN_TYPE %0 = PyTuple_GET_SIZE(%PYARG_2);
+        %RETURN_TYPE %0 = PyTuple_Size(%PYARG_2);
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </add-function>

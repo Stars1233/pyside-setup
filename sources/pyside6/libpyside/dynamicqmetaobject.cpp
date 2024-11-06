@@ -582,8 +582,8 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
     // This enforces registering of all signals and slots at type parsing time, and not later at
     // signal connection time, thus making sure no method indices change which would break
     // existing connections.
-    const PyObject *mro = type->tp_mro;
-    const Py_ssize_t basesCount = PyTuple_GET_SIZE(mro);
+    PyObject *mro = type->tp_mro;
+    const Py_ssize_t basesCount = PyTuple_Size(mro);
 
     std::vector<PyTypeObject *> basesToCheck;
     // Prepend the actual type that we are parsing.
@@ -593,7 +593,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
     auto *sbkObjTypeF = SbkObject_TypeF();
     auto *baseObjType = reinterpret_cast<PyTypeObject *>(&PyBaseObject_Type);
     for (Py_ssize_t i = 0; i < basesCount; ++i) {
-        auto *baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, i));
+        auto *baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, i));
         if (baseType != sbkObjTypeF && baseType != baseObjType
             && !PySide::isQObjectDerived(baseType, false)) {
             basesToCheck.push_back(baseType);

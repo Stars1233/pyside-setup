@@ -473,7 +473,7 @@ static int callPythonMetaMethodHelper(const QByteArrayList &paramTypes,
         Shiboken::Conversions::SpecificConverter converter(param.constData());
         if (!converter.isValid())
             return CallResult::CallArgumentError + int(i);
-        PyTuple_SET_ITEM(preparedArgs, i, converter.toPython(data));
+        PyTuple_SetItem(preparedArgs, i, converter.toPython(data));
     }
 
     QScopedPointer<Shiboken::Conversions::SpecificConverter> retConverter;

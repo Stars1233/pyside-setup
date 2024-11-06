@@ -59,7 +59,7 @@ int StringDecoratorPrivate::convertToString(PyObject *self, PyObject *args)
 {
     int result = -1;
     if (PyTuple_Size(args) == 1) {
-        PyObject *arg = PyTuple_GET_ITEM(args, 0);
+        PyObject *arg = PyTuple_GetItem(args, 0);
         if (PyUnicode_Check(arg)) {
             auto *pData = DecoratorPrivate::get<StringDecoratorPrivate>(self);
             result = 0;
@@ -90,7 +90,7 @@ int TypeDecoratorPrivate::convertToType(PyObject *self, PyObject *args)
     int result = -1;
     const auto argsCount = PyTuple_Size(args);
     if (argsCount == 1) {
-        PyObject *arg = PyTuple_GET_ITEM(args, 0);
+        PyObject *arg = PyTuple_GetItem(args, 0);
         if (PyType_Check(arg)) {
             result = 0;
             auto *pData = DecoratorPrivate::get<TypeDecoratorPrivate>(self);

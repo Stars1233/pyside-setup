@@ -207,6 +207,6 @@ if (%PYARG_0 == nullptr) {
     qCritical() << "Error while creating the return Tuple";
     Py_RETURN_NONE;
 }
-PyTuple_SET_ITEM(%PYARG_0, 0, classObj);
-PyTuple_SET_ITEM(%PYARG_0, 1, baseClassObj);
+PyTuple_SetItem(%PYARG_0, 0, classObj);
+PyTuple_SetItem(%PYARG_0, 1, baseClassObj);
 // @snippet loaduitype

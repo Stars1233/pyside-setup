@@ -277,7 +277,7 @@ static int signalTpInit(PyObject *obSelf, PyObject *args, PyObject *kwds)
     self->data->signalArguments = argumentNamesOpt.value();
 
     for (Py_ssize_t i = 0, i_max = PyTuple_Size(args); i < i_max; i++) {
-        PyObject *arg = PyTuple_GET_ITEM(args, i);
+        PyObject *arg = PyTuple_GetItem(args, i);
         if (PySequence_Check(arg) && !Shiboken::String::check(arg) && !PyEnumMeta_Check(arg)) {
             tupledArgs = true;
             self->data->signatures.append(PySide::Signal::parseSignature(arg));
@@ -677,8 +677,8 @@ static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
     Shiboken::AutoDecRef pyArgs(PyList_New(0));
 
     PyObject *slot = Py_None;
-    if (PyTuple_Check(args) && PyTuple_GET_SIZE(args))
-        slot = PyTuple_GET_ITEM(args, 0);
+    if (PyTuple_Check(args) && PyTuple_Size(args))
+        slot = PyTuple_GetItem(args, 0);
 
     bool match = false;
     if (Py_TYPE(slot) == PySideSignalInstance_TypeF()) {
@@ -802,10 +802,10 @@ static PyObject *_getHomonymousMethod(PySideSignalInstance *inst)
     auto signalName = inst->d->signalName;
     Shiboken::AutoDecRef name(Shiboken::String::fromCString(signalName));
     auto *mro = Py_TYPE(inst->d->source)->tp_mro;
-    const Py_ssize_t n = PyTuple_GET_SIZE(mro);
+    const Py_ssize_t n = PyTuple_Size(mro);
 
     for (Py_ssize_t idx = 0; idx < n; idx++) {
-        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
         Shiboken::AutoDecRef tpDict(PepType_GetDict(sub_type));
         auto *hom = PyDict_GetItem(tpDict, name);
         if (hom != nullptr && PyCallable_Check(hom) != 0) {

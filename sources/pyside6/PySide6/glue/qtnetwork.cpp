@@ -10,9 +10,9 @@ quint16 port;
 %END_ALLOW_THREADS
 QByteArray ba(data, retval);
 %PYARG_0 = PyTuple_New(3);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[QByteArray](ba));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QHostAddress](ha));
-PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[quint16](port));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[QByteArray](ba));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[QHostAddress](ha));
+PyTuple_SetItem(%PYARG_0, 2, %CONVERTTOPYTHON[quint16](port));
 // @snippet qudpsocket-readdatagram
 
 // @snippet qhostinfo-lookuphost-functor
@@ -29,7 +29,7 @@ void QHostInfoFunctor::operator()(const QHostInfo &hostInfo)
     Shiboken::GilState state;
     Shiboken::AutoDecRef arglist(PyTuple_New(1));
     auto *pyHostInfo = %CONVERTTOPYTHON[QHostInfo](hostInfo);
-    PyTuple_SET_ITEM(arglist.object(), 0, pyHostInfo);
+    PyTuple_SetItem(arglist.object(), 0, pyHostInfo);
     Shiboken::AutoDecRef ret(PyObject_CallObject(object(), arglist));
     release(); // single shot
 }
@@ -89,7 +89,7 @@ void QRestFunctor::operator()(QRestReply &restReply)
     Shiboken::AutoDecRef arglist(PyTuple_New(1));
     auto *restReplyPtr = &restReply;
     auto *pyRestReply = %CONVERTTOPYTHON[QRestReply*](restReplyPtr);
-    PyTuple_SET_ITEM(arglist.object(), 0, pyRestReply);
+    PyTuple_SetItem(arglist.object(), 0, pyRestReply);
     Shiboken::AutoDecRef ret(PyObject_CallObject(m_callable, arglist));
     Py_DECREF(m_callable);
     m_callable = nullptr;

@@ -45,7 +45,7 @@ static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, 
     auto *obj = reinterpret_cast<PySideCallableObject *>(callable_object);
     obj->weakref_func(obj->user_data);
 
-    Py_XDECREF(PyTuple_GET_ITEM(args, 0)); //kill weak ref object
+    Py_XDECREF(PyTuple_GetItem(args, 0)); //kill weak ref object
     Py_RETURN_NONE;
 }
 

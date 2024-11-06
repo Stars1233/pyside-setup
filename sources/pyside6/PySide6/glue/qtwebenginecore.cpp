@@ -14,7 +14,7 @@ bool QWebEngineCookieFilterFunctor::operator()(const QWebEngineCookieStore::Filt
 {
     Shiboken::GilState state;
     Shiboken::AutoDecRef arglist(PyTuple_New(1));
-    PyTuple_SET_ITEM(arglist, 0,
+    PyTuple_SetItem(arglist, 0,
                      %CONVERTTOPYTHON[QWebEngineCookieStore::FilterRequest](filterRequest));
     Shiboken::AutoDecRef ret(PyObject_CallObject(object(), arglist));
     return ret.object() == Py_True;
@@ -39,7 +39,7 @@ void QWebEngineNotificationFunctor::operator()
     Shiboken::GilState state;
     Shiboken::AutoDecRef arglist(PyTuple_New(1));
     auto *notification = webEngineNotification.release();
-    PyTuple_SET_ITEM(arglist.object(), 0,
+    PyTuple_SetItem(arglist.object(), 0,
                      %CONVERTTOPYTHON[QWebEngineNotification*](notification));
     Shiboken::AutoDecRef ret(PyObject_CallObject(object(), arglist));
 };
@@ -59,8 +59,8 @@ return resultPair.first;
 QString str;
 %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, &str);
 %PYARG_0 = PyTuple_New(2);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](str));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[QString](str));
 // @snippet qwebenginepage-javascriptprompt-return
 
 // @snippet qwebenginepage-findtext
@@ -69,7 +69,7 @@ auto callback = [callable](const QWebEngineFindTextResult &result)
 {
     Shiboken::GilState state;
     Shiboken::AutoDecRef arglist(PyTuple_New(1));
-    PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QWebEngineFindTextResult](result));
+    PyTuple_SetItem(arglist, 0, %CONVERTTOPYTHON[QWebEngineFindTextResult](result));
     Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
     Py_DECREF(callable);
 
@@ -89,7 +89,7 @@ auto callback = [printer, callable](bool succeeded)
     }
     Shiboken::GilState state;
     Shiboken::AutoDecRef arglist(PyTuple_New(1));
-    PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[bool](succeeded));
+    PyTuple_SetItem(arglist, 0, %CONVERTTOPYTHON[bool](succeeded));
     Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
     Py_DECREF(callable);
     Py_DECREF(printer);
@@ -106,7 +106,7 @@ auto callback = [callable](const QString &text)
 {
     Shiboken::GilState state;
     Shiboken::AutoDecRef arglist(PyTuple_New(1));
-    PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QString](text));
+    PyTuple_SetItem(arglist, 0, %CONVERTTOPYTHON[QString](text));
     Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
     Py_DECREF(callable);
 };

@@ -188,9 +188,9 @@ find_name_in_mro(PyTypeObject *type, PyObject *name, int *error)
        during dict lookup, e.g. when comparing to non-string keys. */
     Py_INCREF(mro);
     assert(PyTuple_Check(mro));
-    n = PyTuple_GET_SIZE(mro);
+    n = PyTuple_Size(mro);
     for (i = 0; i < n; i++) {
-        base = PyTuple_GET_ITEM(mro, i);
+        base = PyTuple_GetItem(mro, i);
         assert(PyType_Check(base));
         auto *type = reinterpret_cast<PyTypeObject *>(base);
         Shiboken::AutoDecRef dict(PepType_GetDict(type));

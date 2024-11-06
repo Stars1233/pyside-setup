@@ -114,7 +114,7 @@ QWidget *PyDesignerCustomWidget::createWidget(QWidget *parent)
     }
 
     Shiboken::AutoDecRef pyArgs(PyTuple_New(1));
-    PyTuple_SET_ITEM(pyArgs, 0, pyParent); // tuple will keep pyParent reference
+    PyTuple_SetItem(pyArgs, 0, pyParent); // tuple will keep pyParent reference
 
     // Call python constructor
     auto result = reinterpret_cast<SbkObject *>(PyObject_CallObject(m_pyTypeObject, pyArgs));

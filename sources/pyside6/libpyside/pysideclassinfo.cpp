@@ -69,7 +69,7 @@ int ClassInfoPrivate::tp_init(PyObject *self, PyObject *args, PyObject *kwds)
     PyObject *infoDict = nullptr;
     auto size = PyTuple_Size(args);
     if (size == 1 && kwds == nullptr) {
-        PyObject *tmp = PyTuple_GET_ITEM(args, 0);
+        PyObject *tmp = PyTuple_GetItem(args, 0);
         if (PyDict_Check(tmp))
             infoDict = tmp;
     } else if (size == 0 && kwds && PyDict_Check(kwds)) {

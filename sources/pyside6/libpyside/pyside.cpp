@@ -222,10 +222,10 @@ static QByteArrayList _SbkType_LookupProperty(PyTypeObject *type,
     if (origName.isEmpty())
         return QByteArrayList{};
     PyObject *mro = type->tp_mro;
-    auto n = PyTuple_GET_SIZE(mro);
+    auto n = PyTuple_Size(mro);
     auto len = std::strlen(origName);
     for (Py_ssize_t idx = 0; idx < n; idx++) {
-        auto *base = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        auto *base = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
         if (!SbkObjectType_Check(base))
             continue;
         auto *props = SbkObjectType_GetPropertyStrings(base);
@@ -499,20 +499,19 @@ void initQObjectSubType(PyTypeObject *type, PyObject *args, PyObject * /* kwds *
 {
     PyTypeObject *qObjType = Shiboken::Conversions::getPythonTypeObject("QObject*");
 
-    PyObject *bases = PyTuple_GET_ITEM(args, 1);
-    int numBases = PyTuple_GET_SIZE(bases);
+    PyObject *bases = PyTuple_GetItem(args, 1);
 
     TypeUserData *userData = nullptr;
 
-    for (int i = 0; i < numBases; ++i) {
-        auto *base = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(bases, i));
+    for (Py_ssize_t i = 0, numBases = PyTuple_Size(bases); i < numBases; ++i) {
+        auto *base = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(bases, i));
         if (PyType_IsSubtype(base, qObjType)) {
             userData = retrieveTypeUserData(base);
             break;
         }
     }
     if (!userData) {
-        const char *className = Shiboken::String::toCString(PyTuple_GET_ITEM(args, 0));
+        const char *className = Shiboken::String::toCString(PyTuple_GetItem(args, 0));
         qWarning("Sub class of QObject not inheriting QObject!? Crash will happen when using %s.",
                  className);
         return;

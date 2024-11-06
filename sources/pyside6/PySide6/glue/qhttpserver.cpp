@@ -15,7 +15,7 @@ bool cppResult = %CPPSELF.%FUNCTION_NAME(rule,
     Shiboken::GilState state;
     auto *requestPtr = &request;
     Shiboken::AutoDecRef arglist(PyTuple_New(1));
-    PyTuple_SET_ITEM(arglist, 0,
+    PyTuple_SetItem(arglist, 0,
                      %CONVERTTOPYTHON[QHttpServerRequest *](requestPtr));
     PyObject *ret = PyObject_CallObject(callable, arglist);
     if (PyErr_Occurred())
@@ -38,9 +38,9 @@ auto callback = [callable](const QHttpServerRequest &request,
     Shiboken::AutoDecRef arglist(PyTuple_New(2));
     auto *responsePtr = &response;
     auto *requestPtr = &request;
-    PyTuple_SET_ITEM(arglist, 0,
+    PyTuple_SetItem(arglist, 0,
                      %CONVERTTOPYTHON[QHttpServerRequest *](requestPtr));
-    PyTuple_SET_ITEM(arglist, 1,
+    PyTuple_SetItem(arglist, 1,
                      %CONVERTTOPYTHON[QHttpServerResponse *](responsePtr));
     PyObject_CallObject(callable, arglist);
     if (PyErr_Occurred())

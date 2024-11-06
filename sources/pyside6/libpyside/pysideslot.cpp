@@ -88,7 +88,7 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
     if (!data->slotData)
         data->slotData = new SlotData;
     for(Py_ssize_t i = 0, i_max = PyTuple_Size(args); i < i_max; i++) {
-        PyObject *argType = PyTuple_GET_ITEM(args, i);
+        PyObject *argType = PyTuple_GetItem(args, i);
         const auto typeName = PySide::Signal::getTypeName(argType);
         if (typeName.isEmpty()) {
             PyErr_Format(PyExc_TypeError, "Unknown signal argument type: %s", Py_TYPE(argType)->tp_name);

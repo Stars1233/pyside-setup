@@ -26,7 +26,7 @@ if (Shiboken::Object::checkType(%1)) {
     std::vector<void*> ptrs = Shiboken::Object::cppPointers(reinterpret_cast<SbkObject *>(%1));
     %PYARG_0 = PyTuple_New(ptrs.size());
     for (std::size_t i = 0; i < ptrs.size(); ++i)
-        PyTuple_SET_ITEM(%PYARG_0, i, PyLong_FromVoidPtr(ptrs[i]));
+        PyTuple_SetItem(%PYARG_0, i, PyLong_FromVoidPtr(ptrs[i]));
 } else {
     PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
 }
@@ -112,11 +112,11 @@ Shiboken::Conversions::dumpConverters();
 // @snippet init
 // Add __version__ and __version_info__ attributes to the module
 PyObject* version = PyTuple_New(5);
-PyTuple_SET_ITEM(version, 0, PyLong_FromLong(SHIBOKEN_MAJOR_VERSION));
-PyTuple_SET_ITEM(version, 1, PyLong_FromLong(SHIBOKEN_MINOR_VERSION));
-PyTuple_SET_ITEM(version, 2, PyLong_FromLong(SHIBOKEN_MICRO_VERSION));
-PyTuple_SET_ITEM(version, 3, Shiboken::String::fromCString(SHIBOKEN_RELEASE_LEVEL));
-PyTuple_SET_ITEM(version, 4, PyLong_FromLong(SHIBOKEN_SERIAL));
+PyTuple_SetItem(version, 0, PyLong_FromLong(SHIBOKEN_MAJOR_VERSION));
+PyTuple_SetItem(version, 1, PyLong_FromLong(SHIBOKEN_MINOR_VERSION));
+PyTuple_SetItem(version, 2, PyLong_FromLong(SHIBOKEN_MICRO_VERSION));
+PyTuple_SetItem(version, 3, Shiboken::String::fromCString(SHIBOKEN_RELEASE_LEVEL));
+PyTuple_SetItem(version, 4, PyLong_FromLong(SHIBOKEN_SERIAL));
 PyModule_AddObject(module, "__version_info__", version);
 PyModule_AddStringConstant(module, "__version__", SHIBOKEN_VERSION);
 VoidPtr::addVoidPtrToModule(module);

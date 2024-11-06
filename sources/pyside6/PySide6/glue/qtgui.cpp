@@ -84,8 +84,8 @@ QAccessibleInterface *PySideAccessibleFactory::callFactories(const QString &key,
 {
     Shiboken::GilState state;
     Shiboken::AutoDecRef arglist(PyTuple_New(2));
-    PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QString](key));
-    PyTuple_SET_ITEM(arglist, 1, %CONVERTTOPYTHON[QObject *](o));
+    PyTuple_SetItem(arglist, 0, %CONVERTTOPYTHON[QString](key));
+    PyTuple_SetItem(arglist, 1, %CONVERTTOPYTHON[QObject *](o));
 
     for (auto *f : m_factoryFunctions) {
         if (PyObject *pyResult = PyObject_CallObject(f, arglist)) {
@@ -305,8 +305,8 @@ QBitmap %0 = QBitmap::fromData(%1, buffer, %3);
 // @snippet qtextline-cursortox
 %RETURN_TYPE %0 = %CPPSELF->::%TYPE::%FUNCTION_NAME(&%1, %2);
 %PYARG_0 = PyTuple_New(2);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
 // @snippet qtextline-cursortox
 
 // @snippet qkeysequence-getitem
@@ -412,8 +412,8 @@ static void imageDecrefDataHandler(void *data)
 // @snippet qimage-scanline
 
 // @snippet qcolor-setstate
-Shiboken::AutoDecRef func(PyObject_GetAttr(%PYSELF, PyTuple_GET_ITEM(%1, 0)));
-PyObject *args = PyTuple_GET_ITEM(%1, 1);
+Shiboken::AutoDecRef func(PyObject_GetAttr(%PYSELF, PyTuple_GetItem(%1, 0)));
+PyObject *args = PyTuple_GetItem(%1, 1);
 %PYARG_0 = PyObject_Call(func, args, nullptr);
 // @snippet qcolor-setstate
 
@@ -688,8 +688,8 @@ for (int r=0, r_max = %CPPSELF.rowCount(); r < r_max; r++) {
 %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2);
 %END_ALLOW_THREADS
 %PYARG_0 = PyTuple_New(2);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
 // @snippet qclipboard-text
 
 // @snippet qpainter-drawpointsnp-numpy-x-y
@@ -733,7 +733,7 @@ float values[16];
 %PYARG_0 = PyTuple_New(16);
 for (Py_ssize_t i = 0; i < 16; ++i) {
   PyObject *v = PyFloat_FromDouble(values[i]);
-  PyTuple_SET_ITEM(%PYARG_0, i, v);
+  PyTuple_SetItem(%PYARG_0, i, v);
 }
 // @snippet qmatrix4x4-copydatato
 
@@ -758,7 +758,7 @@ static void QGuiApplicationConstructor(PyObject *self, PyObject *pyargv, QGuiApp
 {
     static int argc;
     static char **argv;
-    PyObject *stringlist = PyTuple_GET_ITEM(pyargv, 0);
+    PyObject *stringlist = PyTuple_GetItem(pyargv, 0);
     if (Shiboken::listToArgcArgv(stringlist, &argc, &argv, "PySideApp")) {
         *cptr = new QGuiApplicationWrapper(argc, argv, 0);
         Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject *>(self));
@@ -895,17 +895,17 @@ QVector3D outVec{};
 float angle{};
 %CPPSELF.%FUNCTION_NAME(&outVec, &angle);
 %PYARG_0 = PyTuple_New(2);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[QVector3D](outVec));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[float](angle));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[QVector3D](outVec));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[float](angle));
 // @snippet qquaternion-getaxisandangle-vector3d-float
 
 // @snippet qquaternion-geteulerangles
 float pitch{}, yaw{}, roll{};
 %CPPSELF.%FUNCTION_NAME(&pitch, &yaw, &roll);
 %PYARG_0 = PyTuple_New(3);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[float](pitch));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[float](yaw));
-PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[float](roll));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[float](pitch));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[float](yaw));
+PyTuple_SetItem(%PYARG_0, 2, %CONVERTTOPYTHON[float](roll));
 // @snippet qquaternion-geteulerangles
 
 // @snippet qregion-len

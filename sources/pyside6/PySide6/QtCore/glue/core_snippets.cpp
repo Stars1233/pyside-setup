@@ -45,8 +45,8 @@ QMetaType QVariant_resolveMetaType(PyTypeObject *type)
     // that has added any python fields or slots to its object layout.
     // See https://mail.python.org/pipermail/python-list/2009-January/520733.html
     if (type->tp_bases) {
-        for (Py_ssize_t i = 0, size = PyTuple_GET_SIZE(type->tp_bases); i < size; ++i) {
-            auto baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(type->tp_bases, i));
+        for (Py_ssize_t i = 0, size = PyTuple_Size(type->tp_bases); i < size; ++i) {
+            auto baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_bases, i));
             const QMetaType derived = QVariant_resolveMetaType(baseType);
             if (derived.isValid())
                 return derived;
@@ -224,13 +224,13 @@ void qObjectFindChildren(const QObject *parent, const QRegularExpression &patter
 QString qObjectTr(PyTypeObject *type, const char *sourceText, const char *disambiguation, int n)
 {
     PyObject *mro = type->tp_mro;
-    auto len = PyTuple_GET_SIZE(mro);
+    auto len = PyTuple_Size(mro);
     QString result = QString::fromUtf8(sourceText);
     QString oldResult = result;
     static auto *sbkObjectType = reinterpret_cast<PyTypeObject *>(SbkObject_TypeF());
     for (Py_ssize_t idx = 0; idx < len - 1; ++idx) {
         // Skip the last class which is `object`.
-        auto *type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        auto *type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
         if (type == sbkObjectType)
             continue;
         const char *context = type->tp_name;

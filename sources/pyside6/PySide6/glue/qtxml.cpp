@@ -10,8 +10,8 @@ bool _ret_ = %CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, &_errorMsg_, &_errorLine_,
     &_errorColumn_);
 %END_ALLOW_THREADS
 %PYARG_0 = PyTuple_New(4);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[bool](_ret_));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](_errorMsg_));
-PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[int](_errorLine_));
-PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](_errorColumn_));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[bool](_ret_));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[QString](_errorMsg_));
+PyTuple_SetItem(%PYARG_0, 2, %CONVERTTOPYTHON[int](_errorLine_));
+PyTuple_SetItem(%PYARG_0, 3, %CONVERTTOPYTHON[int](_errorColumn_));
 // @snippet qdomdocument-setcontent

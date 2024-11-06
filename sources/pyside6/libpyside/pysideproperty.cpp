@@ -99,7 +99,7 @@ PyObject *PySidePropertyPrivate::getValue(PyObject *source) const
     if (fget) {
         Shiboken::AutoDecRef args(PyTuple_New(1));
         Py_INCREF(source);
-        PyTuple_SET_ITEM(args, 0, source);
+        PyTuple_SetItem(args, 0, source);
         return  PyObject_CallObject(fget, args);
     }
     return nullptr;
@@ -109,8 +109,8 @@ int PySidePropertyPrivate::setValue(PyObject *source, PyObject *value)
 {
     if (fset && value) {
         Shiboken::AutoDecRef args(PyTuple_New(2));
-        PyTuple_SET_ITEM(args, 0, source);
-        PyTuple_SET_ITEM(args, 1, value);
+        PyTuple_SetItem(args, 0, source);
+        PyTuple_SetItem(args, 1, value);
         Py_INCREF(source);
         Py_INCREF(value);
         Shiboken::AutoDecRef result(PyObject_CallObject(fset, args));
@@ -118,7 +118,7 @@ int PySidePropertyPrivate::setValue(PyObject *source, PyObject *value)
     }
     if (fdel) {
         Shiboken::AutoDecRef args(PyTuple_New(1));
-        PyTuple_SET_ITEM(args, 0, source);
+        PyTuple_SetItem(args, 0, source);
         Py_INCREF(source);
         Shiboken::AutoDecRef result(PyObject_CallObject(fdel, args));
         return (result.isNull() ? -1 : 0);
@@ -132,7 +132,7 @@ int PySidePropertyPrivate::reset(PyObject *source)
     if (freset) {
         Shiboken::AutoDecRef args(PyTuple_New(1));
         Py_INCREF(source);
-        PyTuple_SET_ITEM(args, 0, source);
+        PyTuple_SetItem(args, 0, source);
         Shiboken::AutoDecRef result(PyObject_CallObject(freset, args));
         return (result.isNull() ? -1 : 0);
     }
@@ -456,9 +456,9 @@ static PyObject *getFromType(PyTypeObject *type, PyObject *name)
     auto *attr = PyDict_GetItem(tpDict.object(), name);
     if (!attr) {
         PyObject *bases = type->tp_bases;
-        const Py_ssize_t size = PyTuple_GET_SIZE(bases);
+        const Py_ssize_t size = PyTuple_Size(bases);
         for (Py_ssize_t i = 0; i < size; ++i) {
-            PyObject *base = PyTuple_GET_ITEM(bases, i);
+            PyObject *base = PyTuple_GetItem(bases, i);
             attr = getFromType(reinterpret_cast<PyTypeObject *>(base), name);
             if (attr)
                 return attr;

@@ -392,11 +392,12 @@ PyObject *BindingManager::getOverride(const void *cptr,
     if (method != nullptr) {
         PyObject *mro = Py_TYPE(wrapper)->tp_mro;
 
+        int size = PyTuple_Size(mro);
         bool defaultFound = false;
         // The first class in the mro (index 0) is the class being checked and it should not be tested.
         // The last class in the mro (size - 1) is the base Python object class which should not be tested also.
-        for (Py_ssize_t idx = 1, size = PyTuple_GET_SIZE(mro); idx < size - 1; ++idx) {
-            auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        for (int idx = 1; idx < size - 1; ++idx) {
+            auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
             AutoDecRef parentDict(PepType_GetDict(parent));
             if (parentDict) {
                 if (PyObject *defaultMethod = PyDict_GetItem(parentDict.object(), pyMethodName)) {
@@ -500,10 +501,10 @@ static bool _callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
     auto *startType = Py_TYPE(self);
     auto *mro = startType->tp_mro;
     Py_ssize_t idx = 0;
-    const Py_ssize_t n = PyTuple_GET_SIZE(mro);
+    const Py_ssize_t n = PyTuple_Size(mro);
     /* No need to check the last one: it's gonna be skipped anyway.  */
     for ( ; idx + 1 < n; ++idx) {
-        auto *lookType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        auto *lookType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
         if (className == lookType->tp_name)
             break;
     }
@@ -511,14 +512,14 @@ static bool _callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
     // mro: ('C', 'A', 'QObject', 'Object', 'B', 'object')
     // We want to catch class `B` and call its `__init__`.
     for (idx += 1; idx + 1 < n; ++idx) {
-        auto *t = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        auto *t = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
         if (isPythonType(t))
             break;
     }
     if (idx >= n)
         return false;
 
-    auto *obSubType = PyTuple_GET_ITEM(mro, idx);
+    auto *obSubType = PyTuple_GetItem(mro, idx);
     auto *subType = reinterpret_cast<PyTypeObject *>(obSubType);
     if (subType == &PyBaseObject_Type)
         return false;
@@ -532,7 +533,7 @@ static bool _callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
     AutoDecRef newArgs(PyTuple_New(1));
     auto *newArgsOb = newArgs.object();
     Py_INCREF(self);
-    PyTuple_SET_ITEM(newArgsOb, 0, self);
+    PyTuple_SetItem(newArgsOb, 0, self);
     // Note: This can fail, so please always check the error status.
     AutoDecRef result(PyObject_Call(func, newArgs, kwds));
     return true;

@@ -139,9 +139,9 @@ void propListAppender(QQmlListProperty<QObject> *propList, QObject *item)
 
     Shiboken::AutoDecRef args(PyTuple_New(2));
     PyTypeObject *qobjectType = qObjectType();
-    PyTuple_SET_ITEM(args, 0,
+    PyTuple_SetItem(args, 0,
                      Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
-    PyTuple_SET_ITEM(args, 1,
+    PyTuple_SetItem(args, 1,
                      Shiboken::Conversions::pointerToPython(qobjectType, item));
 
     auto *data = reinterpret_cast<QmlListPropertyPrivate *>(propList->data);
@@ -157,7 +157,7 @@ qsizetype propListCount(QQmlListProperty<QObject> *propList)
     Shiboken::GilState state;
 
     Shiboken::AutoDecRef args(PyTuple_New(1));
-    PyTuple_SET_ITEM(args, 0,
+    PyTuple_SetItem(args, 0,
                      Shiboken::Conversions::pointerToPython(qObjectType(), propList->object));
 
     auto *data = reinterpret_cast<QmlListPropertyPrivate *>(propList->data);
@@ -183,10 +183,10 @@ QObject *propListAt(QQmlListProperty<QObject> *propList, qsizetype index)
 
     Shiboken::AutoDecRef args(PyTuple_New(2));
     PyTypeObject *qobjectType = qObjectType();
-    PyTuple_SET_ITEM(args, 0,
+    PyTuple_SetItem(args, 0,
                      Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
     auto *converter = Shiboken::Conversions::PrimitiveTypeConverter<qsizetype>();
-    PyTuple_SET_ITEM(args, 1,
+    PyTuple_SetItem(args, 1,
                      Shiboken::Conversions::copyToPython(converter, &index));
 
     auto *data = reinterpret_cast<QmlListPropertyPrivate *>(propList->data);
@@ -207,7 +207,7 @@ void propListClear(QQmlListProperty<QObject> * propList)
 
     Shiboken::AutoDecRef args(PyTuple_New(1));
     PyTypeObject *qobjectType = qObjectType();
-    PyTuple_SET_ITEM(args, 0,
+    PyTuple_SetItem(args, 0,
                      Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
 
     auto *data = reinterpret_cast<QmlListPropertyPrivate *>(propList->data);
@@ -224,12 +224,12 @@ void propListReplace(QQmlListProperty<QObject> *propList, qsizetype index, QObje
 
     Shiboken::AutoDecRef args(PyTuple_New(3));
     PyTypeObject *qobjectType = qObjectType();
-    PyTuple_SET_ITEM(args, 0,
+    PyTuple_SetItem(args, 0,
                      Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
     auto *converter = Shiboken::Conversions::PrimitiveTypeConverter<qsizetype>();
-    PyTuple_SET_ITEM(args, 1,
+    PyTuple_SetItem(args, 1,
                      Shiboken::Conversions::copyToPython(converter, &index));
-    PyTuple_SET_ITEM(args, 2,
+    PyTuple_SetItem(args, 2,
                      Shiboken::Conversions::pointerToPython(qobjectType, value));
 
     auto *data = reinterpret_cast<QmlListPropertyPrivate *>(propList->data);
@@ -246,7 +246,7 @@ void propListRemoveLast(QQmlListProperty<QObject> *propList)
 
     Shiboken::AutoDecRef args(PyTuple_New(1));
     PyTypeObject *qobjectType = qObjectType();
-    PyTuple_SET_ITEM(args, 0,
+    PyTuple_SetItem(args, 0,
                      Shiboken::Conversions::pointerToPython(qobjectType, propList->object));
 
     auto *data = reinterpret_cast<QmlListPropertyPrivate *>(propList->data);

@@ -97,7 +97,7 @@ static QObject *extensionFactory(QObject *o)
     }
 
     Shiboken::AutoDecRef args(PyTuple_New(1));
-    PyTuple_SET_ITEM(args.object(), 0, pyObj);
+    PyTuple_SetItem(args.object(), 0, pyObj);
     auto *extensionTypeObj = reinterpret_cast<PyObject *>(info->extensionType);
     Shiboken::AutoDecRef pyResult(PyObject_Call(extensionTypeObj, args, nullptr));
     if (pyResult.isNull() || PyErr_Occurred()) {

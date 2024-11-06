@@ -1191,7 +1191,7 @@ void CppGenerator::writeVirtualMethodNativeArgs(TextStream &s,
         << indent << argConversions.join(u",\n"_s) << outdent << "\n));\n";
 
     for (int index : std::as_const(invalidateArgs)) {
-        s << "bool invalidateArg" << index << " = Py_REFCNT(PyTuple_GET_ITEM(" << PYTHON_ARGS
+        s << "bool invalidateArg" << index << " = Py_REFCNT(PyTuple_GetItem(" << PYTHON_ARGS
             << ", " << index - 1 << ")) == 1;\n";
     }
 }
@@ -1411,7 +1411,7 @@ void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
 
         for (int argIndex : std::as_const(invalidateArgs)) {
             s << "if (invalidateArg" << argIndex << ")\n" << indent
-                << "Shiboken::Object::invalidate(PyTuple_GET_ITEM(" << PYTHON_ARGS
+                << "Shiboken::Object::invalidate(PyTuple_GetItem(" << PYTHON_ARGS
                 << ", " << (argIndex - 1) << "));\n" << outdent;
         }
         if (generateNewCall)
@@ -2390,7 +2390,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
                                              ErrorReturn errorReturn)
 {
     const auto rfunc = overloadData.referenceFunction();
-    s << "PyTuple_GET_SIZE(args);\n" << sbkUnusedVariableCast("numArgs");
+    s << "PyTuple_Size(args);\n" << sbkUnusedVariableCast("numArgs");
 
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();

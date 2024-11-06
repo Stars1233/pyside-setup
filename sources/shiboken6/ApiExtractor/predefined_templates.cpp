@@ -184,8 +184,8 @@ Shiboken::AutoDecRef objsecond(PySequence_GetItem(%in, 1));
 
     {u"shiboken_conversion_cpppair_to_pytuple"_s,
     uR"(PyObject *%out = PyTuple_New(2);
-PyTuple_SET_ITEM(%out, 0, %CONVERTTOPYTHON[%INTYPE_0](%in.first));
-PyTuple_SET_ITEM(%out, 1, %CONVERTTOPYTHON[%INTYPE_1](%in.second));
+PyTuple_SetItem(%out, 0, %CONVERTTOPYTHON[%INTYPE_0](%in.first));
+PyTuple_SetItem(%out, 1, %CONVERTTOPYTHON[%INTYPE_1](%in.second));
 return %out;
 )"_s},
 

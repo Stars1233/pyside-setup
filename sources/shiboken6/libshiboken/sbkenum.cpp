@@ -102,9 +102,9 @@ int enumIsFlag(PyObject *ob_type)
     if (metatype != reinterpret_cast<PyTypeObject *>(PyEnumMeta))
         return -1;
     auto *mro = reinterpret_cast<PyTypeObject *>(ob_type)->tp_mro;
-    const Py_ssize_t n = PyTuple_GET_SIZE(mro);
+    const Py_ssize_t n = PyTuple_Size(mro);
     for (Py_ssize_t idx = 0; idx < n; ++idx) {
-        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
         if (sub_type == reinterpret_cast<PyTypeObject *>(PyFlag))
             return 1;
     }
@@ -401,8 +401,8 @@ static PyTypeObject *createPythonEnumHelper(PyObject *module,
         auto *key = PyUnicode_FromString(kv);
         auto *value = toPyObject(enumValues[idx]);
         auto *key_value = PyTuple_New(2);
-        PyTuple_SET_ITEM(key_value, 0, key);
-        PyTuple_SET_ITEM(key_value, 1, value);
+        PyTuple_SetItem(key_value, 0, key);
+        PyTuple_SetItem(key_value, 1, value);
         PyList_Append(pyEnumItems, key_value);
     }
     return createEnumForPython(module, fullName, pyEnumItems);

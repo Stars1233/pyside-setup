@@ -63,9 +63,8 @@ static PyObject *_PyType_FromSpecWithBasesHack(PyType_Spec *spec,
             bases = basesPatch.object();
         }
 
-        Py_ssize_t n = PyTuple_GET_SIZE(bases);
-        for (auto idx = 0; idx < n; ++idx) {
-            PyTypeObject *base = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(bases, idx));
+        for (Py_ssize_t idx = 0, n = PyTuple_Size(bases); idx < n; ++idx) {
+            PyTypeObject *base = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(bases, idx));
             PyTypeObject *meta = Py_TYPE(base);
             if (meta->tp_new != PyType_Type.tp_new) {
                 // make sure there is no second meta class
@@ -87,7 +86,7 @@ static PyObject *_PyType_FromSpecWithBasesHack(PyType_Spec *spec,
         keepMeta->tp_new = keepNew;
     if (basesPatch.object()) {
         // undo the metaclass patch.
-        auto *base = PyTuple_GET_ITEM(basesPatch.object(), 0);
+        auto *base = PyTuple_GetItem(basesPatch.object(), 0);
         base->ob_type = &PyType_Type;
     }
     return ret;
@@ -273,7 +272,7 @@ static PyTypeObject *
 best_base(PyObject *bases)
 {
     // We always have only one base
-    return reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(bases, 0));
+    return reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(bases, 0));
 }
 
 static PyObject *

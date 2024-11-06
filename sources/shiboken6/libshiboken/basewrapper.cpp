@@ -579,8 +579,8 @@ static PyTypeObject *SbkObjectType_tp_new(PyTypeObject *metatype, PyObject *args
                                      &PyDict_Type, &dict))
         return nullptr;
 
-    for (int i=0, i_max=PyTuple_GET_SIZE(pyBases); i < i_max; i++) {
-        PyObject *baseType = PyTuple_GET_ITEM(pyBases, i);
+    for (Py_ssize_t i=0, i_max=PyTuple_Size(pyBases); i < i_max; i++) {
+        PyObject *baseType = PyTuple_GetItem(pyBases, i);
         if (PepExt_Type_GetNewSlot(reinterpret_cast<PyTypeObject *>(baseType)) == SbkDummyNew) {
             // PYSIDE-595: A base class does not allow inheritance.
             return reinterpret_cast<PyTypeObject *>(SbkDummyNew(metatype, args, kwds));

@@ -322,7 +322,7 @@ QByteArray uncompressed = %FUNCTION_NAME(ptr, %2);
 QList<QByteArray> version = QByteArray(qVersion()).split('.');
 PyObject *pyQtVersion = PyTuple_New(3);
 for (int i = 0; i < 3; ++i)
-    PyTuple_SET_ITEM(pyQtVersion, i, PyLong_FromLong(version[i].toInt()));
+    PyTuple_SetItem(pyQtVersion, i, PyLong_FromLong(version[i].toInt()));
 PyModule_AddObject(module, "__version_info__", pyQtVersion);
 PyModule_AddStringConstant(module, "__version__", qVersion());
 // @snippet qt-version
@@ -434,11 +434,11 @@ static void msgHandlerCallback(QtMsgType type, const QMessageLogContext &ctx, co
 {
     Shiboken::GilState state;
     Shiboken::AutoDecRef arglist(PyTuple_New(3));
-    PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QtMsgType](type));
-    PyTuple_SET_ITEM(arglist, 1, %CONVERTTOPYTHON[QMessageLogContext &](ctx));
+    PyTuple_SetItem(arglist, 0, %CONVERTTOPYTHON[QtMsgType](type));
+    PyTuple_SetItem(arglist, 1, %CONVERTTOPYTHON[QMessageLogContext &](ctx));
     QByteArray array = msg.toUtf8();  // Python handler requires UTF-8
     const char *data = array.constData();
-    PyTuple_SET_ITEM(arglist, 2, %CONVERTTOPYTHON[const char *](data));
+    PyTuple_SetItem(arglist, 2, %CONVERTTOPYTHON[const char *](data));
     Shiboken::AutoDecRef ret(PyObject_CallObject(qtmsghandler, arglist));
 }
 // @snippet qt-messagehandler
@@ -474,8 +474,8 @@ namespace PySide {
 QPointF p;
 %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, &p);
 %PYARG_0 = PyTuple_New(2);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QPointF](p));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[QPointF](p));
 // @snippet qlinef-intersect
 
 // @snippet qresource-data
@@ -498,17 +498,17 @@ if (!PyDateTimeAPI)
 int year, month, day;
 %CPPSELF.%FUNCTION_NAME(&year, &month, &day);
 %PYARG_0 = PyTuple_New(3);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](year));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[int](month));
-PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[int](day));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[int](year));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[int](month));
+PyTuple_SetItem(%PYARG_0, 2, %CONVERTTOPYTHON[int](day));
 // @snippet qdate-getdate
 
 // @snippet qdate-weeknumber
 int yearNumber;
 int week = %CPPSELF.%FUNCTION_NAME(&yearNumber);
 %PYARG_0 = PyTuple_New(2);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](week));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[int](yearNumber));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[int](week));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[int](yearNumber));
 // @snippet qdate-weeknumber
 
 // @snippet qdatetime-1
@@ -1136,8 +1136,8 @@ if (msec == 0) {
 qint64 pid;
 %RETURN_TYPE retval = %TYPE::%FUNCTION_NAME(%1, %2, %3, &pid);
 %PYARG_0 = PyTuple_New(2);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[qint64](pid));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[qint64](pid));
 // @snippet qprocess-startdetached
 
 // @snippet qcoreapplication-init
@@ -1145,7 +1145,7 @@ static void QCoreApplicationConstructor(PyObject *self, PyObject *pyargv, QCoreA
 {
     static int argc;
     static char **argv;
-    PyObject *stringlist = PyTuple_GET_ITEM(pyargv, 0);
+    PyObject *stringlist = PyTuple_GetItem(pyargv, 0);
     if (Shiboken::listToArgcArgv(stringlist, &argc, &argv, "PySideApp")) {
         *cptr = new QCoreApplicationWrapper(argc, argv);
         Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject *>(self));
@@ -1354,7 +1354,7 @@ Py_END_ALLOW_THREADS
     if (!atexit.isNull() && !regFunc.isNull()){
         PyObject *shutDownFunc = PyObject_GetAttrString(module, "__moduleShutdown");
         Shiboken::AutoDecRef args(PyTuple_New(1));
-        PyTuple_SET_ITEM(args, 0, shutDownFunc);
+        PyTuple_SetItem(args, 0, shutDownFunc);
         Shiboken::AutoDecRef retval(PyObject_Call(regFunc, args, nullptr));
         Q_ASSERT(!retval.isNull());
     }
@@ -2079,7 +2079,7 @@ auto callback = [callable, arg_qpermission](const QPermission &permission) -> vo
     Shiboken::GilState state;
     if (arg_qpermission) {
         Shiboken::AutoDecRef arglist(PyTuple_New(1));
-        PyTuple_SET_ITEM(arglist.object(), 0, %CONVERTTOPYTHON[QPermission](permission));
+        PyTuple_SetItem(arglist.object(), 0, %CONVERTTOPYTHON[QPermission](permission));
         Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
     } else {
         Shiboken::AutoDecRef ret(PyObject_CallObject(callable, nullptr));
@@ -2098,9 +2098,9 @@ qint64 pid{};
 QString hostname, appname;
 %CPPSELF.%FUNCTION_NAME(&pid, &hostname, &appname);
 %PYARG_0 = PyTuple_New(3);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[qint64](pid));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](hostname));
-PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[QString](appname));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[qint64](pid));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[QString](hostname));
+PyTuple_SetItem(%PYARG_0, 2, %CONVERTTOPYTHON[QString](appname));
 // @snippet qlockfile-getlockinfo
 
 // @snippet darwin_permission_plugin

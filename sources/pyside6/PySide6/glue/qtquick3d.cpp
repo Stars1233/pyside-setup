@@ -16,6 +16,6 @@ return resultPair.first;
 int count{};
 %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&count);
 %PYARG_0 = PyTuple_New(2);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[int](count));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[int](count));
 // @snippet qquick3dinstancing-getinstancebuffer-return

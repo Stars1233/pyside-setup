@@ -36,8 +36,8 @@ if (%0) {
 QGraphicsItem *item_ = nullptr;
 %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&item_);
 %PYARG_0 = PyTuple_New(2);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QGraphicsItem *](item_));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[QGraphicsItem *](item_));
 // @snippet qgraphicsitem-isblockedbymodalpanel
 
 // @snippet qitemeditorfactory-registereditor
@@ -60,13 +60,13 @@ int _row;
 QFormLayout::ItemRole _role;
 %CPPSELF->%FUNCTION_NAME(%ARGUMENT_NAMES, &_row, &_role);
 %PYARG_0 = PyTuple_New(2);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](_row));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[int](_row));
 // On the C++ side, *rolePtr is not set if row == -1, in which case on
 // the Python side this gets converted to a random value outside the
 // enum range. Fix this by setting _role to a default value here.
 if (_row == -1)
     _role = QFormLayout::LabelRole;
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QFormLayout::ItemRole](_role));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[QFormLayout::ItemRole](_role));
 // @snippet qformlayout-fix-args
 
 // @snippet qfiledialog-return
@@ -74,8 +74,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QFormLayout::ItemRole](_role));
 %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, &%5, %6);
 %END_ALLOW_THREADS
 %PYARG_0 = PyTuple_New(2);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](%5));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[QString](%5));
 // @snippet qfiledialog-return
 
 // @snippet qwidget-addaction-glue
@@ -392,10 +392,10 @@ removeLayoutOwnership(%CPPSELF, %1);
 int a, b, c, d;
 %CPPSELF.%FUNCTION_NAME(%1, &a, &b, &c, &d);
 %PYARG_0 = PyTuple_New(4);
-PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](a));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[int](b));
-PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[int](c));
-PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](d));
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[int](a));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[int](b));
+PyTuple_SetItem(%PYARG_0, 2, %CONVERTTOPYTHON[int](c));
+PyTuple_SetItem(%PYARG_0, 3, %CONVERTTOPYTHON[int](d));
 // @snippet qgridlayout-getitemposition
 
 // @snippet qgraphicsscene-destroyitemgroup
@@ -569,7 +569,7 @@ static void QApplicationConstructor(PyObject *self, PyObject *pyargv, QApplicati
 {
     static int argc;
     static char **argv;
-    PyObject *stringlist = PyTuple_GET_ITEM(pyargv, 0);
+    PyObject *stringlist = PyTuple_GetItem(pyargv, 0);
     if (Shiboken::listToArgcArgv(stringlist, &argc, &argv, "PySideApp")) {
         *cptr = new QApplicationWrapper(argc, argv, 0);
         Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject *>(self));

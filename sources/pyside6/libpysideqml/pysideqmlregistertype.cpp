@@ -438,7 +438,7 @@ public:
     {
         Shiboken::GilState gil;
         Shiboken::AutoDecRef args(PyTuple_New(1));
-        PyTuple_SET_ITEM(args, 0,
+        PyTuple_SetItem(args, 0,
                          Shiboken::Conversions::pointerToPython(qQmlEngineType(), engine));
         PyObject *retVal = PyObject_CallObject(data()->callable, args);
         QObject *result = handleReturnValue(retVal);
@@ -540,7 +540,7 @@ static int qmlRegisterSingletonType(PyObject *pyObj, const ImportData &importDat
                 Shiboken::GilState gil;
                 AutoDecRef args(PyTuple_New(1));
 
-                PyTuple_SET_ITEM(args, 0, Conversions::pointerToPython(
+                PyTuple_SetItem(args, 0, Conversions::pointerToPython(
                                  qQmlEngineType(), engine));
 
                 AutoDecRef retVal(PyObject_CallObject(callback, args));

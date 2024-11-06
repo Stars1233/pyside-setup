@@ -347,10 +347,10 @@ static inline void SelectFeatureSet(PyTypeObject *type)
     last_select_id = select_id;
 
     auto *mro = type->tp_mro;
-    const Py_ssize_t n = PyTuple_GET_SIZE(mro);
+    const Py_ssize_t n = PyTuple_Size(mro);
     // We leave 'Shiboken.Object' and 'object' alone, therefore "n - 2".
     for (Py_ssize_t idx = 0; idx < n - 2; idx++) {
-        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
         SelectFeatureSetSubtype(sub_type, select_id);
     }
     // PYSIDE-1436: Clear all caches for the type and subtypes.
@@ -627,10 +627,10 @@ static QByteArrayList GetPropertyStringsMro(PyTypeObject *type)
     auto res = QByteArrayList();
 
     PyObject *mro = type->tp_mro;
-    const Py_ssize_t n = PyTuple_GET_SIZE(mro);
+    const Py_ssize_t n = PyTuple_Size(mro);
     // We leave 'Shiboken.Object' and 'object' alone, therefore "n - 2".
     for (Py_ssize_t idx = 0; idx < n - 2; idx++) {
-        auto *subType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        auto *subType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
         auto *props = SbkObjectType_GetPropertyStrings(subType);
         if (props != nullptr)
             for (; *props != nullptr; ++props)
