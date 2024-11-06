@@ -184,8 +184,8 @@ QDataStream &operator<<(QDataStream &out, const PyObjectWrapper &myObj)
         const char *buff = nullptr;
         Py_ssize_t size  = 0;
         if (PyBytes_Check(repr.object())) {
-            buff = PyBytes_AS_STRING(repr.object());
-            size = PyBytes_GET_SIZE(repr.object());
+            buff = PyBytes_AsString(repr.object());
+            size = PyBytes_Size(repr.object());
         } else if (Shiboken::String::check(repr.object())) {
             buff = Shiboken::String::toCString(repr.object());
             size = Shiboken::String::len(repr.object());

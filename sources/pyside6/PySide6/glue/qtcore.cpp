@@ -831,7 +831,7 @@ static PyBufferProcs SbkQByteArrayBufferProc = {
 // @snippet qbytearray-bufferprotocol
 
 // @snippet qbytearray-operatorplus-1
-QByteArray ba = QByteArray(PyBytes_AS_STRING(%PYARG_1), PyBytes_GET_SIZE(%PYARG_1)) + *%CPPSELF;
+QByteArray ba = QByteArray(PyBytes_AsString(%PYARG_1), PyBytes_Size(%PYARG_1)) + *%CPPSELF;
 %PYARG_0 = %CONVERTTOPYTHON[QByteArray](ba);
 // @snippet qbytearray-operatorplus-1
 
@@ -852,7 +852,7 @@ QByteArray ba = *%CPPSELF + QByteArray(PyByteArray_AsString(%PYARG_1), PyByteArr
 // @snippet qbytearray-operatorequalequal
 if (PyUnicode_CheckExact(%PYARG_1)) {
     Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
-    QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
+    QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_Size(data.object()));
     bool cppResult = %CPPSELF == ba;
     %PYARG_0 = %CONVERTTOPYTHON[bool](cppResult);
 }
@@ -861,7 +861,7 @@ if (PyUnicode_CheckExact(%PYARG_1)) {
 // @snippet qbytearray-operatornotequal
 if (PyUnicode_CheckExact(%PYARG_1)) {
     Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
-    QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
+    QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_Size(data.object()));
     bool cppResult = %CPPSELF != ba;
     %PYARG_0 = %CONVERTTOPYTHON[bool](cppResult);
 }
@@ -870,7 +870,7 @@ if (PyUnicode_CheckExact(%PYARG_1)) {
 // @snippet qbytearray-operatorgreater
 if (PyUnicode_CheckExact(%PYARG_1)) {
     Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
-    QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
+    QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_Size(data.object()));
     bool cppResult = %CPPSELF > ba;
     %PYARG_0 = %CONVERTTOPYTHON[bool](cppResult);
 }
@@ -879,7 +879,7 @@ if (PyUnicode_CheckExact(%PYARG_1)) {
 // @snippet qbytearray-operatorgreaterequal
 if (PyUnicode_CheckExact(%PYARG_1)) {
     Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
-    QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
+    QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_Size(data.object()));
     bool cppResult = %CPPSELF >= ba;
     %PYARG_0 = %CONVERTTOPYTHON[bool](cppResult);
 }
@@ -888,7 +888,7 @@ if (PyUnicode_CheckExact(%PYARG_1)) {
 // @snippet qbytearray-operatorlower
 if (PyUnicode_CheckExact(%PYARG_1)) {
     Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
-    QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
+    QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_Size(data.object()));
     bool cppResult = %CPPSELF < ba;
     %PYARG_0 = %CONVERTTOPYTHON[bool](cppResult);
 }
@@ -897,7 +897,7 @@ if (PyUnicode_CheckExact(%PYARG_1)) {
 // @snippet qbytearray-operatorlowerequal
 if (PyUnicode_CheckExact(%PYARG_1)) {
     Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
-    QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
+    QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_Size(data.object()));
     bool cppResult = %CPPSELF <= ba;
     %PYARG_0 = %CONVERTTOPYTHON[bool](cppResult);
 }
@@ -918,7 +918,7 @@ Py_DECREF(aux);
 // @snippet qbytearray-2
 
 // @snippet qbytearray-3
-%0 = new QByteArray(PyBytes_AS_STRING(%PYARG_1), PyBytes_GET_SIZE(%PYARG_1));
+%0 = new QByteArray(PyBytes_AsString(%PYARG_1), PyBytes_Size(%PYARG_1));
 // @snippet qbytearray-3
 
 // @snippet qbytearray-py3
@@ -1268,16 +1268,16 @@ QT_END_NAMESPACE
 // @snippet qt-registerresourcedata
 
 // @snippet qt-qregisterresourcedata
-%RETURN_TYPE %0 = %FUNCTION_NAME(%1, reinterpret_cast<uchar *>(PyBytes_AS_STRING(%PYARG_2)),
-                                     reinterpret_cast<uchar *>(PyBytes_AS_STRING(%PYARG_3)),
-                                     reinterpret_cast<uchar *>(PyBytes_AS_STRING(%PYARG_4)));
+%RETURN_TYPE %0 = %FUNCTION_NAME(%1, reinterpret_cast<uchar *>(PyBytes_AsString(%PYARG_2)),
+                                     reinterpret_cast<uchar *>(PyBytes_AsString(%PYARG_3)),
+                                     reinterpret_cast<uchar *>(PyBytes_AsString(%PYARG_4)));
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qt-qregisterresourcedata
 
 // @snippet qt-qunregisterresourcedata
-%RETURN_TYPE %0 = %FUNCTION_NAME(%1, reinterpret_cast<uchar *>(PyBytes_AS_STRING(%PYARG_2)),
-                                     reinterpret_cast<uchar *>(PyBytes_AS_STRING(%PYARG_3)),
-                                     reinterpret_cast<uchar *>(PyBytes_AS_STRING(%PYARG_4)));
+%RETURN_TYPE %0 = %FUNCTION_NAME(%1, reinterpret_cast<uchar *>(PyBytes_AsString(%PYARG_2)),
+                                     reinterpret_cast<uchar *>(PyBytes_AsString(%PYARG_3)),
+                                     reinterpret_cast<uchar *>(PyBytes_AsString(%PYARG_4)));
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qt-qunregisterresourcedata
 
@@ -1321,8 +1321,8 @@ QString &res = *%0;
 // @snippet return-readData
 %RETURN_TYPE %0 = 0;
 if (PyBytes_Check(%PYARG_0)) {
-    %0 = PyBytes_GET_SIZE(%PYARG_0.object());
-    memcpy(%1, PyBytes_AS_STRING(%PYARG_0.object()), %0);
+    %0 = PyBytes_Size(%PYARG_0.object());
+    memcpy(%1, PyBytes_AsString(%PYARG_0.object()), %0);
 } else if (Shiboken::String::check(%PYARG_0.object())) {
     %0 = Shiboken::String::len(%PYARG_0.object());
     memcpy(%1, Shiboken::String::toCString(%PYARG_0.object()), %0);
@@ -1583,7 +1583,7 @@ int usec = PyDateTime_TIME_GET_MICROSECOND(%in);
 // @snippet conversion-qtime-pytime
 
 // @snippet conversion-qbytearray-pybytes
-%out = %OUTTYPE(PyBytes_AS_STRING(%in), PyBytes_GET_SIZE(%in));
+%out = %OUTTYPE(PyBytes_AsString(%in), PyBytes_Size(%in));
 // @snippet conversion-qbytearray-pybytes
 
 // @snippet conversion-qbytearray-pybytearray

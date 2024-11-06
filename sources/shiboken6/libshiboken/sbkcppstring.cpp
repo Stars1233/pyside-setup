@@ -36,7 +36,7 @@ void toCppString(PyObject *str, std::string *value)
     }
 
     if (PyBytes_Check(str))
-        value->assign(PyBytes_AS_STRING(str));
+        value->assign(PyBytes_AsString(str));
 }
 
 void toCppWString(PyObject *str, std::wstring *value)

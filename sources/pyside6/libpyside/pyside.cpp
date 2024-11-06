@@ -847,7 +847,7 @@ QString pyStringToQString(PyObject *str)
         return pyUnicodeToQString(str);
 
     if (PyBytes_Check(str)) {
-        const char *asciiBuffer = PyBytes_AS_STRING(str);
+        const char *asciiBuffer = PyBytes_AsString(str);
         if (asciiBuffer)
             return QString::fromLatin1(asciiBuffer);
     }
