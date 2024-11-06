@@ -467,7 +467,7 @@ private:
     static void writeRichCompareFunctionHeader(TextStream &s,
                                                const QString &baseName,
                                                const GeneratorContext &context);
-    void writeRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
+    void writeRichCompareFunction(TextStream &s, TextStream &t, const GeneratorContext &context) const;
     void writeSmartPointerRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
 
     static void writeEnumsInitialization(TextStream &s, AbstractMetaEnumList &enums);

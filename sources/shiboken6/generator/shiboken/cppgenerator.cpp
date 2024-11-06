@@ -831,7 +831,7 @@ void CppGenerator::generateClass(TextStream &s,
 
     if (generateRichComparison(classContext)) {
         s << "// Rich comparison\n";
-        writeRichCompareFunction(s, classContext);
+        writeRichCompareFunction(s, signatureStream, classContext);
     }
 
     if (shouldGenerateGetSetList(metaClass)) {
@@ -5077,7 +5077,7 @@ void CppGenerator::writeRichCompareFunctionHeader(TextStream &s,
         << sbkUnusedVariableCast(PYTHON_TO_CPP_VAR) << '\n';
 }
 
-void CppGenerator::writeRichCompareFunction(TextStream &s,
+void CppGenerator::writeRichCompareFunction(TextStream &s, TextStream &t,
                                             const GeneratorContext &context) const
 {
     const auto metaClass = context.metaClass();
@@ -5103,6 +5103,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
 
         bool first = true;
         OverloadData overloadData(overloads, api());
+        writeSignatureInfo(t, overloadData);
         const OverloadDataList &nextOverloads = overloadData.children();
         for (const auto &od : nextOverloads) {
             const auto func = od->referenceFunction();

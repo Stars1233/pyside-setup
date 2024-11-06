@@ -343,6 +343,7 @@ type_map.update({
     "quint8*"       : bytearray,  # only for QCborStreamReader and QCborValue
     "uchar*"        : typing.Union[bytes, bytearray, memoryview],
     "unsigned char*": typing.Union[bytes, bytearray, memoryview],
+    "char*const"    : typing.Union[bytes, bytearray, memoryview],
 })
 
 type_map.update({
