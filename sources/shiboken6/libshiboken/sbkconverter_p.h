@@ -221,7 +221,7 @@ struct IntPrimitive : TwoPrimitive<INT>
     }
     static void toCpp(PyObject *pyIn, void *cppOut)
     {
-        double result = PyFloat_AS_DOUBLE(pyIn);
+        double result = PyFloat_AsDouble(pyIn);
         // If cast to long directly it could overflow silently.
         if (OverFlowChecker<INT>::check(result, pyIn))
             PyErr_SetObject(PyExc_OverflowError, nullptr);
