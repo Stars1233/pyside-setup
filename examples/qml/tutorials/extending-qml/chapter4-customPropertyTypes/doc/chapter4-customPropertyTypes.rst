@@ -30,7 +30,8 @@ int-type property to store an identifier for each chart:
     }
 
 Aside from ``int``, we could use various other property types. Many of the Qt
-data types such as ``QColor``, ``QSize`` and ``QRect`` are automatically
+data types such as :class:`~PySide6.QtGui.QColor`, :class:`~PySide6.QtCore.QSize`
+and :class:`~PySide6.QtCore.QRect` are automatically
 supported from QML.
 
 If we want to create a property whose type is not supported by QML by default,
@@ -45,8 +46,8 @@ we assign an ``PieSlice`` value which itself contains a ``color``:
     :lines: 4-22
 
 Like ``PieChart``, this new ``PieSlice`` type inherits from
-``QQuickPaintedItem``, is exposed via the ``QmlElement`` decorator and declares
-its properties with the ``Property`` decorator:
+``QQuickPaintedItem``, is exposed via :deco:`~PySide6.QtQml.QmlElement` and declares
+its properties with the :class:`~PySide6.QtCore.Property` decorator:
 
 .. literalinclude:: customPropertyTypes.py
     :lineno-start: 21
@@ -61,7 +62,7 @@ and associated method signatures:
 
 There is one thing to be aware of when implementing ``setPieSlice()``. The
 ``PieSlice`` is a visual item, so it must be set as a child of the ``PieChart``
-using ``QQuickItem.setParentItem()`` so that the ``PieChart`` knows to paint
+using :meth:`~PySide6.QtQuick.QQuickItem.setParentItem` so that the ``PieChart`` knows to paint
 this child item when its contents are drawn.
 
 As with ``PieChart``, we add the ``Charts`` type namespace, version 1.0:

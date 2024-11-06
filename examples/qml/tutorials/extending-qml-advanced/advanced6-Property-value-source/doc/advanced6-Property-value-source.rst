@@ -14,7 +14,7 @@ the song over time.
     :lines: 13-49
 
 The class ``HappyBirthdaySong`` is added as a value source. It must inherit
-from ``QQmlPropertyValueSource`` and implement its interface. The
+from :class:`~PySide6.QtQml.QQmlPropertyValueSource` and implement its interface. The
 ``setTarget()`` function is used to define which property this source acts
 upon. In this case, the value source writes to the ``announcement`` property of
 the ``BirthdayParty`` to display the lyrics over time. It has an internal timer

@@ -23,7 +23,7 @@ To do this, the ``Boy`` and ``Girl`` classes are introduced, both inheriting fro
 
 The ``Person`` class remains unaltered and the ``Boy`` and ``Girl`` classes are
 trivial extensions of it. The types and their QML name are registered with the
-QML engine with ``@QmlElement``.
+QML engine with :deco:`~PySide6.QtQml.QmlElement`.
 
 Notice that the ``host`` and ``guests`` properties in ``BirthdayParty`` still
 take instances of ``Person``.
@@ -47,8 +47,9 @@ explicit ``Boy`` or ``Girl`` should be instantiated instead.
 
 While we want to disallow instantiating ``Person`` from within QML, it still
 needs to be registered with the QML engine so that it can be used as a property
-type and other types can be coerced to it. This is what the ``@QmlUncreatable``
-macro does. As all three types, ``Person``, ``Boy`` and ``Girl``, have been
+type and other types can be coerced to it. This is what
+:deco:`~PySide6.QtQml.QmlUncreatable` does.
+As all three types, ``Person``, ``Boy`` and ``Girl``, have been
 registered with the QML system, on assignment, QML automatically (and
 type-safely) converts the ``Boy`` and ``Girl`` objects into a ``Person``.
 

@@ -19,7 +19,7 @@ to our C++ class:
     :lineno-start: 54
     :lines: 54-58
 
-The use of the ``Slot`` decorator makes the ``clearChart()`` method available
+The use of :deco:`~PySide6.QtCore.Slot` makes the ``clearChart()`` method available
 to the Qt Meta-Object system, and in turn, to QML. The method simply changes
 the color to ``Qt::transparent``, repaints the chart, then emits the
 ``chartCleared()`` signal:

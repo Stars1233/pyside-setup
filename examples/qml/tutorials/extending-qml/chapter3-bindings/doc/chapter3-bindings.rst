@@ -22,8 +22,8 @@ clicked, the ``onClicked`` handler in the ``MouseArea`` changes the color of
 ``chartA`` , thereby changing both charts to the color blue.
 
 It's easy to enable property binding for the ``color`` property. We add a
-``notify`` parameter to its ``Property`` decorator to indicate that a
-``colorChanged`` signal is emitted whenever the value changes.
+``notify`` parameter to its :class:`~PySide6.QtCore.Property` decorator to
+indicate that a ``colorChanged`` signal is emitted whenever the value changes.
 
 .. literalinclude:: bindings.py
     :lineno-start: 39
