@@ -716,7 +716,7 @@ Shiboken::AutoDecRef seq(PySequence_Fast(%PYARG_1, "Can't turn into sequence"));
 if (PySequence_Size(seq) == 16) {
     float values[16];
     for (Py_ssize_t i = 0; i < 16; ++i) {
-        PyObject *pv = PySequence_Fast_GET_ITEM(seq.object(), i);
+        Shiboken::AutoDecRef pv(PySequence_GetItem(seq.object(), i));
         values[i] = PyFloat_AsDouble(pv);
     }
 
@@ -741,8 +741,8 @@ for (Py_ssize_t i = 0; i < 16; ++i) {
 if (PySequence_Check(_key)) {
     Shiboken::AutoDecRef key(PySequence_Fast(_key, "Invalid matrix index."));
     if (PySequence_Fast_GET_SIZE(key.object()) == 2) {
-        PyObject *posx = PySequence_Fast_GET_ITEM(key.object(), 0);
-        PyObject *posy = PySequence_Fast_GET_ITEM(key.object(), 1);
+        Shiboken::AutoDecRef posx(PySequence_GetItem(key.object(), 0));
+        Shiboken::AutoDecRef posy(PySequence_GetItem(key.object(), 1));
         Py_ssize_t x = PyLong_AsSsize_t(posx);
         Py_ssize_t y = PyLong_AsSsize_t(posy);
         float ret = (*%CPPSELF)(x,y);

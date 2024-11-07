@@ -20,7 +20,9 @@
         Shiboken::AutoDecRef strList(PySequence_Fast(%PYARG_1, "Invalid sequence."));
         Py_ssize_t lineCount = PySequence_Fast_GET_SIZE(strList.object());
         for (Py_ssize_t line = 0; line &lt; lineCount; ++line) {
-            if (!Shiboken::String::check(PySequence_Fast_GET_ITEM(strList.object(), line))) {
+            Shiboken::AutoDecRef _obj(PySequence_GetItem(strList.object(), line));
+            bool isString = Shiboken::String::check(_obj);
+            if (!isString) {
                 PyErr_SetString(PyExc_TypeError, "The argument must be a sequence of strings.");
                 break;
             }
@@ -30,8 +32,10 @@
             break;
 
         auto xpm = new const char*[lineCount];
-        for (Py_ssize_t line = 0; line &lt; lineCount; ++line)
-            xpm[line] = Shiboken::String::toCString(PySequence_Fast_GET_ITEM(strList.object(), line));
+        for (Py_ssize_t line = 0; line &lt; lineCount; ++line) {
+            Shiboken::AutoDecRef _obj(PySequence_GetItem(strList.object(), line));
+            xpm[line] = Shiboken::String::toCString(_obj);
+        }
 
         %0 = new %TYPE(xpm);
 
@@ -101,19 +105,23 @@
               const Py_ssize_t size = PySequence_Fast_GET_SIZE(seq.object());
 
               if (size > 1) {
-                  if (%ISCONVERTIBLE[QString](PySequence_Fast_GET_ITEM(seq.object(), 1)))
-                      %1 = %CONVERTTOCPP[QString](PySequence_Fast_GET_ITEM(seq.object(), 1));
+                  Shiboken::AutoDecRef _obj1(PySequence_GetItem(seq.object(), 1));
+                  if (%ISCONVERTIBLE[QString](_obj1))
+                      %1 = %CONVERTTOCPP[QString](_obj1);
                   else
                       qWarning("%TYPE::%FUNCTION_NAME: Second tuple element is not convertible to unicode.");
               }
 
               if (size > 2) {
-                  if (%ISCONVERTIBLE[int](PySequence_Fast_GET_ITEM(seq.object(), 2)))
-                      %2 = %CONVERTTOCPP[int](PySequence_Fast_GET_ITEM(seq.object(), 2));
+                  Shiboken::AutoDecRef _obj2(PySequence_GetItem(seq.object(), 2));
+                  if (%ISCONVERTIBLE[int](_obj2))
+                      %2 = %CONVERTTOCPP[int](_obj2);
                   else
                       qWarning("%TYPE::%FUNCTION_NAME: Second tuple element is not convertible to int.");
               }
-              %PYARG_0.reset(PySequence_Fast_GET_ITEM(seq.object(), 0));
+              Shiboken::AutoDecRef _sobj(PySequence_GetItem(seq.object(), 0));
+
+              %PYARG_0.reset(_sobj);
               Py_INCREF(%PYARG_0); // we need to incref, because "%PYARG_0 = ..." will decref the tuple and the tuple will be decrefed again at the end of this scope.
           }
 
@@ -210,7 +218,7 @@
                 "Failed to parse sequence on %TYPE constructor."));
             float values[%SIZE];
             for(int i=0; i &lt; %SIZE; i++) {
-                PyObject *pv = PySequence_Fast_GET_ITEM(fast.object(), i);
+                Shiboken::AutoDecRef pv(PySequence_GetItem(fast.object(), i));
                 values[i] = %CONVERTTOCPP[float](pv);
             }
             %0 = new %TYPE(values);

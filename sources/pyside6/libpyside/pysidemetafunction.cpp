@@ -156,12 +156,13 @@ bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
             methArgs[i] = methValues[i].data();
             if (i == 0) // Don't do this for return type
                 continue;
+            Shiboken::AutoDecRef obj(PySequence_GetItem(sequence.object(), i - 1));
             if (metaType.id() == QMetaType::QString) {
                 QString tmp;
-                converter.toCpp(PySequence_Fast_GET_ITEM(sequence.object(), i - 1), &tmp);
+                converter.toCpp(obj, &tmp);
                 methValues[i] = tmp;
             } else {
-                converter.toCpp(PySequence_Fast_GET_ITEM(sequence.object(), i - 1), methArgs[i]);
+                converter.toCpp(obj, methArgs[i]);
             }
         } else {
             PyErr_Format(PyExc_TypeError, "Unknown type used to call meta function (that may be a signal): %s", argTypes[i].constData());

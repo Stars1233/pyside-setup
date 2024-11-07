@@ -19,7 +19,8 @@
         const Py_ssize_t numItems = PySequence_Size(%PYARG_1);
         Shiboken::AutoArrayPointer&lt;QGraphicsItem*&gt; %out(numItems);
         for (Py_ssize_t i = 0; i &lt; numItems; ++i) {
-            %out[i] = %CONVERTTOCPP[QGraphicsItem*](PySequence_Fast_GET_ITEM(%PYARG_1, i));
+            Shiboken::AutoDecRef _arg1(PySequence_GetItem(%PYARG_1, i));
+            %out[i] = %CONVERTTOCPP[QGraphicsItem*](_arg1);
         }
     </template>
 
@@ -44,7 +45,8 @@
         const Py_ssize_t numOptions = PySequence_Size(%PYARG_2);
         Shiboken::AutoArrayPointer&lt;QStyleOptionGraphicsItem&gt; %out(numOptions);
         for (Py_ssize_t i=0; i &lt; numOptions; ++i) {
-            %out[i] = %CONVERTTOCPP[QStyleOptionGraphicsItem](PySequence_Fast_GET_ITEM(%PYARG_1, i));
+            Shiboken::AutoDecRef _arg1(PySequence_GetItem(%PYARG_1, i));
+            %out[i] = %CONVERTTOCPP[QStyleOptionGraphicsItem](_arg1);
         }
     </template>
 

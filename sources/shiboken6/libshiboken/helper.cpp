@@ -148,10 +148,9 @@ static void formatPySequence(PyObject *obj, std::ostream &str)
         if (i)
             str << ", ";
         str << '(';
-        PyObject *item = PySequence_GetItem(obj, i);
+        Shiboken::AutoDecRef item(PySequence_GetItem(obj, i));
         formatPyObject(item, str);
         str << ')';
-        Py_XDECREF(item);
     }
     if (printSize < size)
         str << ",...";
@@ -529,7 +528,7 @@ int *sequenceToIntArray(PyObject *obj, bool zeroTerminated)
     int *array = new int[size + (zeroTerminated ? 1 : 0)];
 
     for (int i = 0; i < size; i++) {
-        PyObject *item = PySequence_Fast_GET_ITEM(seq.object(), i);
+        Shiboken::AutoDecRef item(PySequence_GetItem(seq.object(), i));
         if (!PyLong_Check(item)) {
             PyErr_SetString(PyExc_TypeError, "Sequence of ints expected");
             delete[] array;

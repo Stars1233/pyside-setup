@@ -12,7 +12,7 @@
               Shiboken::AutoDecRef fast(PySequence_Fast(%PYARG_2,
                 "Failed to parse sequence with type %VECTOR_TYPE."));
               for(Py_ssize_t i=0; i &lt; _size; i++) {
-                  PyObject* pv = PySequence_Fast_GET_ITEM(fast.object(), i);
+                  Shiboken::AutoDecRef pv(PySequence_GetItem(fast.object(), i));
                   _list[i] = %CONVERTTOCPP[$ATTR_TYPE](pv);
               }
             }

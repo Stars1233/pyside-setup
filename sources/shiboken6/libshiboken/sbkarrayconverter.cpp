@@ -22,9 +22,8 @@ static bool sequenceAllOf(PyObject *pyIn, Predicate p)
 {
     const Py_ssize_t size = PySequence_Size(pyIn);
     for (Py_ssize_t i = 0; i < size; ++i) {
-        PyObject *item = PySequence_GetItem(pyIn, i);
+        AutoDecRef item(PySequence_GetItem(pyIn, i));
         const bool ok = p(item);
-        Py_XDECREF(item);
         if (!ok)
             return false;
     }
@@ -37,9 +36,8 @@ inline void convertPySequence(PyObject *pyIn, Converter c, T *out)
 {
     const Py_ssize_t size = PySequence_Size(pyIn);
     for (Py_ssize_t i = 0; i < size; ++i) {
-        PyObject *item = PySequence_GetItem(pyIn, i);
+        AutoDecRef item(PySequence_GetItem(pyIn, i));
         *out++ = c(item);
-        Py_XDECREF(item);
     }
 }
 

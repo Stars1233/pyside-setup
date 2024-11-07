@@ -176,8 +176,10 @@ const PredefinedTemplates &predefinedTemplates()
 
     // QPair/std::pair
     {u"shiboken_conversion_pysequence_to_cpppair"_s,
-     uR"(%out.first = %CONVERTTOCPP[%OUTTYPE_0](PySequence_Fast_GET_ITEM(%in, 0));
-%out.second = %CONVERTTOCPP[%OUTTYPE_1](PySequence_Fast_GET_ITEM(%in, 1));
+     uR"(Shiboken::AutoDecRef objfirst(PySequence_GetItem(%in, 0));
+Shiboken::AutoDecRef objsecond(PySequence_GetItem(%in, 1));
+%out.first = %CONVERTTOCPP[%OUTTYPE_0](objfirst);
+%out.second = %CONVERTTOCPP[%OUTTYPE_1](objsecond);
 )"_s},
 
     {u"shiboken_conversion_cpppair_to_pytuple"_s,
