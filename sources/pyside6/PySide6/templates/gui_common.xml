@@ -18,7 +18,7 @@
 
     <template name="load_xpm">
         Shiboken::AutoDecRef strList(PySequence_Fast(%PYARG_1, "Invalid sequence."));
-        Py_ssize_t lineCount = PySequence_Fast_GET_SIZE(strList.object());
+        Py_ssize_t lineCount = PySequence_Size(strList.object());
         for (Py_ssize_t line = 0; line &lt; lineCount; ++line) {
             Shiboken::AutoDecRef _obj(PySequence_GetItem(strList.object(), line));
             bool isString = Shiboken::String::check(_obj);
@@ -102,7 +102,7 @@
 
           if (PySequence_Check(%PYARG_0)) {
               Shiboken::AutoDecRef seq(PySequence_Fast(%PYARG_0, 0));
-              const Py_ssize_t size = PySequence_Fast_GET_SIZE(seq.object());
+              const Py_ssize_t size = PySequence_Size(seq.object());
 
               if (size > 1) {
                   Shiboken::AutoDecRef _obj1(PySequence_GetItem(seq.object(), 1));

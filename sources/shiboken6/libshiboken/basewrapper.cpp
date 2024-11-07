@@ -893,7 +893,7 @@ std::vector<SbkObject *> splitPyObject(PyObject *pyObj)
     if (PySequence_Check(pyObj)) {
         AutoDecRef lst(PySequence_Fast(pyObj, "Invalid keep reference object."));
         if (!lst.isNull()) {
-            for (Py_ssize_t i = 0, i_max = PySequence_Fast_GET_SIZE(lst.object()); i < i_max; ++i) {
+            for (Py_ssize_t i = 0, i_max = PySequence_Size(lst.object()); i < i_max; ++i) {
                 Shiboken::AutoDecRef item(PySequence_GetItem(lst.object(), i));
                 if (Object::checkType(item))
                     result.push_back(reinterpret_cast<SbkObject *>(item.object()));
@@ -1003,7 +1003,7 @@ introduceWrapperType(PyObject *enclosingObject,
                      PyObject *bases,
                      unsigned wrapperFlags)
 {
-    assert(PySequence_Fast_GET_SIZE(bases) > 0);
+    assert(PySequence_Size(bases) > 0);
     typeSpec->slots[0].pfunc = PySequence_GetItem(bases, 0);
 
     auto *type = SbkType_FromSpecBasesMeta(typeSpec, bases, SbkObjectType_TypeF());

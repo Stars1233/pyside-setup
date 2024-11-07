@@ -592,7 +592,7 @@ static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
         return PyErr_Format(PyExc_RuntimeError, "The SignalInstance object was already deleted");
 
     Shiboken::AutoDecRef pyArgs(PyList_New(0));
-    int numArgsGiven = PySequence_Fast_GET_SIZE(args);
+    Py_ssize_t numArgsGiven = PySequence_Size(args);
     int numArgsInSignature = argCountInSignature(source->d->signature);
 
     // If number of arguments given to emit is smaller than the first source signature expects,

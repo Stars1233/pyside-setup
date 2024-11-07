@@ -226,7 +226,7 @@
                 <add-conversion type="PySequence">
                 %OUTTYPE&amp; list = %out;
                 Shiboken::AutoDecRef seq(PySequence_Fast(%in, 0));
-                for (int i = 0; i &lt; PySequence_Size(seq.object()); i++) {
+                for (Py_ssize_t i = 0; i &lt; PySequence_Size(seq.object()); i++) {
                     Shiboken::AutoDecRef pyItem(PySequence_GetItem(seq.object(), i));
                     PStr cppItem = %CONVERTTOCPP[PStr](pyItem);
                     list.push_back(cppItem);
@@ -1392,7 +1392,7 @@
             Shiboken::AutoDecRef _obj2(PySequence_GetItem(_obj, 2));
             Shiboken::AutoDecRef _obj3(PySequence_GetItem(_obj, 3));
             if (!PySequence_Check(_obj)
-                || PySequence_Fast_GET_SIZE(_obj) != 4
+                || PySequence_Size(_obj) != 4
                 || !PyNumber_Check(_obj0)
                 || !PyNumber_Check(_obj1)
                 || !PyNumber_Check(_obj2)
@@ -1583,13 +1583,13 @@
             <modify-argument index="1">
                 <remove-argument/>
                 <conversion-rule class="native">
-                  const auto %out = PySequence_Size(%PYARG_1);
+                  const Py_ssize_t %out = PySequence_Size(%PYARG_1);
                 </conversion-rule>
             </modify-argument>
             <modify-argument index="2">
                 <replace-type modified-type="PySequence"/>
                 <conversion-rule class="native">
-                const auto numItems = PySequence_Size(%PYARG_1);
+                const Py_ssize_t numItems = PySequence_Size(%PYARG_1);
                 Shiboken::AutoArrayPointer&lt;int&gt; %out(numItems);
                 for (Py_ssize_t i = 0; i &lt; numItems; ++i) {
                     Shiboken::AutoDecRef _obj(PySequence_GetItem(%PYARG_1, i));
@@ -1617,7 +1617,7 @@
                 <replace-type modified-type="PySequence"/>
             </modify-argument>
             <inject-code class="target" position="beginning">
-            int numItems = PySequence_Size(%PYARG_1);
+            Py_ssize_t numItems = PySequence_Size(%PYARG_1);
             int *cppItems = new int[numItems];
             for (int i = 0; i &lt; numItems; i++) {
                 Shiboken::AutoDecRef _obj(PySequence_GetItem(%PYARG_1, i));
@@ -1960,7 +1960,7 @@
                 <conversion-rule class="native">
                 {
                     Shiboken::AutoDecRef strList(PySequence_Fast(%PYARG_1, "The argument must be a sequence."));
-                    int lineCount = PySequence_Fast_GET_SIZE(strList.object());
+                    const Py_ssize_t lineCount = PySequence_Size(strList.object());
                     for (int line = 0; line &lt; lineCount; ++line) {
                         Shiboken::AutoDecRef _obj(PySequence_GetItem(strList.object(), line));
                         bool isString = Shiboken::String::check(_obj);

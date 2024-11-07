@@ -740,7 +740,7 @@ for (Py_ssize_t i = 0; i < 16; ++i) {
 // @snippet qmatrix4x4-mgetitem
 if (PySequence_Check(_key)) {
     Shiboken::AutoDecRef key(PySequence_Fast(_key, "Invalid matrix index."));
-    if (PySequence_Fast_GET_SIZE(key.object()) == 2) {
+    if (PySequence_Size(key.object()) == 2) {
         Shiboken::AutoDecRef posx(PySequence_GetItem(key.object(), 0));
         Shiboken::AutoDecRef posy(PySequence_GetItem(key.object(), 1));
         Py_ssize_t x = PyLong_AsSsize_t(posx);

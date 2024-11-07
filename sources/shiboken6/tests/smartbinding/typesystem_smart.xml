@@ -11,7 +11,7 @@
     </template>
     <template name="pyseq_to_cpplist_convertion">
         Shiboken::AutoDecRef seq(PySequence_Fast(%in, 0));
-        for (int i = 0, size = PySequence_Fast_GET_SIZE(seq.object()); i &lt; size; ++i) {
+        for (Py_ssize_t i = 0, size = PySequence_Size(seq.object()); i &lt; size; ++i) {
             Shiboken::AutoDecRef pyItem(PySequence_GetItem(seq.object(), i));
             %OUTTYPE_0 cppItem = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
             %out.push_back(cppItem);

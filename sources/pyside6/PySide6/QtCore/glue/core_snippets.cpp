@@ -103,7 +103,7 @@ bool QVariant_isStringList(PyObject *list)
     }
 
     Shiboken::AutoDecRef fast(PySequence_Fast(list, "Failed to convert QVariantList"));
-    const Py_ssize_t size = PySequence_Fast_GET_SIZE(fast.object());
+    const Py_ssize_t size = PySequence_Size(fast.object());
     for (Py_ssize_t i = 0; i < size; ++i) {
         Shiboken::AutoDecRef item(PySequence_GetItem(fast.object(), i));
         if (PyUnicode_Check(item) == 0)

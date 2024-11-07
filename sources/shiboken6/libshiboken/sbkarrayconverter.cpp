@@ -79,7 +79,7 @@ static void sequenceToCppShortArray(PyObject *pyIn, void *cppOut)
 static inline bool sequenceSizeCheck(PyObject *pyIn, int expectedSize = -1)
 {
     if (expectedSize >= 0) {
-        const int size = int(PySequence_Size(pyIn));
+        const Py_ssize_t size = PySequence_Size(pyIn);
         if (size < expectedSize) {
             warning(PyExc_RuntimeWarning, 0, "A sequence of size %d was passed to a function that expects %d.",
                    size, expectedSize);

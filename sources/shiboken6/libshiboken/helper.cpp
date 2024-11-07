@@ -481,8 +481,8 @@ bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, const char *defa
 
     // Check all items
     Shiboken::AutoDecRef args(PySequence_Fast(argList, nullptr));
-    int numArgs = int(PySequence_Fast_GET_SIZE(argList));
-    for (int i = 0; i < numArgs; ++i) {
+    Py_ssize_t numArgs = PySequence_Size(argList);
+    for (Py_ssize_t i = 0; i < numArgs; ++i) {
         PyObject *item = PyList_GET_ITEM(args.object(), i);
         if (!PyBytes_Check(item) && !PyUnicode_Check(item))
             return false;
@@ -524,7 +524,7 @@ int *sequenceToIntArray(PyObject *obj, bool zeroTerminated)
     if (seq.isNull())
         return nullptr;
 
-    Py_ssize_t size = PySequence_Fast_GET_SIZE(seq.object());
+    Py_ssize_t size = PySequence_Size(seq.object());
     int *array = new int[size + (zeroTerminated ? 1 : 0)];
 
     for (int i = 0; i < size; i++) {

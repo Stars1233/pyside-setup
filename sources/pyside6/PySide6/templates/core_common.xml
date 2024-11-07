@@ -160,7 +160,7 @@
         Shiboken::AutoDecRef _obj2(PySequence_GetItem(_obj, 2));
         Shiboken::AutoDecRef _obj3(PySequence_GetItem(_obj, 3));
         if (!PySequence_Check(_obj)
-            || PySequence_Fast_GET_SIZE(_obj) != 4
+            || PySequence_Size(_obj) != 4
             || !PyNumber_Check(_obj0)
             || !PyNumber_Check(_obj1)
             || !PyNumber_Check(_obj2)

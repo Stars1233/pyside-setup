@@ -107,7 +107,7 @@ bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
 
     // args given plus return type
     Shiboken::AutoDecRef sequence(PySequence_Fast(args, nullptr));
-    qsizetype numArgs = PySequence_Fast_GET_SIZE(sequence.object()) + 1;
+    qsizetype numArgs = PySequence_Size(sequence.object()) + 1;
 
     if (numArgs - 1 > argTypes.size()) {
         PyErr_Format(PyExc_TypeError, "%s only accepts %d argument(s), %d given!",
