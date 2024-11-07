@@ -229,6 +229,9 @@ def wheel_files_pyside_addons() -> list[ModuleData]:
         module_QtLocation(),
         module_QtAsyncio(),
         module_QtWebView(),
+        # This is not an actual module, but it's required in order
+        # to add the 'Quick' components of the WebView.
+        module_QtWebViewQuick(),
     ]
     return files
 
@@ -1075,4 +1078,9 @@ def module_QtWebView() -> ModuleData:
     data = ModuleData("WebView")
     json_data = get_module_json_data("WebView")
     data.plugins = get_module_plugins(json_data)
+    return data
+
+
+def module_QtWebViewQuick() -> ModuleData:
+    data = ModuleData("WebViewQuick")
     return data
