@@ -44,9 +44,9 @@ development process using *Qt Creator*:
    This should create a ``main.py`` and ```main.pyproject`` files
    for the project.
 
-#. Download :download:`Main.qml<Main/Main.qml>`, :download:`qmldir<Main/qmldir>`
-   and :download:`logo.png <Main/logo.png>` and place them in a subdirectory
-   named `Main` in your project folder. This creates a basic QML module.
+#. Download :download:`Main.qml<App/Main.qml>`, :download:`qmldir<App/qmldir>`
+   and :download:`logo.png <App/logo.png>` and place them in a subdirectory
+   named `App` in your project folder. This creates a basic QML module.
 
 #. Double-click on ``main.pyproject`` to open it in edit mode, and append
    ``view.qml`` and ``logo.png`` to the **files** list. This is how your
@@ -55,7 +55,7 @@ development process using *Qt Creator*:
    .. code::
 
     {
-        "files": ["main.py", "Main/Main.qml", "Main/logo.png", "Main/qmldir"]
+        "files": ["main.py", "App/Main.qml", "App/logo.png", "App/qmldir"]
     }
 
 #. Now that you have the necessary bits for the application, import the

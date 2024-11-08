@@ -42,12 +42,12 @@ that reads "Hello World". The code :code:`anchors.centerIn: main` makes
 the text appear centered within the object with :code:`id: main`,
 which is the Rectangle in this case.
 
-Put the file into into a directory named :code:`Main` along
+Put the file into into a directory named :code:`App` along
 with a file named :code:`qmldir` to describe a basic QML module:
 
 .. code-block:: text
 
-    module Main
+    module App
     Main 254.0 Main.qml
 
 Now, let's see how the code looks on the PySide6.
@@ -63,7 +63,7 @@ Let's call it :code:`main.py`:
         app = QGuiApplication()
         view = QQuickView()
         view.engine().addImportPath(sys.path[0])
-        view.loadFromModule("Main", "Main")
+        view.loadFromModule("App", "Main")
         view.show()
         ex = app.exec()
         del view

@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     engine = QQmlApplicationEngine()
     engine.addImportPath(sys.path[0])
-    engine.loadFromModule("Main", "Main")
+    engine.loadFromModule("App", "Main")
 
     if not engine.rootObjects():
         sys.exit(-1)

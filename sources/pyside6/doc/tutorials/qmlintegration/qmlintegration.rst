@@ -63,7 +63,7 @@ application and PySide6 integration:
    This :code:`id` will help you to get a reference to the element
    that was registered from Python.
 
-   .. literalinclude:: Main/Main.qml
+   .. literalinclude:: QmlIntegration/Main.qml
       :linenos:
       :lines: 45-55
       :emphasize-lines: 6-8
@@ -77,12 +77,12 @@ application and PySide6 integration:
    will return *False*, that is how we make sure only one is being
    applied to the text.
 
-#. Put the file into into a directory named :code:`Main` along
+#. Put the file into into a directory named :code:`QmlIntegration` along
    with a file named :code:`qmldir` to describe a basic QML module:
 
    .. code-block:: text
 
-       module Main
+       module QmlIntegration
        Main 254.0 Main.qml
 
 #. Each slot verifies if the selected option contains the text associated
@@ -133,6 +133,6 @@ application and PySide6 integration:
 
    .. image:: textproperties_material.png
 
-You can download :download:`Main.qml <Main/Main.qml>`,
-:download:`qmldir <Main/qmldir>` and :download:`main.py <main.py>`
+You can download :download:`Main.qml <QmlIntegration/Main.qml>`,
+:download:`qmldir <QmlIntegration/qmldir>` and :download:`main.py <main.py>`
 to try this example.

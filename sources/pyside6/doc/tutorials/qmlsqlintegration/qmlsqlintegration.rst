@@ -64,7 +64,7 @@ Main.qml
 
 Let's look at the ``Main.qml`` file.
 
-.. literalinclude:: Main/Main.qml
+.. literalinclude:: App/Main.qml
    :linenos:
    :lines: 4-6
 
@@ -77,9 +77,9 @@ Next, import the Qt Quick Controls module.
 Among other things, this provides access to ``ApplicationWindow``, which replaces the existing
 root type, Window:
 
-Let's step through the ``Main/Main.qml`` file.
+Let's step through the ``App/Main.qml`` file.
 
-.. literalinclude:: Main/Main.qml
+.. literalinclude:: App/Main.qml
    :linenos:
    :lines: 9-14
 
@@ -94,7 +94,7 @@ Once we've set these, we have a properly sized, empty window ready to be filled 
 Because we are exposing the :code:`SqlConversationModel` class to QML, we will
 declare a component to access it:
 
-.. literalinclude:: Main/Main.qml
+.. literalinclude:: App/Main.qml
    :linenos:
    :lines: 16-18
 
@@ -106,11 +106,11 @@ There are two ways of laying out items in QML: `Item Positioners`_ and `Qt Quick
   resizable user interfaces.
   Below, we use `ColumnLayout`_ to vertically lay out a `ListView`_ and a `Pane`_.
 
-  .. literalinclude:: Main/Main.qml
+  .. literalinclude:: App/Main.qml
      :linenos:
      :lines: 20-23
 
-  .. literalinclude:: Main/Main.qml
+  .. literalinclude:: App/Main.qml
      :linenos:
      :lines: 72-74
 
@@ -141,7 +141,7 @@ remaining space that is left after accommodating the Pane.
 
 Let's look at the ``Listview`` in detail:
 
-.. literalinclude:: Main/Main.qml
+.. literalinclude:: App/Main.qml
    :linenos:
    :lines: 23-70
 
@@ -170,7 +170,7 @@ At the bottom of the screen, we place a `TextArea`_ item to allow multi-line tex
 button to send the message.
 We use Pane to cover the area under these two items:
 
-.. literalinclude:: Main/Main.qml
+.. literalinclude:: App/Main.qml
    :linenos:
    :lines: 72-96
 
@@ -187,10 +187,10 @@ recipient and one possible sender for this conversation we're just using strings
 .. _displayMarginEnd: https://doc.qt.io/qt-5/qml-qtquick-listview.html#displayMarginEnd-prop
 .. _TextArea: https://doc.qt.io/qt-5/qml-qtquick-controls2-textarea.html
 
-``Main.qml`` needs to be put into a directory named :code:`Main` along
+``Main.qml`` needs to be put into a directory named :code:`App` along
 with a file named ``qmldir`` to describe a basic QML module:
 
-.. literalinclude:: Main/qmldir
+.. literalinclude:: App/qmldir
 
 main.py
 -------

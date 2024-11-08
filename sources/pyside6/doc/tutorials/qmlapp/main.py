@@ -35,7 +35,7 @@ if __name__ == '__main__':
     # Load the QML file
     # Add the current directory to the import paths and load the main module.
     view.engine().addImportPath(sys.path[0])
-    view.loadFromModule("Main", "Main")
+    view.loadFromModule("App", "Main")
 
     # Show the window
     if view.status() == QQuickView.Error:

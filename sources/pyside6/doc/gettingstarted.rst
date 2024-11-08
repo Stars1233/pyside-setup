@@ -236,12 +236,12 @@ To do the same using Qt Quick:
     }
 
   Put the this into a file named :code:`Main.qml` into a directory named
-  :code:`Main` along with a file named :code:`qmldir` to describe a basic
+  :code:`Example` along with a file named :code:`qmldir` to describe a basic
   QML module:
 
   .. code-block:: text
 
-    module Main
+    module Example
     Main 254.0 Main.qml
 
 * **Application execution**
@@ -257,7 +257,7 @@ To do the same using Qt Quick:
         app = QGuiApplication(sys.argv)
         engine = QQmlApplicationEngine()
         engine.addImportPath(sys.path[0])
-        engine.loadFromModule("Main", "Main")
+        engine.loadFromModule("Example", "Main")
         if not engine.rootObjects():
             sys.exit(-1)
         exit_code = app.exec()

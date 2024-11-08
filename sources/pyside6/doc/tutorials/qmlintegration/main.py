@@ -54,7 +54,7 @@ if __name__ == '__main__':
     engine = QQmlApplicationEngine()
     # Add the current directory to the import paths and load the main module.
     engine.addImportPath(sys.path[0])
-    engine.loadFromModule("Main", "Main")
+    engine.loadFromModule("QmlIntegration", "Main")
 
     if not engine.rootObjects():
         sys.exit(-1)
