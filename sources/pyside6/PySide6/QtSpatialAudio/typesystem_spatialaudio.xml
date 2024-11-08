@@ -11,7 +11,7 @@
     <load-typesystem name="QtMultimedia/typesystem_multimedia.xml" generate="no"/>
 
     <object-type name="QAmbientSound">
-        <enum-type name="Loops"/>
+        <enum-type name="Loops" python-type="IntEnum"/>
     </object-type>
 
     <object-type name="QAudioEngine">
@@ -26,7 +26,7 @@
     </object-type>
 
     <object-type name="QSpatialSound">
-        <enum-type name="Loops"/>
+        <enum-type name="Loops" python-type="IntEnum"/>
         <enum-type name="DistanceModel"/>
     </object-type>
 </typesystem>
