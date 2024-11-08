@@ -531,7 +531,7 @@ private:
     static bool shouldGenerateGetSetList(const AbstractMetaClassCPtr &metaClass);
 
     static bool hasHashFunction(const AbstractMetaClassCPtr &c);
-    static void writeHashFunction(TextStream &s, const GeneratorContext &context);
+    static void writeHashFunction(TextStream &s, TextStream &t, const GeneratorContext &context);
 
     /// Write default implementations for sequence protocol
     void writeDefaultSequenceMethods(TextStream &s, const GeneratorContext &context) const;

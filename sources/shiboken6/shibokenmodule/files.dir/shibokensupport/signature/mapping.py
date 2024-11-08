@@ -29,6 +29,12 @@ class ellipsis(object):
         return "..."
 
 
+if not hasattr(typing, "Self"):
+    @typing._SpecialForm
+    def Self(self, parameters):
+        raise TypeError(f"{self} is not subscriptable")
+    typing.Self = Self
+
 ellipsis = ellipsis()
 Point = typing.Tuple[int, int]
 Variant = typing.Any

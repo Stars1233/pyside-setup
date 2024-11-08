@@ -267,10 +267,11 @@ class ExactEnumerator(object):
             decorator = f"builtins.{decorator}"
         signature = self.get_signature(func, decorator)
         # PYSIDE-2846: Special cases of signatures which inherit from object.
+        _self = inspect.Parameter("self", inspect._POSITIONAL_OR_KEYWORD)
         if func_name == "__dir__":
-            signature = inspect.Signature([], return_annotation=typing.Iterable[str])
+            signature = inspect.Signature([_self], return_annotation=typing.Iterable[str])
         elif func_name == "__repr__":
-            signature = inspect.Signature([], return_annotation=str)
+            signature = inspect.Signature([_self], return_annotation=str)
         if signature is not None:
             aug_ass = func in self.mypy_aug_ass_errors
             with self.fmt.function(func_name, signature, decorator, aug_ass) as key:

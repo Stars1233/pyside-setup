@@ -884,7 +884,7 @@ void CppGenerator::generateClass(TextStream &s,
     s << closeExternC;
 
     if (hasHashFunction(metaClass))
-        writeHashFunction(s, classContext);
+        writeHashFunction(s, signatureStream, classContext);
 
     // Write tp_traverse and tp_clear functions.
     writeTpTraverseFunction(s, metaClass);
@@ -4681,7 +4681,7 @@ void CppGenerator::writeSequenceMethods(TextStream &s,
         const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : &func->arguments().constLast();
         writeCodeSnips(s, snips,TypeSystem::CodeSnipPositionAny,
                        TypeSystem::TargetLangCode, func, false /* uses PyArgs */, lastArg);
-        s<< outdent << "}\n\n";
+        s << outdent << "}\n\n";
     }
 
     if (!injectedCode)
@@ -4853,7 +4853,7 @@ QString CppGenerator::writeCopyFunction(TextStream &s,
     const QString className = chopType(cpythonTypeName(metaClass));
     const QString funcName = className + u"__copy__"_s;
 
-    signatureStream << fullPythonClassName(metaClass) << ".__copy__()\n";
+    signatureStream << fullPythonClassName(metaClass) << ".__copy__(self)->typing.Self\n";
     definitionStream << PyMethodDefEntry{u"__copy__"_s, funcName, {"METH_NOARGS"_ba}, {}}
                      << ",\n";
 
@@ -6861,9 +6861,10 @@ void CppGenerator::writeReturnValueHeuristics(TextStream &s, const AbstractMetaF
     }
 }
 
-void CppGenerator::writeHashFunction(TextStream &s, const GeneratorContext &context)
+void CppGenerator::writeHashFunction(TextStream &s, TextStream &t, const GeneratorContext &context)
 {
     const auto metaClass = context.metaClass();
+    t << fullPythonClassName(metaClass) << ".__hash__(self)->int\n";
     const char hashType[] = "Py_hash_t";
     s << "static " << hashType << ' ' << cpythonBaseName(metaClass)
         << "_HashFunc(PyObject *self)\n{\n" << indent;

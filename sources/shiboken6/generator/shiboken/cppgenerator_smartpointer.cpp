@@ -204,7 +204,7 @@ void CppGenerator::generateSmartPointerClass(TextStream &s,
     s << closeExternC;
 
     if (hasHashFunction(metaClass))
-        writeHashFunction(s, classContext);
+        writeHashFunction(s, signatureStream, classContext);
 
     // Write tp_traverse and tp_clear functions.
     writeTpTraverseFunction(s, metaClass);
