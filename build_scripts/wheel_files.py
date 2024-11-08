@@ -1073,4 +1073,6 @@ def module_QtExampleIcons() -> ModuleData:
 
 def module_QtWebView() -> ModuleData:
     data = ModuleData("WebView")
+    json_data = get_module_json_data("WebView")
+    data.plugins = get_module_plugins(json_data)
     return data
