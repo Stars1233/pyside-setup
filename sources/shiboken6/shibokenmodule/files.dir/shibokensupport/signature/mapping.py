@@ -91,12 +91,7 @@ class _NotCalled(str):
         return eval(text, namespace)
 
 
-USE_PEP563 = False
-# Note: we cannot know if this feature has been imported.
-# Otherwise it would be "sys.version_info[:2] >= (3, 7)".
-# We *can* eventually inspect sys.modules and look if
-# the calling module has this future statement set,
-# but should we do that?
+USE_PEP563 = sys.version_info[:2] >= (3, 10)
 
 
 # Some types are abstract. They just show their name.
@@ -733,5 +728,40 @@ def init_testbinding():
         'Str("")': str(""),
     })
     return locals()
+
+
+# Functions which should return Optional(result) but don't.
+missing_optional_return = {
+    "PySide6.QtWidgets.QApplication.activeModalWidget",
+    "PySide6.QtWidgets.QApplication.activePopupWidget",
+    "PySide6.QtWidgets.QApplication.activeWindow",
+    "PySide6.QtWidgets.QApplication.focusWidget",
+    "PySide6.QtWidgets.QApplication.setStyle",
+    "PySide6.QtWidgets.QApplication.topLevelAt",
+    "PySide6.QtWidgets.QApplication.widgetAt",
+    "PySide6.QtWidgets.QComboBox.completer",
+    "PySide6.QtWidgets.QComboBox.lineEdit",
+    "PySide6.QtWidgets.QComboBox.validator",
+    "PySide6.QtWidgets.QGridLayout.itemAt",
+    "PySide6.QtWidgets.QGridLayout.itemAtPosition",
+    "PySide6.QtWidgets.QLayout.itemAt",
+    "PySide6.QtWidgets.QTableWidget.horizontalHeaderItem",
+    "PySide6.QtWidgets.QTableWidget.item",
+    "PySide6.QtWidgets.QTableWidget.itemAt",
+    "PySide6.QtWidgets.QTableWidget.mimeData",
+    "PySide6.QtWidgets.QWidget.childAt",
+    "PySide6.QtWidgets.QWidget.find",
+    "PySide6.QtWidgets.QWidget.focusProxy",
+    "PySide6.QtWidgets.QWidget.graphicsEffect",
+    "PySide6.QtWidgets.QWidget.graphicsProxyWidget",
+    "PySide6.QtWidgets.QWidget.keyboardGrabber",
+    "PySide6.QtWidgets.QWidget.layout",
+    "PySide6.QtWidgets.QWidget.mouseGrabber",
+    "PySide6.QtWidgets.QWidget.nativeParentWidget",
+    "PySide6.QtWidgets.QWidget.nextInFocusChain",
+    "PySide6.QtWidgets.QWidget.parentWidget",
+    "PySide6.QtWidgets.QWidget.previousInFocusChain",
+    "PySide6.QtWidgets.QWidget.window",
+}
 
 # end of file

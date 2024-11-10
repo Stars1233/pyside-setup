@@ -456,6 +456,7 @@ def calculate_props(line):
     funcname = parsed.funcname
     shortname = funcname[funcname.rindex(".") + 1:]
     props.name = shortname
+    props.fullname = funcname
     props.multi = parsed.multi
     fix_variables(props, line)
     return vars(props)

@@ -23,7 +23,7 @@ import typing
 
 from types import SimpleNamespace
 from textwrap import dedent
-from shibokensupport.signature.mapping import ellipsis
+from shibokensupport.signature.mapping import ellipsis, missing_optional_return
 
 
 class SignatureLayout(SimpleNamespace):
@@ -355,8 +355,11 @@ def create_signature(props, key):
         params.append(param)
         if kind == _VAR_POSITIONAL:
             kind = _KEYWORD_ONLY
+    ret_anno = annotations.get('return', _empty)
+    if ret_anno is not _empty and props["fullname"] in missing_optional_return:
+        ret_anno = typing.Optional[ret_anno]
     sig = inspect.Signature(params,
-                            return_annotation=annotations.get('return', _empty),
+                            return_annotation=ret_anno,
                             __validate_parameters__=False)
 
     # the special case of nameless parameters
