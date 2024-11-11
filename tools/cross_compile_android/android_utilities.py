@@ -153,26 +153,31 @@ def download_android_ndk(ndk_path: Path):
     if ndk_version_path.exists():
         print(f"NDK path found in {str(ndk_version_path)}")
     else:
-        ndk_path.mkdir(parents=True, exist_ok=True)
-        url = (f"https://dl.google.com/android/repository"
-               f"/android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.{ndk_extension}")
+        try:
+            ndk_path.mkdir(parents=True, exist_ok=True)
+            url = (f"https://dl.google.com/android/repository"
+                   f"/android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.{ndk_extension}")
 
-        print(f"Downloading Android Ndk version r{ANDROID_NDK_VERSION}")
-        _download(url=url, destination=ndk_zip_path)
+            print(f"Downloading Android Ndk version r{ANDROID_NDK_VERSION}")
+            _download(url=url, destination=ndk_zip_path)
 
-        print("Unpacking Android Ndk")
-        if sys.platform == "darwin":
-            extract_dmg(file=(ndk_path
-                              / f"android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.{ndk_extension}"
-                              ),
-                        destination=ndk_path)
-            ndk_version_path = (ndk_version_path
-                                / f"AndroidNDK{ANDROID_NDK_VERSION_NUMBER_SUFFIX}.app/Contents/NDK")
-        else:
-            extract_zip(file=(ndk_path
-                              / f"android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.{ndk_extension}"
-                              ),
-                        destination=ndk_path)
+            print("Unpacking Android Ndk")
+            if sys.platform == "darwin":
+                extract_dmg(file=(ndk_path
+                            / f"android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.{ndk_extension}"),
+                            destination=ndk_path)
+                ndk_version_path = (ndk_version_path
+                                    / (f"AndroidNDK{ANDROID_NDK_VERSION_NUMBER_SUFFIX}.app"
+                                       "/Contents/NDK"))
+            else:
+                extract_zip(file=(ndk_path
+                            / f"android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.{ndk_extension}"),
+                            destination=ndk_path)
+        except Exception as e:
+            print(f"Error occurred while downloading and unpacking Android NDK: {e}")
+            if ndk_path.exists():
+                shutil.rmtree(ndk_path)
+            sys.exit(1)
 
     return ndk_version_path
 
@@ -192,14 +197,20 @@ def download_android_commandlinetools(android_sdk_dir: Path):
     if cltools_path.exists():
         print(f"Command-line tools found in {str(cltools_path)}")
     else:
-        android_sdk_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            android_sdk_dir.mkdir(parents=True, exist_ok=True)
 
-        print("Download Android Command Line Tools: "
-              f"commandlinetools-{sys.platform}-{DEFAULT_SDK_TAG}_latest.zip")
-        _download(url=url, destination=cltools_zip_path)
+            print("Download Android Command Line Tools: "
+                  f"commandlinetools-{sys.platform}-{DEFAULT_SDK_TAG}_latest.zip")
+            _download(url=url, destination=cltools_zip_path)
 
-        print("Unpacking Android Command Line Tools")
-        extract_zip(file=cltools_zip_path, destination=android_sdk_dir)
+            print("Unpacking Android Command Line Tools")
+            extract_zip(file=cltools_zip_path, destination=android_sdk_dir)
+        except Exception as e:
+            print(f"Error occurred while downloading and unpacking Android Command Line Tools: {e}")
+            if android_sdk_dir.exists():
+                shutil.rmtree(android_sdk_dir)
+            sys.exit(1)
 
     return android_sdk_dir
 

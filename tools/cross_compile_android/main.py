@@ -185,19 +185,19 @@ if __name__ == "__main__":
                 if toolchain_path.is_file():
                     toolchain_path.unlink()
 
+    if not ndk_path:
+        # Download android ndk
+        ndk_path = download_android_ndk(pyside6_deploy_cache)
+
+    if not sdk_path:
+        # download and unzip command-line tools
+        sdk_path = download_android_commandlinetools(pyside6_deploy_cache)
+        # install and update required android packages
+        install_android_packages(android_sdk_dir=sdk_path, android_api=api_level,
+                                 dry_run=dry_run, accept_license=auto_accept_license,
+                                 skip_update=skip_update)
+
     if download_only:
-        if not ndk_path:
-            # Download android ndk
-            ndk_path = download_android_ndk(pyside6_deploy_cache)
-
-        if not sdk_path:
-            # download and unzip command-line tools
-            sdk_path = download_android_commandlinetools(pyside6_deploy_cache)
-            # install and update required android packages
-            install_android_packages(android_sdk_dir=sdk_path, android_api=api_level,
-                                     dry_run=dry_run, accept_license=auto_accept_license,
-                                     skip_update=skip_update)
-
         print(f"Android NDK and SDK downloaded successfully into {pyside6_deploy_cache}")
         sys.exit(0)
 
