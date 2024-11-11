@@ -10,6 +10,7 @@ from dataclasses import Field, dataclass, field
 
 _pyside_package_path = None
 _module_json_file_path = None
+_multimedia_libs = ["avcodec", "avformat", "avutil", "swresample", "swscale"]
 
 
 def set_pyside_package_path(p):
@@ -878,15 +879,12 @@ def module_QtMultimedia() -> ModuleData:
     data.translations.append("qtmultimedia_*")
     data.plugins = get_module_plugins(json_data)
 
+    linux_multimedia_libs = [f"Qt/lib/lib{lib}*.so*" for lib in _multimedia_libs]
+    linux_multimedia_libs.append("Qt/lib/libQt6FFmpegStub*.so*")
     platform_files = {
-        "win32": ["avcodec-*.dll", "avformat-*.dll", "avutil-*.dll", "swresample-*.dll",
-                  "swscale-*.dll"],
-        "darwin": [f"Qt/lib/{dependency_lib}" for dependency_lib in ["libavcodec.*.dylib",
-                                                                     "libavformat.*.dylib",
-                                                                     "libavutil.*.dylib",
-                                                                     "libswresample.*.dylib",
-                                                                     "libswscale.*.dylib"]]}
-
+        "win32": [f"{lib}-*.dll" for lib in _multimedia_libs],
+        "darwin": [f"Qt/lib/lib{lib}.*.dylib" for lib in _multimedia_libs],
+        "linux": linux_multimedia_libs}
     extra_files = platform_files.get(sys.platform, [])
     data.extra_files.extend(extra_files)
 

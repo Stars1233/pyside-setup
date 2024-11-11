@@ -13,7 +13,7 @@ from ..config import config
 from ..options import OPTION
 from ..utils import (copydir, copyfile, copy_qt_metatypes,
                      download_and_extract_7z, filter_match, makefile, in_coin)
-from .. import PYSIDE, SHIBOKEN, PYSIDE_WINDOWS_BIN_TOOLS
+from .. import PYSIDE, SHIBOKEN, PYSIDE_WINDOWS_BIN_TOOLS, PYSIDE_MULTIMEDIA_LIBS
 
 
 def prepare_packages_win32(pyside_build, _vars):
@@ -282,13 +282,7 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
         copy_qt_permanent_artifacts = False
 
     # <qt>/bin/*.dll and Qt *.exe -> <setup>/{st_package_name}
-    qt_multimedia_artifacts_permanent = [
-        "avcodec-*.dll",
-        "avformat-*.dll",
-        "avutil-*.dll",
-        "swresample-*.dll",
-        "swscale-*.dll"
-    ]
+    qt_multimedia_artifacts_permanent = [f"{lib}-*.dll" for lib in PYSIDE_MULTIMEDIA_LIBS]
 
     def qt_rhi_artifacts_permanent():
         result = ["opengl*.dll"]

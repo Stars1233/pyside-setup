@@ -39,3 +39,6 @@ PYSIDE_UNIX_LIBEXEC_TOOLS = ["uic",
 
 # all Qt tools are in 'bin' folder in Windows
 PYSIDE_WINDOWS_BIN_TOOLS = PYSIDE_UNIX_LIBEXEC_TOOLS + PYSIDE_LINUX_BIN_TOOLS
+
+PYSIDE_MULTIMEDIA_LIBS = ["avcodec", "avformat", "avutil",
+                          "swresample", "swscale"]

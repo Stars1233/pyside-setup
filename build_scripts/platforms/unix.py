@@ -12,7 +12,8 @@ from ..utils import copydir, copyfile, copy_qt_metatypes, makefile
 from .. import PYSIDE, SHIBOKEN
 from .linux import prepare_standalone_package_linux
 from .macos import prepare_standalone_package_macos
-from .. import PYSIDE_UNIX_BIN_TOOLS, PYSIDE_UNIX_LIBEXEC_TOOLS, PYSIDE_UNIX_BUNDLED_TOOLS
+from .. import (PYSIDE_UNIX_BIN_TOOLS, PYSIDE_UNIX_LIBEXEC_TOOLS, PYSIDE_UNIX_BUNDLED_TOOLS,
+                PYSIDE_MULTIMEDIA_LIBS)
 
 
 def _macos_copy_gui_executable(name, _vars=None):
@@ -233,11 +234,12 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
                 "{st_build_dir}/{st_package_name}/jar",
                 _vars=_vars)
 
-    # some libraries specific to Android from 6.8
+    # Some libraries specific to Linux/Android from 6.8
     # eg: the libav* libraries are required for the multimedia module
-    if is_android and config.is_internal_pyside_build():
+    if config.is_internal_pyside_build() and sys.platform != "darwin":
+        qt_multimedia_filters = [f"lib{lib}*.so*" for lib in PYSIDE_MULTIMEDIA_LIBS]
         copydir("{qt_lib_dir}", destination_qt_dir / "lib",
-                _filter=["libav*.so", "libsw*.so"],
+                _filter=qt_multimedia_filters,
                 recursive=False, _vars=_vars, force_copy_symlinks=True)
 
     # Copy Qt libs to package
