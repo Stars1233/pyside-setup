@@ -31,7 +31,7 @@ website.
 * **Qt:** 6.8+ `[online installer] <https://download.qt.io/official_releases/online_installers/>`_
 * **CMake:** 3.18+ `[official CMake website] <https://cmake.org/download/>`_
 * **Git:** 2.0+. `[official Git website] <https://git-scm.com/downloads>`_
-* **libclang:** The libclang library, recommended: version 16+ for 6.8+.
+* **libclang:** The libclang library, recommended: version 18+ for 6.8+.
   Prebuilt versions for each OS can be `downloaded here`_.
 * Check the `Supported Platforms of Qt`_
 
