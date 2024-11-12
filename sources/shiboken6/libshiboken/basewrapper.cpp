@@ -1025,8 +1025,8 @@ introduceWrapperType(PyObject *enclosingObject,
             AutoDecRef tpDict(PepType_GetDict(reinterpret_cast<PyTypeObject *>(enclosingObject)));
             return PyDict_SetItemString(tpDict, typeName, ob_type) == 0 ? type : nullptr;
         }
-        assert(PyDict_Check(enclosingObject));
-        return PyDict_SetItemString(enclosingObject, typeName, ob_type) == 0 ? type : nullptr;
+        if (PyDict_Check(enclosingObject))
+            return PyDict_SetItemString(enclosingObject, typeName, ob_type) == 0 ? type : nullptr;
     }
 
     // PyModule_AddObject steals type's reference.
