@@ -32,7 +32,7 @@ class RenamingTest(unittest.TestCase):
         rename_user = RenamedUser()
         rename_user.useRenamedValue(renamed_value)
         actual_signature = str(get_signature(rename_user.useRenamedValue))
-        self.assertTrue(re.match(r"^\(self,\s*?v:\s*?sample.RenamedValue\)\s*?->\s*?None$",
+        self.assertTrue(re.match(r"^\(self,\s*?v:\s*?sample.RenamedValue(,\s*?/)?\)\s*?->\s*?None$",
                                  actual_signature))
 
 

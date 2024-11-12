@@ -164,11 +164,8 @@ class Formatter(Writer):
         spaces = indent * self.level
         err_ignore = "  # type: ignore[misc]"
         if isinstance(signature, list):
-            # PYSIDE-2846: mypy does not handle inconsistent static methods
-            #              in overload chains. Check this and disable the error.
-            #              Also disable errors in augmented assignments.
-            opt_comment = (err_ignore if is_inconsistent_overload(self, signature)
-                           or aug_ass else "")
+            # PYSIDE-2846: Disable errors in augmented assignments.
+            opt_comment = (err_ignore if aug_ass else "")
             for sig in signature:
                 self.print(f'{spaces}@typing.overload{opt_comment}')
                 opt_comment = ""
@@ -213,13 +210,6 @@ class Formatter(Writer):
         spaces = indent * self.level
         self.print(f"{spaces}{sig_name:25}: typing.ClassVar[{class_name}] = ... # {sig_str}")
         yield
-
-
-def is_inconsistent_overload(self, signatures):
-    count = 0
-    for sig in signatures:
-        count += 1 if self.is_method() and "self" not in sig.parameters else 0
-    return count != 0 and count != len(signatures)
 
 
 def find_imports(text):

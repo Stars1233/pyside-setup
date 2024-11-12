@@ -25,6 +25,8 @@ from types import SimpleNamespace
 from textwrap import dedent
 from shibokensupport.signature.mapping import ellipsis, missing_optional_return
 
+DEFAULT_PARAM_KIND = inspect.Parameter.POSITIONAL_ONLY
+
 
 class SignatureLayout(SimpleNamespace):
     """
@@ -285,11 +287,21 @@ def _remove_ambiguous_signatures_body(signatures):
     return True, new_sigs
 
 
+def is_inconsistent_overload(signatures):
+    count = 0
+    for sig in signatures:
+        count += 1 if "self" in sig.parameters else 0
+    return count != 0 and count != len(signatures)
+
+
 def remove_ambiguous_signatures(signatures):
     # This may run more than once because of indexing.
     found, new_sigs = _remove_ambiguous_signatures_body(signatures)
-    if found:
-        _, new_sigs = _remove_ambiguous_signatures_body(new_sigs)
+    while found:
+        found, new_sigs = _remove_ambiguous_signatures_body(new_sigs)
+    # Python cannot handle mixed methods and classmethods. Remove the latter.
+    if is_inconsistent_overload(signatures):
+        new_sigs = list(sig for sig in new_sigs if "self" in sig.parameters)
     return new_sigs
 
 
@@ -335,7 +347,7 @@ def create_signature(props, key):
         del annotations["return"]
 
     # Build a signature.
-    kind = inspect._POSITIONAL_OR_KEYWORD
+    kind = DEFAULT_PARAM_KIND
     params = []
     for idx, name in enumerate(varnames):
         if name.startswith("**"):

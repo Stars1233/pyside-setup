@@ -17,6 +17,7 @@ import sys
 import types
 import typing
 from shibokensupport.signature import get_signature as get_sig
+from shibokensupport.signature.layout import DEFAULT_PARAM_KIND
 from enum import Enum
 
 
@@ -267,7 +268,7 @@ class ExactEnumerator(object):
             decorator = f"builtins.{decorator}"
         signature = self.get_signature(func, decorator)
         # PYSIDE-2846: Special cases of signatures which inherit from object.
-        _self = inspect.Parameter("self", inspect._POSITIONAL_OR_KEYWORD)
+        _self = inspect.Parameter("self", DEFAULT_PARAM_KIND)
         if func_name == "__dir__":
             signature = inspect.Signature([_self], return_annotation=typing.Iterable[str])
         elif func_name == "__repr__":
@@ -329,8 +330,8 @@ class HintingEnumerator(ExactEnumerator):
     def __init__(self, *args, **kwds):
         super().__init__(*args, **kwds)
         # We need to provide default signatures for class properties.
-        cls_param = inspect.Parameter("cls", inspect._POSITIONAL_OR_KEYWORD)
-        set_param = inspect.Parameter("arg_1", inspect._POSITIONAL_OR_KEYWORD, annotation=object)
+        cls_param = inspect.Parameter("cls", DEFAULT_PARAM_KIND)
+        set_param = inspect.Parameter("arg_1", DEFAULT_PARAM_KIND, annotation=object)
         self.getter_sig = inspect.Signature([cls_param], return_annotation=object)
         self.setter_sig = inspect.Signature([cls_param, set_param])
         self.deleter_sig = inspect.Signature([cls_param])

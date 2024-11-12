@@ -144,11 +144,13 @@ Disagreement with inconsistent overloads
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If there is a mixed overloading of methods and static or class methods, mypy
-believes this is an error. In a few cases we have this situation, and since
-this is again treated as a "misc" error, we only disable this when it
-happens. See function ``is_inconsistent_overload()`` of module
-``pyi_generator`` which checks if "self" is always or never an argument.
-This is again marked by an inline comment "# type: ignore[misc]".
+believes this is an error. In a first version, we fixed this rare situation
+by suppressing this "misc" error. But when moving to correct positional-only
+parameters (PEP 570) this suppression created unsolvable follow-up errors.
+The cleaner solution was to remove the static methods and prefer the normal methods.
+
+See function ``is_inconsistent_overload()`` of module
+``layout`` which checks if "self" is always or never an argument.
 
 
 Conclusion and Future
