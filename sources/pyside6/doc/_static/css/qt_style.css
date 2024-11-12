@@ -98,3 +98,15 @@ dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.glossary):not(.
   font-size: +1rem;
   color: var(--color-brand-primary);
 }
+
+article[role="main"] section[id^="pyside6-"] h1 {
+    font-size: 1.5em;
+}
+
+article[role="main"] section[id^="pyside6-"] dl dt em span.pre{
+    font-size: 1.5em;
+}
+
+article[role="main"] section[id^="pyside6-"] dl dt span.pre {
+    font-size: 1.5em;
+}
