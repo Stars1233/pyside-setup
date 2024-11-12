@@ -1186,7 +1186,13 @@ static void formatPyObject(PyObject *obj, QDebug &debug)
         return;
     }
     if (PyType_Check(obj) == 0)
-        debug << pyTypeName(obj) << ": ";
+        debug << pyTypeName(obj);
+    const auto refs = Py_REFCNT(obj);
+    if (refs == UINT_MAX) // _Py_IMMORTAL_REFCNT
+        debug << ", immortal";
+    else
+        debug << ", refs=" << refs;
+    debug << ": ";
     formatPyObjectValue(obj, debug);
 }
 
