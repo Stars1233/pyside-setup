@@ -729,7 +729,8 @@ void CppGenerator::generateClass(TextStream &s,
 
         if (rfunc->isConstructor()) {
             writeConstructorWrapper(s, overloadData, classContext);
-            writeSignatureInfo(signatureStream, overloadData);
+            // On constructors, we also generate the property initializers.
+            writeSignatureInfo(signatureStream, overloadData, true);
         }
         // call operators
         else if (rfunc->name() == u"operator()") {
@@ -5284,7 +5285,8 @@ QString CppGenerator::signatureParameter(const AbstractMetaArgument &arg, bool i
     return result;
 }
 
-void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloadData) const
+void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloadData,
+                                      bool useProperties) const
 {
     const auto rfunc = overloadData.referenceFunction();
     QString funcName = fullPythonFunctionName(rfunc, false);
@@ -5315,6 +5317,33 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
                 if (!defaultValue.isEmpty())
                     t += u'=' + defaultValue.replace(u"::"_s, u"."_s);
                 args.append(t);
+            }
+        }
+        // PYSIDE-1846: In a constructor, provide all properties as keyword-only parameters.
+        const auto &metaClass = rfunc->ownerClass();
+        if (useProperties && !metaClass->propertySpecs().isEmpty()) {
+            args << "*:KeywordOnly=None"_L1;
+            for (const auto &spec : metaClass->propertySpecs()) {
+                auto typeEntry = spec.typeEntry();
+                QString text;
+                if (typeEntry->isFlags()) {
+                    const auto fte = std::static_pointer_cast<const FlagsTypeEntry>(typeEntry);
+                    text = fte->originator()->qualifiedTargetLangName();
+                } else {
+                    text = typeEntry->qualifiedCppName();
+                }
+                auto &inst = spec.type().instantiations();
+                if (!inst.isEmpty()) {
+                    text += u'[';
+                    for (qsizetype i = 0, size = inst.size(); i < size; ++i) {
+                        if (i > 0)
+                            text += u", "_s;
+                        text += pythonSignature(inst.at(i));
+                    }
+                    text += u']';
+                }
+                QString entry = spec.name() + u':' + text.replace(u"::"_s, u"."_s) + "=None"_L1;
+                args.append(entry);
             }
         }
 

@@ -171,12 +171,12 @@ def make_signature_nameless(signature):
         signature.parameters[key].__class__ = NamelessParameter
 
 
-_POSITIONAL_ONLY         = inspect.Parameter.POSITIONAL_ONLY  # noqa E:201
+_POSITIONAL_ONLY         = inspect.Parameter.POSITIONAL_ONLY        # noqa E:201
 _POSITIONAL_OR_KEYWORD   = inspect.Parameter.POSITIONAL_OR_KEYWORD  # noqa E:201
-_VAR_POSITIONAL          = inspect.Parameter.VAR_POSITIONAL  # noqa E:201
-_KEYWORD_ONLY            = inspect.Parameter.KEYWORD_ONLY  # noqa E:201
-_VAR_KEYWORD             = inspect.Parameter.VAR_KEYWORD  # noqa E:201
-_empty                   = inspect.Parameter.empty  # noqa E:201
+_VAR_POSITIONAL          = inspect.Parameter.VAR_POSITIONAL         # noqa E:201
+_KEYWORD_ONLY            = inspect.Parameter.KEYWORD_ONLY           # noqa E:201
+_VAR_KEYWORD             = inspect.Parameter.VAR_KEYWORD            # noqa E:201
+_empty                   = inspect.Parameter.empty                  # noqa E:201
 
 
 default_weights = {
@@ -349,7 +349,13 @@ def create_signature(props, key):
     # Build a signature.
     kind = DEFAULT_PARAM_KIND
     params = []
+
     for idx, name in enumerate(varnames):
+        if name == "*":
+            # This is a switch.
+            # Important: It must have a default to simplify the calculation.
+            kind = _KEYWORD_ONLY
+            continue
         if name.startswith("**"):
             kind = _VAR_KEYWORD
         elif name.startswith("*"):
@@ -360,14 +366,19 @@ def create_signature(props, key):
         name = name.lstrip("*")
         defpos = idx - len(varnames) + len(defaults)
         default = defaults[defpos] if defpos >= 0 else _empty
+        if default is not _empty:
+            if kind != _KEYWORD_ONLY:
+                kind = _POSITIONAL_OR_KEYWORD
         if default is None:
             ann = typing.Optional[ann]
         if default is not _empty and layout.ellipsis:
             default = ellipsis
+        # See if this is a duplicate name - happens with properties
+        if kind is _KEYWORD_ONLY and varnames.count(name) > 1:
+            continue
         param = inspect.Parameter(name, kind, annotation=ann, default=default)
         params.append(param)
-        if kind == _VAR_POSITIONAL:
-            kind = _KEYWORD_ONLY
+
     ret_anno = annotations.get('return', _empty)
     if ret_anno is not _empty and props["fullname"] in missing_optional_return:
         ret_anno = typing.Optional[ret_anno]

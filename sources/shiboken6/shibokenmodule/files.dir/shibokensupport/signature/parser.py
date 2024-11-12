@@ -13,7 +13,7 @@ import warnings
 
 from types import SimpleNamespace
 from shibokensupport.signature.mapping import (type_map, update_mapping,
-    namespace, _NotCalled, ResultVariable, ArrayLikeVariable)  # noqa E:128
+    namespace, _NotCalled, ResultVariable, ArrayLikeVariable, pyside_modules)  # noqa E:128
 from shibokensupport.signature.lib.tool import build_brace_pattern
 
 _DEBUG = False
@@ -254,10 +254,11 @@ def _resolve_value(thing, valtype, line):
     if thing in ("0", "None") and valtype:
         if valtype.startswith("PySide6.") or valtype.startswith("typing."):
             return None
-        map = type_map[valtype]
+        mapped = type_map.get(valtype)
         # typing.Any: '_SpecialForm' object has no attribute '__name__'
-        name = get_name(map) if hasattr(map, "__name__") else str(map)
+        name = get_name(mapped) if hasattr(mapped, "__name__") else str(mapped)
         thing = f"zero({name})"
+        type_map[f"zero({name})"] = None
     if thing in type_map:
         return type_map[thing]
     res = make_good_value(thing, valtype)
@@ -267,6 +268,9 @@ def _resolve_value(thing, valtype, line):
     res = try_to_guess(thing, valtype) if valtype else None
     if res is not None:
         type_map[thing] = res
+        return res
+    # Still not found. Look into the imported modules.
+    if res := get_from_another_module(thing):
         return res
     warnings.warn(f"""pyside_type_init:_resolve_value
 
@@ -321,6 +325,21 @@ def handle_matrix(arg):
     assert typstr == "float"
     result = f"PySide6.QtGui.QMatrix{n}x{m}"
     return eval(result, globals(), namespace)
+
+
+def get_from_another_module(thing):
+    top = thing.split(".", 1)[0] if "." in thing else thing
+    for mod_name in pyside_modules:
+        mod = sys.modules[mod_name]
+        if hasattr(mod, top):
+            try:
+                res = eval(f"{mod_name}.{thing}", globals(), namespace)
+                type_map[thing] = res
+                return res
+            except AttributeError:
+                # Maybe it was anothr module...
+                pass
+    return None
 
 
 def _resolve_type(thing, line, level, var_handler, func_name=None):
