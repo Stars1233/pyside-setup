@@ -267,36 +267,6 @@ enum PepUnicode_Kind {
 
 /*****************************************************************************
  *
- * RESOLVED: bytesobject.h
- *
- */
-#ifdef Py_LIMITED_API
-#define PyBytes_AS_STRING(op)       PyBytes_AsString(op)
-#define PyBytes_GET_SIZE(op)        PyBytes_Size(op)
-#endif
-
-/*****************************************************************************
- *
- * RESOLVED: floatobject.h
- *
- */
-#ifdef Py_LIMITED_API
-#define PyFloat_AS_DOUBLE(op)       PyFloat_AsDouble(op)
-#endif
-
-/*****************************************************************************
- *
- * RESOLVED: tupleobject.h
- *
- */
-#ifdef Py_LIMITED_API
-#define PyTuple_GET_ITEM(op, i)     PyTuple_GetItem((PyObject *)op, i)
-#define PyTuple_SET_ITEM(op, i, v)  PyTuple_SetItem(op, i, v)
-#define PyTuple_GET_SIZE(op)        PyTuple_Size((PyObject *)op)
-#endif
-
-/*****************************************************************************
- *
  * RESOLVED: methodobject.h
  *
  */

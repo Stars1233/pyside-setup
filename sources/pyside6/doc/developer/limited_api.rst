@@ -71,25 +71,6 @@ that calls ``_PepUnicode_AsString``. The implementation was a bit involved,
 and it would be better to change the code and replace this function.
 
 
-bytesobject.h
-~~~~~~~~~~~~~
-
-The macros ``PyBytes_AS_STRING`` and ``PyBytes_GET_SIZE`` were redefined to call
-the according functions.
-
-
-floatobject.h
-~~~~~~~~~~~~~
-
-``PyFloat_AS_DOUBLE`` now calls ``PyFloat_AsDouble``.
-
-
-tupleobject.h
-~~~~~~~~~~~~~
-
-``PyTuple_GET_ITEM``, ``PyTuple_SET_ITEM`` and ``PyTuple_GET_SIZE`` were redefined as
-function calls.
-
 dictobject.h
 ~~~~~~~~~~~~
 
