@@ -48,7 +48,7 @@ placed in separate ``.cpp`` files named after each C++ type. The code is
 then compiled and linked into a shared library. The shared library is a
 CPython extension module, which is loaded by the Python interpreter.
 
-Beacuse the C++ language has different semantics to Python, shiboken
+Because the C++ language has different semantics to Python, shiboken
 needs help in figuring out how to generate the bindings code. This is
 done by specifying a special XML file called a typesystem file.
 
