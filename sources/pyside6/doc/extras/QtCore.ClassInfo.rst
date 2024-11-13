@@ -1,3 +1,6 @@
+PySide6.QtCore.ClassInfo
+========================
+
 .. currentmodule:: PySide6.QtCore
 .. py:decorator:: ClassInfo
 

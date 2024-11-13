@@ -1,3 +1,6 @@
+PySide6.QtQml.ListProperty
+==========================
+
 .. currentmodule:: PySide6.QtQml
 .. py:class:: ListProperty
 

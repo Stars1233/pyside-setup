@@ -1,3 +1,6 @@
+PySide6.QtCore.QEnum
+====================
+
 .. currentmodule:: PySide6.QtCore
 .. py:decorator:: QEnum
 

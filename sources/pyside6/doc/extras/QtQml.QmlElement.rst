@@ -1,3 +1,6 @@
+PySide6.QtQml.QmlElement
+========================
+
 .. currentmodule:: PySide6.QtQml
 .. py:decorator:: QmlElement
 

@@ -1,3 +1,6 @@
+PySide6.QtDesigner.QPyDesignerCustomWidgetCollection
+====================================================
+
 .. currentmodule:: PySide6.QtDesigner
 .. py:class:: QPyDesignerCustomWidgetCollection
 

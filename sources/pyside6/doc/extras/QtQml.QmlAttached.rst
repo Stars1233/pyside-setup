@@ -1,3 +1,6 @@
+PySide6.QtQml.QmlAttached
+=========================
+
 .. currentmodule:: PySide6.QtQml
 .. py:decorator:: QmlAttached
 

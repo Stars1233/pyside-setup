@@ -1,3 +1,6 @@
+PySide6.QtCore.Slot
+===================
+
 .. currentmodule:: PySide6.QtCore
 .. py:decorator:: Slot([type1 [, type2...]] [, name="" [, result=None, [tag=""]]])
 

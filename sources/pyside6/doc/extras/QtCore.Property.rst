@@ -1,3 +1,6 @@
+PySide6.QtCore.Property
+=======================
+
 .. currentmodule:: PySide6.QtCore
 .. py:class:: Property
 

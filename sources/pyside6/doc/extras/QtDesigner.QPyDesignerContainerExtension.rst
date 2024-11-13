@@ -1,3 +1,6 @@
+PySide6.QtDesigner.QPyDesignerContainerExtension
+================================================
+
 .. currentmodule:: PySide6.QtDesigner
 .. py:class:: QPyDesignerContainerExtension
 

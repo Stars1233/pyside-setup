@@ -1,3 +1,6 @@
+PySide6.QtCore.QFlag
+====================
+
 .. currentmodule:: PySide6.QtCore
 .. py:decorator:: QFlag
 

@@ -1,3 +1,6 @@
+PySide6.QtQml.QmlAnonymous
+==========================
+
 .. currentmodule:: PySide6.QtQml
 .. py:decorator:: QmlAnonymous
 

@@ -1,3 +1,6 @@
+PySide6.QtQml.QmlForeign
+========================
+
 .. currentmodule:: PySide6.QtQml
 .. py:decorator:: QmlForeign
 

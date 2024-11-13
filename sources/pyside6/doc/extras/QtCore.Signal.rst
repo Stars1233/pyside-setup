@@ -1,3 +1,6 @@
+PySide6.QtCore.Signal
+=====================
+
 .. currentmodule:: PySide6.QtCore
 
 .. py:class:: Signal
