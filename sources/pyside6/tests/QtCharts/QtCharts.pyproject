@@ -1,3 +1,4 @@
 {
-    "files": ["qcharts_test.py"]
+    "files": ["qcharts_test.py",
+              "qcharts_numpy_test.py"]
 }
