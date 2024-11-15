@@ -41,6 +41,7 @@
     <value-type name="StdOptionalTestBench"/>
 
     <system-include file-name="memory"/>
+    <system-include file-name="optional"/>
 
     <namespace-type name="std">
         <include file-name="memory" location="global"/>

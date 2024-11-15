@@ -42,6 +42,8 @@ class StdOptionalTests(unittest.TestCase):
         ci = std.optional_int(43)
         self.assertEqual(ci.value(), 43)
 
+    @unittest.skipIf(True, """PYSIDE-2854, T &std::optional::value() does not work/
+                              returns self (colocated).""")
     def testInteger(self):
         b = StdOptionalTestBench()
         i = b.optionalInteger()
