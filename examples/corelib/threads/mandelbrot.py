@@ -9,7 +9,7 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 import sys
 
 from PySide6.QtCore import (Signal, QMutex, QElapsedTimer, QMutexLocker,
-                            QPoint, QPointF, QSize, Qt, QThread,
+                            QPoint, QPointF, QRectF, QSize, Qt, QThread,
                             QWaitCondition, Slot)
 from PySide6.QtGui import QColor, QImage, QPainter, QPixmap, qRgb
 from PySide6.QtWidgets import QApplication, QWidget
@@ -73,7 +73,7 @@ class RenderThread(QThread):
             self._result_size = resultSize
 
             if not self.isRunning():
-                self.start(QThread.LowPriority)
+                self.start(QThread.Priority.LowPriority)
             else:
                 self.restart = True
                 self.condition.wakeOne()
@@ -91,7 +91,7 @@ class RenderThread(QThread):
 
             half_width = resultSize.width() // 2
             half_height = resultSize.height() // 2
-            image = QImage(resultSize, QImage.Format_RGB32)
+            image = QImage(resultSize, QImage.Format.Format_RGB32)
 
             curpass = 0
 
@@ -194,7 +194,7 @@ class RenderThread(QThread):
         g = pow(g * s, 0.8)
         b = pow(b * s, 0.8)
 
-        return qRgb(r * 255, g * 255, b * 255)
+        return qRgb(int(r * 255), int(g * 255), int(b * 255))
 
 
 class MandelbrotWidget(QWidget):
@@ -214,16 +214,16 @@ class MandelbrotWidget(QWidget):
         self.thread.rendered_image.connect(self.update_pixmap)
 
         self.setWindowTitle("Mandelbrot")
-        self.setCursor(Qt.CrossCursor)
+        self.setCursor(Qt.CursorShape.CrossCursor)
         self._info = ''
 
     def paintEvent(self, event):
         with QPainter(self) as painter:
-            painter.fillRect(self.rect(), Qt.black)
+            painter.fillRect(self.rect(), Qt.GlobalColor.black)
 
             if self.pixmap.isNull():
-                painter.setPen(Qt.white)
-                painter.drawText(self.rect(), Qt.AlignCenter,
+                painter.setPen(Qt.GlobalColor.white)
+                painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter,
                                  "Rendering initial image, please wait...")
                 return
 
@@ -250,31 +250,33 @@ class MandelbrotWidget(QWidget):
             metrics = painter.fontMetrics()
             text_width = metrics.horizontalAdvance(text)
 
-            painter.setPen(Qt.NoPen)
+            painter.setPen(Qt.PenStyle.NoPen)
             painter.setBrush(QColor(0, 0, 0, 127))
-            painter.drawRect((self.width() - text_width) / 2 - 5, 0, text_width + 10,
-                             metrics.lineSpacing() + 5)
-            painter.setPen(Qt.white)
-            painter.drawText((self.width() - text_width) / 2,
-                             metrics.leading() + metrics.ascent(), text)
+            box = QRectF((self.width() - text_width) / 2 - 5, 0,
+                         text_width + 10, metrics.lineSpacing() + 5)
+            painter.drawRect(box)
+            painter.setPen(Qt.GlobalColor.white)
+            pos = QPointF((self.width() - text_width) / 2,
+                          metrics.leading() + metrics.ascent())
+            painter.drawText(pos, text)
 
     def resizeEvent(self, event):
         self.thread.render(self._center_x, self._center_y, self._cur_scale, self.size())
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Plus:
+        if event.key() == Qt.Key.Key_Plus:
             self.zoom(ZOOM_IN_FACTOR)
-        elif event.key() == Qt.Key_Minus:
+        elif event.key() == Qt.Key.Key_Minus:
             self.zoom(ZOOM_OUT_FACTOR)
-        elif event.key() == Qt.Key_Left:
+        elif event.key() == Qt.Key.Key_Left:
             self.scroll(-SCROLL_STEP, 0)
-        elif event.key() == Qt.Key_Right:
+        elif event.key() == Qt.Key.Key_Right:
             self.scroll(+SCROLL_STEP, 0)
-        elif event.key() == Qt.Key_Down:
+        elif event.key() == Qt.Key.Key_Down:
             self.scroll(0, -SCROLL_STEP)
-        elif event.key() == Qt.Key_Up:
+        elif event.key() == Qt.Key.Key_Up:
             self.scroll(0, +SCROLL_STEP)
-        elif event.key() == Qt.Key_Q:
+        elif event.key() == Qt.Key.Key_Q:
             self.close()
         else:
             super(MandelbrotWidget, self).keyPressEvent(event)
@@ -285,18 +287,18 @@ class MandelbrotWidget(QWidget):
         self.zoom(pow(ZOOM_IN_FACTOR, num_steps))
 
     def mousePressEvent(self, event):
-        if event.buttons() == Qt.LeftButton:
+        if event.buttons() == Qt.MouseButton.LeftButton:
             self._last_drag_pos = event.position()
 
     def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.LeftButton:
+        if event.buttons() & Qt.MouseButton.LeftButton:
             pos = event.position()
             self._pixmap_offset += pos - self._last_drag_pos
             self._last_drag_pos = pos
             self.update()
 
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             pos = event.position()
             self._pixmap_offset += pos - self._last_drag_pos
             self._last_drag_pos = QPointF()
