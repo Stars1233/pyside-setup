@@ -3268,14 +3268,17 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
 
     int numRemovedArgs = OverloadData::numberOfRemovedArguments(func);
 
-    s << "if (Shiboken::Errors::occurred() == nullptr) {\n" << indent;
+    const bool hasArguments = !func->arguments().isEmpty();
+    if (hasArguments) // Argument conversion error?
+        s << "if (Shiboken::Errors::occurred() == nullptr) {\n" << indent;
     writeMethodCall(s, func, context,
                     overloadData.pythonFunctionWrapperUsesListOfArguments(),
                     func->arguments().size() - numRemovedArgs, indirections, errorReturn);
 
     if (!func->isConstructor())
         writeNoneReturn(s, func, overloadData.hasNonVoidReturnType());
-    s << outdent << "}\n";
+    if (hasArguments)
+        s << outdent << "}\n";
 }
 
 QString CppGenerator::cppToPythonFunctionName(const QString &sourceTypeName, QString targetTypeName)
