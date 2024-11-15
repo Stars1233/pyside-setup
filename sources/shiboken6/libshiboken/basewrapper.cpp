@@ -1530,10 +1530,9 @@ PyObject *newObjectForType(PyTypeObject *instanceType, void *cptr, bool hasOwner
     bool shouldRegister = true;
     SbkObject *self = nullptr;
 
+    auto &bindingManager = BindingManager::instance();
     // Some logic to ensure that colocated child field does not overwrite the parent
-    if (BindingManager::instance().hasWrapper(cptr)) {
-        SbkObject *existingWrapper = BindingManager::instance().retrieveWrapper(cptr);
-
+    if (SbkObject *existingWrapper = bindingManager.retrieveWrapper(cptr)) {
         self = findColocatedChild(existingWrapper, instanceType);
         if (self) {
             // Wrapper already registered for cptr.
@@ -1544,7 +1543,7 @@ PyObject *newObjectForType(PyTypeObject *instanceType, void *cptr, bool hasOwner
                   (!(Shiboken::Object::hasCppWrapper(existingWrapper) ||
                      Shiboken::Object::hasOwnership(existingWrapper)))) {
             // Old wrapper is likely junk, since we have ownership and it doesn't.
-            BindingManager::instance().releaseWrapper(existingWrapper);
+            bindingManager.releaseWrapper(existingWrapper);
         } else {
             // Old wrapper may be junk caused by some bug in identifying object deletion
             // but it may not be junk when a colocated field is accessed for an
@@ -1559,9 +1558,8 @@ PyObject *newObjectForType(PyTypeObject *instanceType, void *cptr, bool hasOwner
         self->d->cptr[0] = cptr;
         self->d->hasOwnership = hasOwnership;
         self->d->validCppObject = 1;
-        if (shouldRegister) {
-            BindingManager::instance().registerWrapper(self, cptr);
-        }
+        if (shouldRegister)
+            bindingManager.registerWrapper(self, cptr);
     } else {
         Py_IncRef(reinterpret_cast<PyObject *>(self));
     }
