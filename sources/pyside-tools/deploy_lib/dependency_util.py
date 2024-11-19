@@ -22,7 +22,7 @@ def get_py_files(project_dir: Path, extra_ignore_dirs: list[Path] = None, projec
     """Finds and returns all the Python files in the project
     """
     py_candidates = []
-    ignore_dirs = ["__pycache__", *DEFAULT_IGNORE_DIRS]
+    ignore_dirs = DEFAULT_IGNORE_DIRS.copy()
 
     if project_data:
         py_candidates = project_data.python_files

@@ -18,8 +18,8 @@ else:
     EXE_FORMAT = ".bin"
 
 DEFAULT_APP_ICON = str((Path(__file__).parent / f"pyside_icon{IMAGE_FORMAT}").resolve())
-DEFAULT_IGNORE_DIRS = ["site-packages", "deployment", ".qtcreator", "build", "dist", "tests",
-                       "doc", "docs", "examples"]
+DEFAULT_IGNORE_DIRS = {"site-packages", "deployment", ".git", ".qtcreator", "build", "dist",
+                       "tests", "doc", "docs", "examples", ".vscode", "__pycache__"}
 
 IMPORT_WARNING_PYSIDE = (f"[DEPLOY] Found 'import PySide6' in file {0}"
                          ". Use 'from PySide6 import <module>' or pass the module"
