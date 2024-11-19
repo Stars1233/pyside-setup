@@ -78,6 +78,10 @@
         <inject-code file="../glue/qtcore.cpp" snippet="qfatal"/>
         <modify-argument index="1" pyi-type="str"/>
     </add-function>
+    <add-function signature="qInfo(const char*@message@)">
+        <inject-code file="../glue/qtcore.cpp" snippet="qdebug-format-string"/>
+        <modify-argument index="1" pyi-type="str"/>
+    </add-function>
     <add-function signature="qWarning(const char*@message@)">
         <inject-code file="../glue/qtcore.cpp" snippet="qdebug-format-string"/>
         <modify-argument index="1" pyi-type="str"/>
