@@ -1,0 +1,4 @@
+module Bars
+Main 1.0 Main.qml
+Axes 1.0 Axes.qml
+Data 1.0 Data.qml

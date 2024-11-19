@@ -1,0 +1,9 @@
+{
+    "files": [
+        "main.py",
+        "Bars/Main.qml",
+        "Bars/Data.qml",
+        "Bars/Axes.qml",
+        "Bars/qmldir ",
+    ]
+}
