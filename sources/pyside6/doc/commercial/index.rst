@@ -42,6 +42,9 @@ qtpip - a commercial wheel installer
 `qtpip`_ is a wrapper around `pip`_ (the package installer for Python) that provides an
 integration with the detection of commercial licenses.
 
+It requires that a Qt license is present. On a fresh install,
+this can be done by launching the `Qt Maintenance Tool`_ first.
+
 To set up the tool, we recommend creating a virtual environment for your
 project, and then installing the tool like any other module:
 
