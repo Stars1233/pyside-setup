@@ -1281,13 +1281,11 @@ QT_END_NAMESPACE
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qt-qunregisterresourcedata
 
-// @snippet use-stream-for-format-security
-// Uses the stream version for security reasons
-// see gcc man page at -Wformat-security
+// @snippet qdebug-format-string
 Py_BEGIN_ALLOW_THREADS
-%FUNCTION_NAME() << %1;
+%FUNCTION_NAME("%s", %1); // Uses placeholder for security reasons
 Py_END_ALLOW_THREADS
-// @snippet use-stream-for-format-security
+// @snippet qdebug-format-string
 
 // @snippet qresource-registerResource
  auto ptr = reinterpret_cast<uchar *>(Shiboken::Buffer::getPointer(%PYARG_1));

@@ -66,20 +66,20 @@
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
                  snippet="darwin_permission_plugin"/>
 
-    <add-function signature="qDebug(const char*)">
-        <inject-code file="../glue/qtcore.cpp" snippet="use-stream-for-format-security"/>
+    <add-function signature="qDebug(const char*@message@)">
+        <inject-code file="../glue/qtcore.cpp" snippet="qdebug-format-string"/>
         <modify-argument index="1" pyi-type="str"/>
     </add-function>
-    <add-function signature="qCritical(const char*)">
-        <inject-code file="../glue/qtcore.cpp" snippet="use-stream-for-format-security"/>
+    <add-function signature="qCritical(const char*@message@)">
+        <inject-code file="../glue/qtcore.cpp" snippet="qdebug-format-string"/>
         <modify-argument index="1" pyi-type="str"/>
     </add-function>
-    <add-function signature="qFatal(const char*)">
+    <add-function signature="qFatal(const char*@message@)">
         <inject-code file="../glue/qtcore.cpp" snippet="qfatal"/>
         <modify-argument index="1" pyi-type="str"/>
     </add-function>
-    <add-function signature="qWarning(const char*)">
-        <inject-code file="../glue/qtcore.cpp" snippet="use-stream-for-format-security"/>
+    <add-function signature="qWarning(const char*@message@)">
+        <inject-code file="../glue/qtcore.cpp" snippet="qdebug-format-string"/>
         <modify-argument index="1" pyi-type="str"/>
     </add-function>
 
