@@ -947,12 +947,14 @@ void CppGenerator::writeConstructorNative(TextStream &s, const GeneratorContext 
     if (wrapperDiagnostics())
         s << R"(std::cerr << __FUNCTION__ << ' ' << this << '\n';)" << '\n';
     const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : &func->arguments().constLast();
-    s << "resetPyMethodCache();\n";
-    writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionBeginning,
-                   TypeSystem::NativeCode, func, false, lastArg);
-    s << "// ... middle\n";
-    writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionEnd,
-                   TypeSystem::NativeCode, func, false, lastArg);
+    const auto &codeSnips = func->injectedCodeSnips();
+    if (!codeSnips.isEmpty()) {
+        writeCodeSnips(s, codeSnips, TypeSystem::CodeSnipPositionBeginning,
+                       TypeSystem::NativeCode, func, false, lastArg);
+        s << "// ... middle\n";
+        writeCodeSnips(s, codeSnips, TypeSystem::CodeSnipPositionEnd,
+                       TypeSystem::NativeCode, func, false, lastArg);
+    }
     s << outdent << "}\n\n";
 }
 

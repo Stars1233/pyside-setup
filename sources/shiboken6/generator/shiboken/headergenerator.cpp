@@ -293,8 +293,14 @@ void *qt_metacast(const char *_clname) override;
         s << '\n';
     }
 
-    s << "mutable bool m_PyMethodCache[" << maxOverrides << "];\n"
-      << outdent << "};\n\n";
+    s << "mutable bool m_PyMethodCache[" << maxOverrides << "]";
+    if (maxOverrides > 0) {
+        s << "= {false";
+        for (int i = 1; i < maxOverrides; ++i)
+            s << ", false";
+        s << '}';
+    }
+    s << ";\n" << outdent << "};\n\n";
 }
 
 // Write an inline wrapper around a function
