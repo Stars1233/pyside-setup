@@ -1804,13 +1804,6 @@ if (dataChar == nullptr) {
 }
 // @snippet qdatastream-read-bytes
 
-// @snippet qloggingcategory_to_cpp
-// PYSIDE-2404: Usage of the `get()` function not necessary, the type exists.
-    QLoggingCategory *category{nullptr};
-    Shiboken::Conversions::pythonToCppPointer(SbkPySide6_QtCoreTypeStructs[SBK_QLoggingCategory_IDX].type,
-    pyArgs[0], &(category));
-// @snippet qloggingcategory_to_cpp
-
 // Q_ARG()-equivalent
 // @snippet q_arg
 const QArgData qArgData = qArgDataFromPyType(%1);

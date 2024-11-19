@@ -3564,30 +3564,30 @@
 
   <object-type name="QLoggingCategory"/>
 
-  <add-function signature="qCDebug(PyObject *, const char *)">
+  <add-function signature="qCDebug(QLoggingCategory *@logging_category@, const char *@message@)">
     <extra-includes>
     <include file-name="qloggingcategory.h" location="global" />
     </extra-includes>
-    <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
-      qCDebug((*category), "%s", %2);
+    <inject-code class="target" position="beginning">
+      qCDebug(*%1, "%s", %2);
     </inject-code>
   </add-function>
 
-  <add-function signature="qCCritical(PyObject *, const char *)">
-    <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
-      qCCritical((*category), "%s", %2);
+  <add-function signature="qCCritical(QLoggingCategory *@logging_category@, const char *@message@)">
+    <inject-code class="target" position="beginning">
+      qCCritical(*%1, "%s", %2);
     </inject-code>
   </add-function>
 
-  <add-function signature="qCInfo(PyObject *, const char *)">
-    <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
-      qCInfo((*category), "%s", %2);
+  <add-function signature="qCInfo(QLoggingCategory *@logging_category@, const char *@message@)">
+    <inject-code class="target" position="beginning">
+      qCInfo(*%1, "%s", %2);
     </inject-code>
   </add-function>
 
-  <add-function signature="qCWarning(PyObject *, const char *)">
-    <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qloggingcategory_to_cpp">
-      qCWarning((*category), "%s", %2);
+  <add-function signature="qCWarning(QLoggingCategory *@logging_category@, const char *@message@)">
+    <inject-code class="target" position="beginning">
+      qCWarning(*%1, "%s", %2);
     </inject-code>
   </add-function>
 
