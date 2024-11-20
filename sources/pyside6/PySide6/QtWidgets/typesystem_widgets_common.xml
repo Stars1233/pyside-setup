@@ -1151,7 +1151,7 @@
     </modify-function>
   </object-type>
   <object-type name="QAbstractButton">
-    <add-function signature="setShortcut(Qt::Key)">
+    <add-function signature="setShortcut(Qt::Key@key@)">
       <inject-code file="../glue/qtgui.cpp" snippet="set-qtkey-shortcut"/>
     </add-function>
   </object-type>
@@ -1291,7 +1291,7 @@
         </inject-code>
     </modify-function>
 
-    <add-function signature="setAlignment(QFlags&lt;Qt::AlignmentFlag&gt;)">
+    <add-function signature="setAlignment(QFlags&lt;Qt::AlignmentFlag&gt;@alignment@)">
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-setalignment"/>
     </add-function>
 
@@ -2739,7 +2739,7 @@
     </modify-function>
     <modify-function signature="del()" rename="del_"/>
 
-    <add-function signature="addAction(QAction*)">
+    <add-function signature="addAction(QAction*@action@)">
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlineedit-addaction"/>
     </add-function>
 
@@ -2903,7 +2903,7 @@
       <include file-name="pysidecleanup.h" location="global"/>
     </extra-includes>
     <modify-function signature="QApplication(int&amp;,char**,int)" access="private"/>
-    <add-function signature="QApplication(QStringList)">
+    <add-function signature="QApplication(QStringList@arguments@)">
         <inject-code file="../glue/qtwidgets.cpp" snippet="qapplication-1"/>
     </add-function>
     <add-function signature="QApplication()">

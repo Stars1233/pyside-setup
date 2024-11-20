@@ -382,12 +382,12 @@
       </extra-includes>
       <enum-type name="Type" python-type="IntEnum"/>
       <enum-type name="TypeFlag" flags="TypeFlags"/>
-      <add-function signature="QMetaType(PyTypeObject*)">
+      <add-function signature="QMetaType(PyTypeObject*@py_type@)">
           <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
                        snippet="metatype-from-type"/>
       </add-function>
       <!-- PYSIDE-1735: The class QMetaType.Type must be allowed because int is gone -->
-      <add-function signature="QMetaType(QMetaType::Type)">
+      <add-function signature="QMetaType(QMetaType::Type@type@)">
           <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
                        snippet="metatype-from-metatype-type"/>
       </add-function>
@@ -673,7 +673,7 @@
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-qabs"/>
   </add-function>
 
-  <add-function signature="qAddPostRoutine(PyObject*)">
+  <add-function signature="qAddPostRoutine(PyObject*@callable@)">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-addpostroutine"/>
   </add-function>
   <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="qt-qaddpostroutine"/>
@@ -692,7 +692,7 @@
   <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qt-messagehandler"/>
   <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
                snippet="qlatin1string-check"/>
-  <add-function signature="qInstallMessageHandler(PyObject)" return-type="PyObject">
+  <add-function signature="qInstallMessageHandler(PyObject@callable@)" return-type="PyObject">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-installmessagehandler"/>
   </add-function>
 
@@ -889,14 +889,14 @@
       <include file-name="datetime.h" location="global"/>
     </extra-includes>
     <!-- Somewhat internal constructor used to pickle QDateTime -->
-    <add-function signature="QDateTime(int,int,int,int,int,int,int,int=Qt::LocalTime)">
+    <add-function signature="QDateTime(int@year@,int@month@,int@day@,int@h@,int@m@,int@s@,int@ms@,int@spec@=Qt::LocalTime)">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdatetime-1"/>
     </add-function>
-    <add-function signature="QDateTime(int,int,int,int,int,int)">
+    <add-function signature="QDateTime(int@year@,int@month@,int@day@,int@h@,int@m@,int@s@)">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdatetime-2"/>
     </add-function>
     <!-- PYSIDE-1735: Qt::TimeSpec is no more compatible with int -->
-    <add-function signature="QDateTime(int,int,int,int,int,int,int,Qt::TimeSpec=Qt::LocalTime)">
+    <add-function signature="QDateTime(int@year@,int@month@,int@day@,int@h@,int@m@,int@s@,int@ms@,Qt::TimeSpec@spec@=Qt::LocalTime)">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdatetime-3"/>
     </add-function>
     <add-function signature="__repr__" return-type="str">
@@ -1818,7 +1818,7 @@
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-6"/>
     </add-function>
 
-    <add-function signature="emit(const char*,...)" return-type="bool">
+    <add-function signature="emit(const char*@signal@,...)" return-type="bool">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-emit"/>
     </add-function>
     <add-function signature="disconnect(const char*@signal@,PyCallable*@functor@)" return-type="bool">
@@ -2058,10 +2058,10 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <add-function signature="QByteArray(PyByteArray)">
+    <add-function signature="QByteArray(PyByteArray@data@)">
          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-2"/>
     </add-function>
-    <add-function signature="QByteArray(PyBytes)">
+    <add-function signature="QByteArray(PyBytes@data@)">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-3"/>
     </add-function>
     <!-- buffer protocol -->
@@ -3049,7 +3049,7 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <add-function signature="tryStart(PyCallable)" return-type="bool">
+    <add-function signature="tryStart(PyCallable@callable@)" return-type="bool">
        <inject-code class="target" position="beginning"
                     file="../glue/qtcore.cpp"
                     snippet="std-function-void-lambda"/>
@@ -3414,7 +3414,7 @@
     </extra-includes>
     <inject-code file="../glue/qtcore.cpp" snippet="qeasingcurve"/>
     <enum-type name="Type"/>
-    <add-function signature="setCustomType(PyObject*)">
+    <add-function signature="setCustomType(PyObject*@callable@)">
       <inject-code file="../glue/qtcore.cpp" snippet="qeasingcurve-setcustomtype"/>
     </add-function>
     <add-function signature="customType()" return-type="PyObject">
@@ -3475,37 +3475,37 @@
 
   <!-- From Qt4.6 ^^^ -->
 
-  <add-function signature="SIGNAL(const char*)" return-type="str">
+  <add-function signature="SIGNAL(const char*@signature@)" return-type="str">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-signal"/>
     <modify-argument index="1" pyi-type="str"/>
   </add-function>
 
-  <add-function signature="SLOT(const char*)" return-type="str">
+  <add-function signature="SLOT(const char*@signature@)" return-type="str">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-slot"/>
     <modify-argument index="1" pyi-type="str"/>
   </add-function>
 
-  <add-function signature="QT_TR_NOOP(PyObject)" return-type="PyObject*">
+  <add-function signature="QT_TR_NOOP(PyObject@message@)" return-type="PyObject*">
     <inject-code class="target" position="beginning">
       <insert-template name="return_argument"><replace from="#" to="1"/></insert-template>
     </inject-code>
   </add-function>
-  <add-function signature="QT_TR_NOOP_UTF8(PyObject)" return-type="PyObject*">
+  <add-function signature="QT_TR_NOOP_UTF8(PyObject@message@)" return-type="PyObject*">
     <inject-code class="target" position="beginning">
       <insert-template name="return_argument"><replace from="#" to="1"/></insert-template>
     </inject-code>
   </add-function>
-  <add-function signature="QT_TRANSLATE_NOOP(PyObject,PyObject)" return-type="PyObject*">
+  <add-function signature="QT_TRANSLATE_NOOP(PyObject@context@,PyObject@message@)" return-type="PyObject*">
     <inject-code class="target" position="beginning">
       <insert-template name="return_argument"><replace from="#" to="2"/></insert-template>
     </inject-code>
   </add-function>
-  <add-function signature="QT_TRANSLATE_NOOP3(PyObject,PyObject,PyObject)" return-type="PyObject*">
+  <add-function signature="QT_TRANSLATE_NOOP3(PyObject@context@,PyObject@message@,PyObject@disambiguation@)" return-type="PyObject*">
     <inject-code class="target" position="beginning">
       <insert-template name="return_argument"><replace from="#" to="2"/></insert-template>
     </inject-code>
   </add-function>
-  <add-function signature="QT_TRANSLATE_NOOP_UTF8(PyObject)" return-type="PyObject*">
+  <add-function signature="QT_TRANSLATE_NOOP_UTF8(PyObject@message@)" return-type="PyObject*">
     <inject-code class="target" position="beginning">
       <insert-template name="return_argument"><replace from="#" to="1"/></insert-template>
     </inject-code>

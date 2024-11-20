@@ -268,7 +268,7 @@
         <inject-code class="native" position="beginning" file="../glue/qtnetwork.cpp"
                      snippet="qhostinfo-lookuphost-functor"/>
         <enum-type name="HostInfoError"/>
-        <add-function signature="lookupHost(const QString &amp;,PyCallable)">
+        <add-function signature="lookupHost(const QString &amp;@name@,PyCallable@callable@)">
             <inject-code class="target" position="beginning"
                          file="../glue/qtnetwork.cpp"
                          snippet="qhostinfo-lookuphost-callable"/>

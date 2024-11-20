@@ -147,7 +147,7 @@
     <object-type name="QJSEngine">
         <enum-type name="Extension" flags="Extensions"/>
         <enum-type name="ObjectOwnership"/>
-        <add-function signature="toScriptValue(const QVariant&amp;)" return-type="QJSValue">
+        <add-function signature="toScriptValue(const QVariant&amp;@value@)" return-type="QJSValue">
             <inject-code class="target" position="end" file="../glue/qtqml.cpp" snippet="qjsengine-toscriptvalue"/>
         </add-function>
     </object-type>

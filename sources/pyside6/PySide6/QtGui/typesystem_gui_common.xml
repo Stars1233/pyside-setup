@@ -185,11 +185,11 @@
     </modify-function>
   </object-type>
   <object-type name="QShortcut">
-    <add-function signature="QShortcut(QKeySequence&amp;,QObject*,PyCallable*,Qt::ShortcutContext=Qt::WindowShortcut)">
+    <add-function signature="QShortcut(QKeySequence&amp;@key@,QObject*@parent@,PyCallable*@callable@,Qt::ShortcutContext@context@=Qt::WindowShortcut)">
       <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qshortcut-1"/>
       <inject-code class="target" position="end" file="../glue/qtgui.cpp" snippet="qshortcut-2"/>
     </add-function>
-    <add-function signature="QShortcut(QKeySequence::StandardKey,QObject*,PyCallable*,Qt::ShortcutContext=Qt::WindowShortcut)">
+    <add-function signature="QShortcut(QKeySequence::StandardKey@standard_key@,QObject*@parent@,PyCallable*@callable@,Qt::ShortcutContext@context@=Qt::WindowShortcut)">
       <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qshortcut-1"/>
       <inject-code class="target" position="end" file="../glue/qtgui.cpp" snippet="qshortcut-2"/>
     </add-function>
@@ -248,7 +248,7 @@
         <insert-template name="fix_bool*"/>
       </inject-code>
     </modify-function>
-    <add-function signature="quadToQuad(QPolygonF&amp;,QPolygonF&amp;)" return-type="PyObject*" static="true">
+    <add-function signature="quadToQuad(QPolygonF&amp;@one@,QPolygonF&amp;@two@)" return-type="PyObject*" static="true">
       <inject-code file="../glue/qtgui.cpp" snippet="qtransform-quadtoquad"/>
     </add-function>
     <add-function signature="quadToSquare(QPolygonF &amp;)" return-type="PyObject*" static="true">
@@ -692,14 +692,14 @@
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
 
-    <add-function signature="QImage(QString&amp;,int,int,int,QImage::Format)">
+    <add-function signature="QImage(QString&amp;,int@width@,int@height@,int@bytes_per_line@,QImage::Format@format@)">
         <inject-code>
             <insert-template name="qimage_buffer_constructor">
                 <replace from="%ARGS" to="%2, %3, %4, %5"/>
             </insert-template>
         </inject-code>
     </add-function>
-    <add-function signature="QImage(QString&amp;,int,int,QImage::Format)">
+    <add-function signature="QImage(QString&amp;,int@width@,int@height@,QImage::Format@format@)">
         <inject-code>
             <insert-template name="qimage_buffer_constructor">
                 <replace from="%ARGS" to="%2, %3, %4"/>
@@ -812,7 +812,7 @@
     <!-- ### Constructor removed because we already have an overload using QString. -->
     <modify-function signature="QColor(const char*)" remove="all"/>
     <!-- ### -->
-    <add-function signature="QColor(QVariant)">
+    <add-function signature="QColor(QVariant@color@)">
         <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qcolor"/>
     </add-function>
     <!-- get* methods. Inject code -->
@@ -1184,10 +1184,10 @@
   <object-type name="QPainterPathStroker" copyable="false"/>
   <object-type name="QPixmapCache">
     <value-type name="Key"/>
-    <add-function signature="find(QPixmapCache::Key&amp;)">
+    <add-function signature="find(QPixmapCache::Key&amp;@key@)">
         <inject-code file="../glue/qtgui.cpp" snippet="qpixmapcache-find"/>
     </add-function>
-    <add-function signature="find(const QString&amp;)">
+    <add-function signature="find(const QString&amp;@key@)">
         <inject-code file="../glue/qtgui.cpp" snippet="qpixmapcache-find"/>
     </add-function>
   </object-type>
@@ -1463,7 +1463,7 @@
   <object-type name="QInputEvent"/>
   <object-type name="QKeyEvent"
                polymorphic-id-expression="%B-&gt;type() == QEvent::KeyPress || %B-&gt;type() == QEvent::KeyRelease || %B-&gt;type() == QEvent::ShortcutOverride">
-      <add-function signature="operator!=(QKeySequence::StandardKey)">
+      <add-function signature="operator!=(QKeySequence::StandardKey@standard_key@)">
           <inject-code class="target" file="../glue/qtgui.cpp" snippet="qkeyevent-operatornotequal"/>
       </add-function>
       <add-function signature="__repr__" return-type="str">
@@ -1883,13 +1883,13 @@
 
 
     <modify-function signature="drawConvexPolygon(const QPoint*,int)" remove="all"/>
-    <add-function signature="drawConvexPolygon(QList&lt;QPoint>)">
+    <add-function signature="drawConvexPolygon(QList&lt;QPoint>@points@)">
         <inject-code>
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
     </add-function>
     <modify-function signature="drawConvexPolygon(const QPointF*,int)" remove="all"/>
-    <add-function signature="drawConvexPolygon(QList&lt;QPointF>)">
+    <add-function signature="drawConvexPolygon(QList&lt;QPointF>@points@)">
         <inject-code>
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
@@ -1903,12 +1903,12 @@
     <!-- PYSIDE-1540: Preferably use the QPolygon overloads first to avoid
          a costly sequence type check on QPolygon. -->
     <modify-function signature="drawPoints(const QPoint*,int)" remove="all"/>
-    <add-function signature="drawPoints(QList&lt;QPoint>)" overload-number="2">
+    <add-function signature="drawPoints(QList&lt;QPoint>@points@)" overload-number="2">
         <inject-code>
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
     </add-function>
-    <add-function signature="drawPoints(QList&lt;QPointF>)" overload-number="3">
+    <add-function signature="drawPoints(QList&lt;QPointF>@points@)" overload-number="3">
         <inject-code>
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
@@ -1927,15 +1927,15 @@
     </add-function>
 
     <modify-function signature="drawPolygon(const QPoint*,int,Qt::FillRule)" remove="all"/>
-    <add-function signature="drawPolygon(QList&lt;QPoint>,Qt::FillRule)">
+    <add-function signature="drawPolygon(QList&lt;QPoint>@points@,Qt::FillRule@fill_rule@)">
         <inject-code file="../glue/qtgui.cpp" snippet="qpainter-drawpolygon"/>
     </add-function>
     <modify-function signature="drawPolygon(const QPointF*,int,Qt::FillRule)" remove="all"/>
-    <add-function signature="drawPolygon(QList&lt;QPointF>,Qt::FillRule)">
+    <add-function signature="drawPolygon(QList&lt;QPointF>@points@,Qt::FillRule@fill_rule@)">
         <inject-code file="../glue/qtgui.cpp" snippet="qpainter-drawpolygon"/>
     </add-function>
     <modify-function signature="drawPolyline(const QPoint*,int)" remove="all"/>
-    <add-function signature="drawPolyline(QList&lt;QPoint>)">
+    <add-function signature="drawPolyline(QList&lt;QPoint>@points@)">
         <inject-code>
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
@@ -1945,7 +1945,7 @@
     <modify-function signature="drawPolyline(const QPointF*,int)" remove="all"/>
     <modify-function signature="drawPolyline(const QPolygon&amp;)" overload-number="0"/>
     <modify-function signature="drawPolyline(const QPolygonF&amp;)" overload-number="1"/>
-    <add-function signature="drawPolyline(QList&lt;QPointF>)">
+    <add-function signature="drawPolyline(QList&lt;QPointF@points@>)">
         <inject-code>
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
@@ -2037,7 +2037,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <add-function signature="QMatrix2x2(PySequence*)">
+    <add-function signature="QMatrix2x2(PySequence*@elements@)">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_constructor">
           <replace from="%SIZE" to="4"/>
@@ -2074,7 +2074,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <add-function signature="QMatrix2x3(PySequence*)">
+    <add-function signature="QMatrix2x3(PySequence*@elements@)">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_constructor">
           <replace from="%SIZE" to="6"/>
@@ -2111,7 +2111,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <add-function signature="QMatrix2x4(PySequence*)">
+    <add-function signature="QMatrix2x4(PySequence*@elements@)">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_constructor">
           <replace from="%SIZE" to="8"/>
@@ -2148,7 +2148,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <add-function signature="QMatrix3x2(PySequence*)">
+    <add-function signature="QMatrix3x2(PySequence*@elements@)">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_constructor">
           <replace from="%SIZE" to="6"/>
@@ -2185,7 +2185,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <add-function signature="QMatrix3x3(PySequence*)">
+    <add-function signature="QMatrix3x3(PySequence*@elements@)">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_constructor">
           <replace from="%SIZE" to="9"/>
@@ -2222,7 +2222,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <add-function signature="QMatrix3x4(PySequence*)">
+    <add-function signature="QMatrix3x4(PySequence*@elements@)">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_constructor">
           <replace from="%SIZE" to="12"/>
@@ -2259,7 +2259,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <add-function signature="QMatrix4x2(PySequence*)">
+    <add-function signature="QMatrix4x2(PySequence*@elements@)">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_constructor">
           <replace from="%SIZE" to="8"/>
@@ -2296,7 +2296,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <add-function signature="QMatrix4x3(PySequence*)">
+    <add-function signature="QMatrix4x3(PySequence*@elements@)">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_constructor">
           <replace from="%SIZE" to="12"/>
@@ -2631,7 +2631,7 @@
       <include file-name="qtguihelper.h" location="local"/>
     </extra-includes>
     <modify-function signature="QGuiApplication(int&amp;,char**,int)" access="private"/>
-    <add-function signature="QGuiApplication(QStringList)">
+    <add-function signature="QGuiApplication(QStringList@arguments@)">
         <inject-code file="../glue/qtgui.cpp" snippet="qguiapplication-1"/>
     </add-function>
     <add-function signature="QGuiApplication()">

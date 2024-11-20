@@ -108,7 +108,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   </object-type>
 
   <object-type name="QSignalTransition">
-    <add-function signature="QSignalTransition(PyObject*,QState*)">
+    <add-function signature="QSignalTransition(PyObject*@signal@,QState*@state@)">
         <modify-argument index="2">
             <replace-default-expression with="0"/>
         </modify-argument>
@@ -146,7 +146,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
     <!-- FIXME: the proper signature for this added function would be something like
          addTransition(PySide2.QtCore.Signal, QAbstractState*)
          but that depends on bug #362. -->
-    <add-function signature="addTransition(PyObject*,QAbstractState*)" return-type="QSignalTransition*">
+    <add-function signature="addTransition(PyObject*@signal@,QAbstractState*)" return-type="QSignalTransition*">
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>

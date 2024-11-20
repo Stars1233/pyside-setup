@@ -182,6 +182,7 @@ default_weights = {
     bool:        101,   # noqa E:241
     int:         102,   # noqa E:241
     float:       103,   # noqa E:241
+    object:      500,   # noqa E:241
 }
 
 
@@ -233,7 +234,7 @@ def get_ordering_key(anno):
     # In 3.10 only None has no name. 3.9 is worse concerning typing constructs.
     name = anno.__name__ if hasattr(anno, "__name__") else "None"
     # Put typing containers after the plain type.
-    if typing_type and not is_union:
+    if typing_type:
         return (-leng + 100, parts, name)
     return (-leng, parts, name)
 
