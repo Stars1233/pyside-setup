@@ -11,7 +11,7 @@ class PySideEasingCurveFunctor
 {
     public:
         static void init();
-        static QEasingCurve::EasingFunction createCustomFuntion(PyObject *parent, PyObject *pyFunc);
+        static QEasingCurve::EasingFunction createCustomFunction(PyObject *parent, PyObject *pyFunc);
 
         qreal operator()(qreal progress);
 

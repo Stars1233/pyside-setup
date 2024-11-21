@@ -69,7 +69,7 @@ void PySideEasingCurveFunctor::init()
     CustomFunctions<MAX_CUSTOM_FUNCTIONS-1>::init();
 }
 
-QEasingCurve::EasingFunction PySideEasingCurveFunctor::createCustomFuntion(PyObject *parent, PyObject *pyFunc)
+QEasingCurve::EasingFunction PySideEasingCurveFunctor::createCustomFunction(PyObject *parent, PyObject *pyFunc)
 {
     for(int i=0; i < MAX_CUSTOM_FUNCTIONS; i++) {
         CustomFunctionsData &data = CustomFunctionsData::m_list[i];

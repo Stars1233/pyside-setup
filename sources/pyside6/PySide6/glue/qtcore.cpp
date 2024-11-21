@@ -1233,7 +1233,7 @@ PySideEasingCurveFunctor::init();
 // @snippet qeasingcurve
 
 // @snippet qeasingcurve-setcustomtype
-QEasingCurve::EasingFunction func = PySideEasingCurveFunctor::createCustomFuntion(%PYSELF, %PYARG_1);
+QEasingCurve::EasingFunction func = PySideEasingCurveFunctor::createCustomFunction(%PYSELF, %PYARG_1);
 if (func)
     %CPPSELF.%FUNCTION_NAME(func);
 // @snippet qeasingcurve-setcustomtype
