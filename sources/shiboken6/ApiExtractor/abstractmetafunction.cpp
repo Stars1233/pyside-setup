@@ -736,6 +736,11 @@ void AbstractMetaFunction::setArguments(const AbstractMetaArgumentList &argument
     d->m_arguments = arguments;
 }
 
+void AbstractMetaFunction::setArgumentName(qsizetype a, const QString &name)
+{
+    d->m_arguments[a].setName(name);
+}
+
 void AbstractMetaFunction::addArgument(const AbstractMetaArgument &argument)
 {
     d->m_arguments << argument;

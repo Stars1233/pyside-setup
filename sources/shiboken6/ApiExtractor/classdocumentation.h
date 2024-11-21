@@ -36,6 +36,7 @@ struct FunctionDocumentationQuery
 /// A function in a WebXML/doxygen document
 struct FunctionDocumentation : public FunctionDocumentationQuery
 {
+    QStringList parameterNames;
     QString signature;
     QString returnType;
     QString description;

@@ -161,28 +161,33 @@ static QString formatFunctionArgTypeQuery(const AbstractMetaType &metaType)
     return result;
 }
 
-QString QtDocParser::functionDocumentation(const QString &sourceFileName,
-                                           const ClassDocumentation &classDocumentation,
-                                           const AbstractMetaClassCPtr &metaClass,
-                                           const AbstractMetaFunctionCPtr &func,
-                                           QString *errorMessage)
+QtDocParser::FunctionDocumentationOpt
+    QtDocParser::functionDocumentation(const QString &sourceFileName,
+                                       const ClassDocumentation &classDocumentation,
+                                       const AbstractMetaClassCPtr &metaClass,
+                                       const AbstractMetaFunctionCPtr &func, QString *errorMessage)
 {
     errorMessage->clear();
 
-    const QString docString =
-        queryFunctionDocumentation(sourceFileName, classDocumentation, metaClass,
-                                   func, errorMessage);
+    FunctionDocumentationOpt orig = queryFunctionDocumentation(sourceFileName, classDocumentation, metaClass,
+                                                               func, errorMessage);
+    if (!orig.has_value() || orig.value().description.isEmpty())
+        return orig;
 
     const auto funcModifs = DocParser::getXpathDocModifications(func, metaClass);
-    return docString.isEmpty() || funcModifs.isEmpty()
-        ? docString : applyDocModifications(funcModifs, docString);
+    if (funcModifs.isEmpty())
+        return orig;
+
+    FunctionDocumentation modified = orig.value();
+    modified.description = applyDocModifications(funcModifs, orig->description);
+    return modified;
 }
 
-QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
-                                                const ClassDocumentation &classDocumentation,
-                                                const AbstractMetaClassCPtr &metaClass,
-                                                const AbstractMetaFunctionCPtr &func,
-                                                QString *errorMessage)
+QtDocParser::FunctionDocumentationOpt
+    QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
+                                            const ClassDocumentation &classDocumentation,
+                                            const AbstractMetaClassCPtr &metaClass,
+                                            const AbstractMetaFunctionCPtr &func, QString *errorMessage)
 {
     // Search candidates by name and const-ness
     FunctionDocumentationList candidates =
@@ -190,7 +195,7 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
     if (candidates.isEmpty()) {
         *errorMessage = msgCannotFindDocumentation(sourceFileName, func.get())
                         + u" (no matches)"_s;
-        return {};
+        return std::nullopt;
     }
 
     // Try an exact query
@@ -223,7 +228,7 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
     }
 
     if (index != -1)
-        return candidates.at(index).description;
+        return candidates.at(index);
 
     // Fallback: Try matching by argument count
     const auto parameterCount = func->arguments().size();
@@ -236,12 +241,12 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
         QTextStream(errorMessage) << msgFallbackForDocumentation(sourceFileName, func.get())
             << "\n  Falling back to \"" << match.signature
             << "\" obtained by matching the argument count only.";
-        return candidates.constFirst().description;
+        return candidates.constFirst();
     }
 
     QTextStream(errorMessage) << msgCannotFindDocumentation(sourceFileName, func.get())
         << " (" << candidates.size() << " candidates matching the argument count)";
-    return {};
+    return std::nullopt;
 }
 
 // Extract the <brief> section from a WebXML (class) documentation and remove it
@@ -261,6 +266,23 @@ static QString extractBrief(QString *value)
                       u"<rst> More_...</rst>"_s);
     value->remove(briefStart, briefLength);
     return briefValue;
+}
+
+// Apply the documentation parsed from WebXML to a AbstractMetaFunction and complete argument
+// names missing from parsed headers using the WebXML names (exact match only).
+static void applyDocumentation(const FunctionDocumentation &funcDoc,
+                               const QString &sourceFileName,
+                               const AbstractMetaFunctionPtr &func)
+{
+    const Documentation documentation(funcDoc.description, {}, sourceFileName);
+    func->setDocumentation(documentation);
+
+    if (const auto argCount = func->arguments().size(); argCount == funcDoc.parameterNames.size()) {
+        for (qsizetype a = 0; a < argCount; ++a) {
+            if (!func->arguments().at(a).hasName() && !funcDoc.parameterNames.at(a).isEmpty())
+                func->setArgumentName(a, funcDoc.parameterNames.at(a));
+        }
+    }
 }
 
 // Find the webxml file for global functions/enums
@@ -307,13 +329,13 @@ void  QtDocParser::fillGlobalFunctionDocumentation(const AbstractMetaFunctionPtr
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return;
     }
-    const QString detailed =
-        functionDocumentation(sourceFileName, classDocumentationO.value(),
-                              {}, f, &errorMessage);
-    if (!errorMessage.isEmpty())
+
+    const auto funcDocOpt = functionDocumentation(sourceFileName, classDocumentationO.value(),
+                                                  {}, f, &errorMessage);
+    if (funcDocOpt.has_value())
+        applyDocumentation(funcDocOpt.value(), sourceFileName, f);
+    else if (!errorMessage.isEmpty())
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
-    Documentation documentation(detailed, {}, sourceFileName);
-    f->setDocumentation(documentation);
 }
 
 void QtDocParser::fillGlobalEnumDocumentation(AbstractMetaEnum &e)
@@ -395,13 +417,14 @@ QString QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
     //Functions Documentation
     const auto &funcs = DocParser::documentableFunctions(metaClass);
     for (const auto &func : funcs) {
-        const QString detailed =
-            functionDocumentation(sourceFileName, classDocumentation,
-                                  metaClass, func, &errorMessage);
-        if (!errorMessage.isEmpty())
+        const auto funcDocOpt = functionDocumentation(sourceFileName, classDocumentation,
+                                                      metaClass, func, &errorMessage);
+        if (funcDocOpt.has_value()) {
+            applyDocumentation(funcDocOpt.value(), sourceFileName,
+                               std::const_pointer_cast<AbstractMetaFunction>(func));
+        } else if (!errorMessage.isEmpty()) {
             qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
-        const Documentation documentation(detailed, {}, sourceFileName);
-        std::const_pointer_cast<AbstractMetaFunction>(func)->setDocumentation(documentation);
+        }
     }
 #if 0
     // Fields

@@ -137,8 +137,11 @@ static void parseWebXmlElement(WebXmlCodeTag tag, const QXmlStreamAttributes &at
     }
         break;
     case WebXmlCodeTag::Parameter:
-        Q_ASSERT(!cd->functions.isEmpty());
-        cd->functions.last().parameters.append(attributes.value(u"type"_s).toString());
+        Q_ASSERT(!cd->functions.isEmpty()); {
+        FunctionDocumentation &last = cd->functions.last();
+        last.parameters.append(attributes.value(u"type"_s).toString());
+        last.parameterNames.append(attributes.value(u"name"_s).toString());
+    }
         break;
     case WebXmlCodeTag::Property: {
         PropertyDocumentation pd;
