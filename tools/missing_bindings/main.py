@@ -31,7 +31,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 qt_documentation_website_prefixes = {
-    "6.5": "https://doc.qt.io/qt-6/",
+    "6.8": "https://doc.qt.io/qt-6/",
     "dev": "https://doc-snapshots.qt.io/qt6-dev/",
 }
 
@@ -60,8 +60,8 @@ def get_parser():
     parser.add_argument(
         "--qt-version",
         "-v",
-        default="6.5",
-        choices=["6.5", "dev"],
+        default="6.8",
+        choices=["6.8", "dev"],
         type=str,
         dest="version",
         help="the Qt version to use to check for types",
@@ -322,7 +322,7 @@ if __name__ == "__main__":
         plt.xticks(rotation=45)
         plt.ylabel("Types Count")
         figure = plt.gcf()
-        figure.set_size_inches(32, 18) # set to full_screen
+        figure.set_size_inches(32, 18)  # set to full_screen
         plt.savefig("missing_bindings_comparison_plot.png", bbox_inches='tight')
         print(f"Plot saved in {Path.cwd() / 'missing_bindings_comparison_plot.png'}\n")
 
