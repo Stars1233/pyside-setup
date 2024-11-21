@@ -514,7 +514,10 @@ PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[int](yearNumber));
 // @snippet qdatetime-1
 QDate date(%1, %2, %3);
 QTime time(%4, %5, %6, %7);
-%0 = new %TYPE(date, time, Qt::TimeSpec(%8));
+%0 = new %TYPE(date, time,
+               Qt::TimeSpec(%8) == Qt::UTC
+               ? QTimeZone(QTimeZone::UTC) : QTimeZone(QTimeZone::LocalTime));
+Shiboken::Warnings::warnDeprecated("QDateTime", "QDateTime(..., Qt::TimeSpec spec)");
 // @snippet qdatetime-1
 
 // @snippet qdatetime-2
@@ -526,7 +529,9 @@ QTime time(%4, %5, %6);
 // @snippet qdatetime-3
 QDate date(%1, %2, %3);
 QTime time(%4, %5, %6, %7);
-%0 = new %TYPE(date, time, %8);
+%0 = new %TYPE(date, time,
+               %8 == Qt::UTC ? QTimeZone(QTimeZone::UTC) : QTimeZone(QTimeZone::LocalTime));
+Shiboken::Warnings::warnDeprecated("QDateTime", "QDateTime(..., Qt::TimeSpec spec)");
 // @snippet qdatetime-3
 
 // @snippet qdatetime-topython
