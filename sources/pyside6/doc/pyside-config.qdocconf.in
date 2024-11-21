@@ -14,6 +14,22 @@ spurious                 += "Hostile character .*"
 #excludes qdoc statements that are not relevant for PySide6
 defines                  += qtforpython
 
+# Dummies for Apple platform versions
+macro.macOSMinSdkVersion = ""
+macro.macOSMinXcodeVersion = ""
+macro.macOSMinVersion = ""
+macro.macOSMaxVersionTested = ""
+
+macro.iOSMinSdkVersion = ""
+macro.iOSMinXcodeVersion = ""
+macro.iOSMinVersion = ""
+macro.iOSMaxVersionTested = ""
+
+macro.visionOSMinSdkVersion = ""
+macro.visionOSMinXcodeVersion = ""
+macro.visionOSMinVersion = ""
+macro.visionOSMaxVersionTested = ""
+
 includepaths += \
     -I @QT_INCLUDE_DIR@ \
     -I @mkspecInclude@ \
