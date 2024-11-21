@@ -101,11 +101,11 @@ class TestPySide6DeployWidgets(DeployTestBase):
         self.deployment_files = self.temp_example_widgets / "deployment"
         # All the plugins included. This is different from plugins_nuitka, because Nuitka bundles
         # some plugins by default
-        self.all_plugins = ["accessiblebridge", "egldeviceintegrations", "generic", "iconengines",
+        self.all_plugins = ["egldeviceintegrations", "generic", "iconengines",
                             "imageformats", "platforminputcontexts", "platforms",
-                            "platforms/darwin", "platformthemes", "styles", "xcbglintegrations"]
+                            "platformthemes", "styles", "xcbglintegrations"]
         # Plugins that needs to be passed to Nuitka
-        plugins_nuitka = ("accessiblebridge,platforminputcontexts,platforms/darwin")
+        plugins_nuitka = ("platforminputcontexts")
         self.expected_run_cmd = (
             f"{sys.executable} -m nuitka {str(self.main_file)} --follow-imports"
             f" --enable-plugin=pyside6 --output-dir={str(self.deployment_files)} --quiet"
@@ -152,7 +152,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
         self.assertTrue(config_obj.get_value("app", "project_dir").endswith("tetrix"))
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
         self.assertEqual(config_obj.get_value("python", "packages"),
-                         "Nuitka==2.4.8")
+                         "Nuitka==2.5.1")
         self.assertEqual(config_obj.get_value("qt", "qml_files"), "")
         equ_base = "--quiet --noinclude-qt-translations"
         equ_value = equ_base + " --static-libpython=no" if is_pyenv_python() else equ_base
@@ -207,14 +207,14 @@ class TestPySide6DeployQml(DeployTestBase):
 
         # All the plugins included. This is different from plugins_nuitka, because Nuitka bundles
         # some plugins by default
-        self.all_plugins = ["accessiblebridge", "egldeviceintegrations", "generic", "iconengines",
+        self.all_plugins = ["egldeviceintegrations", "generic", "iconengines",
                             "imageformats", "networkaccess", "networkinformation",
-                            "platforminputcontexts", "platforms", "platforms/darwin",
+                            "platforminputcontexts", "platforms",
                             "platformthemes", "qmltooling", "scenegraph", "tls",
                             "xcbglintegrations"]
         # Plugins that needs to be passed to Nuitka
-        plugins_nuitka = ("accessiblebridge,networkaccess,networkinformation,platforminputcontexts,"
-                          "platforms/darwin,qml,qmltooling,scenegraph")
+        plugins_nuitka = ("networkaccess,networkinformation,platforminputcontexts,"
+                          "qml,qmltooling,scenegraph")
         self.expected_run_cmd = (
             f"{sys.executable} -m nuitka {str(self.main_file)} --follow-imports"
             f" --enable-plugin=pyside6 --output-dir={str(self.deployment_files)} --quiet"
@@ -268,7 +268,7 @@ class TestPySide6DeployQml(DeployTestBase):
         self.assertTrue(config_obj.get_value("app", "project_dir").endswith("editingmodel"))
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
         self.assertEqual(config_obj.get_value("python", "packages"),
-                         "Nuitka==2.4.8")
+                         "Nuitka==2.5.1")
         self.assertEqual(config_obj.get_value("qt", "qml_files"), "main.qml,MovingRectangle.qml")
         equ_base = "--quiet --noinclude-qt-translations"
         equ_value = equ_base + " --static-libpython=no" if is_pyenv_python() else equ_base
@@ -319,9 +319,9 @@ class TestPySide6DeployWebEngine(DeployTestBase):
     @patch("deploy_lib.dependency_util.QtDependencyReader.get_qt_libs_dir")
     def testWebEngineQuickDryRun(self, mock_sitepackages, mock_plugins):
         mock_sitepackages.return_value = Path(_get_qt_lib_dir())
-        all_plugins = ["accessiblebridge", "egldeviceintegrations", "generic", "iconengines",
+        all_plugins = ["egldeviceintegrations", "generic", "iconengines",
                        "imageformats", "networkaccess", "networkinformation",
-                       "platforminputcontexts", "platforms", "platforms/darwin",
+                       "platforminputcontexts", "platforms",
                        "platformthemes", "qmltooling", "scenegraph", "tls",
                        "xcbglintegrations"]
         mock_plugins.return_value = all_plugins
@@ -331,8 +331,8 @@ class TestPySide6DeployWebEngine(DeployTestBase):
         main_file = self.temp_example_webenginequick / "quicknanobrowser.py"
         deployment_files = self.temp_example_webenginequick / "deployment"
         # Plugins that needs to be passed to Nuitka
-        plugins_nuitka = ("accessiblebridge,networkaccess,networkinformation,platforminputcontexts,"
-                          "platforms/darwin,qml,qmltooling,scenegraph")
+        plugins_nuitka = ("networkaccess,networkinformation,platforminputcontexts,"
+                          "qml,qmltooling,scenegraph")
         qml_files = [
             "ApplicationRoot.qml",
             "BrowserDialog.qml",
