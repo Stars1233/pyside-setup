@@ -24,6 +24,7 @@ from dataclasses import dataclass
 from enum import IntEnum, Enum
 from pathlib import Path
 from textwrap import dedent
+from collections import defaultdict
 
 
 class Format(Enum):
@@ -81,6 +82,16 @@ Examples
  directory.
 
 """
+
+
+def tutorial_headline(path: str):
+    if "tutorials/extending-qml/chapter" in path:
+        return "Tutorial: Writing QML Extensions with Python"
+    if "tutorials/extending-qml-advanced/advanced" in path:
+        return "Tutorial: Writing advanced QML Extensions with Python"
+    if "tutorials/finance_manager" in path:
+        return "Tutorial: Finance Manager - Integrating PySide6 with SQLAlchemy and FastAPI"
+    return ""
 
 
 def ind(x):
@@ -206,6 +217,7 @@ class ExampleData:
     has_doc: bool
     img_doc: Path
     headline: str
+    tutorial: str
 
 
 def get_module_gallery(examples):
@@ -215,8 +227,8 @@ def get_module_gallery(examples):
     """
 
     gallery = (
-        f"{ind(1)}.. grid:: 1 4 4 4\n"
-        f"{ind(2)}:gutter: 2\n\n"
+        f"{ind(1)}.. grid:: 1 3 3 3\n"
+        f"{ind(2)}:gutter: 3\n\n"
     )
 
     # Iteration per rows
@@ -537,6 +549,7 @@ def write_example(example_root, pyproject_file, pyside_example=True):
     result.abs_path = str(p.example_dir)
     result.has_doc = bool(p.src_doc_file_path)
     result.img_doc = p.src_screenshot
+    result.tutorial = tutorial_headline(result.abs_path)
 
     files = []
     try:
@@ -607,8 +620,13 @@ def write_example(example_root, pyproject_file, pyside_example=True):
 
 
 def example_sort_key(example: ExampleData):
-    name = example.example
-    return "AAA" + name if "gallery" in name else name
+    result = ""
+    if example.tutorial:
+        result += "AA:" + example.tutorial + ":"
+    elif "gallery" in example.example:
+        result += "AB:"
+    result += example.example
+    return result
 
 
 def sort_examples(example):
@@ -693,11 +711,34 @@ if __name__ == "__main__":
         f.write(BASE_CONTENT)
         for module_name in sorted(examples.keys(), key=module_sort_key):
             e = examples.get(module_name)
-            for i in e:
-                index_files.append(i.doc_file)
+            tutorial_examples = defaultdict(list)
+            non_tutorial_examples = []
+
+            for example in e:
+                index_files.append(example.doc_file)
+                if example.tutorial:
+                    tutorial_examples[example.tutorial].append(example)
+                else:
+                    non_tutorial_examples.append(example)
+
             title = module_title(module_name)
             f.write(f".. dropdown:: {title}\n\n")
-            f.write(get_module_gallery(e))
+
+            # Write tutorial examples under their tutorial names
+            for tutorial_name, tutorial_exs in tutorial_examples.items():
+                f.write(f"{ind(1)}.. raw:: html\n\n")
+                f.write(f"{ind(2)}<p class='tutorial-subtitle'>{tutorial_name}</p>\n\n")
+                f.write(get_module_gallery(tutorial_exs))
+
+            # If there are non-tutorial examples and tutorials exist
+            if tutorial_examples and non_tutorial_examples:
+                f.write(f"{ind(1)}.. raw:: html\n\n")
+                f.write(f"{ind(2)}<p class='tutorial-subtitle'>Other Examples</p>\n\n")
+                f.write(get_module_gallery(non_tutorial_examples))
+            # If no tutorials exist, list all examples
+            elif not tutorial_examples:
+                f.write(get_module_gallery(e))
+
         f.write("\n\n")
         f.write(footer_index)
         for i in index_files:
