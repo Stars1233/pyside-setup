@@ -46,4 +46,6 @@ if __name__ == '__main__':
         fsm = engine.singletonInstance("FileSystemModule", "FileSystemModel")
         fsm.setInitialDirectory(args[0])
 
-    sys.exit(app.exec())
+    exit_code = app.exec()
+    del engine
+    sys.exit(exit_code)

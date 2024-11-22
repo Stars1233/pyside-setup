@@ -49,6 +49,6 @@ if __name__ == '__main__':
     if not engine.rootObjects():
         sys.exit(-1)
 
-    ex = QCoreApplication.exec()
+    exit_code = QCoreApplication.exec()
     del engine
-    sys.exit(ex)
+    sys.exit(exit_code)

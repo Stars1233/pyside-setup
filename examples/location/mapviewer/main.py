@@ -71,6 +71,6 @@ if __name__ == "__main__":
     QMetaObject.invokeMethod(items[0], "initializeProviders",
                              Q_ARG("QVariant", parameters))
 
-    ex = application.exec()
+    exit_code = application.exec()
     del engine
-    sys.exit(ex)
+    sys.exit(exit_code)

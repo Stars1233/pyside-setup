@@ -243,4 +243,6 @@ if __name__ == "__main__":
         if args.config == "resizeToItem":
             logging.info("qml: Not a QQuickview item. resizeToItem is done by default")
 
-    sys.exit(app.exec())
+    exit_code = app.exec()
+    del engine
+    sys.exit(exit_code)

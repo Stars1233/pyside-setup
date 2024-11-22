@@ -11,8 +11,8 @@ This example shows how to customize Qt Quick Controls by implementing a simple f
 # import FileSystemModule.rc_icons
 # import FileSystemModule.rc_app
 
-from scheme_manager import SchemeManager
-from editormodels import FileSystemModel
+from scheme_manager import SchemeManager  # noqa: F401
+from editormodels import FileSystemModel  # noqa: F401
 import PySide6
 from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
@@ -48,4 +48,6 @@ if __name__ == '__main__':
         fsm = engine.singletonInstance("FileSystemModule", "FileSystemModel")
         fsm.setInitialDirectory(args[0])
 
-    sys.exit(app.exec())
+    exit_code = app.exec()
+    del engine
+    sys.exit(exit_code)

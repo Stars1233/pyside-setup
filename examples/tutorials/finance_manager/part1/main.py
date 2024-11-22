@@ -20,6 +20,6 @@ if __name__ == '__main__':
     if not engine.rootObjects():
         sys.exit(-1)
 
-    ex = app.exec()
+    exit_code = app.exec()
     del engine
-    sys.exit(ex)
+    sys.exit(exit_code)

@@ -68,4 +68,6 @@ if __name__ == '__main__':
 
     QMetaObject.invokeMethod(engine.rootObjects()[0], "load", Q_ARG("QVariant", url))
 
-    app.exec()
+    exit_code = app.exec()
+    del engine
+    sys.exit(exit_code)

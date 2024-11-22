@@ -50,4 +50,6 @@ if __name__ == "__main__":
     window = rootObjects[0]
     window.setIcon(QIcon(':/qt-project.org/logos/pysidelogo.png'))
 
-    sys.exit(app.exec())
+    exit_code = app.exec()
+    del engine
+    sys.exit(exit_code)
