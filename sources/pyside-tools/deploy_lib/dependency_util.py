@@ -143,7 +143,7 @@ def find_pyside_modules(project_dir: Path, extra_ignore_dirs: list[Path] = None,
             for node in ast.walk(tree):
                 if isinstance(node, ast.ImportFrom):
                     main_mod_name = node.module
-                    if main_mod_name.startswith("PySide6"):
+                    if main_mod_name and main_mod_name.startswith("PySide6"):
                         if main_mod_name == "PySide6":
                             # considers 'from PySide6 import QtCore'
                             for imported_module in node.names:
