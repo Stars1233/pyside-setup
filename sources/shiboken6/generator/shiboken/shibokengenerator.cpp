@@ -1857,7 +1857,13 @@ bool ShibokenGenerator::injectedCodeCallsCppFunction(const GeneratorContext &con
 
 bool ShibokenGenerator::useOverrideCaching(const AbstractMetaClassCPtr &metaClass)
 {
-    return metaClass->isPolymorphic();
+    return checkAttroFunctionNeeds(metaClass).testFlag(AttroCheckFlag::SetattroMethodOverride);
+}
+
+bool ShibokenGenerator::isVirtualOverride(const AbstractMetaFunctionCPtr &f)
+{
+    return f->isVirtual() && !f->isDestructor() &&
+        ShibokenGenerator::functionGeneration(f).testFlag(FunctionGenerationFlag::VirtualMethod);
 }
 
 ShibokenGenerator::AttroCheck
@@ -1878,8 +1884,11 @@ ShibokenGenerator::AttroCheck
     }
     if (usePySideExtensions() && metaClass->qualifiedCppName() == qObjectT)
         result |= AttroCheckFlag::SetattroQObject;
-    if (useOverrideCaching(metaClass))
-        result |= AttroCheckFlag::SetattroMethodOverride;
+    if (metaClass->isPolymorphic()) {
+        const auto &funcs = metaClass->functions();
+        if (std::any_of(funcs.cbegin(), funcs.cend(), isVirtualOverride))
+            result |= AttroCheckFlag::SetattroMethodOverride;
+    }
     if (metaClass->queryFirstFunction(metaClass->functions(),
                                       FunctionQueryOption::SetAttroFunction)) {
         result |= AttroCheckFlag::SetattroUser;

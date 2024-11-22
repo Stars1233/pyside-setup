@@ -376,6 +376,7 @@ private:
     static bool classNeedsGetattroOverloadFunctionImpl(const FunctionGroups &functionGroups);
     static AttroCheck checkAttroFunctionNeedsImpl(const AbstractMetaClassCPtr &metaClass,
                                                   const FunctionGroups &functionGroups);
+    static bool isVirtualOverride(const AbstractMetaFunctionCPtr &f);
 
     QString translateTypeForWrapperMethod(const AbstractMetaType &cType,
                                           const AbstractMetaClassCPtr &context,

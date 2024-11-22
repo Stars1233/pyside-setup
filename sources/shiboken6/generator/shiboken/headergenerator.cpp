@@ -247,8 +247,6 @@ void HeaderGenerator::writeWrapperClassDeclaration(TextStream &s,
         if (generation.testFlag(FunctionGenerationFlag::VirtualMethod))
             maxOverrides++;
     }
-    if (!maxOverrides)
-        maxOverrides = 1;
 
     //destructor
     // PYSIDE-504: When C++ 11 is used, then the destructor must always be declared.
@@ -284,8 +282,13 @@ void *qt_metacast(const char *_clname) override;
     if (usePySideExtensions())
         s << "static void pysideInitQtMetaTypes();\n";
 
-    s << "void resetPyMethodCache();\n"
-        << outdent << "private:\n" << indent;
+    const bool needsMethodCache = useOverrideCaching(metaClass);
+    Q_ASSERT(maxOverrides > 0 || !needsMethodCache);
+
+    if (needsMethodCache)
+        s << "void resetPyMethodCache();\n";
+
+    s << outdent << "private:\n" << indent;
 
     if (!metaClass->userAddedPythonOverrides().isEmpty()) {
         for (const auto &f : metaClass->userAddedPythonOverrides())
@@ -293,14 +296,14 @@ void *qt_metacast(const char *_clname) override;
         s << '\n';
     }
 
-    s << "mutable bool m_PyMethodCache[" << maxOverrides << "]";
-    if (maxOverrides > 0) {
-        s << "= {false";
+    if (needsMethodCache) {
+        s << "mutable bool m_PyMethodCache[" << maxOverrides << "] = {false";
         for (int i = 1; i < maxOverrides; ++i)
             s << ", false";
-        s << '}';
+        s << "};\n";
     }
-    s << ";\n" << outdent << "};\n\n";
+
+    s << outdent << "};\n\n";
 }
 
 // Write an inline wrapper around a function

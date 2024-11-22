@@ -692,7 +692,8 @@ void CppGenerator::generateClass(TextStream &s,
         }
 
         int maxOverrides = 0;
-        writeCacheResetNative(s, classContext);
+        if (useOverrideCaching(classContext.metaClass()))
+            writeCacheResetNative(s, classContext);
         for (const auto &func : metaClass->functions()) {
             const auto generation = functionGeneration(func);
             if (generation.testFlag(FunctionGenerationFlag::WrapperConstructor))
@@ -1309,9 +1310,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     writeFuncNameVar(s, func, funcName);
     s << "Shiboken::AutoDecRef " << PYTHON_OVERRIDE_VAR
         << "(Shiboken::BindingManager::instance().getOverride(this, nameCache, funcName));\n"
-        << "if (" << PYTHON_OVERRIDE_VAR << ".isNull()) {\n" << indent;
-    if (useOverrideCaching(func->ownerClass()))
-        s << "m_PyMethodCache[" << cacheIndex << "] = true;\n";
+        << "if (" << PYTHON_OVERRIDE_VAR << ".isNull()) {\n" << indent
+        << "m_PyMethodCache[" << cacheIndex << "] = true;\n";
     writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
                               returnStatement.statement, true);
     s << outdent << "}\n\n"; //WS
