@@ -275,6 +275,19 @@ static PyObject *get_signature(PyObject * /* self */, PyObject *args)
 
 ////////////////////////////////////////////////////////////////////////////
 //
+// make_snake_case_name  --  make efficient name change available in Python
+//
+//
+
+static PyObject *make_snake_case_name(PyObject * /* self */, PyObject *arg)
+{
+    if (!PyUnicode_Check(arg))
+        return PyErr_Format(PyExc_TypeError, "%S is not a string");
+    return Shiboken::String::getSnakeCaseName(arg, true);
+}
+
+////////////////////////////////////////////////////////////////////////////
+//
 // feature_import  --  special handling for `from __feature__ import ...`
 //
 // The actual function is implemented in Python.
@@ -309,9 +322,12 @@ static PyObject *feature_import(PyObject * /* self */, PyObject *args, PyObject 
 }
 
 PyMethodDef signature_methods[] = {
-    {"__feature_import__", (PyCFunction)feature_import, METH_VARARGS | METH_KEYWORDS, nullptr},
-    {"get_signature", (PyCFunction)get_signature, METH_VARARGS,
+    {"__feature_import__", reinterpret_cast<PyCFunction>(feature_import),
+        METH_VARARGS | METH_KEYWORDS, nullptr},
+    {"get_signature", reinterpret_cast<PyCFunction>(get_signature), METH_VARARGS,
         "get the signature, passing an optional string parameter"},
+    {"make_snake_case_name", reinterpret_cast<PyCFunction>(make_snake_case_name), METH_O,
+        "turn a camelCase name into snake_case"},
     {nullptr, nullptr, 0, nullptr}
 };
 

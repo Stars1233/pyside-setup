@@ -24,6 +24,8 @@ import typing
 from types import SimpleNamespace
 from textwrap import dedent
 from shibokensupport.signature.mapping import ellipsis, missing_optional_return
+from shibokensupport.signature.parser import using_snake_case
+from shibokensupport.signature import make_snake_case_name
 
 DEFAULT_PARAM_KIND = inspect.Parameter.POSITIONAL_ONLY
 
@@ -349,6 +351,7 @@ def create_signature(props, key):
     # Build a signature.
     kind = DEFAULT_PARAM_KIND
     params = []
+    snake_flag = using_snake_case()
 
     for idx, name in enumerate(varnames):
         if name == "*":
@@ -373,9 +376,18 @@ def create_signature(props, key):
             ann = typing.Optional[ann]
         if default is not _empty and layout.ellipsis:
             default = ellipsis
-        # See if this is a duplicate name - happens with properties
-        if kind is _KEYWORD_ONLY and varnames.count(name) > 1:
-            continue
+        if kind is _KEYWORD_ONLY:
+            # All these entries are properties. They might have been used already
+            # as normal parameter before and must be omitted here. Fixing that now:
+            if varnames.count(name) > 1:
+                assert varnames.count(name) == 2
+                if snake_flag and name != (new_name := make_snake_case_name(name)):
+                    # Patch this name backwards because it comes earlier as property.
+                    idx = varnames.index(name)
+                    params[idx] = params[idx].replace(name=new_name)
+                continue
+            if snake_flag:
+                name = make_snake_case_name(name)
         param = inspect.Parameter(name, kind, annotation=ann, default=default)
         params.append(param)
 

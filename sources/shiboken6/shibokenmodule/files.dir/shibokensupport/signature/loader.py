@@ -75,6 +75,7 @@ import builtins
 import signature_bootstrap
 from shibokensupport import signature, feature
 signature.get_signature = signature_bootstrap.get_signature
+signature.make_snake_case_name = signature_bootstrap.make_snake_case_name
 # PYSIDE-1019: Publish the __feature__ dictionary.
 feature.pyside_feature_dict = signature_bootstrap.pyside_feature_dict
 builtins.__feature_import__ = signature_bootstrap.__feature_import__

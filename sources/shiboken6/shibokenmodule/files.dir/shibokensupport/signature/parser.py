@@ -12,9 +12,10 @@ import typing
 import warnings
 
 from types import SimpleNamespace
-from shibokensupport.signature.mapping import (type_map, update_mapping,
+from shibokensupport.signature.mapping import (type_map, type_map_tuple, update_mapping,
     namespace, _NotCalled, ResultVariable, ArrayLikeVariable, pyside_modules)  # noqa E:128
 from shibokensupport.signature.lib.tool import build_brace_pattern
+from shibokensupport.signature import make_snake_case_name
 
 _DEBUG = False
 LIST_KEYWORDS = False
@@ -168,8 +169,9 @@ def _parse_line(line):
     return vars(ret)
 
 
-def _using_snake_case():
+def using_snake_case():
     # Note that this function should stay here where we use snake_case.
+    # This function is only meant for creating correct PYI files.
     if "PySide6.QtCore" not in sys.modules:
         return False
     from PySide6.QtCore import QDir
@@ -191,24 +193,13 @@ def _handle_instance_fixup(thing):
         return thing
     start, stop = match.start(), match.end() - 1
     pre, func, args = thing[:start], thing[start:stop], thing[stop:]
-    if func[0].isupper() or func.startswith("gl") and func[2:3].isupper():
-        return thing
-    # Now convert this string to snake case.
-    snake_func = ""
-    for idx, char in enumerate(func):
-        if char.isupper():
-            if idx and func[idx - 1].isupper():
-                # two upper chars are forbidden
-                return thing
-            snake_func += f"_{char.lower()}"
-        else:
-            snake_func += char
+    snake_func = make_snake_case_name(func)
     return f"{pre}{snake_func}{args}"
 
 
 def make_good_value(thing, valtype):
     # PYSIDE-1019: Handle instance calls (which are really seldom)
-    if "(" in thing and _using_snake_case():
+    if "(" in thing and using_snake_case():
         thing = _handle_instance_fixup(thing)
     try:
         if thing.endswith("()"):
@@ -346,8 +337,8 @@ def _resolve_type(thing, line, level, var_handler, func_name=None):
     # manual set of 'str' instead of 'bytes'
     if func_name:
         new_thing = (func_name, thing)
-        if new_thing in type_map:
-            return type_map[new_thing]
+        if new_thing in type_map_tuple:
+            return type_map_tuple[new_thing]
 
     # Capture total replacements, first. Happens in
     # "PySide6.QtCore.QCborStreamReader.StringResult[PySide6.QtCore.QByteArray]"

@@ -209,6 +209,7 @@ def check_module(mod):
 
 update_mapping = Reloader().update
 type_map = {}
+type_map_tuple = {}
 namespace = globals()  # our module's __dict__
 pyside_modules: set[str] = set()
 
@@ -526,26 +527,22 @@ def init_PySide6_QtCore():
         "QStringRef": str,
         "QStringRef": str,
         "Qt.HANDLE": int,  # be more explicit with some constants?
-        "QUrl.FormattingOptions(PrettyDecoded)": Instance(
-            "QUrl.FormattingOptions(QUrl.PrettyDecoded)"),
+        "QUrl.FormattingOptions(QUrl.ComponentFormattingOption.PrettyDecoded)":
+            PySide6.QtCore.QUrl.ComponentFormattingOption.PrettyDecoded,
         "QVariant()": Invalid(Variant),
         "QVariant.Type": type,  # not so sure here...
         "QVariantMap": typing.Dict[str, Variant],
         "std.chrono.seconds{5}" : ellipsis,
-        # new entries from property init
     })
-    try:
+    from shibokensupport.signature.parser import using_snake_case
+    if using_snake_case():
         type_map.update({
-            "PySide6.QtCore.QMetaObject.Connection": PySide6.QtCore.Connection,  # wrong!
+            "QKeyCombination.fromCombined(0)": PySide6.QtCore.QKeyCombination.from_combined(0),
         })
-    except AttributeError:
-        # this does not exist on 5.9 ATM.
-        pass
-
     # special case - char* can either be 'bytes' or 'str'. The default is 'bytes'.
     # Here we manually set it to map to 'str'.
-    type_map.update({("PySide6.QtCore.QObject.setProperty", "char*"): str})
-    type_map.update({("PySide6.QtCore.QObject.property", "char*"): str})
+    type_map_tuple.update({("PySide6.QtCore.QObject.setProperty", "char*"): str})
+    type_map_tuple.update({("PySide6.QtCore.QObject.property", "char*"): str})
 
     return locals()
 
@@ -582,7 +579,7 @@ def init_PySide6_QtGui():
 
     # special case - char* can either be 'bytes' or 'str'. The default is 'bytes'.
     # Here we manually set it to map to 'str'.
-    type_map.update({("PySide6.QtGui.QPixmap.save", "char*"): str})
+    type_map_tuple.update({("PySide6.QtGui.QPixmap.save", "char*"): str})
 
     return locals()
 
