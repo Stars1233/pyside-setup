@@ -373,7 +373,9 @@ private:
     static QList<AbstractMetaFunctionCList>
         getNumberProtocolOperators(const AbstractMetaClassCPtr &metaClass);
     static BoolCastFunctionOptional getBoolCast(const AbstractMetaClassCPtr &metaClass);
-    static bool classNeedsGetattroFunctionImpl(const AbstractMetaClassCPtr &metaClass);
+    static bool classNeedsGetattroOverloadFunctionImpl(const FunctionGroups &functionGroups);
+    static AttroCheck checkAttroFunctionNeedsImpl(const AbstractMetaClassCPtr &metaClass,
+                                                  const FunctionGroups &functionGroups);
 
     QString translateTypeForWrapperMethod(const AbstractMetaType &cType,
                                           const AbstractMetaClassCPtr &context,

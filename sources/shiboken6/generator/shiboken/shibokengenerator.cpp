@@ -107,7 +107,7 @@ struct GeneratorClassInfoCacheEntry
     ShibokenGenerator::FunctionGroups functionGroups;
     QList<AbstractMetaFunctionCList> numberProtocolOperators;
     BoolCastFunctionOptional boolCastFunctionO;
-    bool needsGetattroFunction = false;
+    ShibokenGenerator::AttroCheck attroCheck;
 };
 
 using GeneratorClassInfoCache = QHash<AbstractMetaClassCPtr, GeneratorClassInfoCacheEntry>;
@@ -1860,45 +1860,44 @@ bool ShibokenGenerator::useOverrideCaching(const AbstractMetaClassCPtr &metaClas
     return metaClass->isPolymorphic();
 }
 
-ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(
-    const AbstractMetaClassCPtr &metaClass)
+ShibokenGenerator::AttroCheck
+    ShibokenGenerator::checkAttroFunctionNeedsImpl(const AbstractMetaClassCPtr &metaClass,
+                                                   const FunctionGroups &functionGroups)
 {
-    AttroCheck result;
     if (metaClass->typeEntry()->isSmartPointer()) {
-        result |= AttroCheckFlag::GetattroSmartPointer | AttroCheckFlag::SetattroSmartPointer;
-    } else {
-        if (getGeneratorClassInfo(metaClass).needsGetattroFunction)
-            result |= AttroCheckFlag::GetattroOverloads;
-        if (metaClass->queryFirstFunction(metaClass->functions(),
-                                          FunctionQueryOption::GetAttroFunction)) {
-            result |= AttroCheckFlag::GetattroUser;
-        }
-        if (usePySideExtensions() && metaClass->qualifiedCppName() == qObjectT)
-            result |= AttroCheckFlag::SetattroQObject;
-        if (useOverrideCaching(metaClass))
-            result |= AttroCheckFlag::SetattroMethodOverride;
-        if (metaClass->queryFirstFunction(metaClass->functions(),
-                                          FunctionQueryOption::SetAttroFunction)) {
-            result |= AttroCheckFlag::SetattroUser;
-        }
-        // PYSIDE-1255: If setattro is generated for a class inheriting
-        // QObject, the property code needs to be generated, too.
-        if ((result & AttroCheckFlag::SetattroMask) != 0
-            && !result.testFlag(AttroCheckFlag::SetattroQObject)
-            && isQObject(metaClass)) {
-            result |= AttroCheckFlag::SetattroQObject;
-        }
+        return AttroCheck(AttroCheckFlag::GetattroSmartPointer
+                          | AttroCheckFlag::SetattroSmartPointer);
+    }
+
+    AttroCheck result;
+    if (classNeedsGetattroOverloadFunctionImpl(functionGroups))
+        result |= AttroCheckFlag::GetattroOverloads;
+    if (metaClass->queryFirstFunction(metaClass->functions(),
+                                      FunctionQueryOption::GetAttroFunction)) {
+        result |= AttroCheckFlag::GetattroUser;
+    }
+    if (usePySideExtensions() && metaClass->qualifiedCppName() == qObjectT)
+        result |= AttroCheckFlag::SetattroQObject;
+    if (useOverrideCaching(metaClass))
+        result |= AttroCheckFlag::SetattroMethodOverride;
+    if (metaClass->queryFirstFunction(metaClass->functions(),
+                                      FunctionQueryOption::SetAttroFunction)) {
+        result |= AttroCheckFlag::SetattroUser;
+    }
+    // PYSIDE-1255: If setattro is generated for a class inheriting
+    // QObject, the property code needs to be generated, too.
+    if ((result & AttroCheckFlag::SetattroMask) != 0
+        && !result.testFlag(AttroCheckFlag::SetattroQObject)
+        && isQObject(metaClass)) {
+        result |= AttroCheckFlag::SetattroQObject;
     }
     return result;
 }
 
-bool ShibokenGenerator::classNeedsGetattroFunctionImpl(const AbstractMetaClassCPtr &metaClass)
+// Returns whether a mixture of static and instance functions exists,
+// requiring a getattro function.
+bool ShibokenGenerator::classNeedsGetattroOverloadFunctionImpl(const FunctionGroups &functionGroup)
 {
-    if (!metaClass)
-        return false;
-    if (metaClass->typeEntry()->isSmartPointer())
-        return true;
-    const auto &functionGroup = getFunctionGroups(metaClass);
     for (auto it = functionGroup.cbegin(), end = functionGroup.cend(); it != end; ++it) {
         AbstractMetaFunctionCList overloads;
         for (const auto &func : std::as_const(it.value())) {
@@ -2053,7 +2052,7 @@ const GeneratorClassInfoCacheEntry &
         it = cache->insert(scope, {});
         auto &entry = it.value();
         entry.functionGroups = getFunctionGroupsImpl(scope);
-        entry.needsGetattroFunction = classNeedsGetattroFunctionImpl(scope);
+        entry.attroCheck = checkAttroFunctionNeedsImpl(scope, entry.functionGroups);
         entry.numberProtocolOperators = getNumberProtocolOperators(scope);
         entry.boolCastFunctionO = getBoolCast(scope);
     }
@@ -2078,6 +2077,13 @@ BoolCastFunctionOptional ShibokenGenerator::boolCast(const AbstractMetaClassCPtr
 {
     Q_ASSERT(scope);
     return getGeneratorClassInfo(scope).boolCastFunctionO;
+}
+
+ShibokenGenerator::AttroCheck
+    ShibokenGenerator::checkAttroFunctionNeeds(const AbstractMetaClassCPtr &scope)
+{
+    Q_ASSERT(scope);
+    return getGeneratorClassInfo(scope).attroCheck;
 }
 
 // Use non-const overloads only, for example, "foo()" and "foo()const"
