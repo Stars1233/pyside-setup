@@ -121,7 +121,7 @@ Testing the installation
 
 Once the installation finishes, you will be able to execute any of our examples::
 
-  python examples/widgets/widgets/tetrix.py
+  python examples/widgets/widgets/tetrix/tetrix.py
 
 Running Tests
 -------------
