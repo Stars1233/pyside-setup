@@ -215,8 +215,8 @@ def get_module_gallery(examples):
     """
 
     gallery = (
-        ".. grid:: 1 4 4 4\n"
-        f"{ind(1)}:gutter: 2\n\n"
+        f"{ind(1)}.. grid:: 1 4 4 4\n"
+        f"{ind(2)}:gutter: 2\n\n"
     )
 
     # Iteration per rows
@@ -249,12 +249,12 @@ def get_module_gallery(examples):
         if not desc:
             desc = f"found in the ``{underline}`` directory."
 
-        gallery += f"{ind(1)}.. grid-item-card:: {name}\n"
-        gallery += f"{ind(2)}:class-item: cover-img\n"
-        gallery += f"{ind(2)}:link: {doc_file_name}\n"
-        gallery += f"{ind(2)}:link-type: ref\n"
-        gallery += f"{ind(2)}:img-top: {img_name}\n\n"
-        gallery += f"{ind(2)}{desc}\n"
+        gallery += f"{ind(2)}.. grid-item-card:: {name}\n"
+        gallery += f"{ind(3)}:class-item: cover-img\n"
+        gallery += f"{ind(3)}:link: {doc_file_name}\n"
+        gallery += f"{ind(3)}:link-type: ref\n"
+        gallery += f"{ind(3)}:img-top: {img_name}\n\n"
+        gallery += f"{ind(3)}{desc}\n"
 
     return f"{gallery}\n"
 
@@ -696,8 +696,7 @@ if __name__ == "__main__":
             for i in e:
                 index_files.append(i.doc_file)
             title = module_title(module_name)
-            f.write(f"{title}\n")
-            f.write(f"{'*' * len(title)}\n")
+            f.write(f".. dropdown:: {title}\n\n")
             f.write(get_module_gallery(e))
         f.write("\n\n")
         f.write(footer_index)
