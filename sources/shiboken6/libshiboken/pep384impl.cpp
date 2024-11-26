@@ -177,36 +177,27 @@ check_PyTypeObject_valid()
 static PyObject *
 find_name_in_mro(PyTypeObject *type, PyObject *name, int *error)
 {
-    Py_ssize_t i, n;
-    PyObject *mro, *res, *base;
-
-    /* Look in tp_dict of types in MRO */
-    mro = type->tp_mro;
-
-    res = nullptr;
-    /* Keep a strong reference to mro because type->tp_mro can be replaced
-       during dict lookup, e.g. when comparing to non-string keys. */
-    Py_INCREF(mro);
-    assert(PyTuple_Check(mro));
-    n = PyTuple_Size(mro);
-    for (i = 0; i < n; i++) {
-        base = PyTuple_GetItem(mro, i);
+    *error = 0;
+    /* Look in tp_dict of types in MRO. Keep a strong reference to mro because
+     * type->tp_mro can be replaced during dict lookup, e.g. when comparing to
+     * non-string keys. */
+    assert(PyTuple_Check(type->tp_mro));
+    Py_INCREF(type->tp_mro);
+    Shiboken::AutoDecRef mro(type->tp_mro);
+    for (Py_ssize_t i = 0, n = PyTuple_Size(mro.object()); i < n; ++i) {
+        auto *base = PyTuple_GetItem(mro.object(), i);
         assert(PyType_Check(base));
         auto *type = reinterpret_cast<PyTypeObject *>(base);
         Shiboken::AutoDecRef dict(PepType_GetDict(type));
         assert(!dict.isNull() && PyDict_Check(dict.object()));
-        res = PyDict_GetItem(dict.object(), name);
-        if (res != nullptr)
-            break;
+        if (auto *res = PyDict_GetItem(dict.object(), name))
+            return res;
         if (PyErr_Occurred()) {
             *error = -1;
-            goto done;
+            return nullptr;
         }
     }
-    *error = 0;
-done:
-    Py_DECREF(mro);
-    return res;
+    return nullptr;
 }
 
 /* Internal API to look for a name through the MRO.
@@ -214,26 +205,20 @@ done:
 PyObject *
 _PepType_Lookup(PyTypeObject *type, PyObject *name)
 {
-    PyObject *res;
-    int error;
-
     /* We may end up clearing live exceptions below, so make sure it's ours. */
     assert(!PyErr_Occurred());
 
-    res = find_name_in_mro(type, name, &error);
-    /* Only put NULL results into cache if there was no error. */
+    int error{};
+    auto *res = find_name_in_mro(type, name, &error);
+    /* Only put nullptr results into cache if there was no error. */
     if (error) {
-        /* It's not ideal to clear the error condition,
-           but this function is documented as not setting
-           an exception, and I don't want to change that.
-           E.g., when PyType_Ready() can't proceed, it won't
-           set the "ready" flag, so future attempts to ready
-           the same type will call it again -- hopefully
-           in a context that propagates the exception out.
-        */
-        if (error == -1) {
+        /* It's not ideal to clear the error condition, but this function is
+         * documented as not setting an exception, and I don't want to change
+         * that. E.g., when PyType_Ready() can't proceed, it won't set the
+         * "ready" flag, so future attempts to ready the same type will call
+         * it again -- hopefully in a context that propagates the exception out. */
+        if (error == -1)
             PyErr_Clear();
-        }
         return nullptr;
     }
     return res;
@@ -442,13 +427,11 @@ const char *_PepUnicode_AsString(PyObject *str)
  */
 #ifdef Py_LIMITED_API
 
-static PyObject *sys_flags = nullptr;
-
 int
 Pep_GetFlag(const char *name)
 {
+    static PyObject *sys_flags = nullptr;
     static int initialized = 0;
-    int ret = -1;
 
     if (!initialized) {
         sys_flags = PySys_GetObject("flags");
@@ -457,14 +440,11 @@ Pep_GetFlag(const char *name)
         initialized = 1;
     }
     if (sys_flags != nullptr) {
-        PyObject *ob_ret = PyObject_GetAttrString(sys_flags, name);
-        if (ob_ret != nullptr) {
-            long long_ret = PyLong_AsLong(ob_ret);
-            Py_DECREF(ob_ret);
-            ret = (int) long_ret;
-        }
+        Shiboken::AutoDecRef ob_ret(PyObject_GetAttrString(sys_flags, name));
+        if (!ob_ret.isNull())
+            return int(PyLong_AsLong(ob_ret.object()));
     }
-    return ret;
+    return -1;
 }
 
 int
@@ -533,17 +513,9 @@ LIBSHIBOKEN_API void PepException_SetArgs(PyObject *ex, PyObject *args)
 int
 PepCode_Get(PepCodeObject *co, const char *name)
 {
-    PyObject *ob = reinterpret_cast<PyObject *>(co);
-    PyObject *ob_ret;
-    int ret = -1;
-
-    ob_ret = PyObject_GetAttrString(ob, name);
-    if (ob_ret != nullptr) {
-        long long_ret = PyLong_AsLong(ob_ret);
-        Py_DECREF(ob_ret);
-        ret = (int) long_ret;
-    }
-    return ret;
+    auto *ob = reinterpret_cast<PyObject *>(co);
+    Shiboken::AutoDecRef ob_ret(PyObject_GetAttrString(ob, name));
+    return ob_ret.isNull() ? -1 : int(PyLong_AsLong(ob_ret.object()));
 }
 
 int PepCode_Check(PyObject *o)
@@ -608,32 +580,24 @@ init_DateTime(void)
 int
 PyDateTime_Get(PyObject *ob, const char *name)
 {
-    PyObject *ob_ret;
-    int ret = -1;
-
-    ob_ret = PyObject_GetAttrString(ob, name);
-    if (ob_ret != nullptr) {
-        long long_ret = PyLong_AsLong(ob_ret);
-        Py_DECREF(ob_ret);
-        ret = (int) long_ret;
-    }
-    return ret;
+    Shiboken::AutoDecRef ob_ret(PyObject_GetAttrString(ob, name));
+    return ob_ret.isNull() ? -1 : int(PyLong_AsLong(ob_ret.object()));
 }
 
 PyObject *
 PyDate_FromDate(int year, int month, int day)
 {
-    return PyObject_CallFunction((PyObject *)PyDateTimeAPI->DateType,
-                                 (char *)"(iii)", year, month, day);
+    auto *ob = reinterpret_cast<PyObject *>(PyDateTimeAPI->DateType);
+    return PyObject_CallFunction(ob, "(iii)", year, month, day);
 }
 
 PyObject *
 PyDateTime_FromDateAndTime(int year, int month, int day,
                            int hour, int min, int sec, int usec)
 {
-    return PyObject_CallFunction((PyObject *)PyDateTimeAPI->DateTimeType,
-                                 (char *)"(iiiiiii)", year, month, day,
-                                  hour, min, sec, usec);
+    auto *ob = reinterpret_cast<PyObject *>(PyDateTimeAPI->DateTimeType);
+    return PyObject_CallFunction(ob, "(iiiiiii)", year, month, day,
+                                 hour, min, sec, usec);
 }
 
 PyObject *
@@ -655,14 +619,8 @@ PyTime_FromTime(int hour, int min, int sec, int usec)
 PyObject *
 PyRun_String(const char *str, int start, PyObject *globals, PyObject *locals)
 {
-    PyObject *code = Py_CompileString(str, "pyscript", start);
-    PyObject *ret = nullptr;
-
-    if (code != nullptr) {
-        ret = PyEval_EvalCode(code, globals, locals);
-    }
-    Py_XDECREF(code);
-    return ret;
+    Shiboken::AutoDecRef code(Py_CompileString(str, "pyscript", start));
+    return code.isNull() ? nullptr : PyEval_EvalCode(code.object(), globals, locals);
 }
 
 #endif // Py_LIMITED_API
@@ -678,10 +636,10 @@ PyTypeObject *PepMethod_TypePtr = nullptr;
 
 static PyTypeObject *getMethodType(void)
 {
-    static const char prog[] =
-        "class _C:\n"
-        "    def _m(self): pass\n"
-        "result = type(_C()._m)\n";
+    static const char prog[] = R"(class _C:
+    def _m(self): pass
+result = type(_C()._m)
+)";
     return reinterpret_cast<PyTypeObject *>(PepRun_GetResult(prog));
 }
 
@@ -689,16 +647,15 @@ static PyTypeObject *getMethodType(void)
 PyObject *
 PyMethod_New(PyObject *func, PyObject *self)
 {
-    return PyObject_CallFunction((PyObject *)PepMethod_TypePtr,
-                                 (char *)"(OO)", func, self);
+    auto *ob = reinterpret_cast<PyObject *>(PepMethod_TypePtr);
+    return PyObject_CallFunction(ob, "(OO)", func, self);
 }
 
 PyObject *
 PyMethod_Function(PyObject *im)
 {
-    PyObject *ret = PyObject_GetAttr(im, Shiboken::PyMagicName::func());
-
     // We have to return a borrowed reference.
+    PyObject *ret = PyObject_GetAttr(im, Shiboken::PyMagicName::func());
     Py_DECREF(ret);
     return ret;
 }
@@ -706,10 +663,9 @@ PyMethod_Function(PyObject *im)
 PyObject *
 PyMethod_Self(PyObject *im)
 {
-    PyObject *ret = PyObject_GetAttr(im, Shiboken::PyMagicName::self());
-
     // We have to return a borrowed reference.
     // If we don't obey that here, then we get a test error!
+    PyObject *ret = PyObject_GetAttr(im, Shiboken::PyMagicName::self());
     Py_DECREF(ret);
     return ret;
 }
@@ -725,10 +681,8 @@ PyMethod_Self(PyObject *im)
 PyObject *
 PepFunction_Get(PyObject *ob, const char *name)
 {
-    PyObject *ret;
-
     // We have to return a borrowed reference.
-    ret = PyObject_GetAttrString(ob, name);
+    PyObject *ret = PyObject_GetAttrString(ob, name);
     Py_XDECREF(ret);
     return ret;
 }
@@ -824,9 +778,7 @@ PepType_GetNameStr(PyTypeObject *type)
 {
     const char *ret = type->tp_name;
     const char *nodots = std::strrchr(ret, '.');
-    if (nodots)
-        ret = nodots + 1;
-    return ret;
+    return nodots != nullptr ? nodots + 1 : ret;
 }
 
 // PYSIDE-2264: Find the _functools or functools module and retrieve the
@@ -864,22 +816,20 @@ Pep_GetPartialFunction(void)
 PyObject *
 PyImport_GetModule(PyObject *name)
 {
-    PyObject *m;
     PyObject *modules = PyImport_GetModuleDict();
-    if (modules == NULL) {
+    if (modules == nullptr) {
         PyErr_SetString(PyExc_RuntimeError, "unable to get sys.modules");
-        return NULL;
+        return nullptr;
     }
     Py_INCREF(modules);
+    PyObject *m{};
     if (PyDict_CheckExact(modules)) {
         m = PyDict_GetItemWithError(modules, name);  /* borrowed */
         Py_XINCREF(m);
-    }
-    else {
+    } else {
         m = PyObject_GetItem(modules, name);
-        if (m == NULL && PyErr_ExceptionMatches(PyExc_KeyError)) {
+        if (m == nullptr && PyErr_ExceptionMatches(PyExc_KeyError))
             PyErr_Clear();
-        }
     }
     Py_DECREF(modules);
     return m;
@@ -966,7 +916,8 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
     const Py_ssize_t amount = ipriv + 1 + plen + nlen;
     const Py_ssize_t big_stack = 1000;
     wchar_t bigbuf[big_stack];
-    wchar_t *resbuf = amount <= big_stack ? bigbuf : (wchar_t *)malloc(sizeof(wchar_t) * amount);
+    wchar_t *resbuf = amount <= big_stack
+        ? bigbuf : reinterpret_cast<wchar_t *>(malloc(sizeof(wchar_t) * amount));
     if (!resbuf)
         return nullptr;
     /* ident = "_" + priv[ipriv:] + ident # i.e. 1+plen+nlen bytes */
