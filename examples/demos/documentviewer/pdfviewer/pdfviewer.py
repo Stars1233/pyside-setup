@@ -5,7 +5,7 @@ from __future__ import annotations
 from math import sqrt
 
 from PySide6.QtWidgets import (QListView, QTreeView)
-from PySide6.QtGui import QIcon, QPainter
+from PySide6.QtGui import QIcon, QKeySequence, QPainter
 from PySide6.QtCore import (QDir, QIODevice, QModelIndex,
                             QPointF, Slot)
 from PySide6.QtPrintSupport import QPrinter
@@ -61,20 +61,16 @@ class PdfViewer(AbstractViewer):
         self._toolBar.addSeparator()
         self._toolBar.addWidget(self._zoomSelector)
 
-        actionZoomIn = self._toolBar.addAction("Zoom in")
-        actionZoomIn.setToolTip("Increase zoom level")
         icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomIn,
                                QIcon(":/demos/documentviewer/images/zoom-in.png"))
-        actionZoomIn.setIcon(icon)
-        self._toolBar.addAction(actionZoomIn)
+        actionZoomIn = self._toolBar.addAction(icon, "Zoom in", QKeySequence.StandardKey.ZoomIn)
+        actionZoomIn.setToolTip("Increase zoom level")
         actionZoomIn.triggered.connect(self.onActionZoomInTriggered)
 
-        actionZoomOut = self._toolBar.addAction("Zoom out")
-        actionZoomOut.setToolTip("Decrease zoom level")
         icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomIn,
                                QIcon(":/demos/documentviewer/images/zoom-out.png"))
-        actionZoomOut.setIcon(icon)
-        self._toolBar.addAction(actionZoomOut)
+        actionZoomOut = self._toolBar.addAction(icon, "Zoom out", QKeySequence.StandardKey.ZoomOut)
+        actionZoomOut.setToolTip("Decrease zoom level")
         actionZoomOut.triggered.connect(self.onActionZoomOutTriggered)
 
         nav.backAvailableChanged.connect(self._actionBack.setEnabled)
