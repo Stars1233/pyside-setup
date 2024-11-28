@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/../qtwebview/src/webview/doc/qtwebview.qdocconf)
+include(../pyside-config.qdocconf)

@@ -81,7 +81,8 @@
   <!-- For Qt::mightBeRichText(QString), Qt::convertFromPlainText(QString,Qt::WhiteSpaceMode)
        Match on files from '/QtGui/' (shadow build) or '/gui/' (developer build)
        or '/QtGui.framework' (macOS) -->
-  <namespace-type name="Qt" files="^.*/(gui|QtGui)[/.].*\.h$" extends="PySide6.QtCore"/>
+  <namespace-type name="Qt" files="^.*/(gui|QtGui)[/.].*\.h$" extends="PySide6.QtCore"
+                  doc-file="qt-sub-qtgui"/>
 
   <primitive-type name="WId" target-lang-api-name="PyLong">
     <conversion-rule>
