@@ -10,7 +10,7 @@ from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog,
                                QMainWindow, QSlider, QStyle, QToolBar)
 from PySide6.QtMultimedia import (QAudioOutput, QMediaFormat,
-                                  QMediaPlayer)
+                                  QMediaPlayer, QAudio)
 from PySide6.QtMultimediaWidgets import QVideoWidget
 
 
@@ -93,11 +93,11 @@ class MainWindow(QMainWindow):
         self._volume_slider.setMaximum(100)
         available_width = self.screen().availableGeometry().width()
         self._volume_slider.setFixedWidth(available_width / 10)
-        self._volume_slider.setValue(self._audio_output.volume())
+        self._volume_slider.setValue(self._audio_output.volume() * 100)
         self._volume_slider.setTickInterval(10)
         self._volume_slider.setTickPosition(QSlider.TicksBelow)
         self._volume_slider.setToolTip("Volume")
-        self._volume_slider.valueChanged.connect(self._audio_output.setVolume)
+        self._volume_slider.valueChanged.connect(self.setVolume)
         tool_bar.addWidget(self._volume_slider)
 
         icon = QIcon.fromTheme(QIcon.ThemeIcon.HelpAbout)
@@ -183,6 +183,13 @@ class MainWindow(QMainWindow):
     def _player_error(self, error, error_string):
         print(error_string, file=sys.stderr)
         self.show_status_message(error_string)
+
+    @Slot()
+    def setVolume(self):
+        self.volumeValue = QAudio.convertVolume(self._volume_slider.value() / 100.0,
+                                                QAudio.VolumeScale.LogarithmicVolumeScale,
+                                                QAudio.VolumeScale.LinearVolumeScale)
+        self._audio_output.setVolume(self.volumeValue)
 
 
 if __name__ == '__main__':
