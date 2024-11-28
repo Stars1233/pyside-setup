@@ -6,6 +6,7 @@
 #include "abstractmetafield.h"
 #include "abstractmetafunction.h"
 #include "abstractmetalang.h"
+#include "include.h"
 #include "modifications.h"
 #include "sourcelocation.h"
 #include "typedatabase.h"
@@ -21,6 +22,9 @@
 #include <QtCore/QFile>
 #include <QtCore/QStringList>
 #include <QtCore/QXmlStreamReader>
+
+#include <algorithm>
+#include <iterator>
 
 using namespace Qt::StringLiterals;
 
@@ -1033,4 +1037,19 @@ QString msgCannotCopy(const QFile &source, const QString &target)
     return "Cannot copy "_L1 + QDir::toNativeSeparators(source.fileName())
         + " to "_L1 + QDir::toNativeSeparators(target)
         + ": "_L1 + source.errorString();
+}
+
+QString msgCannotFindQDocFile(const AbstractMetaClassCPtr &metaClass,
+                              const QStringList &candidates)
+{
+    QStringList nativeCandidates;
+    std::transform(candidates.cbegin(), candidates.cend(), std::back_inserter(nativeCandidates),
+                   QDir::toNativeSeparators);
+    QString result;
+    QTextStream(&result) << "Cannot find qdoc file for "
+        << (metaClass->isNamespace() ? "namespace" : "class") << " \""
+        << metaClass->typeEntry()->qualifiedCppName() << "\" ("
+        << QDir::toNativeSeparators(metaClass->typeEntry()->include().name())
+        << "), tried: " << nativeCandidates.join(", "_L1);
+    return result;
 }

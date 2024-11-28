@@ -163,6 +163,9 @@ public:
     bool isValueTypeWithCopyConstructorOnly() const;
     void setValueTypeWithCopyConstructorOnly(bool v);
 
+    QString docFile() const;
+    void setDocFile(const QString &docFile);
+
     // FIXME PYSIDE 7: Remove this
     static bool isParentManagementEnabled();
     static void setParentManagementEnabled(bool e);

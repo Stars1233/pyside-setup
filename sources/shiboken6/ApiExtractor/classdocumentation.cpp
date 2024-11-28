@@ -195,23 +195,15 @@ static QString msgXmlError(const QString &fileName, const QXmlStreamReader &read
     return result;
 }
 
-std::optional<ClassDocumentation> parseWebXml(const QString &fileName, QString *errorMessage)
+static bool parseWebXmlHelper(QFile *file, ClassDocumentation *result, QString *errorMessage)
 {
-    ClassDocumentation result;
-
-    QFile file(fileName);
-    if (!file.open(QIODevice::Text | QIODevice::ReadOnly)) {
-        *errorMessage = msgCannotOpenForReading(file);
-        return std::nullopt;
-    }
-
     WebXmlCodeTag lastTag = WebXmlCodeTag::Other;
-    QXmlStreamReader reader(&file);
+    QXmlStreamReader reader(file);
     while (!reader.atEnd()) {
         switch (reader.readNext()) {
         case QXmlStreamReader::StartElement: {
             const auto currentTag = tag(reader.name());
-            parseWebXmlElement(currentTag, reader.attributes(), &result);
+            parseWebXmlElement(currentTag, reader.attributes(), result);
             switch (currentTag) { // Store relevant tags in lastTag
             case WebXmlCodeTag::Class:
             case WebXmlCodeTag::Function:
@@ -225,16 +217,16 @@ std::optional<ClassDocumentation> parseWebXml(const QString &fileName, QString *
                 QString *target = nullptr;
                 switch (lastTag) {
                 case WebXmlCodeTag::Class:
-                    target = &result.description;
+                    target = &result->description;
                     break;
                 case WebXmlCodeTag::Function:
-                    target = &result.functions.last().description;
+                    target = &result->functions.last().description;
                     break;
                 case WebXmlCodeTag::Enum:
-                    target = &result.enums.last().description;
+                    target = &result->enums.last().description;
                     break;
                 case WebXmlCodeTag::Property:
-                    target = &result.properties.last().description;
+                    target = &result->properties.last().description;
                 default:
                     break;
                 }
@@ -252,8 +244,24 @@ std::optional<ClassDocumentation> parseWebXml(const QString &fileName, QString *
     }
 
     if (reader.error() != QXmlStreamReader::NoError) {
-        *errorMessage= msgXmlError(fileName, reader);
-        return std::nullopt;
+        *errorMessage= msgXmlError(file->fileName(), reader);
+        return false;
+    }
+
+    return result;
+}
+
+std::optional<ClassDocumentation> parseWebXml(const QStringList &fileNames, QString *errorMessage)
+{
+    ClassDocumentation result;
+    for (const auto &fileName : fileNames) {
+        QFile file(fileName);
+        if (!file.open(QIODevice::Text | QIODevice::ReadOnly)) {
+            *errorMessage = msgCannotOpenForReading(file);
+            return std::nullopt;
+        }
+        if (!parseWebXmlHelper(&file, &result, errorMessage))
+            return std::nullopt;
     }
 
     sortDocumentation(&result);

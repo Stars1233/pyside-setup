@@ -1367,6 +1367,7 @@ public:
     QString m_defaultConstructor;
     QString m_defaultSuperclass;
     QString m_qualifiedCppName;
+    QString m_docFile;
 
     uint m_polymorphicBase : 1;
     uint m_genericClass : 1;
@@ -1797,6 +1798,18 @@ void ComplexTypeEntry::setValueTypeWithCopyConstructorOnly(bool v)
 {
     S_D(ComplexTypeEntry);
     d->m_isValueTypeWithCopyConstructorOnly = v;
+}
+
+QString ComplexTypeEntry::docFile() const
+{
+    S_D(const ComplexTypeEntry);
+    return d->m_docFile;
+}
+
+void ComplexTypeEntry::setDocFile(const QString &docFile)
+{
+    S_D(ComplexTypeEntry);
+    d->m_docFile = docFile;
 }
 
 // FIXME PYSIDE 7: Remove this and make "true" the default

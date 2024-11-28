@@ -235,6 +235,7 @@ child nodes.
             since="..."
             extends = "..."
             files = "..."
+            doc-file = "..."
             revision="..." />
     </typesystem>
 
@@ -274,6 +275,9 @@ generated extending ``QtCore.Qt`` if **extends** is specified.
 The *optional* **file** attribute specifies a regular expression matching the
 include files whose contents are to be associated with the current module in
 case of a namespace spanning several modules.
+
+The *optional* **doc-file** attribute specifies the base name of a ``.qdoc``
+file where documentation of the class is to be found (``qdoc`` only).
 
 .. _enum-type:
 
@@ -388,7 +392,8 @@ node or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethod
          stream="yes | no"
          default-constructor="..."
          revision="..."
-         snake-case="yes | no | both" />
+         snake-case="yes | no | both"
+         doc-file = "..." />
     </typesystem>
 
 The **name** attribute is the fully qualified C++ class name, such as
@@ -436,6 +441,9 @@ The *optional* **isNull** and **operator-bool** attributes can be used
 to override the command line setting for generating bool casts
 (see :ref:`bool-cast`).
 
+The *optional* **doc-file** attribute specifies the base name of a ``.qdoc``
+file where documentation of the class is to be found (``qdoc`` only).
+
 .. _object-type:
 
 object-type
@@ -473,7 +481,8 @@ or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethoddef`,
          qt-register-metatype = "yes | no | base"
          stream="yes | no"
          revision="..."
-         snake-case="yes | no | both" />
+         snake-case="yes | no | both"
+         doc-file = "..." />
     </typesystem>
 
 The **name** attribute is the fully qualified C++ class name. If there is no
@@ -552,6 +561,9 @@ attribute.
 
 For the *optional* **polymorphic-id-expression**, **polymorphic-name-function**
 and **polymorphic-base** attributes, see :ref:`typediscovery-attributes`.
+
+The *optional* **doc-file** attribute specifies the base name of a ``.qdoc``
+file where documentation of the class is to be found (``qdoc`` only).
 
 interface-type
 ^^^^^^^^^^^^^^

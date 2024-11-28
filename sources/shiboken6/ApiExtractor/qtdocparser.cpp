@@ -28,6 +28,9 @@
 #include <QtCore/QHash>
 #include <QtCore/QUrl>
 
+#include <algorithm>
+#include <iterator>
+
 using namespace Qt::StringLiterals;
 
 enum { debugFunctionSearch = 0 };
@@ -86,13 +89,11 @@ QString QtDocParser::qdocModuleDir(const QString &pythonType)
     return it.value();
 }
 
-static QString xmlFileNameRoot(const AbstractMetaClassPtr &metaClass)
+static QString xmlFileBaseName(const AbstractMetaClassPtr &metaClass)
 {
     QString className = metaClass->qualifiedCppName().toLower();
     className.replace("::"_L1, "-"_L1);
-
-    return QtDocParser::qdocModuleDir(metaClass->typeEntry()->targetLangPackage())
-           + u'/' + className;
+    return className;
 }
 
 static void formatPreQualifications(QTextStream &str, const AbstractMetaType &type)
@@ -324,7 +325,7 @@ void  QtDocParser::fillGlobalFunctionDocumentation(const AbstractMetaFunctionPtr
         return;
 
     QString errorMessage;
-    auto classDocumentationO = parseWebXml(sourceFileName, &errorMessage);
+    auto classDocumentationO = parseWebXml({sourceFileName}, &errorMessage);
     if (!classDocumentationO.has_value()) {
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return;
@@ -347,7 +348,7 @@ void QtDocParser::fillGlobalEnumDocumentation(AbstractMetaEnum &e)
         return;
 
     QString errorMessage;
-    auto classDocumentationO = parseWebXml(sourceFileName, &errorMessage);
+    auto classDocumentationO = parseWebXml({sourceFileName}, &errorMessage);
     if (!classDocumentationO.has_value()) {
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return;
@@ -370,28 +371,35 @@ QString QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
         context = context->enclosingClass();
     }
 
-    QString sourceFileRoot = documentationDataDirectory() + u'/' + xmlFileNameRoot(metaClass);
+    // Find qdoc files of a class.
+    QStringList allCandidates;
+    const auto typeEntry = metaClass->typeEntry();
+    const QString docDir = documentationDataDirectory() + u'/'
+                           + QtDocParser::qdocModuleDir(typeEntry->targetLangPackage()) + u'/';
+    const QString baseName = xmlFileBaseName(metaClass);
+    allCandidates.append(docDir + baseName + webxmlSuffix);
+    const QString &docFile = typeEntry->docFile();
+    if (!docFile.isEmpty())
+        allCandidates.append(docDir + docFile + webxmlSuffix);
+    allCandidates.append(docDir + baseName + ".xml"_L1);
+    QStringList candidates;
+    std::copy_if(allCandidates.cbegin(), allCandidates.cend(), std::back_inserter(candidates),
+                 qOverload<const QString &>(QFileInfo::exists));
 
-    QFileInfo sourceFile(sourceFileRoot + webxmlSuffix);
-    if (!sourceFile.exists())
-        sourceFile.setFile(sourceFileRoot + ".xml"_L1);
-   if (!sourceFile.exists()) {
-        qCWarning(lcShibokenDoc).noquote().nospace()
-            << "Can't find qdoc file for class " << metaClass->name() << ", tried: "
-            << QDir::toNativeSeparators(sourceFile.absoluteFilePath());
+   if (candidates.isEmpty()) {
+       qCWarning(lcShibokenDoc, "%s", qPrintable(msgCannotFindQDocFile(metaClass, allCandidates)));
        return {};
     }
 
-    const QString sourceFileName = sourceFile.absoluteFilePath();
     QString errorMessage;
-
-    const auto classDocumentationO = parseWebXml(sourceFileName, &errorMessage);
+    const auto classDocumentationO = parseWebXml(candidates, &errorMessage);
     if (!classDocumentationO.has_value()) {
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return {};
     }
 
     const auto &classDocumentation = classDocumentationO.value();
+    const QString &sourceFileName = candidates.constFirst();
     for (const auto &p : classDocumentation.properties) {
         Documentation doc(p.description, p.brief, sourceFileName);
         metaClass->setPropertyDocumentation(p.name, doc);

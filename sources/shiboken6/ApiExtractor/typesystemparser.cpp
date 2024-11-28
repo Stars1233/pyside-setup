@@ -1925,6 +1925,8 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
             if (convertBoolean(attribute.value(), parentManagementAttribute, false))
                 ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::ParentManagement);
             ComplexTypeEntry::setParentManagementEnabled(true);
+        }  else if (name == docFileAttribute) {
+            ctype->setDocFile(attributes->takeAt(i).value().toString());
         }
     }
 

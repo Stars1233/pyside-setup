@@ -273,4 +273,7 @@ QString msgCannotCreateDir(const QString &dir);
 
 QString msgCannotCopy(const QFile &source, const QString &target);
 
+QString msgCannotFindQDocFile(const AbstractMetaClassCPtr &metaClass,
+                              const QStringList &candidates);
+
 #endif // MESSAGES_H
