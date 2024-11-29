@@ -45,3 +45,4 @@ from .utils import (run_command, requires_rebuild, remove_path, package_dir, qtp
 from .project_data import (is_python_file, ProjectData, QmlProjectData,
                            check_qml_decorators)
 from .newproject import new_project, ProjectType
+from .design_studio_project import DesignStudioProject

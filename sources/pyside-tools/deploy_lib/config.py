@@ -11,8 +11,8 @@ from configparser import ConfigParser
 from pathlib import Path
 from enum import Enum
 
-from project import ProjectData
-from . import (DEFAULT_APP_ICON, DEFAULT_IGNORE_DIRS, DesignStudio, find_pyside_modules,
+from project import ProjectData, DesignStudioProject
+from . import (DEFAULT_APP_ICON, DEFAULT_IGNORE_DIRS, find_pyside_modules,
                find_permission_categories, QtDependencyReader, run_qmlimportscanner)
 
 # Some QML plugins like QtCore are excluded from this list as they don't contribute much to
@@ -156,12 +156,14 @@ class Config(BaseConfig):
             self.project_data = ProjectData(project_file=self.project_file)
 
         self._qml_files = []
-        config_qml_files = self.get_value("qt", "qml_files")
-        if config_qml_files and self.project_dir and self.existing_config_file:
-            self._qml_files = [Path(self.project_dir)
-                               / file for file in config_qml_files.split(",")]
-        else:
-            self.qml_files = self._find_qml_files()
+        # Design Studio projects include the qml files using Qt resources
+        if source_file and not DesignStudioProject.is_ds_project(source_file):
+            config_qml_files = self.get_value("qt", "qml_files")
+            if config_qml_files and self.project_dir and self.existing_config_file:
+                self._qml_files = [Path(self.project_dir)
+                                   / file for file in config_qml_files.split(",")]
+            else:
+                self.qml_files = self._find_qml_files()
 
         self._excluded_qml_plugins = []
         excl_qml_plugins = self.get_value("qt", "excluded_qml_plugins")
@@ -170,10 +172,7 @@ class Config(BaseConfig):
         else:
             self.excluded_qml_plugins = self._find_excluded_qml_plugins()
 
-        if DesignStudio.isDSProject(self.source_file):
-            self._generated_files_path = self.project_dir / "Python" / "deployment"
-        else:
-            self._generated_files_path = self.project_dir / "deployment"
+        self._generated_files_path = self.source_file.parent / "deployment"
 
         self.modules = []
 
@@ -263,11 +262,6 @@ class Config(BaseConfig):
     @source_file.setter
     def source_file(self, source_file: Path):
         self._source_file = source_file
-        # FIXME: Remove when new DS is released
-        # for DS project, set self._source_file to main_patch.py, but don't change the value
-        # in the config file as main_patch.py is a temporary file
-        if DesignStudio.isDSProject(source_file):
-            self._source_file = DesignStudio(source_file).ds_source_file
         self.set_value("app", "input_file", str(source_file))
 
     @property
@@ -343,49 +337,48 @@ class Config(BaseConfig):
         return qml_files
 
     def _find_project_dir(self) -> Path:
-        if DesignStudio.isDSProject(self.source_file):
-            ds = DesignStudio(self.source_file)
-            project_dir = ds.project_dir
-        else:
-            # there is no other way to find the project_dir than assume it is the parent directory
-            # of source_file
-            project_dir = self.source_file.parent
-        return project_dir
+        if DesignStudioProject.is_ds_project(self.source_file):
+            return DesignStudioProject(self.source_file).project_dir
+
+        # there is no other way to find the project_dir than assume it is the parent directory
+        # of source_file
+        return self.source_file.parent
 
     def _find_project_file(self) -> Path | None:
-        if self.project_dir:
-            files = list(self.project_dir.glob("*.pyproject"))
-        else:
-            raise RuntimeError("[DEPLOY] Project directory not set in config file")
+        if not self.source_file:
+            raise RuntimeError("[DEPLOY] Source file not set in config file")
 
+        if DesignStudioProject.is_ds_project(self.source_file):
+            pyproject_location = self.source_file.parent
+        else:
+            pyproject_location = self.project_dir
+
+        files = list(pyproject_location.glob("*.pyproject"))
         if not files:
             logging.info("[DEPLOY] No .pyproject file found. Project file not set")
-        elif len(files) > 1:
+            return None
+        if len(files) > 1:
             warnings.warn("DEPLOY: More that one .pyproject files found. Project file not set")
-        else:
-            return files[0]
+            return None
 
-        return None
+        return files[0]
 
     def _find_excluded_qml_plugins(self) -> list[str] | None:
-        excluded_qml_plugins = None
-        if self.qml_files:
-            self.qml_modules = set(run_qmlimportscanner(project_dir=self.project_dir,
-                                                        dry_run=self.dry_run))
-            excluded_qml_plugins = EXCLUDED_QML_PLUGINS.difference(self.qml_modules)
+        if not self.qml_files and not DesignStudioProject.is_ds_project(self.source_file):
+            return None
 
-            # needed for dry_run testing
-            excluded_qml_plugins = sorted(excluded_qml_plugins)
+        self.qml_modules = set(run_qmlimportscanner(project_dir=self.project_dir,
+                                                    dry_run=self.dry_run))
+        excluded_qml_plugins = EXCLUDED_QML_PLUGINS.difference(self.qml_modules)
 
-        return excluded_qml_plugins
+        # sorting needed for dry_run testing
+        return sorted(excluded_qml_plugins)
 
     def _find_exe_dir(self) -> Path:
-        exe_dir = None
         if self.project_dir == Path.cwd():
-            exe_dir = self.project_dir.relative_to(Path.cwd())
-        else:
-            exe_dir = self.project_dir
-        return exe_dir
+            return self.project_dir.relative_to(Path.cwd())
+
+        return self.project_dir
 
     def _find_pysidemodules(self) -> list[str]:
         modules = find_pyside_modules(project_dir=self.project_dir,
@@ -456,6 +449,14 @@ class DesktopConfig(Config):
             self._mode = self.NuitkaMode.STANDALONE
         elif mode == self.NuitkaMode.STANDALONE.value:
             self.mode = self.NuitkaMode.STANDALONE
+
+        if DesignStudioProject.is_ds_project(self.source_file):
+            ds_project = DesignStudioProject(self.source_file)
+            if not ds_project.compiled_resources_available():
+                raise RuntimeError(f"[DEPLOY] Compiled resources file not found: "
+                                   f"{ds_project.compiled_resources_file.absolute()}. "
+                                   f"Build the project using 'pyside6-project build' or compile "
+                                   f"the resources manually using pyside6-rcc")
 
     @property
     def qt_plugins(self):

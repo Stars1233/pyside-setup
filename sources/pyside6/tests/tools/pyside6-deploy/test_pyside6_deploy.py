@@ -495,7 +495,7 @@ class TestLongCommand(DeployTestBase):
 @unittest.skipIf(sys.platform == "darwin" and int(platform.mac_ver()[0].split('.')[0]) <= 11,
                  "Test only works on macOS version 12+")
 @patch("deploy_lib.config.QtDependencyReader.find_plugin_dependencies")
-class DSProjectTest(DeployTestBase):
+class EmptyDSProjectTest(DeployTestBase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -503,11 +503,16 @@ class DSProjectTest(DeployTestBase):
         # setup a test DS Python project
         base_path = Path(cls.temp_dir) / "PythonProject"
 
+        project_name = "TestProject"
         files = [
             base_path / "Python" / "autogen" / "settings.py",
+            base_path / "Python" / "autogen" / "resources.py",
             base_path / "Python" / "main.py",
-            base_path / "PythonProject" / "test.qml",
-            base_path / "PythonProjectContent" / "test.qml"
+            base_path / project_name / "test.qml",
+            base_path / f"{project_name}Content" / "test.qml",
+            base_path / f"{project_name}.qmlproject",
+            base_path / f"{project_name}.qmlproject.qtds",
+            base_path / f"{project_name}.qrc"
         ]
 
         # Create the files
@@ -521,17 +526,12 @@ class DSProjectTest(DeployTestBase):
         os.chdir(self.temp_example)
         self.temp_example = self.temp_example.resolve()
         self.main_file = self.temp_example / "Python" / "main.py"
-        self.main_patch_file = self.temp_example / "Python" / "main_patch.py"
         self.deployment_files = self.temp_example / "Python" / "deployment"
 
         self.expected_run_cmd = (
-            f"{sys.executable} -m nuitka {self.main_patch_file} --follow-imports"
+            f"{sys.executable} -m nuitka {self.main_file} --follow-imports"
             f" --enable-plugin=pyside6 --output-dir={self.deployment_files} --quiet"
             f" --noinclude-qt-translations"
-            f" --include-data-dir={self.temp_example / 'PythonProjectContent'}="
-            "./PythonProjectContent"
-            f" --include-data-dir={self.temp_example / 'Python'}=./Python"
-            f" --include-data-dir={self.temp_example / 'PythonProject'}=./PythonProject"
             f" {self.dlls_ignore_nuitka}"
             f" --noinclude-dlls=*/qml/QtQuickEffectMaker/*"
             f" --include-qt-plugins=qml"
@@ -566,7 +566,7 @@ class DSProjectTest(DeployTestBase):
     def testDryRun(self, mock_plugins):
         with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:  # noqa: F841
             original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
-            self.assertEqual(original_output, self.expected_run_cmd)
+            self.assertEqual(self.expected_run_cmd, original_output)
 
     @patch("deploy_lib.dependency_util.QtDependencyReader.get_qt_libs_dir")
     def testConfigFile(self, mock_sitepackages, mock_plugins):
