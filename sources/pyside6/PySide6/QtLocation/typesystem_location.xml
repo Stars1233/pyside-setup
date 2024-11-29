@@ -7,6 +7,9 @@
             namespace-begin="QT_BEGIN_NAMESPACE" namespace-end="QT_END_NAMESPACE">
   <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
   <load-typesystem name="QtPositioning/typesystem_positioning.xml" generate="no"/>
+  <namespace-type name="QLocation">
+      <enum-type name="Visibility" flags="VisibilityScope"/>
+  </namespace-type>
   <object-type name="QGeoCodeReply">
       <enum-type name="Error"/>
   </object-type>

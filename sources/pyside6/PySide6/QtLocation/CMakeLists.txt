@@ -13,6 +13,7 @@ ${QtLocation_GEN_DIR}/qgeoroute_wrapper.cpp
 ${QtLocation_GEN_DIR}/qgeoroutereply_wrapper.cpp
 ${QtLocation_GEN_DIR}/qgeoroutesegment_wrapper.cpp
 ${QtLocation_GEN_DIR}/qgeoserviceprovider_wrapper.cpp
+${QtLocation_GEN_DIR}/qlocation_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplace_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacecontentreply_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacedetailsreply_wrapper.cpp

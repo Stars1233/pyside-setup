@@ -39,6 +39,7 @@
             </modify-argument>
         </modify-function>
     </object-type>
+    <namespace-type name="QQuickOpenGLUtils"/>
 
     <value-type name="QQuickGraphicsConfiguration"/>
     <value-type name="QQuickGraphicsDevice">

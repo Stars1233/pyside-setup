@@ -104,9 +104,10 @@ check_qt_opengl("Quick" QtQuick_include_dirs QtQuick_deps
 if (Qt${QT_MAJOR_VERSION}OpenGL_FOUND)
     list(APPEND QtQuick_SRC
          ${QtQuick_GEN_DIR}/qquickframebufferobject_wrapper.cpp
-         ${QtQuick_GEN_DIR}/qquickframebufferobject_renderer_wrapper.cpp)
+         ${QtQuick_GEN_DIR}/qquickframebufferobject_renderer_wrapper.cpp
+         ${QtQuick_GEN_DIR}/qquickopenglutils_wrapper.cpp)
 else()
-    list(APPEND QtQuick_DROPPED_ENTRIES QQuickFramebufferObject)
+    list(APPEND QtQuick_DROPPED_ENTRIES QQuickFramebufferObject QQuickOpenGLUtils)
 endif()
 
 create_pyside_module(NAME QtQuick
