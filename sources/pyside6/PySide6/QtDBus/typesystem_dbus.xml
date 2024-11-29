@@ -107,7 +107,7 @@
       <enum-type name="WatchModeFlag" flags="WatchMode"/>
     </object-type>
     <object-type name="QDBusSignature"/>
-    <object-type name="QDBusUnixFileDescriptor"/>
+    <value-type name="QDBusUnixFileDescriptor"/>
     <value-type name="QDBusVariant"/>
     <object-type name="QDBusVirtualObject"/>
     <suppress-warning text='^.*Unable to translate type "QDBusReply&lt;.*$'/>
