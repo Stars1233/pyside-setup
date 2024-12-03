@@ -384,7 +384,7 @@
   </value-type>
   <value-type name="QRegion" >
     <enum-type name="RegionType"/>
-    <add-function signature="__len__">
+    <add-function signature="__len__" return-type="int">
         <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qregion-len"/>
     </add-function>
     <add-function signature="__getitem__">

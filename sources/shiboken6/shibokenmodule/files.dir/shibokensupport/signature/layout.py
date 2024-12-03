@@ -258,9 +258,25 @@ def sort_by_inheritance(signatures):
     return signatures
 
 
-def _remove_ambiguous_signatures_body(signatures):
+def best_to_remove(signatures, idx1, idx2, name=None):
+    # Both have identical annotation.
+    sig1 = signatures[idx1]
+    sig2 = signatures[idx2]
+    ra1 = sig1.return_annotation
+    ra2 = sig2.return_annotation
+    # Both have equal return annotation.
+    if ra1 == ra2:
+        for p1, p2 in zip(sig1.parameters.values(), sig2.parameters.values()):
+            # Use the first with a default.
+            if p1.default is not _empty or p2.default is not _empty:
+                return idx1 if p1.default is not _empty else idx2
+    # Use the one with a return annotation.
+    return idx1 if ra1 is not None else idx2
+
+
+def _remove_ambiguous_signatures_body(signatures, name=None):
     # By the sorting of signatures, duplicates will always be adjacent.
-    last_ann = last_sig = None
+    last_ann = None
     last_idx = -1
     to_delete = []
     found = False
@@ -270,14 +286,8 @@ def _remove_ambiguous_signatures_body(signatures):
             annos.append(param.annotation)
         if annos == last_ann:
             found = True
-            if sig.return_annotation is last_sig.return_annotation:
-                # we can use any duplicate
-                to_delete.append(idx)
-            else:
-                # delete the one which has non-empty result
-                to_delete.append(idx if not sig.return_annotation else last_idx)
+            to_delete.append(best_to_remove(signatures, idx, last_idx, name))
         last_ann = annos
-        last_sig = sig
         last_idx = idx
 
     if not found:
@@ -296,7 +306,7 @@ def is_inconsistent_overload(signatures):
     return count != 0 and count != len(signatures)
 
 
-def remove_ambiguous_signatures(signatures):
+def remove_ambiguous_signatures(signatures, name=None):
     # This may run more than once because of indexing.
     found, new_sigs = _remove_ambiguous_signatures_body(signatures)
     while found:
@@ -313,10 +323,12 @@ def create_signature(props, key):
         return
     if isinstance(props["multi"], list):
         # multi sig: call recursively.
+        # For debugging: Print the name!
+        # name = props["multi"][0]["fullname"]
         res = list(create_signature(elem, key) for elem in props["multi"])
         # PYSIDE-2846: Sort multi-signatures by inheritance in order to avoid shadowing.
         res = sort_by_inheritance(res)
-        res = remove_ambiguous_signatures(res)
+        res = remove_ambiguous_signatures(res, name=None)
         return res if len(res) > 1 else res[0]
 
     if type(key) is tuple:

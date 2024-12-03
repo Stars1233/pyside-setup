@@ -297,7 +297,7 @@
     </value-type>
 
     <value-type name="QIPv6Address">
-        <add-function signature="__len__">
+        <add-function signature="__len__" return-type="int">
             <inject-code class="target" position="beginning" file="../glue/qtnetwork.cpp" snippet="qipv6address-len"/>
         </add-function>
         <add-function signature="__getitem__">

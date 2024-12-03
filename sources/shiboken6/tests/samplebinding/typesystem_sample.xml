@@ -2034,7 +2034,7 @@
                 %PYARG_0 = Shiboken::String::fromCString(%CPPSELF.cstring());
             </inject-code>
         </add-function>
-        <add-function signature="__len__" >
+        <add-function signature="__len__" return-type="int">
             <inject-code class="target" position="end">
                 return %CPPSELF.size();
             </inject-code>
@@ -2194,7 +2194,7 @@
             </inject-code>
         </add-function>
 
-        <add-function signature="__len__">
+        <add-function signature="__len__" return-type="int">
             <inject-code class="target" position="beginning">
             return %CPPSELF.size();
             </inject-code>
@@ -2216,7 +2216,7 @@
 
     <value-type name="StrList">
         <enum-type name="CtorEnum"/>
-        <add-function signature="__len__" >
+        <add-function signature="__len__" return-type="int">
             <inject-code class="target" position="end">
                 return %CPPSELF.size();
             </inject-code>

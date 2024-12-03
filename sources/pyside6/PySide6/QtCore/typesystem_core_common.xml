@@ -1514,7 +1514,7 @@
     <modify-function signature="^to.*\(.*QStringView.*$" remove="all"/>
   </value-type>
   <value-type name="QBitArray">
-    <add-function signature="__len__">
+    <add-function signature="__len__" return-type="int">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbitarray-len"/>
     </add-function>
     <add-function signature="__getitem__">
@@ -1634,7 +1634,7 @@
 
   <value-type name="QModelRoleDataSpan">
       <modify-function signature="dataForRole(int)const" remove="all"/>
-      <add-function signature="__len__">
+      <add-function signature="__len__" return-type="int">
           <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
                        snippet="qmodelroledataspan-len"/>
       </add-function>
@@ -2014,7 +2014,7 @@
     <modify-function signature="operator+(QByteArray,const char*)" remove="all"/>
     <modify-function signature="operator+(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator+(QByteArray,const char*)" remove="all"/>
-    <add-function signature="operator+(PyBytes,QByteArray)">
+    <add-function signature="operator+(PyBytes,QByteArray)" return-type="QByteArray">
         <inject-code file="../glue/qtcore.cpp" snippet="qbytearray-operatorplus-1"/>
     </add-function>
     <add-function signature="operator+(PyByteArray, QByteArray)" return-type="QByteArray">
@@ -2026,22 +2026,22 @@
     <add-function signature="operator+=(PyByteArray)" return-type="QByteArray">
         <inject-code file="../glue/qtcore.cpp" snippet="qbytearray-operatorplusequal"/>
     </add-function>
-    <add-function signature="operator==(PyUnicode)">
+    <add-function signature="operator==(PyUnicode)" return-type="bool">
         <inject-code file="../glue/qtcore.cpp" snippet="qbytearray-operatorequalequal"/>
     </add-function>
-    <add-function signature="operator!=(PyUnicode)">
+    <add-function signature="operator!=(PyUnicode)" return-type="bool">
         <inject-code file="../glue/qtcore.cpp" snippet="qbytearray-operatornotequal"/>
     </add-function>
-    <add-function signature="operator&gt;(PyUnicode)">
+    <add-function signature="operator&gt;(PyUnicode)" return-type="bool">
         <inject-code file="../glue/qtcore.cpp" snippet="qbytearray-operatorgreater"/>
     </add-function>
-    <add-function signature="operator&gt;=(PyUnicode)">
+    <add-function signature="operator&gt;=(PyUnicode)" return-type="bool">
         <inject-code file="../glue/qtcore.cpp" snippet="qbytearray-operatorgreaterequal"/>
     </add-function>
-    <add-function signature="operator&lt;(PyUnicode)">
+    <add-function signature="operator&lt;(PyUnicode)" return-type="bool">
         <inject-code file="../glue/qtcore.cpp" snippet="qbytearray-operatorlower"/>
     </add-function>
-    <add-function signature="operator&lt;=(PyUnicode)">
+    <add-function signature="operator&lt;=(PyUnicode)" return-type="bool">
         <inject-code file="../glue/qtcore.cpp" snippet="qbytearray-operatorlowerequal"/>
     </add-function>
     <!-- ### -->
@@ -2206,7 +2206,7 @@
     <add-function signature="__str__" return-type="str">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-str"/>
     </add-function>
-    <add-function signature="__len__">
+    <add-function signature="__len__" return-type="int">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-len"/>
     </add-function>
     <add-function signature="__getitem__">
