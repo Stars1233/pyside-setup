@@ -752,7 +752,6 @@ missing_optional_return = {
     "PySide6.QtWidgets.QWidget.nextInFocusChain",
     "PySide6.QtWidgets.QWidget.parentWidget",
     "PySide6.QtWidgets.QWidget.previousInFocusChain",
-    "PySide6.QtWidgets.QWidget.window",
 }
 
 # end of file
