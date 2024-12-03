@@ -12,7 +12,8 @@ import stat
 import subprocess
 import sys
 import tempfile
-import urllib.request as urllib
+import urllib.request
+import urllib.error
 from collections import defaultdict
 from pathlib import Path
 from textwrap import dedent, indent
@@ -518,9 +519,9 @@ def download_and_extract_7z(fileurl, target):
     for i in range(1, 10):
         try:
             log.info(f"Downloading fileUrl {fileurl}, attempt #{i}")
-            localfile, info = urllib.urlretrieve(fileurl)
+            localfile, info = urllib.request.urlretrieve(fileurl)
             break
-        except urllib.URLError:
+        except urllib.error.URLError:
             pass
     if not localfile:
         log.error(f"Error downloading {fileurl} : {info}")
