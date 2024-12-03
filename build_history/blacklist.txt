@@ -44,7 +44,6 @@
 [QtAsyncio::qasyncio_test_chain]
     win32
 [QtQml::bug_825]
-    py3.8       # bug in typeobject::type_mro_modified, fix in 3.9
     py3.9.0
     py3.9.1
     py3.9.2
