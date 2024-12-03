@@ -18,7 +18,7 @@ from . import IMPORT_WARNING_PYSIDE, DEFAULT_IGNORE_DIRS, run_command
 
 
 @lru_cache(maxsize=None)
-def get_py_files(project_dir: Path, extra_ignore_dirs: list[Path] = None, project_data=None):
+def get_py_files(project_dir: Path, extra_ignore_dirs: tuple[Path] = None, project_data=None):
     """Finds and returns all the Python files in the project
     """
     py_candidates = []
@@ -116,6 +116,8 @@ def find_permission_categories(project_dir: Path, extra_ignore_dirs: list[Path] 
 
         return set(perm_categories)
 
+    if extra_ignore_dirs is not None:
+        extra_ignore_dirs = tuple(extra_ignore_dirs)
     py_candidates = get_py_files(project_dir, extra_ignore_dirs, project_data)
     for py_candidate in py_candidates:
         all_perm_categories = all_perm_categories.union(pyside_permission_imports(py_candidate))
@@ -172,6 +174,8 @@ def find_pyside_modules(project_dir: Path, extra_ignore_dirs: list[Path] = None,
 
         return set(modules)
 
+    if extra_ignore_dirs is not None:
+        extra_ignore_dirs = tuple(extra_ignore_dirs)
     py_candidates = get_py_files(project_dir, extra_ignore_dirs, project_data)
     for py_candidate in py_candidates:
         all_modules = all_modules.union(pyside_module_imports(py_candidate))
