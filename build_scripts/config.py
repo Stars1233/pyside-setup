@@ -6,8 +6,13 @@ import sys
 from .log import log, LogLevel
 from pathlib import Path
 
-from . import PYSIDE, PYSIDE_MODULE, SHIBOKEN
+from . import PYSIDE, PYSIDE_MODULE, SHIBOKEN, PYPROJECT_PATH
 from .utils import available_pyside_tools
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 
 
 class Config(object):
@@ -57,19 +62,29 @@ class Config(object):
         # Store where host shiboken is built during a cross-build.
         self.shiboken_host_query_path = None
 
-        # Used by check_allowed_python_version to validate the
-        # interpreter version.
-        self.python_version_classifiers = [
-            'Programming Language :: Python',
-            'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.9',
-            'Programming Language :: Python :: 3.10',
-            'Programming Language :: Python :: 3.11',
-            'Programming Language :: Python :: 3.12',
-            'Programming Language :: Python :: 3.13',
-        ]
-
         self.setup_script_dir = None
+
+        # Getting data from base pyproject.toml file to be consistent
+
+        if not PYPROJECT_PATH.exists():
+            log.error("'pyproject.toml.base' not found in '{pyproject_path}'")
+
+        with open(PYPROJECT_PATH, "rb") as f:
+            _pyproject_data = tomllib.load(f)["project"]
+
+        self.setup_kwargs = {}
+        self.setup_kwargs['long_description_content_type'] = 'text/markdown'
+
+        self.setup_kwargs['keywords'] = _pyproject_data["keywords"]
+        _author, _email = _pyproject_data["authors"][0]
+        self.setup_kwargs['author'] = _author
+        self.setup_kwargs['author_email'] = _email
+        self.setup_kwargs['url'] = _pyproject_data["urls"]["Homepage"]
+        self.setup_kwargs['license'] = _pyproject_data["license"]["text"]
+        self.setup_kwargs['python_requires'] = _pyproject_data["requires-python"]
+
+        self.classifiers = _pyproject_data["classifiers"]
+        self.setup_kwargs['classifiers'] = self.classifiers
 
     def init_config(self,
                     build_type=None,
@@ -105,24 +120,14 @@ class Config(object):
 
         self.cmake_toolchain_file = cmake_toolchain_file
 
-        setup_kwargs = {}
-        setup_kwargs['long_description'] = self.get_long_description()
-        setup_kwargs['long_description_content_type'] = 'text/markdown'
-        setup_kwargs['keywords'] = 'Qt'
-        setup_kwargs['author'] = 'Qt for Python Team'
-        setup_kwargs['author_email'] = 'pyside@qt-project.org'
-        setup_kwargs['url'] = 'https://www.pyside.org'
-        setup_kwargs['download_url'] = 'https://download.qt.io/official_releases/QtForPython'
-        setup_kwargs['license'] = 'LGPL'
-        setup_kwargs['zip_safe'] = False
-        setup_kwargs['cmdclass'] = cmd_class_dict
-        setup_kwargs['version'] = package_version
-        setup_kwargs['python_requires'] = ">=3.9, <3.14"
+        self.setup_kwargs['long_description'] = self.get_long_description()
+        self.setup_kwargs['cmdclass'] = cmd_class_dict
+        self.setup_kwargs['version'] = package_version
 
         if log_level == LogLevel.QUIET:
             # Tells setuptools to be quiet, and only print warnings or errors.
             # Makes way less noise in the terminal when building.
-            setup_kwargs['verbose'] = 0
+            self.setup_kwargs['verbose'] = 0
 
         # Setting these two keys is still a bit of a discussion point.
         # In general not setting them will allow using "build" and
@@ -140,54 +145,29 @@ class Config(object):
         # The only plausible usage of it, is if we will implement a
         # correctly functioning setup.py develop command (or bdist_egg).
         # But currently that doesn't seem to work.
-        setup_kwargs['packages'] = self.get_setup_tools_packages_for_current_build()
-        setup_kwargs['package_dir'] = self.get_package_name_to_dir_path_mapping()
+        self.setup_kwargs['packages'] = self.get_setup_tools_packages_for_current_build()
+        self.setup_kwargs['package_dir'] = self.get_package_name_to_dir_path_mapping()
 
         # Add a bogus extension module (will never be built here since
         # we are overriding the build command to do it using cmake) so
         # things like bdist_egg will know that there are extension
         # modules and will name the dist with the full platform info.
-        setup_kwargs['ext_modules'] = ext_modules
-
-        common_classifiers = [
-            'Development Status :: 5 - Production/Stable',
-            'Environment :: Console',
-            'Environment :: MacOS X',
-            'Environment :: X11 Applications :: Qt',
-            'Environment :: Win32 (MS Windows)',
-            'Intended Audience :: Developers',
-            'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
-            'License :: Other/Proprietary License',
-            'Operating System :: MacOS :: MacOS X',
-            'Operating System :: POSIX',
-            'Operating System :: POSIX :: Linux',
-            'Operating System :: Microsoft',
-            'Operating System :: Microsoft :: Windows',
-            'Programming Language :: C++']
-        common_classifiers.extend(self.python_version_classifiers)
-        common_classifiers.extend([
-            'Topic :: Database',
-            'Topic :: Software Development',
-            'Topic :: Software Development :: Code Generators',
-            'Topic :: Software Development :: Libraries :: Application Frameworks',
-            'Topic :: Software Development :: User Interfaces',
-            'Topic :: Software Development :: Widget Sets'])
-        setup_kwargs['classifiers'] = common_classifiers
+        self.setup_kwargs['ext_modules'] = ext_modules
 
         package_name = self.package_name()
 
         if self.internal_build_type == self.shiboken_module_option_name:
-            setup_kwargs['name'] = self.shiboken_module_st_name
-            setup_kwargs['description'] = "Python / C++ bindings helper module"
-            setup_kwargs['entry_points'] = {}
+            self.setup_kwargs['name'] = self.shiboken_module_st_name
+            self.setup_kwargs['description'] = "Python / C++ bindings helper module"
+            self.setup_kwargs['entry_points'] = {}
 
         elif self.internal_build_type == self.shiboken_generator_option_name:
-            setup_kwargs['name'] = self.shiboken_generator_st_name
-            setup_kwargs['description'] = "Python / C++ bindings generator"
-            setup_kwargs['install_requires'] = [
+            self.setup_kwargs['name'] = self.shiboken_generator_st_name
+            self.setup_kwargs['description'] = "Python / C++ bindings generator"
+            self.setup_kwargs['install_requires'] = [
                 f"{self.shiboken_module_st_name}=={package_version}"
             ]
-            setup_kwargs['entry_points'] = {
+            self.setup_kwargs['entry_points'] = {
                 'console_scripts': [
                     f'{SHIBOKEN} = {package_name}.scripts.shiboken_tool:main',
                     f'{SHIBOKEN}-genpyi = {package_name}.scripts.shiboken_tool:genpyi',
@@ -195,10 +175,11 @@ class Config(object):
             }
 
         elif self.internal_build_type == self.pyside_option_name:
-            setup_kwargs['name'] = self.pyside_st_name
-            setup_kwargs['description'] = ("Python bindings for the Qt cross-platform application "
-                                           "and UI framework")
-            setup_kwargs['install_requires'] = [
+            self.setup_kwargs['name'] = self.pyside_st_name
+            self.setup_kwargs['description'] = (
+                "Python bindings for the Qt cross-platform application and UI framework"
+            )
+            self.setup_kwargs['install_requires'] = [
                 f"{self.shiboken_module_st_name}=={package_version}"
             ]
             if qt_install_path:
@@ -215,9 +196,7 @@ class Config(object):
                 _console_scripts.extend([f'{PYSIDE}-{tool} = {package_name}.scripts.pyside_tool:'
                                          f'{tool}' for tool in _pyside_tools])
 
-                setup_kwargs['entry_points'] = {'console_scripts': _console_scripts}
-
-        self.setup_kwargs = setup_kwargs
+                self.setup_kwargs['entry_points'] = {'console_scripts': _console_scripts}
 
     def get_long_description(self):
         readme_filename = 'README.md'

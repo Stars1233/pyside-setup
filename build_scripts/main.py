@@ -121,7 +121,7 @@ def get_allowed_python_versions():
     pattern = r'Programming Language :: Python :: (\d+)\.(\d+)'
     supported = []
 
-    for line in config.python_version_classifiers:
+    for line in config.classifiers:
         found = re.search(pattern, line)
         if found:
             major = int(found.group(1))

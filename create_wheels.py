@@ -184,13 +184,13 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData) -> str:
     with open(artifacts / "pyproject.toml.base") as f:
         content = (
             f.read()
-            .replace("PROJECT_NAME", f'"{setup.name}"')
-            .replace("PROJECT_VERSION", f'"{setup.version[1]}"')
-            .replace("PROJECT_DESCRIPTION", f'"{setup.description}"')
-            .replace("PROJECT_README", f'"{setup.readme}"')
-            .replace("PROJECT_TAG", f'"{_tag}"')
-            .replace("PROJECT_SCRIPTS", _console_scripts)
-            .replace("PROJECT_DEPENDENCIES", f"{_dependencies}")
+            .replace('"PROJECT_NAME"', f'"{setup.name}"')
+            .replace('"PROJECT_VERSION"', f'"{setup.version[1]}"')
+            .replace('"PROJECT_DESCRIPTION"', f'"{setup.description}"')
+            .replace('"PROJECT_README"', f'"{setup.readme}"')
+            .replace('"PROJECT_TAG"', f'"{_tag}"')
+            .replace('# PROJECT_SCRIPTS', _console_scripts)
+            .replace('"PROJECT_DEPENDENCIES"', f"{_dependencies}")
         )
     return content
 
