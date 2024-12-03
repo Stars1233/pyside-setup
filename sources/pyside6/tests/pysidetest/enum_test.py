@@ -92,15 +92,6 @@ class InvestigateOpcodesTest(unittest.TestCase):
                     ('LOAD_CONST',  100, 0),
                     ('RETURN_VALUE', 83, None)]
 
-        if sys.version_info[:2] <= (3, 6):
-
-            result_2 = [('LOAD_GLOBAL',   116, 0),
-                        ('LOAD_ATTR',     106, 1),
-                        ('CALL_FUNCTION', 131, 0),
-                        ('STORE_FAST',    125, 1),
-                        ('LOAD_CONST',    100, 0),
-                        ('RETURN_VALUE',   83, None)]
-
         if sys.version_info[:2] == (3, 11):
             # Note: Python 3.11 is a bit more complex because it can optimize itself.
             # Opcodes are a bit different, and a hidden second code object is used.

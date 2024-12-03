@@ -18,7 +18,7 @@ add_library(QtExampleIcons MODULE module.c)
 
 # See libshiboken/CMakeLists.txt
 if(PYTHON_LIMITED_API)
-    target_compile_definitions(QtExampleIcons PRIVATE "-DPy_LIMITED_API=0x03050000")
+    target_compile_definitions(QtExampleIcons PRIVATE "-DPy_LIMITED_API=0x03080000")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

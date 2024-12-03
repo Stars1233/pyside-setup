@@ -118,14 +118,14 @@ Now, build the project using it::
 This step creates a ``build/`` directory with the following structure::
 
     build
-    └── exe.linux-x86_64-3.7
+    └── exe.linux-x86_64-3.12
         └── lib
         └── main
 
 The first directory inside ``build/`` depends on the platform
-you are using, in this case a ``x86_64`` Linux using Python 3.7.
+you are using, in this case a ``x86_64`` Linux using Python 3.12.
 The structure is the same as previously described, and you can simply
 enter the directory and execute the file::
 
-    cd build/exe.linux-x86_64-3.7
+    cd build/exe.linux-x86_64-3.12
     ./main

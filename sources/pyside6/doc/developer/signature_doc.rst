@@ -3,7 +3,7 @@
 The signature C extension
 =========================
 
-This module is a C extension for CPython 3.5 and up, and CPython 2.7.
+This module is a C extension for CPython 3.X.
 Its purpose is to provide support for the ``__signature__`` attribute
 of builtin PyCFunction objects.
 

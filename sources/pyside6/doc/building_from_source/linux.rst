@@ -93,7 +93,7 @@ Assumming that Qt is in PATH, for example, the configure step can be done with::
           -DPython_EXECUTABLE=/path/to/interpreter
 
 .. note:: You can add `-DFORCE_LIMITED_API=yes` in case you want to have a
-   build which will be compatible with Python 3.7+.
+   build which will be compatible with Python 3.8+.
 
 and then for building::
 

@@ -28,11 +28,6 @@ After the cache has been created, the runtime is substantially smaller.
 
 """
 
-import sys
-if sys.version_info[:2] < (3, 6):
-    print("This program is written for Python 3.6 or higher.")
-    sys.exit(1)
-
 DEMO_URL = ("https://testresults.qt.io/coin/api/results/pyside/pyside-setup/"
             # The above URL part is fixed.
             "30c1193ec56a86b8d0920c325185b9870f96941e/"

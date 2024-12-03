@@ -350,26 +350,25 @@ def try_build_examples():
     generate_build_cmake()
     run_ninja()
 
-    if sys.version_info[:2] >= (3, 7):
-        log.info("Checking Python Interface Files in Python 3 with all features selected")
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            src_path = Path(tmpdirname) / "pyi_test"
-            pyi_script_dir = Path(setup_script_dir) / "sources" / "pyside6" / "PySide6" / "support"
-            execute_script(
-                pyi_script_dir / "generate_pyi.py",
-                "all",
-                "--outpath",
-                src_path,
-                "--feature",
-                "snake_case",
-                "true_property",
-            )
-            from PySide6 import __all__ as modules
+    log.info("Checking Python Interface Files in Python 3 with all features selected")
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        src_path = Path(tmpdirname) / "pyi_test"
+        pyi_script_dir = Path(setup_script_dir) / "sources" / "pyside6" / "PySide6" / "support"
+        execute_script(
+            pyi_script_dir / "generate_pyi.py",
+            "all",
+            "--outpath",
+            src_path,
+            "--feature",
+            "snake_case",
+            "true_property",
+        )
+        from PySide6 import __all__ as modules
 
-            for modname in modules:
-                # PYSIDE-1735: pyi files are no longer compatible with Python.
-                # XXX Maybe add a test with Mypy here?
-                pass  # execute_script(src_path / f"{modname}.pyi")
+        for modname in modules:
+            # PYSIDE-1735: pyi files are no longer compatible with Python.
+            # XXX Maybe add a test with Mypy here?
+            pass  # execute_script(src_path / f"{modname}.pyi")
 
 
 def run_wheel_tests(install_wheels, wheels_dir_name):

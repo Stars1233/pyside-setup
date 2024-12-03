@@ -157,8 +157,7 @@ def _embed_bytefile(fin, fout, is_text):
          * {remark}.
          */
          """), file=fout)
-    headsize = (0 if is_text else
-                16 if sys.version_info >= (3, 7) else 12 if sys.version_info >= (3, 3) else 8)
+    headsize = 0 if is_text else 16
     binstr = fin.read()[headsize:]
     if is_text:
         try:

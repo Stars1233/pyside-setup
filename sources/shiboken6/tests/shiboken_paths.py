@@ -68,11 +68,8 @@ def add_python_dirs(python_dirs):
 def add_lib_dirs(lib_dirs):
     """Add directories to the platform's library path."""
     if sys.platform == 'win32':
-        if sys.version_info >= (3, 8, 0):
-            for lib_dir in lib_dirs:
-                os.add_dll_directory(lib_dir)
-        else:
-            _prepend_path_var('PATH', lib_dirs)
+        for lib_dir in lib_dirs:
+            os.add_dll_directory(lib_dir)
     else:
         _prepend_path_var('LD_LIBRARY_PATH', lib_dirs)
 
