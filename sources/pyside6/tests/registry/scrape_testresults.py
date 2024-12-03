@@ -2,6 +2,17 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
+from bs4 import BeautifulSoup
+from datetime import datetime
+from multiprocessing import Pool
+from textwrap import dedent
+import requests
+import os
+import time
+import re
+import json
+import argparse
+
 """
 scrape_testresults.py
 
@@ -26,21 +37,11 @@ DEMO_URL = ("https://testresults.qt.io/coin/api/results/pyside/pyside-setup/"
             # The above URL part is fixed.
             "30c1193ec56a86b8d0920c325185b9870f96941e/"
             "MacOSMacOS_10_12x86_64MacOSMacOS_10_12x86_64Clangqtci-macos-"
-                "10.12-x86_64-8-425364DebugAndRelease_Release/"
+            "10.12-x86_64-8-425364DebugAndRelease_Release/"
             "d80c5d4547ea2b3d74188bd458955aae39cb32b4/"
             "test_1535865484/"
             "log.txt.gz")
 
-from bs4 import BeautifulSoup
-from datetime import datetime
-from multiprocessing import Pool
-from textwrap import dedent
-import requests
-import os
-import time
-import re
-import json
-import argparse
 
 my_name = __file__ if __file__.endswith(".py") else __file__[:-1]
 test_path = os.path.join(os.path.dirname(__file__), "testresults", "embedded")
@@ -123,7 +124,7 @@ def get_timestamp(text):
         stop_all = True
         raise
     startpos += len(prefix)
-    text = text[startpos : startpos + 80]
+    text = text[startpos: startpos + 80]
     ts = text[:19]
     ts = re.sub(r'[^0-9]', '_', ts)
     # check that it is a valid time stamp
@@ -152,7 +153,7 @@ def write_data(name, text):
             offset = line.index("BEGIN_FILE")
         if "END_FILE" in line:
             stop = idx
-    lines = lines[start : stop]
+    lines = lines[start: stop]
     if offset:
         lines = list(line[offset:] for line in lines)
     # fix the lines - the original has no empty line after "# eof"
@@ -226,7 +227,7 @@ def handle_suburl_tup(idx_n_url_level):
         return  # bad solution, but it stops fast
     idx, n, url, level = idx_n_url_level
     try:
-        ret = handle_suburl(idx, n, url, level)
+        handle_suburl(idx, n, url, level)
         return url, None
     except requests.exceptions.RequestException as e:
         return url, e
@@ -276,7 +277,6 @@ def handle_topurl(url):
         with open(cache_file, 'r') as fp:
             known_urls = json.load(fp)
             work_urls -= set(known_urls)
-    level = 1
     for sub_url in work_urls:
         name = get_name(sub_url)
         if name.endswith("/"):

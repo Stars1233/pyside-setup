@@ -39,7 +39,7 @@ assert (build_script_dir / "build_scripts").exists()
 
 sys.path.insert(0, os.fspath(build_script_dir))
 
-from build_scripts import utils
+from build_scripts import utils  # noqa: E402
 
 
 def runpy(cmd, **kw):
@@ -157,7 +157,7 @@ def _embed_bytefile(fin, fout, is_text):
          * {remark}.
          */
          """), file=fout)
-    headsize = ( 0 if is_text else
+    headsize = (0 if is_text else
                 16 if sys.version_info >= (3, 7) else 12 if sys.version_info >= (3, 3) else 8)
     binstr = fin.read()[headsize:]
     if is_text:
@@ -194,7 +194,7 @@ def _embed_bytefile(fin, fout, is_text):
     print(file=fout)
     use_ord = sys.version_info[0] == 2
     for i in range(0, len(binstr), 16):
-        for c in bytes(binstr[i : i + 16]):
+        for c in bytes(binstr[i: i + 16]):
             ord_c = ord(c) if use_ord else c
             print(f"{ord_c:#4},", file=fout, end="")
         print(file=fout)
