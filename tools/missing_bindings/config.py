@@ -12,6 +12,7 @@ modules_to_test = {
     'QtQuickWidgets': 'qtquickwidgets-module.html',
     # Broken in 6.5.0
     #'QtQuickControls2': 'qtquickcontrols-module.html',
+    'QtQuickControls2': 'qtquickcontrols2-module.html',
     'QtSql': 'qtsql-module.html',
     'QtWidgets': 'qtwidgets-module.html',
     'QtConcurrent': 'qtconcurrent-module.html',
@@ -23,6 +24,7 @@ modules_to_test = {
     'QtSvgWidgets': 'qtsvgwidgets-module.html',
     'QtUiTools': 'qtuitools-module.html',
     'QtXml': 'qtxml-module.html',
+    'QtQuickTest': 'qtquicktest-module.html',
     'QtTest': 'qttest-module.html',
     # Deprecated in 6.8
     #'Qt3DCore': 'qt3dcore-module.html',
@@ -33,15 +35,15 @@ modules_to_test = {
     #'Qt3DExtras': 'qt3dextras-module.html',
     'QtNetworkAuth': 'qtnetworkauth-module.html',
     'QtStateMachine': 'qtstatemachine-module.html',
-    # 'QtCoAp' -- TODO
-    # 'QtMqtt' -- TODO
-    # 'QtOpcUA' -- TODO
+    'QtCoap': 'qtcoap-module.html',
+    'QtMqtt': 'qtmqtt-module.html',
+    'QtOpcUa': 'qtopcua-module.html',
+    'QtVirtualKeyboard': 'qtvirtualkeyboard-module.html',
+    'QtWaylandCompositor': 'qtwaylandcompositor-module.html',
+    'QtWebView': 'qtwebview-module.html',
 
     # 6.1
     'QtScxml': 'qtscxml-module.html',
-    # Deprecated in 6.7
-    #'QtCharts':  'qtcharts-module.html',
-    #'QtDataVisualization':  'qtdatavisualization-module.html',
 
     # 6.2
     'QtBluetooth': 'qtbluetooth-module.html',
@@ -71,9 +73,15 @@ modules_to_test = {
     'QtSerialBus': 'qtserialbus-module.html',
     'QtTextToSpeech': 'qttexttospeech-module.html',
     'QtLocation': 'qtlocation-module.html',
+    'QtGRPC': 'qtgrpc-module.html',
+    'QtPhotobuf': 'qtprotobuf-module.html',
 
     # 6.6
     'QtGraphs': 'qtgraphs-module.html',
+
+    # 6.7
+    'QtCharts': 'qtcharts-module-qtcharts.html',
+    'QtDataVisualization': 'qtdatavisualization-module-qtdatavis.html',
 }
 
 types_to_ignore = {
@@ -146,4 +154,12 @@ types_to_ignore = {
     # QtSql
     'QSqlDriverCreator',
     'QSqlDriverPlugin',
+}
+
+# Split modules on PySide
+split_modules = {
+    'QtSvg': 'QtSvgWidgets',
+    'QtPdf': 'QtPdfWidgets',
+    'QtOpenGL': 'QtOpenGLWidgets',
+    'QtGraphs': 'QtGraphsWidgets',
 }

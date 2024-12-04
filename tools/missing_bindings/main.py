@@ -26,12 +26,12 @@ from urllib import request
 from pathlib import Path
 
 from bs4 import BeautifulSoup
-from config import modules_to_test, types_to_ignore
+from config import modules_to_test, types_to_ignore, split_modules
 import pandas as pd
 import matplotlib.pyplot as plt
 
 qt_documentation_website_prefixes = {
-    "6.8": "https://doc.qt.io/qt-6/",
+    "6.7": "https://doc.qt.io/qt-6/",
     "dev": "https://doc-snapshots.qt.io/qt6-dev/",
 }
 
@@ -60,8 +60,8 @@ def get_parser():
     parser.add_argument(
         "--qt-version",
         "-v",
-        default="6.8",
-        choices=["6.8", "dev"],
+        default="6.7",
+        choices=["6.7", "dev"],
         type=str,
         dest="version",
         help="the Qt version to use to check for types",
@@ -157,10 +157,10 @@ if __name__ == "__main__":
         style="end",
     )
 
-    wikilog(
-        "Similar report:\n https://gist.github.com/ethanhs/6c626ca4e291f3682589699296377d3a",
-        style="text_with_link",
-    )
+    # wikilog(
+    #     "Similar report:\n https://gist.github.com/ethanhs/6c626ca4e291f3682589699296377d3a",
+    #     style="text_with_link",
+    # )
 
     python_executable = Path(sys.executable).name or ""
     command_line_arguments = " ".join(sys.argv)
@@ -188,6 +188,13 @@ if __name__ == "__main__":
             pyside_tested_module = getattr(
                 __import__(pyside_package_name, fromlist=[module_name]), module_name
             )
+            for main_module, split_module in split_modules.items():
+                # If module name matches with the split_modules
+                # Second module is also imported
+                if module_name == main_module:
+                    pyside_tested_module_split = getattr(
+                        __import__(pyside_package_name, fromlist=[split_module]), split_module
+                    )
         except Exception as e:
             e_str = str(e).replace('"', "")
             wikilog(
@@ -202,7 +209,7 @@ if __name__ == "__main__":
             pyqt_module_name = module_name
 
             pyqt_tested_module = getattr(
-                __import__(pyqt_package_name, fromlist=[pyqt_module_name]), pyqt_module_name
+                __import__(pyqt_package_name, fromlist=[module_name]), pyqt_module_name
             )
         except Exception as e:
             e_str = str(e).replace("'", "")
@@ -251,17 +258,24 @@ if __name__ == "__main__":
                 pyside_qualified_type = f"pyside_tested_module.{qt_type}"
                 eval(pyside_qualified_type)
                 is_present_in_pyside = True
-            except Exception as e:
-                print("Failed eval-in pyside qualified types")
-                print(f"{type(e).__name__}: {e}")
-                missing_type = qt_type
-                missing_pyside_types_count += 1
-                total_missing_types_count += 1
+            except Exception:
+                # If an exception is thrown in the first eval
+                # Second imported module will be checked
+                try:
+                    pyside_qualified_type_split = f"pyside_tested_module_split.{qt_type}"
+                    eval(pyside_qualified_type_split)
+                    is_present_in_pyside = True
+                except Exception as e:
+                    print("Failed eval-in pyside qualified types")
+                    print(f"{type(e).__name__}: {e}")
+                    missing_type = qt_type
+                    missing_pyside_types_count += 1
+                    total_missing_types_count += 1
 
-                if is_present_in_pyqt:
-                    missing_type = f"{missing_type} (is present in PyQt6)"
-                    missing_types_compared_to_pyqt += 1
-                    total_missing_types_count_compared_to_pyqt += 1
+                    if is_present_in_pyqt:
+                        missing_type = f"{missing_type} (is present in PyQt6)"
+                        missing_types_compared_to_pyqt += 1
+                        total_missing_types_count_compared_to_pyqt += 1
 
             # missing in PySide
             if not is_present_in_pyside:
