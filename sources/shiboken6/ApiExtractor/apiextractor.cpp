@@ -11,6 +11,7 @@
 #include "abstractmetalang.h"
 #include "codesnip.h"
 #include "exception.h"
+#include "graph.h"
 #include "messages.h"
 #include "modifications.h"
 #include "optionsparser.h"
@@ -401,6 +402,48 @@ bool ApiExtractorPrivate::runHelper(ApiExtractorFlags flags)
     return result;
 }
 
+static qsizetype indexOfPointee(const InstantiatedSmartPointers &instantiatedList,
+                                const AbstractMetaClassCPtr &pointee)
+{
+    for (qsizetype i = 0, size = instantiatedList.size(); i < size; ++i) {
+        if (instantiatedList.at(i).pointee == pointee)
+            return i;
+    }
+    return -1;
+}
+
+// Sort the list of instantiated smart pointers such that base classes go before
+// descendant classes since those register conversions to smart_ptr<base> for
+// which the base definition needs to exist (PYSIDE-2946).
+static InstantiatedSmartPointers
+    topologicalSortSmartPointers(const InstantiatedSmartPointers &instantiatedList)
+{
+    const auto size = instantiatedList.size();
+    if (size < 2)
+        return instantiatedList;
+
+    // Create a graph (using int indexes for sorting) with dependency edges for the inheritance
+    // within the pointee classes list.
+    Graph<InstantiatedSmartPointer> graph(instantiatedList);
+    for (qsizetype i = 0; i < size; ++i) {
+        const auto &smp = instantiatedList.at(i);
+        if (smp.pointee) {
+            for (const auto &base : smp.pointee->baseClasses()) {
+                const auto baseIndex = indexOfPointee(instantiatedList, base);
+                if (baseIndex != -1)
+                    graph.addEdgeByIndexes(baseIndex, i);
+            }
+        }
+    }
+
+    const auto sortedGraphResult = graph.topologicalSort();
+    // Should not really fail since it is only by base classes ATM...
+    if (!sortedGraphResult.isValid())
+        throw Exception("Failed to sort the list of instantiated smart pointers (cyclic dependency?)"_L1);
+
+    return sortedGraphResult.result;
+}
+
 static inline void classListToCList(const AbstractMetaClassList &list, AbstractMetaClassCList *target)
 {
     target->reserve(list.size());
@@ -430,7 +473,8 @@ std::optional<ApiExtractorResult> ApiExtractor::run(ApiExtractorFlags flags)
         if (instantiationTe->isComplex())
             smp.pointee = AbstractMetaClass::findClass(result.m_metaClasses, instantiationTe);
     }
-    qSwap(result.m_instantiatedSmartPointers, collectContext.instantiatedSmartPointers);
+    result.m_instantiatedSmartPointers =
+        topologicalSortSmartPointers(collectContext.instantiatedSmartPointers);
     return result;
 }
 
