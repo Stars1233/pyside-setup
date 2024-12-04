@@ -176,8 +176,18 @@ macro(setup_clang)
 
     find_package(Clang CONFIG REQUIRED)
     # Need to explicitly handle the version check, because the Clang package doesn't.
-    if (LLVM_PACKAGE_VERSION AND LLVM_PACKAGE_VERSION VERSION_LESS "18.0")
-        message(FATAL_ERROR "You need LLVM version 18.0 or greater to build.")
+    set(REQUIRED_LLVM "18.0")
+
+    if (LLVM_PACKAGE_VERSION AND LLVM_PACKAGE_VERSION VERSION_LESS "${REQUIRED_LLVM}")
+        message(WARNING "You need LLVM version ${REQUIRED_LLVM} or greater to build PySide "
+            "without issues, and ${LLVM_PACKAGE_VERSION} was found. "
+            "A lower version might case problems, specially on Windows.")
+        # Exception to enable Yocto builds (Kirkstone) - 6.8.x
+        set(REQUIRED_LLVM "14.0")
+        if (LLVM_PACKAGE_VERSION AND LLVM_PACKAGE_VERSION VERSION_LESS "${REQUIRED_LLVM}")
+            message(FATAL_ERROR "Using a LLVM version ${REQUIRED_LLVM} is the minimum allowed "
+                "to work pyside in some systems, however ${LLVM_PACKAGE_VERSION} was found.")
+        endif()
     endif()
 
     # CLANG_LIBRARY is read out from the cmake cache to deploy libclang
