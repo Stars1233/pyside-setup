@@ -53,7 +53,7 @@ def get_py_files(project_dir: Path, extra_ignore_dirs: tuple[Path] = None, proje
     # incase there is not .pyproject file, search all python files in project_dir, except
     # ignore_dirs
     if extra_ignore_dirs:
-        ignore_dirs.extend(extra_ignore_dirs)
+        ignore_dirs.update(extra_ignore_dirs)
 
     # find relevant .py files
     _walk = os.walk(project_dir)

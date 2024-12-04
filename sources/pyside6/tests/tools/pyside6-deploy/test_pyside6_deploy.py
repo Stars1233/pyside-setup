@@ -185,6 +185,55 @@ class TestPySide6DeployWidgets(DeployTestBase):
 
         self.assertEqual(original_output, self.expected_run_cmd)
 
+    @patch("deploy_lib.dependency_util.QtDependencyReader.get_qt_libs_dir")
+    def testExtraModules(self, mock_sitepackages, mock_plugins):
+        mock_sitepackages.return_value = Path(_get_qt_lib_dir())
+        mock_plugins.return_value = self.all_plugins
+        init_result = self.deploy.main(self.main_file, extra_modules_grouped="QtNetwork,QtOpenGL",
+                                       init=True, force=True)
+        self.assertEqual(init_result, None)
+        self.deploy.main(config_file=self.config_file, dry_run=True, force=True)
+
+        # test config file contents
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
+        expected_modules = {"Core", "Gui", "Widgets", "Network", "OpenGL"}
+        if sys.platform != "win32":
+            expected_modules.add("DBus")
+        obtained_modules = set(config_obj.get_value("qt", "modules").split(","))
+        self.assertEqual(obtained_modules, expected_modules)
+        self.config_file.unlink()
+
+    @patch("deploy_lib.dependency_util.QtDependencyReader.get_qt_libs_dir")
+    def testExtraIgnoreDirs(self, mock_sitepackages, mock_plugins):
+        # create a directory to ignore
+        ignore_dir = self.temp_example_widgets / "ignore_dir"
+        ignore_dir.mkdir()
+        ignore_file = ignore_dir / "test_ignore.py"
+        ignore_file.write_text("from PySide6 import QtNetwork")
+
+        # rename the .pyproject file inside the example directory
+        project_file = self.temp_example_widgets / "tetrix.pyproject"
+        project_file.rename(self.temp_example_widgets / "tetrix.pyproject.bak")
+
+        mock_sitepackages.return_value = Path(_get_qt_lib_dir())
+        mock_plugins.return_value = self.all_plugins
+        init_result = self.deploy.main(self.main_file, extra_ignore_dirs="ignore_dir",
+                                       init=True, force=True)
+        self.assertEqual(init_result, None)
+        self.deploy.main(config_file=self.config_file, dry_run=True, force=True)
+
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
+        expected_modules = {"Core", "Gui", "Widgets"}
+        if sys.platform != "win32":
+            expected_modules.add("DBus")
+        obtained_modules = set(config_obj.get_value("qt", "modules").split(","))
+        self.assertEqual(obtained_modules, expected_modules)
+        self.config_file.unlink()
+
+        #undo rename of project file
+        project_file = self.temp_example_widgets / "tetrix.pyproject.bak"
+        project_file.rename(self.temp_example_widgets / "tetrix.pyproject")
+
 
 @unittest.skipIf(sys.platform == "darwin" and int(platform.mac_ver()[0].split('.')[0]) <= 11,
                  "Test only works on macOS version 12+")
