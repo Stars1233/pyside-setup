@@ -423,6 +423,13 @@ std::optional<ApiExtractorResult> ApiExtractor::run(ApiExtractorFlags flags)
     result.m_flags = flags;
     result.m_typedefTargetToName = d->m_builder->typedefTargetToName();
     qSwap(result.m_instantiatedContainers, collectContext.instantiatedContainers);
+
+    // Populate the list of pointees by type entry.
+    for (auto &smp : collectContext.instantiatedSmartPointers) {
+        const auto instantiationTe = smp.type.instantiations().constFirst().typeEntry();
+        if (instantiationTe->isComplex())
+            smp.pointee = AbstractMetaClass::findClass(result.m_metaClasses, instantiationTe);
+    }
     qSwap(result.m_instantiatedSmartPointers, collectContext.instantiatedSmartPointers);
     return result;
 }

@@ -20,6 +20,7 @@ struct InstantiatedSmartPointer
 {
     AbstractMetaClassCPtr smartPointer; // Template class
     AbstractMetaClassCPtr specialized; // Specialized for type
+    AbstractMetaClassCPtr pointee;
     AbstractMetaType type;
 };
 

@@ -303,11 +303,7 @@ bool Generator::generate()
     // Generate smart pointers.
     for (const auto &smp: m_d->api.instantiatedSmartPointers()) {
         if (shouldGenerate(smp.specialized->typeEntry())) {
-            AbstractMetaClassCPtr pointeeClass;
-            const auto instantiatedType = smp.type.instantiations().constFirst().typeEntry();
-            if (instantiatedType->isComplex()) // not a C++ primitive
-                pointeeClass = AbstractMetaClass::findClass(m_d->api.classes(), instantiatedType);
-            const auto context = contextForSmartPointer(smp.specialized, smp.type, pointeeClass);
+            const auto context = contextForSmartPointer(smp.specialized, smp.type, smp.pointee);
             const QString targetDirectory = directoryForContext(context);
             FileOut fileOut(targetDirectory + u'/' + fileNameForContext(context));
             generateSmartPointerClass(fileOut.stream, targetDirectory, context);
