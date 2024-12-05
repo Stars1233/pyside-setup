@@ -257,16 +257,51 @@ def get_module_gallery(examples):
         elif name.startswith("advanced"):
             name = name.replace("advanced", "a")
 
-        desc = e.headline
-        if not desc:
-            desc = f"found in the ``{underline}`` directory."
+        # Handling description from original file
+        desc = ""
+        original_dir = Path(e.abs_path) / "doc"
+        try:
+            original_file = list(original_dir.glob("*.rst"))[0]
+        except IndexError:
+            # No example
+            continue
+        with original_file.open("r") as f:
+            # Title line (possible ..tags)
+            _ = f.readline()
+            # The next line is the characters under the title
+            _ = f.readline()
 
-        gallery += f"{ind(2)}.. grid-item-card:: {name}\n"
+            # The next line is always empty
+            assert (f.readline().strip() == "")
+
+            # now we read until another empty line.
+            lines = []
+            while True:
+                line = f.readline().strip()
+                if line.startswith(".. tags"):
+                    # empty line
+                    _ = f.readline()
+                    # new line
+                    line = f.readline().strip()
+
+                if not line:
+                    break
+                lines.append(line)
+
+            desc = "".join(lines)
+            if len(desc) > 120:
+                desc = desc[:120]
+
+        title = e.headline
+        if not title:
+            title = f"{name} from ``{underline}``."
+
+        gallery += f"{ind(2)}.. grid-item-card:: {title}\n"
         gallery += f"{ind(3)}:class-item: cover-img\n"
         gallery += f"{ind(3)}:link: {doc_file_name}\n"
         gallery += f"{ind(3)}:link-type: ref\n"
         gallery += f"{ind(3)}:img-top: {img_name}\n\n"
-        gallery += f"{ind(3)}{desc}\n"
+        gallery += f"{ind(3)}{desc}...\n"
 
     return f"{gallery}\n"
 
@@ -726,14 +761,12 @@ if __name__ == "__main__":
 
             # Write tutorial examples under their tutorial names
             for tutorial_name, tutorial_exs in tutorial_examples.items():
-                f.write(f"{ind(1)}.. raw:: html\n\n")
-                f.write(f"{ind(2)}<p class='tutorial-subtitle'>{tutorial_name}</p>\n\n")
+                f.write(f"{ind(1)}**{tutorial_name}**\n\n")
                 f.write(get_module_gallery(tutorial_exs))
 
             # If there are non-tutorial examples and tutorials exist
             if tutorial_examples and non_tutorial_examples:
-                f.write(f"{ind(1)}.. raw:: html\n\n")
-                f.write(f"{ind(2)}<p class='tutorial-subtitle'>Other Examples</p>\n\n")
+                f.write(f"{ind(1)}**Other Examples**\n\n")
                 f.write(get_module_gallery(non_tutorial_examples))
             # If no tutorials exist, list all examples
             elif not tutorial_examples:
