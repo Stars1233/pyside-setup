@@ -90,7 +90,7 @@ public:
     GraphSortResult<Node> topologicalSort() const;
 
 private:
-    enum Color { WHITE, GRAY, BLACK };
+    enum Color : quint8 { WHITE, GRAY, BLACK };
 
     struct NodeEntry
     {
@@ -157,7 +157,7 @@ GraphSortResult<Node> Graph<Node>::topologicalSort() const
     GraphSortResult<Node> result;
     result.result.reserve(size);
 
-    if (hasEdges()) {
+    if (size > 1 && hasEdges()) {
         for (qsizetype i = 0; i < size; ++i)
             m_nodeEntries[i].color = WHITE;
         for (qsizetype i = 0; i < size; ++i)  {
@@ -192,11 +192,8 @@ bool Graph<Node>::containsEdge(Node from, Node to) const
 template <class Node>
 bool Graph<Node>::hasEdges() const
 {
-    for (const auto &nodeEntry : m_nodeEntries) {
-        if (!nodeEntry.targets.isEmpty())
-            return true;
-    }
-    return false;
+    auto hashEdgesPred = [](const NodeEntry &nodeEntry) { return !nodeEntry.targets.isEmpty(); };
+    return std::any_of(m_nodeEntries.cbegin(), m_nodeEntries.cend(), hashEdgesPred);
 }
 
 template <class Node>
