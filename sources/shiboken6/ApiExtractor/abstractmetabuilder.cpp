@@ -3543,7 +3543,7 @@ static QList<std::shared_ptr<MetaClass> >
     topologicalSortHelper(const QList<std::shared_ptr<MetaClass> > &classList,
                           const Dependencies &additionalDependencies)
 {
-    Graph<std::shared_ptr<MetaClass> > graph(classList.cbegin(), classList.cend());
+    Graph<std::shared_ptr<MetaClass> > graph(classList);
 
     for (const auto &dep : additionalDependencies) {
         if (!graph.addEdge(dep.parent, dep.child)) {

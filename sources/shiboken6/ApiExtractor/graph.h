@@ -34,14 +34,28 @@ struct GraphSortResult
 template <class Node>
 class Graph
 {
+    using IndexList = QList<qsizetype>;
+
 public:
     using NodeList = QList<Node>;
 
     Graph() = default;
 
-    // Construct from a sequence of nodes
+    // Construct from a QList of nodes (unchecked, does not require operator==())
+    explicit Graph(const NodeList &list) : m_nodes(list)
+    {
+        m_nodeEntries.resize(list.size());
+    }
+
+    // Construct from a sequence of nodes (checks for duplicated nodes using operator==())
     template<class It>
-    explicit Graph(It i1, It i2) { setNodes(i1, i2); }
+    explicit Graph(It i1, It i2)
+    {
+        const auto size = std::distance(i1, i2);
+        m_nodes.reserve(size);
+        m_nodeEntries.reserve(size);
+        setNodes(i1, i2);
+    }
 
     template<class It>
     void setNodes(It i1, It i2)
@@ -53,22 +67,29 @@ public:
     bool addNode(Node n);
 
     /// Returns whether node was registered
-    bool hasNode(Node node) { return indexOfNode(node) != -1; }
+    bool hasNode(Node node) { return m_nodes.contains(node); }
 
     /// Returns the numbed of nodes in this graph.
     qsizetype nodeCount() const { return m_nodeEntries.size(); }
 
     /// Returns true if the graph contains the edge from -> to
     bool containsEdge(Node from, Node to) const;
+    bool containsEdgeByIndexes(qsizetype fromIndex, qsizetype toIndex) const;
     /// Returns true if the graph has any edges
     bool hasEdges() const;
 
     /// Adds an edge to this graph.
     bool addEdge(Node from, Node to);
+    bool addEdgeByIndexes(qsizetype fromIndex, qsizetype toIndex);
     /// Removes an edge from this graph.
     bool removeEdge(Node from, Node to);
+    bool removeEdgeByIndexes(qsizetype fromIndex, qsizetype toIndex);
     /// Clears the graph
-    void clear() { m_nodeEntries.clear(); }
+    void clear()
+    {
+        m_nodes.clear();
+        m_nodeEntries.clear();
+    }
 
     /// Dumps a dot graph to a file named \p filename.
     /// \param fileName file name where the output should be written.
@@ -94,45 +115,33 @@ private:
 
     struct NodeEntry
     {
-        Node node;
-        NodeList targets;
-        mutable Color color;
+        IndexList targets;
+        mutable Color color = WHITE;
     };
 
     Color colorAt(qsizetype i) const { return m_nodeEntries.at(i).color; }
-    qsizetype indexOfNode(Node n) const;
-    void depthFirstVisit(qsizetype i, NodeList &result) const;
+    void depthFirstVisit(qsizetype i, IndexList *result) const;
 
+    NodeList m_nodes;
     QList<NodeEntry> m_nodeEntries;
 };
-
-template <class Node>
-qsizetype Graph<Node>::indexOfNode(Node n) const
-{
-    for (qsizetype i = 0, size = m_nodeEntries.size(); i < size; ++i) {
-        if (m_nodeEntries.at(i).node == n)
-            return i;
-    }
-    return -1;
-}
 
 template <class Node>
 bool Graph<Node>::addNode(Node n)
 {
     if (hasNode(n))
         return false;
-    m_nodeEntries.append({n, {}, WHITE});
+    m_nodes.append(n);
+    m_nodeEntries.append(NodeEntry{});
     return true;
 }
 
 template <class Node>
-void Graph<Node>::depthFirstVisit(qsizetype i, NodeList &result) const
+void Graph<Node>::depthFirstVisit(qsizetype i, IndexList *result) const
 {
     m_nodeEntries[i].color = GRAY;
 
-    for (auto to : m_nodeEntries[i].targets) {
-        const qsizetype toIndex = indexOfNode(to);
-        Q_ASSERT(toIndex != -1);
+    for (qsizetype toIndex : m_nodeEntries.at(i).targets) {
         switch (colorAt(toIndex)) {
         case WHITE:
             depthFirstVisit(toIndex, result);
@@ -146,7 +155,7 @@ void Graph<Node>::depthFirstVisit(qsizetype i, NodeList &result) const
 
     m_nodeEntries[i].color = BLACK;
 
-    result.append(m_nodeEntries.at(i).node);
+    result->append(i);
 }
 
 template <class Node>
@@ -155,29 +164,29 @@ GraphSortResult<Node> Graph<Node>::topologicalSort() const
     const qsizetype size = m_nodeEntries.size();
 
     GraphSortResult<Node> result;
-    result.result.reserve(size);
 
     if (size > 1 && hasEdges()) {
+        result.result.reserve(size);
+        IndexList indexList;
+        indexList.reserve(size);
         for (qsizetype i = 0; i < size; ++i)
             m_nodeEntries[i].color = WHITE;
         for (qsizetype i = 0; i < size; ++i)  {
             if (colorAt(i) == WHITE) // recursive calls may have set it to black
-                depthFirstVisit(i, result.result);
+                depthFirstVisit(i, &indexList);
         }
-    } else { // no edges, shortcut
-        std::transform(m_nodeEntries.cbegin(), m_nodeEntries.cend(),
-                       std::back_inserter(result.result),
-                       [](const NodeEntry &ne) { return ne.node; });
-    }
-
-    if (result.result.size() == size) {
+        if (indexList.size() == size) { // Succeeded, all traversed
+            for (qsizetype i = size - 1; i >= 0; --i)
+                result.result.append(m_nodes.at(indexList.at(i)));
+        } else { // Cyclic, Not a DAG!
+            for (qsizetype i = 0; i < size; ++i) {
+                if (!indexList.contains(i))
+                    result.cyclic.append(m_nodes.at(i));
+            }
+        }
+    } else { // no edges, shortcut. Legacy behavior: Also reverse in this case.
+        result.result = m_nodes;
         std::reverse(result.result.begin(), result.result.end());
-    } else {
-        for (const auto &nodeEntry : m_nodeEntries) {
-            if (!result.result.contains(nodeEntry.node))
-                result.cyclic.append(nodeEntry.node);
-        }
-        result.result.clear(); // Not a DAG!
     }
     return result;
 }
@@ -185,8 +194,14 @@ GraphSortResult<Node> Graph<Node>::topologicalSort() const
 template <class Node>
 bool Graph<Node>::containsEdge(Node from, Node to) const
 {
-    const qsizetype i = indexOfNode(from);
-    return i != -1 && m_nodeEntries.at(i).targets.contains(to);
+    return containsEdgeByIndexes(m_nodes.indexOf(from), m_nodes.indexOf(to));
+}
+
+template <class Node>
+bool Graph<Node>::containsEdgeByIndexes(qsizetype fromIndex, qsizetype toIndex) const
+{
+    return fromIndex >= 0 && fromIndex < m_nodeEntries.size()
+        && m_nodeEntries.at(fromIndex).targets.contains(toIndex);
 }
 
 template <class Node>
@@ -199,24 +214,39 @@ bool Graph<Node>::hasEdges() const
 template <class Node>
 bool Graph<Node>::addEdge(Node from, Node to)
 {
-    const qsizetype i = indexOfNode(from);
-    if (i == -1 || !hasNode(to) || m_nodeEntries.at(i).targets.contains(to))
+    return addEdgeByIndexes(m_nodes.indexOf(from), m_nodes.indexOf(to));
+}
+
+template <class Node>
+bool Graph<Node>::addEdgeByIndexes(qsizetype fromIndex, qsizetype toIndex)
+{
+    if (fromIndex < 0 || fromIndex >= m_nodeEntries.size()
+        || toIndex < 0 || toIndex >= m_nodeEntries.size()
+        || m_nodeEntries.at(fromIndex).targets.contains(toIndex)) {
         return false;
-    m_nodeEntries[i].targets.append(to);
+    }
+    m_nodeEntries[fromIndex].targets.append(toIndex);
     return true;
 }
 
 template <class Node>
 bool Graph<Node>::removeEdge(Node from, Node to)
 {
-    const qsizetype i = indexOfNode(from);
-    if (i == -1)
+    return removeEdgeByIndexes(m_nodes.indexOf(from), m_nodes.indexOf(to));
+}
+
+template <class Node>
+bool Graph<Node>::removeEdgeByIndexes(qsizetype fromIndex, qsizetype toIndex)
+{
+    if (fromIndex < 0 || fromIndex >= m_nodeEntries.size()
+        || toIndex < 0 || toIndex >= m_nodeEntries.size()) {
         return false;
-    auto &targets = m_nodeEntries[i].targets;
-    const qsizetype toIndex = targets.indexOf(to);
-    if (toIndex == -1)
+    }
+    auto &targets = m_nodeEntries[fromIndex].targets;
+    const qsizetype toPos = targets.indexOf(toIndex);
+    if (toPos == -1)
         return false;
-    targets.removeAt(toIndex);
+    targets.removeAt(toPos);
     return true;
 }
 
@@ -239,11 +269,12 @@ void Graph<Node>::formatDot(QTextStream &s,
                             NameFunction nameFunction) const
 {
     s << "digraph D {\n";
-    for (const auto &nodeEntry : m_nodeEntries) {
+    for (qsizetype i = 0, size = m_nodes.size(); i < size; ++i) {
+        const auto &nodeEntry = m_nodeEntries.at(i);
         if (!nodeEntry.targets.isEmpty()) {
-            const QString fromName = nameFunction(nodeEntry.node);
-            for (const Node &to : nodeEntry.targets)
-                s << '"' << fromName << "\" -> \"" << nameFunction(to) << "\"\n";
+            const QString fromName = nameFunction(m_nodes.at(i));
+            for (qsizetype i : nodeEntry.targets)
+                s << '"' << fromName << "\" -> \"" << nameFunction(m_nodes.at(i)) << "\"\n";
         }
     }
     s << "}\n";
@@ -268,13 +299,13 @@ void Graph<Node>::format(QDebug &debug) const
         const auto &nodeEntry = m_nodeEntries.at(i);
         if (i)
             debug << ", ";
-        debug << nodeEntry.node;
+        debug << m_nodes.at(i);
         if (!nodeEntry.targets.isEmpty()) {
             debug << " -> [";
             for (qsizetype t = 0, tsize = nodeEntry.targets.size(); t < tsize; ++t) {
                 if (t)
                     debug << ", ";
-                debug << nodeEntry.targets.at(t);
+                debug << m_nodes.at(nodeEntry.targets.at(t));
             }
             debug << ']';
         }
