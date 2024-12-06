@@ -66,6 +66,7 @@ else()
     # pyside6-rcc, pyside6-uic, pyside6-designer, shiboken and pyside6-lupdate entrypoints
     foreach(file ${files})
         if(EXISTS ${file})
+            message(STATUS "Installing tool: ${file}")
             install(FILES "${file}"
                     DESTINATION bin
                     PERMISSIONS
@@ -83,6 +84,18 @@ else()
                 FILE_PERMISSIONS
                 OWNER_EXECUTE OWNER_WRITE OWNER_READ
                 GROUP_EXECUTE GROUP_READ
-                WORLD_EXECUTE WORLD_READ)
+                WORLD_EXECUTE WORLD_READ
+                PATTERN "android_utilities.py" EXCLUDE) # excluding the symlink
     endforeach()
+
+    # dealing with android_utilities.py
+    set(ANDROID_UTILITIES_REALPATH
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/cross_compile_android/android_utilities.py")
+    message(STATUS "Installing ${ANDROID_UTILITIES_REALPATH}")
+    install(FILES "${ANDROID_UTILITIES_REALPATH}"
+            DESTINATION bin/deploy_lib/android
+            PERMISSIONS
+                OWNER_EXECUTE OWNER_WRITE OWNER_READ
+                GROUP_EXECUTE GROUP_READ
+                WORLD_EXECUTE WORLD_READ)
 endif()

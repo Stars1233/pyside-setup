@@ -12,12 +12,11 @@ from pathlib import Path
 from pkginfo import Wheel
 
 from . import (extract_and_copy_jar, get_wheel_android_arch, find_lib_dependencies,
-               get_llvm_readobj, find_qtlibs_in_wheel, platform_map, create_recipe)
+               get_llvm_readobj, find_qtlibs_in_wheel, platform_map, create_recipe,
+               ANDROID_DEPLOY_CACHE)
 from .. import (Config, get_all_pyside_modules, MAJOR_VERSION)
-
-ANDROID_NDK_VERSION = "26b"
-ANDROID_NDK_VERSION_NUMBER_SUFFIX = "10909125"
-ANDROID_DEPLOY_CACHE = Path.home() / ".pyside6_android_deploy"
+from .android_utilities import (ANDROID_NDK_VERSION, ANDROID_NDK_VERSION_NUMBER_SUFFIX,
+                                download_android_ndk)
 
 
 class AndroidConfig(Config):
@@ -52,7 +51,7 @@ class AndroidConfig(Config):
         if android_data.ndk_path:
             # from cli
             self.ndk_path = android_data.ndk_path
-        else:
+        elif not existing_config_file:
             # from config
             ndk_path_temp = self.get_value("buildozer", "ndk_path")
             if ndk_path_temp:
@@ -67,12 +66,14 @@ class AndroidConfig(Config):
                     )
                 if ndk_path_temp.exists():
                     self.ndk_path = ndk_path_temp
+                else:
+                    # download NDK
+                    if not ANDROID_DEPLOY_CACHE.exists():
+                        ANDROID_DEPLOY_CACHE.mkdir()
+                        logging.info(f"Cache created at {str(ANDROID_DEPLOY_CACHE.resolve())}")
 
-        if self.ndk_path:
-            print(f"Using Android NDK: {str(self.ndk_path)}")
-        else:
-            raise FileNotFoundError("[DEPLOY] Unable to find Android NDK. Please pass the NDK "
-                                    "path either from the CLI or from pysidedeploy.spec")
+                    logging.info("[DEPLOY] Downloading Android NDK")
+                    self.ndk_path = download_android_ndk(ANDROID_DEPLOY_CACHE)
 
         self.sdk_path = None
         if android_data.sdk_path:

@@ -169,11 +169,26 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         self.buildozer_config.unlink()
 
     def test_errors(self, mock_extract_jar):
-        # test if error raises for non existing NDK
-        with self.assertRaises(FileNotFoundError) as context:
+        # test when no shiboken wheel is passed
+        with self.assertRaises(RuntimeError) as context:
+            self.android_deploy.main(name="android_app", pyside_wheel=self.pyside_wheel,
+                                     ndk_path=self.ndk_path, force=True)
+        self.assertTrue("Unable to find shiboken6 Android wheel" in str(context.exception))
+
+        # test when no PySide wheel is passed
+        with self.assertRaises(RuntimeError) as context:
             self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
-                                     pyside_wheel=self.pyside_wheel, force=True)
-        self.assertTrue("Unable to find Android NDK" in str(context.exception))
+                                     ndk_path=self.ndk_path, force=True)
+        self.assertTrue("Unable to find PySide6 Android wheel" in str(context.exception))
+
+        # test if wheel name is correct
+        pyside_wheel_temp = Path("/tmp/"
+                                 "PySide6-6.8.0.1+commercial-6.8.0.1-cp311-cp311-android_fake.whl")
+        with self.assertRaises(RuntimeError) as context:
+            self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
+                                     pyside_wheel=pyside_wheel_temp, ndk_path=self.ndk_path,
+                                     force=True)
+        self.assertTrue("PySide wheel corrupted" in str(context.exception))
 
         # test when cwd() is not project_dir
         os.chdir(self.current_dir)
@@ -181,6 +196,33 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
             self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
                                      pyside_wheel=self.pyside_wheel, init=True, force=True)
         self.assertTrue("For Android deployment to work" in str(context.exception))
+
+    @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
+    @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
+    @patch("deploy_lib.android.android_config.download_android_ndk")
+    def test_no_ndk_passed(self, mock_ndk, mock_qtlibs, mock_extraqtmodules, mock_recipes_exist,
+                           mock_find_jars, mock_extract_jar):
+        jar_dir = "tmp/jar/PySide6/jar"
+        mock_extract_jar.return_value = Path(jar_dir)
+        mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
+        mock_extraqtmodules.return_value = []
+        mock_recipes_exist.return_value = True
+        jars, init_classes = ["/tmp/jar/PySide6/jar/Qt6Android.jar",
+                              "/tmp/jar/PySide6/jar/Qt6AndroidBindings.jar"], []
+        mock_find_jars.return_value = jars, init_classes
+        mock_ndk.return_value = Path("/tmp/android_ndk")
+
+        self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
+                                 pyside_wheel=self.pyside_wheel,
+                                 init=True, force=True,
+                                 keep_deployment_files=True)
+
+        # test config file contents
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
+        self.assertEqual(config_obj.get_value("buildozer", "sdk_path"), '')
+        self.assertEqual(config_obj.get_value("buildozer", "ndk_path"), "/tmp/android_ndk")
 
 
 @patch("deploy_lib.config.run_qmlimportscanner")
