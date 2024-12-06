@@ -208,13 +208,12 @@ class TestPySide6DeployQml(DeployTestBase):
         # All the plugins included. This is different from plugins_nuitka, because Nuitka bundles
         # some plugins by default
         self.all_plugins = ["egldeviceintegrations", "generic", "iconengines",
-                            "imageformats", "networkaccess", "networkinformation",
+                            "imageformats", "networkinformation",
                             "platforminputcontexts", "platforms",
-                            "platformthemes", "qmltooling", "scenegraph", "tls",
+                            "platformthemes", "qmltooling", "tls",
                             "xcbglintegrations"]
         # Plugins that needs to be passed to Nuitka
-        plugins_nuitka = ("networkaccess,networkinformation,platforminputcontexts,"
-                          "qml,qmltooling,scenegraph")
+        plugins_nuitka = ("networkinformation,platforminputcontexts,qml,qmltooling")
         self.expected_run_cmd = (
             f"{sys.executable} -m nuitka {str(self.main_file)} --follow-imports"
             f" --enable-plugin=pyside6 --output-dir={str(self.deployment_files)} --quiet"
@@ -320,9 +319,9 @@ class TestPySide6DeployWebEngine(DeployTestBase):
     def testWebEngineQuickDryRun(self, mock_sitepackages, mock_plugins):
         mock_sitepackages.return_value = Path(_get_qt_lib_dir())
         all_plugins = ["egldeviceintegrations", "generic", "iconengines",
-                       "imageformats", "networkaccess", "networkinformation",
+                       "imageformats", "networkinformation",
                        "platforminputcontexts", "platforms",
-                       "platformthemes", "qmltooling", "scenegraph", "tls",
+                       "platformthemes", "qmltooling", "tls",
                        "xcbglintegrations"]
         mock_plugins.return_value = all_plugins
         # this test case retains the QtWebEngine dlls
@@ -331,8 +330,7 @@ class TestPySide6DeployWebEngine(DeployTestBase):
         main_file = self.temp_example_webenginequick / "quicknanobrowser.py"
         deployment_files = self.temp_example_webenginequick / "deployment"
         # Plugins that needs to be passed to Nuitka
-        plugins_nuitka = ("networkaccess,networkinformation,platforminputcontexts,"
-                          "qml,qmltooling,scenegraph")
+        plugins_nuitka = ("networkinformation,platforminputcontexts,qml,qmltooling")
         qml_files = [
             "ApplicationRoot.qml",
             "BrowserDialog.qml",

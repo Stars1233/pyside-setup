@@ -44,6 +44,10 @@ HELP_EXTRA_MODULES = dedent("""
                             Example usage 2: --extra-modules=QtNetwork,QtSvg
                             """)
 
+# plugins to be removed from the --include-qt-plugins option because these plugins
+# don't exist in site-package under PySide6/Qt/plugins
+PLUGINS_TO_REMOVE = ["accessiblebridge", "platforms/darwin", "networkaccess", "scenegraph"]
+
 
 def get_all_pyside_modules():
     """

@@ -11,7 +11,7 @@ import shlex
 import sys
 from pathlib import Path
 
-from . import MAJOR_VERSION, DesignStudio, run_command, DEFAULT_IGNORE_DIRS
+from . import MAJOR_VERSION, DesignStudio, run_command, DEFAULT_IGNORE_DIRS, PLUGINS_TO_REMOVE
 from .config import DesktopConfig
 
 
@@ -169,10 +169,7 @@ class Nuitka:
             # remove the following plugins from the qt_plugins list as Nuitka only checks
             # for plugins within PySide6/Qt/plugins folder, and the following plugins
             # are not present in the PySide6/Qt/plugins folder
-            if "accessiblebridge" in qt_plugins:
-                qt_plugins.remove("accessiblebridge")
-            if "platforms/darwin" in qt_plugins:
-                qt_plugins.remove("platforms/darwin")
+            qt_plugins = [plugin for plugin in qt_plugins if plugin not in PLUGINS_TO_REMOVE]
             qt_plugins_str = ",".join(qt_plugins)
             command.append(f"--include-qt-plugins={qt_plugins_str}")
 
