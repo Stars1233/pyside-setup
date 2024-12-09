@@ -40,7 +40,7 @@ def setup_project_dir():
     while here / look_for not in here.iterdir():
         parent = here.parent
         if parent == here:
-            raise SystemError(look_for + " not found!")
+            raise SystemError(f"{look_for} not found!")
         here = parent
     fsp = os.fspath(here)
     if fsp not in sys.path:
@@ -58,7 +58,7 @@ def check_allowed_python_versions(major, minor):
     from build_scripts.main import config
     pattern = r'Programming Language :: Python :: (\d+)\.(\d+)'
     hist = []
-    for line in config.python_version_classifiers:
+    for line in config.classifiers:
         found = re.search(pattern, line)
         if found:
             ma = int(found.group(1))
