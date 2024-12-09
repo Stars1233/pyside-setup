@@ -98,7 +98,7 @@ private:
     void writeParameterType(TextStream &s, const AbstractMetaClassCPtr &cppClass,
                             const AbstractMetaArgument &arg) const;
     void writeFormattedText(TextStream &s, const QString &doc,
-                            Documentation::Format format,
+                            DocumentationFormat format,
                             const QString &scope,
                             QtXmlToSphinxImages *images) const;
     void writeFormattedBriefText(TextStream &s, const Documentation &doc,

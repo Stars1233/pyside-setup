@@ -9,6 +9,7 @@
 #include "containertypeentry.h"
 #include "customconversion.h"
 #include "customtypenentry.h"
+#include "documentation_enums.h"
 #include "flagstypeentry.h"
 #include "functiontypeentry.h"
 #include "namespacetypeentry.h"
@@ -288,6 +289,15 @@ ENUM_LOOKUP_BEGIN(TypeSystem::Language, Qt::CaseInsensitive,
         {u"target", TypeSystem::TargetLangCode}  // em algum lugar do cpp
     };
 ENUM_LOOKUP_LINEAR_SEARCH
+
+ENUM_LOOKUP_BEGIN(DocumentationFormat, Qt::CaseInsensitive,
+                  documentationFormatFromAttribute)
+    {
+        {u"native", DocumentationFormat::Native},
+        {u"target",  DocumentationFormat::Target}
+    };
+ENUM_LOOKUP_LINEAR_SEARCH
+
 
 ENUM_LOOKUP_BEGIN(TypeSystem::Ownership, Qt::CaseInsensitive,
                    ownershipFromFromAttribute)
@@ -2032,7 +2042,7 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
     }
 
     TypeSystem::DocModificationMode mode = TypeSystem::DocModificationReplace;
-    TypeSystem::Language lang = TypeSystem::NativeCode;
+    DocumentationFormat format = DocumentationFormat::Native;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"mode") {
@@ -2045,18 +2055,18 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
             mode = modeOpt.value();
         } else if (name == formatAttribute) {
             const auto attribute = attributes->takeAt(i);
-            const auto langOpt = languageFromAttribute(attribute.value());
-            if (!langOpt.has_value()) {
+            const auto formatOpt = documentationFormatFromAttribute(attribute.value());
+            if (!formatOpt.has_value()) {
                 m_error = msgInvalidAttributeValue(attribute);
                 return false;
             }
-            lang = langOpt.value();
+            format = formatOpt.value();
         }
     }
 
     QString signature = isTypeEntry(topElement) ? QString() : m_currentSignature;
     DocModification mod(mode, signature);
-    mod.setFormat(lang);
+    mod.setFormat(format);
     if (hasFileSnippetAttributes(attributes)) {
         const auto snippetOptional = readFileSnippet(attributes);
         if (!snippetOptional.has_value())

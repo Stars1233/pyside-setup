@@ -8,7 +8,7 @@
 Documentation::Documentation(const QString &detailed,
                              const QString &brief,
                              const QString &sourceFile,
-                             Format fmt) :
+                             DocumentationFormat fmt) :
     m_detailed(detailed.trimmed()),
     m_brief(brief.trimmed()),
     m_sourceFile(sourceFile),
@@ -21,20 +21,20 @@ bool Documentation::isEmpty() const
     return m_detailed.isEmpty() && m_brief.isEmpty();
 }
 
-Documentation::Format Documentation::format() const
+DocumentationFormat Documentation::format() const
 {
     return m_format;
 }
 
-void Documentation::setValue(const QString &value, Documentation::Type t)
+void Documentation::setValue(const QString &value, DocumentationType t)
 {
-    if (t == Brief)
+    if (t == DocumentationType::Brief)
         setBrief(value);
     else
         setDetailed(value);
 }
 
-void Documentation::setFormat(Documentation::Format f)
+void Documentation::setFormat(DocumentationFormat f)
 {
     m_format = f;
 }
@@ -57,7 +57,7 @@ QDebug operator<<(QDebug debug, const Documentation &d)
     debug.nospace();
     debug << "Documentation(";
     if (!d.isEmpty()) {
-        debug << "format=" << d.format();
+        debug << "format=" << (d.format() == DocumentationFormat::Native ? "native" : "target");
         if (d.hasSourceFile())
             debug << ", file=\"" << d.sourceFile() << '"';
         if (!d.brief().isEmpty())

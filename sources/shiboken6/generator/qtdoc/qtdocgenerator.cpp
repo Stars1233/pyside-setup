@@ -377,11 +377,11 @@ void QtDocGenerator::writeFormattedDetailedText(TextStream &s, const Documentati
 }
 
 void QtDocGenerator::writeFormattedText(TextStream &s, const QString &doc,
-                                        Documentation::Format format,
+                                        DocumentationFormat format,
                                         const QString &scope,
                                         QtXmlToSphinxImages *images) const
 {
-    if (format == Documentation::Native) {
+    if (format == DocumentationFormat::Native) {
         QtXmlToSphinx x(this, m_options.parameters, doc, scope);
         s << x;
         images->append(x.images());
@@ -615,7 +615,7 @@ void QtDocGenerator::writeProperties(TextStream &s,
         s <<  ".. py:property:: " << propertyRefTarget(prop.name)
             << "\n   :type: " << type << "\n\n\n";
         if (!prop.documentation.isEmpty()) {
-            writeFormattedText(s, prop.documentation.detailed(), Documentation::Native,
+            writeFormattedText(s, prop.documentation.detailed(), DocumentationFormat::Native,
                                scope, images);
         }
         s << "**Access functions:**\n";
@@ -772,12 +772,12 @@ bool QtDocGenerator::writeDocModifications(TextStream &s,
     for (const DocModification &mod : mods) {
         if (mod.mode() == mode) {
             switch (mod.format()) {
-            case TypeSystem::NativeCode:
-                writeFormattedText(s, mod.code(), Documentation::Native, scope, images);
+            case DocumentationFormat::Native:
+                writeFormattedText(s, mod.code(), DocumentationFormat::Native, scope, images);
                 didSomething = true;
                 break;
-            case TypeSystem::TargetLangCode:
-                writeFormattedText(s, mod.code(), Documentation::Target, scope, images);
+            case DocumentationFormat::Target:
+                writeFormattedText(s, mod.code(), DocumentationFormat::Target, scope, images);
                 didSomething = true;
                 break;
             default:
@@ -1307,7 +1307,7 @@ void QtDocGenerator::writeModuleDocumentation()
                 sourceFileNames.append(moduleDocRstFileName);
         } else if (!webXmlModuleDoc.isEmpty()) {
             // try the normal way
-            if (webXmlModuleDoc.format() == Documentation::Native) {
+            if (webXmlModuleDoc.format() == DocumentationFormat::Native) {
                 QtXmlToSphinx x(this, m_options.parameters, webXmlModuleDoc.detailed(), context);
                 s << x;
                 parsedImages += x.images();

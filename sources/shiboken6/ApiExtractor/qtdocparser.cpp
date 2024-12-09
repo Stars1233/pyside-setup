@@ -418,7 +418,7 @@ QString QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
     Documentation doc;
     doc.setSourceFile(sourceFileName);
     if (!brief.isEmpty())
-        doc.setValue(brief, Documentation::Brief);
+        doc.setValue(brief, DocumentationType::Brief);
     doc.setValue(docString);
     metaClass->setDocumentation(doc);
 

@@ -4,6 +4,8 @@
 #ifndef DOCUMENTATION_H
 #define DOCUMENTATION_H
 
+#include "documentation_enums.h"
+
 #include <QtCore/QString>
 #include <QtCore/QtCompare>
 
@@ -12,29 +14,18 @@ QT_FORWARD_DECLARE_CLASS(QDebug)
 class Documentation
 {
 public:
-    enum Format {
-        Native, // XML
-        Target  // RST
-    };
-
-    enum Type {
-        Detailed,
-        Brief,
-        Last
-    };
-
     Documentation() = default;
     explicit Documentation(const QString &detailed,
                            const QString &brief,
                            const QString &sourceFile,
-                           Format fmt = Documentation::Native);
+                           DocumentationFormat fmt = DocumentationFormat::Native);
 
     bool isEmpty() const;
 
-    void setValue(const QString& value, Type t = Documentation::Detailed);
+    void setValue(const QString& value, DocumentationType t = DocumentationType::Detailed);
 
-    Documentation::Format format() const;
-    void setFormat(Format f);
+    DocumentationFormat format() const;
+    void setFormat(DocumentationFormat f);
 
     bool equals(const Documentation &rhs) const;
 
@@ -61,7 +52,7 @@ private:
     QString m_detailed;
     QString m_brief;
     QString m_sourceFile;
-    Format m_format = Documentation::Native;
+    DocumentationFormat m_format = DocumentationFormat::Native;
 };
 
 #ifndef QT_NO_DEBUG_STREAM

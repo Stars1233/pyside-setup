@@ -5,6 +5,7 @@
 #define MODIFICATIONS_H
 
 #include "typesystem_enums.h"
+#include "documentation_enums.h"
 #include "modifications_typedefs.h"
 
 #include <QtCore/QList>
@@ -328,15 +329,15 @@ public:
         return m_mode;
     }
 
-    TypeSystem::Language  format() const { return m_format; }
-    void setFormat(TypeSystem::Language f) { m_format = f; }
+    DocumentationFormat format() const { return m_format; }
+    void setFormat(DocumentationFormat f) { m_format = f; }
 
 private:
     QString m_code;
     QString m_xpath;
     QString m_signature;
     TypeSystem::DocModificationMode m_mode = TypeSystem::DocModificationXPathReplace;
-    TypeSystem::Language m_format = TypeSystem::NativeCode;
+    DocumentationFormat m_format = DocumentationFormat::Native;
 };
 
 #endif // MODIFICATIONS_H
