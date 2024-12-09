@@ -277,7 +277,8 @@ using PyCFunctionObject = struct _pycfunc;
 #define PepCFunction_GET_NAMESTR(func) \
     _PepUnicode_AsString(PyObject_GetAttrString((PyObject *)func, "__name__"))
 #else
-#define PepCFunction_GET_NAMESTR(func)        ((func)->m_ml->ml_name)
+#define PepCFunction_GET_NAMESTR(func) \
+    (reinterpret_cast<const PyCFunctionObject *>(func)->m_ml->ml_name)
 #endif
 
 /*****************************************************************************
