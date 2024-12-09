@@ -8,7 +8,6 @@ import random
 import select
 import sys
 import socketserver as SocketServer
-import tempfile
 import threading
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
@@ -38,7 +37,7 @@ class TestSecureHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def do_GET(self):
         self.send_head()
-        self.wfile.write(py3k.b(TestHandler.DATA))
+        self.wfile.write(TestHandler.DATA)
 
     def do_HEAD(self):
         self.send_head()

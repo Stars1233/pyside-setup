@@ -13,7 +13,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
-from PySide6.QtWidgets import QMainWindow, QMenu, QApplication
+from PySide6.QtWidgets import QMainWindow, QMenu
 
 
 class MainWindow(QMainWindow):
@@ -36,4 +36,3 @@ class Bug696(UsesQApplication):
 
 if __name__ == '__main__':
     unittest.main()
-

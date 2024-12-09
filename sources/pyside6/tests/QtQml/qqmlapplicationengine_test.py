@@ -15,7 +15,7 @@ init_test_paths(False)
 
 from helper.timedqguiapplication import TimedQGuiApplication
 
-from PySide6.QtCore import QUrl, QObject, QTimer, Qt
+from PySide6.QtCore import QTimer
 from PySide6.QtQml import QQmlApplicationEngine
 
 

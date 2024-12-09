@@ -5,7 +5,6 @@ from __future__ import annotations
 
 '''Unit tests for QCommandLineParser and QCommandLineOption'''
 
-import ctypes
 import os
 import sys
 import unittest
@@ -20,7 +19,7 @@ from PySide6.QtCore import QCoreApplication, QCommandLineOption, QCommandLinePar
 
 class QCommandLineParserTest(unittest.TestCase):
     def testParser(self):
-        app = QCoreApplication([])
+        app = QCoreApplication([])  # noqa
 
         parser1 = QCommandLineParser()
         self.assertEqual(parser1.parse(["QtCore_qcommandlineparser_test", "file.txt"]), True)

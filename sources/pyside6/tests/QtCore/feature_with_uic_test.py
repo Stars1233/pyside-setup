@@ -23,12 +23,12 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 
-from PySide6.QtCore import QCoreApplication, QLibraryInfo, qVersion
-from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtCore import QCoreApplication, qVersion
+from PySide6.QtWidgets import QMainWindow
 
 # PYSIDE-535: We cannot use __feature__ in PyPy, yet
 try:
-    from __feature__ import snake_case
+    from __feature__ import snake_case  # noqa
 
     from feature_with_uic.window import Ui_MainWindow
     have_feature = True

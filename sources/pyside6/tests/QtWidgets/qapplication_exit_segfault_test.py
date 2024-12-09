@@ -12,7 +12,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtWidgets import QApplication, QPushButton, QWidget, QSpinBox
+from PySide6.QtWidgets import QApplication, QPushButton
 
 
 class QApplicationDelete(unittest.TestCase):
@@ -21,7 +21,7 @@ class QApplicationDelete(unittest.TestCase):
     def testQPushButton(self):
         # QApplication deleted before QPushButton
         a = QApplication([])
-        b = QPushButton('aaaa')
+        b = QPushButton('aaaa')  # noqa: F841
         del a
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()

@@ -11,7 +11,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QIODevice, QTemporaryFile
+from PySide6.QtCore import QTemporaryFile
 
 
 class FileChild1(QTemporaryFile):

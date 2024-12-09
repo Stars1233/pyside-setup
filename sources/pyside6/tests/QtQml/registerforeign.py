@@ -8,16 +8,15 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from helper.helper import qmlcomponent_errorstring
-from helper.timedqguiapplication import TimedQGuiApplication
+from helper.helper import qmlcomponent_errorstring  # noqa: E402
+from helper.timedqguiapplication import TimedQGuiApplication  # noqa: E402
 
-from PySide6.QtCore import Property, QObject, QUrl, qVersion
-from PySide6.QtGui import QGuiApplication, QRasterWindow
-from PySide6.QtQml import (QmlNamedElement, QmlForeign, QQmlEngine,
-                           QQmlComponent)
+from PySide6.QtCore import QObject, QUrl, qVersion  # noqa: E402
+from PySide6.QtGui import QRasterWindow  # noqa: 402
+from PySide6.QtQml import QmlNamedElement, QmlForeign, QQmlEngine, QQmlComponent  # noqa: E402
 
 
 """Test the QmlForeign decorator, letting the QQmlEngine create a QRasterWindow."""

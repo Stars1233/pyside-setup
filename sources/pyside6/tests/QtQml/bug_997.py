@@ -13,7 +13,7 @@ init_test_paths(False)
 
 from helper.helper import quickview_errorstring
 from helper.usesqapplication import UsesQApplication
-from PySide6.QtCore import QCoreApplication, QTimer, QUrl, Slot
+from PySide6.QtCore import QUrl, Slot
 from PySide6.QtQml import QQmlPropertyMap
 from PySide6.QtQuick import QQuickView
 

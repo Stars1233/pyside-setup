@@ -8,16 +8,16 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from helper.helper import quickview_errorstring
+from helper.helper import quickview_errorstring  # noqa: E402
 
-from PySide6.QtCore import Property, Signal, QTimer, QUrl, QObject, Slot
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtCore import Property, QTimer, QUrl, QObject, Slot  # noqa: E402
+from PySide6.QtGui import QGuiApplication  # noqa: E402
 from PySide6.QtQml import (qmlRegisterSingletonType, qmlRegisterSingletonInstance,
-                           QmlElement, QmlSingleton, QJSValue)
-from PySide6.QtQuick import QQuickView
+                           QmlElement, QmlSingleton, QJSValue)  # noqa: E402
+from PySide6.QtQuick import QQuickView  # noqa: E402
 
 
 URI = "Singletons"
@@ -118,7 +118,7 @@ class TestQmlSupport(unittest.TestCase):
     def testIt(self):
         app = QGuiApplication([])
 
-        qObjectQmlTypeId = qmlRegisterSingletonType(SingletonQObject, URI, 1, 0,
+        qObjectQmlTypeId = qmlRegisterSingletonType(SingletonQObject, URI, 1, 0,  # noqa: F841
                                                     'SingletonQObjectNoCallback')
         qmlRegisterSingletonType(SingletonQObject, URI, 1, 0, 'SingletonQObjectCallback',
                                  singletonQObjectCallback)
@@ -126,9 +126,9 @@ class TestQmlSupport(unittest.TestCase):
         qmlRegisterSingletonType(URI, 1, 0, 'SingletonQJSValue', singletonQJSValueCallback)
 
         # Accepts only QObject derived types
-        l = [1, 2]
+        _list = [1, 2]
         with self.assertRaises(TypeError):
-            qmlRegisterSingletonInstance(SingletonQObject, URI, 1, 0, 'SingletonInstance', l)
+            qmlRegisterSingletonInstance(SingletonQObject, URI, 1, 0, 'SingletonInstance', _list)
 
         # Modify value on the instance
         s = SingletonQObject()
@@ -150,4 +150,5 @@ class TestQmlSupport(unittest.TestCase):
         self.assertTrue(view._singleton_instance_jsvalue_int)
 
 
-if __name__ == '__main__':    unittest.main()
+if __name__ == '__main__':
+    unittest.main()

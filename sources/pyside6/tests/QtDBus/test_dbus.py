@@ -16,9 +16,7 @@ init_test_paths(False)
 from helper.usesqapplication import UsesQApplication
 
 import sys
-from PySide6.QtCore import QCoreApplication
-from PySide6.QtDBus import (QDBusConnection, QDBusConnectionInterface,
-                            QDBusInterface, QDBusReply)
+from PySide6.QtDBus import QDBusConnection
 
 
 def service_names():

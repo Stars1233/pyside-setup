@@ -11,7 +11,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import PySide6
+import PySide6  # noqa
 
 # This test tests the new "macro" feature of qApp.
 # It also uses the qApp variable to finish the instance and start over.
@@ -30,9 +30,9 @@ class qAppMacroTest(unittest.TestCase):
         except ImportError:
             QtWidgets = QtGui = QtCore
         # qApp is in the builtins
-        self.assertEqual(bool(qApp), False)
+        self.assertEqual(bool(qApp), False)  # noqa
         # and the type is None
-        self.assertTrue(qApp is None)
+        self.assertTrue(qApp is None)  # noqa
         # now we create an application for all cases
         classes = (QtCore.QCoreApplication,
                    QtGui.QGuiApplication,
@@ -41,14 +41,14 @@ class qAppMacroTest(unittest.TestCase):
         for klass in classes:
             print("CREATED", klass([]), file=fil)
             fil.flush()
-            qApp.shutdown()
-            print("DELETED qApp", qApp, file=fil)
+            qApp.shutdown()  # noqa
+            print("DELETED qApp", qApp, file=fil)  # noqa
             fil.flush()
         # creating without deletion raises:
         QtCore.QCoreApplication([])
         with self.assertRaises(RuntimeError):
             QtCore.QCoreApplication([])
-        self.assertEqual(QtCore.QCoreApplication.instance(), qApp)
+        self.assertEqual(QtCore.QCoreApplication.instance(), qApp)  # noqa
 
     def test_1093(self):
         # Test that without creating a QApplication staticMetaObject still exists.
@@ -62,7 +62,7 @@ class qAppMacroTest(unittest.TestCase):
         if app is None:
             app = QtCore.QCoreApplication([])
         self.assertTrue(QtCore.QObject.staticMetaObject is not None)
-        qApp.shutdown()
+        qApp.shutdown()  # noqa
 
 
 if __name__ == '__main__':

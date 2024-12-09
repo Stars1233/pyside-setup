@@ -16,7 +16,7 @@ init_test_paths(False)
 
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QGridLayout, QWidget
 from PySide6.QtWidgets import QStackedLayout, QFormLayout
-from PySide6.QtWidgets import QApplication, QPushButton, QLabel
+from PySide6.QtWidgets import QPushButton, QLabel
 
 from helper.usesqapplication import UsesQApplication
 
@@ -58,13 +58,13 @@ class SaveReference(UsesQApplication):
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testMoveLayout(self):
-        l = QHBoxLayout()
+        layout = QHBoxLayout()
         self.assertEqual(sys.getrefcount(self.widget1), 2)
-        l.addWidget(self.widget1)
+        layout.addWidget(self.widget1)
         self.assertEqual(sys.getrefcount(self.widget1), 3)
 
         w = QWidget()
-        w.setLayout(l)
+        w.setLayout(layout)
         self.assertEqual(sys.getrefcount(self.widget1), 3)
 
     def testHBoxReference(self):

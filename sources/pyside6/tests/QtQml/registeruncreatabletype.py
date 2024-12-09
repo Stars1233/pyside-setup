@@ -8,14 +8,12 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from helper.helper import qmlcomponent_errorstring
-
-from PySide6.QtCore import Property, QObject, QUrl
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtQml import QmlElement, QmlUncreatable, QQmlEngine, QQmlComponent
+from PySide6.QtCore import Property, QObject, QUrl  # noqa: E402
+from PySide6.QtGui import QGuiApplication  # noqa: E402
+from PySide6.QtQml import QmlElement, QmlUncreatable, QQmlEngine, QQmlComponent  # noqa: E402
 
 noCreationReason = 'Cannot create an item of type: Uncreatable (expected)'
 
@@ -42,7 +40,7 @@ class Uncreatable(QObject):
 class TestQmlSupport(unittest.TestCase):
 
     def testIt(self):
-        app = QGuiApplication([])
+        app = QGuiApplication([])  # noqa: F841
 
         engine = QQmlEngine()
         file = Path(__file__).resolve().parent / 'registeruncreatable.qml'

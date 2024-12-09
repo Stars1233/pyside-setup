@@ -15,7 +15,7 @@ from init_paths import init_test_paths
 init_test_paths()
 
 from PySide6.QtGui import QSyntaxHighlighter
-from PySide6.QtWidgets import QApplication, QTextEdit, QWidget
+from PySide6.QtWidgets import QApplication, QTextEdit
 
 
 class Highlighter(QSyntaxHighlighter):

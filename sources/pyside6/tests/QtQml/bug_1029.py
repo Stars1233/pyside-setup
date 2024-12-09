@@ -5,7 +5,6 @@ from __future__ import annotations
 import gc
 import os
 import sys
-import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
@@ -27,7 +26,7 @@ def register_qml_types():
 
 
 def main():
-    app = QGuiApplication([])
+    app = QGuiApplication([])  # noqa
 
     # reg qml types here
     register_qml_types()

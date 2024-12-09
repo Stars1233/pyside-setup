@@ -14,7 +14,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
-from PySide6.QtGui import QTextFrame, QTextCursor, QTextCharFormat, QFont, QTextFrameFormat
+from PySide6.QtGui import QTextCursor, QTextCharFormat, QFont, QTextFrameFormat
 from PySide6.QtWidgets import QTextEdit
 
 

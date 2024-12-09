@@ -14,7 +14,7 @@ init_test_paths(False)
 from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import QTimer
-from PySide6.QtGui import QPainter, QFont, QFontInfo
+from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QWidget
 
 

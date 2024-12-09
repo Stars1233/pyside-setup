@@ -19,7 +19,7 @@ init_test_paths(False)
 
 logging.basicConfig(level=logging.WARNING)
 
-from PySide6.QtCore import QThread, QCoreApplication, QObject, SIGNAL
+from PySide6.QtCore import QThread, QCoreApplication, QObject
 
 
 class Bucket(QObject):

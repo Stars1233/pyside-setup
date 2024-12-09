@@ -8,15 +8,15 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from helper.helper import quickview_errorstring
-from helper.usesqapplication import UsesQApplication
+from helper.helper import quickview_errorstring  # noqa: E402
+from helper.usesqapplication import UsesQApplication  # noqa: E402
 
-from PySide6.QtCore import Slot, Property, Signal, QObject, QUrl
-from PySide6.QtQml import QJSEngine, qmlRegisterType
-from PySide6.QtQuick import QQuickView
+from PySide6.QtCore import Slot, Property, QObject, QUrl  # noqa: E402
+from PySide6.QtQml import QJSEngine, qmlRegisterType  # noqa: E402
+from PySide6.QtQuick import QQuickView  # noqa: E402
 
 test_error_message = "This is an error."
 

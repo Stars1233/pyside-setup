@@ -14,7 +14,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QRegularExpression, QRegularExpressionMatch, QRegularExpressionMatchIterator
+from PySide6.QtCore import QRegularExpression
 
 
 class QRegularExpressionTest(unittest.TestCase):
@@ -28,7 +28,7 @@ class QRegularExpressionTest(unittest.TestCase):
         self.assertEqual(match.capturedView(1), 'word2')
 
     def testMatchIterator(self):
-        re = QRegularExpression('(\w+)')
+        re = QRegularExpression(r'(\w+)')
         self.assertTrue(re.isValid())
         count = 0
         it = re.globalMatch('word1 word2 word3')

@@ -97,45 +97,50 @@ class QPolygonDeepCopy(DeepCopyHelper, unittest.TestCase):
         self.original = QPolygon([QPoint(1, 2), QPoint(3, 4), QPoint(5, 6)])
 
 
-# Avoid these tests until get gcc fixed
-# Related bug: http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43247
-"""
 class QMatrix2x2DeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QMatrix2x2([1, 2, 3, 4])
+
 
 class QMatrix2x3DeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QMatrix2x3([1, 2, 3, 4, 5, 6])
 
+
 class QMatrix2x4DeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QMatrix2x4([1, 2, 3, 4, 5, 6, 7, 8])
+
 
 class QMatrix3x2DeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QMatrix3x2([1, 2, 3, 4, 5, 6])
 
+
 class QMatrix3x3DeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QMatrix3x3([1, 2, 3, 4, 5, 6, 7, 8, 9])
+
 
 class QMatrix3x4DeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QMatrix3x4([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 
+
 class QMatrix4x2DeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QMatrix4x2([1, 2, 3, 4, 5, 6, 7, 8])
+
 
 class QMatrix4x3DeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QMatrix4x3([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 
+
 class QMatrix4x4DeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QMatrix4x4([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16])
-"""
+
 
 if __name__ == '__main__':
     unittest.main()

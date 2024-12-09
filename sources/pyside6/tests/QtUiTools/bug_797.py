@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 import sys
-import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))

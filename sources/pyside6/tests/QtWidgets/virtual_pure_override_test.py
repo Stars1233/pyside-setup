@@ -12,7 +12,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsView, QApplication
+from PySide6.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsView
 from PySide6.QtGui import QBrush, QColor
 from PySide6.QtCore import QTimer
 from helper.usesqapplication import UsesQApplication
@@ -51,7 +51,7 @@ class QGraphicsItemTest(UsesQApplication):
         view = QGraphicsView(scene)
         view.setWindowTitle("virtual_pure_override_test")
 
-        rect = self.createRoundRect(scene)
+        rect = self.createRoundRect(scene)  # noqa: F841
         view.show()
         self.app.exec()
         self.assertTrue(qgraphics_item_painted)
@@ -59,4 +59,3 @@ class QGraphicsItemTest(UsesQApplication):
 
 if __name__ == '__main__':
     unittest.main()
-

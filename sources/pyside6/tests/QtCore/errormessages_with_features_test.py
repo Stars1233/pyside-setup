@@ -8,7 +8,7 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
 from PySide6 import QtCore
@@ -16,7 +16,7 @@ from PySide6.QtWidgets import QApplication, QLabel
 
 is_pypy = hasattr(sys, "pypy_version_info")
 if not is_pypy:
-    from PySide6.support import feature
+    from PySide6.support import feature  # noqa: E402
 
 import inspect
 
@@ -37,12 +37,12 @@ class ErrormessagesWithFeatures(unittest.TestCase):
     probe = "called with wrong argument types"
 
     def setUp(self):
-        qApp or QApplication()
+        qApp or QApplication()  # noqa
         feature.reset()
 
     def tearDown(self):
         feature.reset()
-        qApp.shutdown()
+        qApp.shutdown()  # noqa
 
     def testCorrectErrorMessagesPlain(self):
         with self.assertRaises(TypeError) as cm:
@@ -51,40 +51,40 @@ class ErrormessagesWithFeatures(unittest.TestCase):
         self.assertTrue(self.probe in cm.exception.args[0])
 
     def testCorrectErrorMessagesSnake(self):
-        from __feature__ import snake_case
+        from __feature__ import snake_case  # noqa
         with self.assertRaises(TypeError) as cm:
             QLabel().set_font(42)
         print("\n\n" + cm.exception.args[0])
         self.assertTrue(self.probe in cm.exception.args[0])
 
     def testCorrectErrorMessagesProp(self):
-        from __feature__ import true_property
+        from __feature__ import true_property  # noqa
         with self.assertRaises(TypeError) as cm:
             QLabel().font = 42
         print("\n\n" + cm.exception.args[0])
         self.assertTrue(self.probe in cm.exception.args[0])
 
     def testCorrectErrorMessagesSnakeProp(self):
-        from __feature__ import snake_case, true_property
+        from __feature__ import snake_case, true_property  # noqa
         with self.assertRaises(TypeError) as cm:
             QLabel().font = 42
         print("\n\n" + cm.exception.args[0])
         self.assertTrue(self.probe in cm.exception.args[0])
 
     def testCorrectErrorMessagesClassProp(self):
-        from __feature__ import true_property
+        from __feature__ import true_property  # noqa
         with self.assertRaises(TypeError) as cm:
             QApplication.quitOnLastWindowClosed = object
         print("\n\n" + cm.exception.args[0])
         self.assertTrue(self.probe in cm.exception.args[0])
         with self.assertRaises(TypeError) as cm:
-            qApp.quitOnLastWindowClosed = object
+            qApp.quitOnLastWindowClosed = object  # noqa
         self.assertTrue(self.probe in cm.exception.args[0])
 
     def testCorrectErrorMessagesClassSnakeProp(self):
-        from __feature__ import snake_case, true_property
+        from __feature__ import snake_case, true_property  # noqa
         with self.assertRaises(TypeError) as cm:
-            QApplication.quit_on_last_window_closed = object
+            QApplication.quit_on_last_window_closed = object  # noqa
         print("\n\n" + cm.exception.args[0])
         self.assertTrue(self.probe in cm.exception.args[0])
         with self.assertRaises(TypeError) as cm:

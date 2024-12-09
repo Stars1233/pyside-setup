@@ -4,7 +4,6 @@ from __future__ import annotations
 
 '''Unit tests for QSharedMemory'''
 
-import ctypes
 import os
 import subprocess
 import sys

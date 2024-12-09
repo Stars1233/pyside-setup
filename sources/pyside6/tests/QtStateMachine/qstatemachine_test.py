@@ -12,8 +12,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import (QObject, QParallelAnimationGroup,
-                            QPropertyAnimation, QTimer, SIGNAL)
+from PySide6.QtCore import QParallelAnimationGroup, QTimer
 from PySide6.QtStateMachine import (QFinalState, QState, QStateMachine)
 
 from helper.usesqapplication import UsesQApplication

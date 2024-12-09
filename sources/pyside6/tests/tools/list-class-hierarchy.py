@@ -13,8 +13,6 @@ from __future__ import annotations
 #
 # meld pyside.list pyqt5.list
 
-import sys
-import pdb
 from inspect import isclass
 
 ignore = ["staticMetaObject",
@@ -48,26 +46,26 @@ def recurse_into(el, obj):
 
 
 if __name__ == '__main__':
-    modules = [ 'QtCore',
-                'QtGui',
-                'QtHelp',
+    modules = ['QtCore',
+               'QtGui',
+               'QtHelp',
                #'QtMultimedia',
-                'QtNetwork',
+               'QtNetwork',
                #'QtOpenGL',
-                'QtScript',
-                'QtScriptTools',
-                'QtSql',
-                'QtSvg',
-                'QtTest',
+               'QtScript',
+               'QtScriptTools',
+               'QtSql',
+               'QtSvg',
+               'QtTest',
                #'QtUiTools',
-                'QtXml',
-                'QtXmlPatterns' ]
+               'QtXml',
+               'QtXmlPatterns']
 
     libraries = ["PySide6", "PyQt5"]
     librarySymbols = {}
-    for l in libraries:
+    for lib in libraries:
         dictionary = []
-        if l == "PyQt5":
+        if lib == "PyQt5":
             import sip
             sip.setapi('QDate', 2)
             sip.setapi('QDateTime', 2)
@@ -78,9 +76,9 @@ if __name__ == '__main__':
             sip.setapi('QVariant', 2)
 
         for m in modules:
-            exec(f"from {l} import {m}", globals(), locals())
+            exec(f"from {lib} import {m}", globals(), locals())
             dictionary += recurse_into(m, eval(m))
-        librarySymbols[l] = dictionary
+        librarySymbols[lib] = dictionary
 
     print("PyQt5: ", len(librarySymbols["PyQt5"]), " PySide6: ", len(librarySymbols["PySide6"]))
 

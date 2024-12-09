@@ -16,7 +16,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
-from PySide6.QtWidgets import QApplication, QWidget
+from PySide6.QtWidgets import QWidget
 from helper.usesqapplication import UsesQApplication
 
 
@@ -33,7 +33,8 @@ class SqlDatabaseCreationDestructionAndQueries(UsesQApplication):
         # Acquire resources
         super().setUp()
         self.assertFalse(not QSqlDatabase.drivers(), "installed Qt has no DB drivers")
-        self.assertTrue("QSQLITE" in QSqlDatabase.drivers(), "\"QSQLITE\" driver not available in this Qt version")
+        self.assertTrue("QSQLITE" in QSqlDatabase.drivers(),
+                        "\"QSQLITE\" driver not available in this Qt version")
         self.db = QSqlDatabase.addDatabase("QSQLITE")
         self.db.setDatabaseName(":memory:")
         self.assertTrue(self.db.open())
@@ -58,7 +59,7 @@ class SqlDatabaseCreationDestructionAndQueries(UsesQApplication):
         # Test table creation, insertion and retrieval
         query = QSqlQuery()
         query.exec("CREATE TABLE person(id int primary key, "
-                    "firstname varchar(20), lastname varchar(20))")
+                   "firstname varchar(20), lastname varchar(20))")
         query.exec("INSERT INTO person VALUES(101, 'George', 'Harrison')")
         query.prepare("INSERT INTO person (id, firstname, lastname) "
                       "VALUES (:id, :firstname, :lastname)")
@@ -76,7 +77,7 @@ class SqlDatabaseCreationDestructionAndQueries(UsesQApplication):
 
     def testTableModelDeletion(self):
         bar = Foo()
-        model = bar.model
+        model = bar.model  # noqa: F841
         del bar
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
@@ -84,4 +85,3 @@ class SqlDatabaseCreationDestructionAndQueries(UsesQApplication):
 
 if __name__ == '__main__':
     unittest.main()
-

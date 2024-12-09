@@ -14,7 +14,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QUrl, QTimer
-from PySide6.QtGui import QGuiApplication, QWindow
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView
 from PySide6.QtQml import QQmlNetworkAccessManagerFactory
 from PySide6.QtNetwork import QNetworkAccessManager

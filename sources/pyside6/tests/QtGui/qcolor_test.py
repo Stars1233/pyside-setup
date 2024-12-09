@@ -13,7 +13,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import PySide6
+# For c.__repr__
+import PySide6  # noqa
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QColorConstants
 
@@ -41,7 +42,8 @@ class QColorGetTest(unittest.TestCase):
         self.assertEqual(self.color.getCmyk(), (170, 85, 0, 195, 80))
 
     def testGetCmykF(self):  # not supported by colorsys
-        for x, y in zip(self.color.getCmykF(), (170 / 255.0, 85 / 255.0, 0, 195 / 255.0, 80 / 255.0)):
+        for x, y in zip(self.color.getCmykF(),
+                        (170 / 255.0, 85 / 255.0, 0, 195 / 255.0, 80 / 255.0)):
             self.assertTrue(x - y < 1 / 10000.0)
 
 

@@ -12,7 +12,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QPointF
-from PySide6.QtGui import QTransform, QPolygonF, QPolygonF, QQuaternion, QVector3D
+from PySide6.QtGui import QTransform, QPolygonF, QQuaternion
 
 
 class QTransformTest(unittest.TestCase):
@@ -88,4 +88,3 @@ class QTransformTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

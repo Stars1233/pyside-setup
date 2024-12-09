@@ -11,7 +11,6 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import PySide6
 from PySide6.QtCore import QPoint, QPointF
 from PySide6.QtCore import QLine, QLineF
 from PySide6.QtCore import QSize, QSizeF
@@ -27,12 +26,12 @@ class testCases(unittest.TestCase):
         self.assertEqual((1, 2), p.toTuple())
 
     def testQLineToTuple(self):
-        l = QLine(1, 2, 3, 4)
-        self.assertEqual((1, 2, 3, 4), l.toTuple())
+        line = QLine(1, 2, 3, 4)
+        self.assertEqual((1, 2, 3, 4), line.toTuple())
 
     def testQLineFToTuple(self):
-        l = QLineF(1, 2, 3, 4)
-        self.assertEqual((1, 2, 3, 4), l.toTuple())
+        line = QLineF(1, 2, 3, 4)
+        self.assertEqual((1, 2, 3, 4), line.toTuple())
 
     def testQSizeToTuple(self):
         s = QSize(1, 2)

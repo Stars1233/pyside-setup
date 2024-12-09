@@ -18,7 +18,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (QAbstractItemDelegate, QComboBox,
                                QSpinBox, QStyledItemDelegate,
-                               QStyleOptionViewItem, QWidget)
+                               QStyleOptionViewItem)
 
 id_text = 'This is me'
 
@@ -79,4 +79,3 @@ class EditorCreatedByDelegateTest(UsesQApplication):
 
 if __name__ == '__main__':
     unittest.main()
-

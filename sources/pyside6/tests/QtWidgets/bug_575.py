@@ -5,7 +5,6 @@ from __future__ import annotations
 """ Unittest for bug #575 """
 """ http://bugs.openbossa.org/show_bug.cgi?id=575 """
 
-import sys
 import os
 import sys
 import unittest

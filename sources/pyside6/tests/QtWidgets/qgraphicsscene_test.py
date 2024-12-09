@@ -15,7 +15,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QPointF
-from PySide6.QtGui import QPolygonF, QPixmap, QPainterPath, QTransform, QWindow
+from PySide6.QtGui import QPolygonF, QPixmap, QPainterPath, QTransform
 from PySide6.QtWidgets import QApplication, QPushButton
 from PySide6.QtWidgets import QGraphicsScene
 from PySide6.QtWidgets import QGraphicsEllipseItem, QGraphicsLineItem

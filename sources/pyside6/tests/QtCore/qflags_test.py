@@ -5,7 +5,6 @@ from __future__ import annotations
 
 '''Test cases for QFlags'''
 
-import operator
 import os
 import sys
 import unittest

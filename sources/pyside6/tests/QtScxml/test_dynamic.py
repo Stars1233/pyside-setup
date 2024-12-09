@@ -12,7 +12,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.timedqapplication import TimedQApplication
-from PySide6.QtCore import QCoreApplication, QObject, Slot, SIGNAL, SLOT
+from PySide6.QtCore import QCoreApplication, QObject, Slot, SLOT
 from PySide6.QtScxml import QScxmlStateMachine, QScxmlEvent
 
 

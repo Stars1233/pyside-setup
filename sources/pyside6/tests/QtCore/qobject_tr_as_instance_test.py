@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import gc
 import os
-import os
 import sys
 import unittest
 
@@ -52,4 +51,3 @@ class QObjectTrTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

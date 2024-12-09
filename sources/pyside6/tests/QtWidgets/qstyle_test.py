@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 from __future__ import annotations
 
-import sys
 import os
 import sys
 import unittest
@@ -14,7 +13,6 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 
-from PySide6.QtGui import QWindow
 from PySide6.QtWidgets import (QApplication, QFontComboBox, QLabel, QProxyStyle,
                                QStyleFactory, QWidget)
 
@@ -47,7 +45,7 @@ class SetStyleTest(UsesQApplication):
         # QFontComboBox is used because it has an QLineEdit created in C++ inside it,
         # and if the QWidget.setStyle(style) steals the ownership of the style
         # for the C++ originated widget everything will break.
-        fontComboBox = QFontComboBox(container)
+        fontComboBox = QFontComboBox(container)  # noqa: F841
         label = QLabel(container)
         label.setText('Label')
         style = QStyleFactory.create(QStyleFactory.keys()[0])
@@ -74,4 +72,3 @@ class SetStyleTest(UsesQApplication):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -15,7 +15,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, QTimer, QCoreApplication, SIGNAL
+from PySide6.QtCore import QObject, QTimer
 from helper.usesqapplication import UsesQApplication
 
 
@@ -34,4 +34,3 @@ class TestDeleteLater(UsesQApplication):
 
 if __name__ == '__main__':
     unittest.main()
-

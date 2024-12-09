@@ -16,13 +16,13 @@ PYSIDE-2029: Tests that snake_case is isolated from imported modules
 """
 is_pypy = hasattr(sys, "pypy_version_info")
 
-from PySide6.QtCore import QSize
-from PySide6.QtWidgets import QWidget, QSpinBox
+from PySide6.QtWidgets import QWidget
 if not is_pypy:
-    from __feature__ import snake_case
+    from __feature__ import snake_case  # noqa
 from helper.usesqapplication import UsesQApplication
 
 import snake_case_sub
+
 
 @unittest.skipIf(is_pypy, "__feature__ cannot yet be used with PyPy")
 class SnakeCaseNoPropagateTest(UsesQApplication):
@@ -30,7 +30,7 @@ class SnakeCaseNoPropagateTest(UsesQApplication):
     def testSnakeCase(self):
         # this worked
         widget = QWidget()
-        check = widget.size_hint
+        check = widget.size_hint  # noqa
 
         snake_case_sub.test_no_snake_case()
 

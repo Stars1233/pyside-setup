@@ -15,7 +15,6 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QObject
-from PySide6.QtCore import QByteArray
 
 
 class UnicodeConversion(unittest.TestCase):
@@ -42,4 +41,3 @@ class UnicodeConversion(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

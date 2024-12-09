@@ -12,7 +12,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QApplication, QHBoxLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
 from helper.usesqapplication import UsesQApplication
 
 
@@ -42,4 +42,3 @@ class QWidgetTest(UsesQApplication):
 
 if __name__ == '__main__':
     unittest.main()
-

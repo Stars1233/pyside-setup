@@ -16,11 +16,10 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 
-from PySide6.QtCore import (Property, QObject, QPropertyAnimation, QTimer, Signal, Slot)
-from PySide6.QtGui import (QGuiApplication, QMatrix4x4, QQuaternion, QVector3D, QWindow)
-from PySide6.Qt3DCore import (Qt3DCore)
-from PySide6.Qt3DRender import (Qt3DRender)
-from PySide6.Qt3DExtras import (Qt3DExtras)
+from PySide6.QtCore import Property, QObject, QTimer, Signal
+from PySide6.QtGui import QMatrix4x4, QQuaternion, QVector3D
+from PySide6.Qt3DCore import Qt3DCore
+from PySide6.Qt3DExtras import Qt3DExtras
 
 
 class OrbitTransformController(QObject):

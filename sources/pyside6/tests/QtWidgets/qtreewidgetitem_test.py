@@ -24,13 +24,12 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication, QTreeWidget, QTreeWidgetItem
 
 
 class QTreeWidgetItemTest(unittest.TestCase):
     def testClass(self):
-        app = QApplication([])
+        app = QApplication([])  # noqa: F841
         treewidget = QTreeWidget()
         item = QTreeWidgetItem(["Words and stuff"])
         item2 = QTreeWidgetItem(["More words!"])
@@ -45,4 +44,3 @@ class QTreeWidgetItemTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

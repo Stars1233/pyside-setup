@@ -19,7 +19,7 @@ is_pypy = hasattr(sys, "pypy_version_info")
 from PySide6.QtCore import QSize
 from PySide6.QtWidgets import QWidget, QSpinBox
 if not is_pypy:
-    from __feature__ import true_property
+    from __feature__ import true_property  # noqa
 from helper.usesqapplication import UsesQApplication
 
 

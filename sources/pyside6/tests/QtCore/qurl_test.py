@@ -41,15 +41,15 @@ class QUrlBasicConstructor(unittest.TestCase):
 
         url.setPath('/mail/view')
         self.assertEqual(url.toString(),
-                        'ftp://www.google.com:8080/mail/view')
+                         'ftp://www.google.com:8080/mail/view')
 
         url.setUserName('john')
         self.assertEqual(url.toString(),
-                        'ftp://john@www.google.com:8080/mail/view')
+                         'ftp://john@www.google.com:8080/mail/view')
 
         url.setPassword('abc123')
         self.assertEqual(url.toString(),
-                        'ftp://john:abc123@www.google.com:8080/mail/view')
+                         'ftp://john:abc123@www.google.com:8080/mail/view')
 
 
 class QueryItemsTest(unittest.TestCase):
@@ -93,7 +93,7 @@ class QueryItemsTest(unittest.TestCase):
         for i, data in enumerate(valid_data):
             url.addQueryItem(key, data)
             self.assertEqual(url.allQueryItemValues(key),
-                          list(valid_data[:i + 1]))
+                             list(valid_data[:i + 1]))
 
     def testPath(self):
         url = QUrl("http://qt-project.org/images/ban/pgs_front.jpg")
@@ -102,7 +102,7 @@ class QueryItemsTest(unittest.TestCase):
 # PYSIDE-345: No bindings for QUrlQuery
 
 
-class QueryItemsTest(unittest.TestCase):
+class QueryItemsTest2(unittest.TestCase):
     '''Test query item management'''
 
     def testQueryItems(self):

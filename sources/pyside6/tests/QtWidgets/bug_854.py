@@ -11,7 +11,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtWidgets import QTableView, QApplication
+from PySide6.QtWidgets import QTableView
 from PySide6.QtCore import QAbstractItemModel, QModelIndex
 
 from helper.usesqapplication import UsesQApplication
@@ -52,4 +52,3 @@ class TestQAbstractItemModel(UsesQApplication):
 
 if __name__ == "__main__":
     unittest.main()
-

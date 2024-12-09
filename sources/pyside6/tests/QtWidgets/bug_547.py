@@ -5,7 +5,6 @@ from __future__ import annotations
 """ Unittest for bug #547 """
 """ http://bugs.openbossa.org/show_bug.cgi?id=547 """
 
-import sys
 import os
 import sys
 import unittest
@@ -71,4 +70,3 @@ class MyMainWindow(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

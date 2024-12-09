@@ -5,7 +5,6 @@ from __future__ import annotations
 
 '''Unit tests for QCollator'''
 
-import ctypes
 import os
 import sys
 import unittest

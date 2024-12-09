@@ -16,8 +16,7 @@ init_test_paths(False)
 from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import QSize, QTimer, Qt
-from PySide6.QtGui import (QColor, QGuiApplication, QImage, QOpenGLContext,
-                           QSurfaceFormat)
+from PySide6.QtGui import QColor, QImage, QSurfaceFormat
 from PySide6.QtOpenGL import QOpenGLTexture, QOpenGLWindow
 
 
@@ -84,7 +83,8 @@ class OpenGLWindow(QOpenGLWindow):
 
 
 class QOpenGLWindowTest(UsesQApplication):
-    # On macOS, glClear(), glViewport() are rejected due to GLbitfield/GLint not being resolved properly
+    # On macOS, glClear(), glViewport() are rejected due to
+    # GLbitfield/GLint not being resolved properly
     def test(self):
         openGlWindow = OpenGLWindow()
         openGlWindow.resize(640, 480)

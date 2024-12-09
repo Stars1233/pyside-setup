@@ -15,8 +15,8 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
-from PySide6.QtCore import QRect, QSize, QTimer
-from PySide6.QtGui import QGuiApplication, QScreen
+from PySide6.QtCore import QTimer
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtCharts import QChart, QChartView, QPieSeries
 
 

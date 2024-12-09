@@ -4,7 +4,6 @@ from __future__ import annotations
 
 '''Test cases for Reference count when the object is created in c++ side'''
 
-import gc
 import os
 import sys
 import unittest
@@ -15,9 +14,9 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import Qt, QPointF
+from PySide6.QtCore import QPointF
 from PySide6.QtGui import QPolygonF
-from PySide6.QtWidgets import QApplication, QGraphicsScene, QGraphicsRectItem, QGraphicsPolygonItem, QGraphicsRectItem
+from PySide6.QtWidgets import QGraphicsScene, QGraphicsPolygonItem, QGraphicsRectItem
 
 from helper.usesqapplication import UsesQApplication
 

@@ -14,8 +14,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QThread, QCoreApplication, QObject, QTimer, Slot
-from PySide6.QtCore import QEventLoop
+from PySide6.QtCore import QThread, QObject, QTimer, Slot
 
 from helper.usesqapplication import UsesQApplication
 

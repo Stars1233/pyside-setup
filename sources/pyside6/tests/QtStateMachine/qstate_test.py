@@ -13,8 +13,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QCoreApplication, QObject, SIGNAL, QTimer
-from PySide6.QtStateMachine import (QEventTransition, QFinalState, QState,
-                                    QStateMachine, QSignalTransition)
+from PySide6.QtStateMachine import QFinalState, QState, QStateMachine, QSignalTransition
 
 
 class QStateTest(unittest.TestCase):

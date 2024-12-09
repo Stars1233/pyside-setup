@@ -14,8 +14,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import (QCoreApplication, QObject, QParallelAnimationGroup,
                             QTimer, SIGNAL)
-from PySide6.QtStateMachine import (QEventTransition, QFinalState, QState,
-                                    QStateMachine, QSignalTransition)
+from PySide6.QtStateMachine import QEventTransition, QFinalState, QState, QStateMachine
 
 
 def addStates(transition):

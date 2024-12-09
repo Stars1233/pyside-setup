@@ -10,13 +10,13 @@ import unittest
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
 sys.path.append(os.path.dirname(TEST_DIR))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from PySide6.QtCore import QCoreApplication, QSize, QUrl, Qt
-from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
-from PySide6.QtWebEngineCore import QWebEnginePage
-from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtCore import QCoreApplication, QSize, QUrl  # noqa: E402
+from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget  # noqa: E402
+from PySide6.QtWebEngineCore import QWebEnginePage  # noqa: E402
+from PySide6.QtWebEngineWidgets import QWebEngineView  # noqa: E402
 
 
 class MainTest(unittest.TestCase):

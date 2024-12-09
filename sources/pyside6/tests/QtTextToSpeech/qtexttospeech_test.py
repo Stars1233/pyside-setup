@@ -17,10 +17,9 @@ init_test_paths(False)
 from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QApplication
 
 try:
-    from PySide6.QtTextToSpeech import QTextToSpeech, QVoice
+    from PySide6.QtTextToSpeech import QTextToSpeech
 except ImportError:
     print("Skipping test due to missing QtTextToSpeech module")
     sys.exit(0)

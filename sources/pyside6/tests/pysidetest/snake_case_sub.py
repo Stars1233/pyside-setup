@@ -4,21 +4,20 @@ from __future__ import annotations
 
 import os
 import sys
-import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
 """
 PYSIDE-2029: Tests that snake_case is isolated from imported modules
 """
 
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget  # noqa: E402
 
 
 def test_no_snake_case():
     print(__name__)
     widget = QWidget()
-    check = widget.sizeHint
+    check = widget.sizeHint  # noqa

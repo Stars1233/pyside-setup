@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 import sys
-import tempfile
 import unittest
 
 from pathlib import Path
@@ -20,7 +19,7 @@ class QFileConstructor(unittest.TestCase):
 
     def testBasic(self):
         '''QFileInfo(QFile)'''
-        obj = QFileInfo(QFile())
+        obj = QFileInfo(QFile())  # noqa
 
     def testQFileInfoPath(self):
         # PYSIDE-1499: Test QFileInfo with Path objects

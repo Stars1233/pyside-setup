@@ -20,7 +20,6 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
-from PySide6.QtCore import QCoreApplication
 from PySide6.QtCharts import QLineSeries
 
 

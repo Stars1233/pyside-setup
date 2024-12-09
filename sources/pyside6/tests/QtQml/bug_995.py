@@ -4,15 +4,11 @@ from __future__ import annotations
 
 import os
 import sys
-import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
-
-from helper.helper import adjust_filename
-from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QGuiApplication
@@ -29,4 +25,3 @@ item = contentItem.childAt(100, 100)
 
 # it CAN NOT crash here
 print(item)
-

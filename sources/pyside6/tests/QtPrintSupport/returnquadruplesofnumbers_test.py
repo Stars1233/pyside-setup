@@ -12,8 +12,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtGui import QTextCursor
-from PySide6.QtPrintSupport import QPrinter, QPrinterInfo
-from PySide6.QtWidgets import QLayout, QWidget, QGraphicsLayout, QGraphicsLayoutItem
+from PySide6.QtWidgets import QLayout, QGraphicsLayout, QGraphicsLayoutItem
 
 from helper.usesqapplication import UsesQApplication
 
@@ -63,4 +62,3 @@ class ReturnsQuadruplesOfNumbers(UsesQApplication):
 
 if __name__ == "__main__":
     unittest.main()
-
