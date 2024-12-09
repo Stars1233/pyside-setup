@@ -84,3 +84,8 @@ directive:
 ::
 
     import PySide6.QtWidgets
+
+List of Classes by Function
+---------------------------
+
+    * :ref:`Widgets-Classes`

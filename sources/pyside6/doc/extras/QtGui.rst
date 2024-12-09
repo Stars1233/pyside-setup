@@ -140,3 +140,10 @@ directive:
 ::
 
     import PySide6.QtGui
+
+List of Classes by Function
+---------------------------
+
+    * :ref:`Painting-Classes`
+    * :ref:`Rendering-in-3D`
+    * :ref:`Rich-Text-Processing-APIs`

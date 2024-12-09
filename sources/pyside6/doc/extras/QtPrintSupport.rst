@@ -13,3 +13,8 @@ directive:
 ::
 
     import PySide6.QtPrintSupport
+
+List of Classes by Function
+---------------------------
+
+    * :ref:`Printer-and-Printing-APIs`

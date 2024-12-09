@@ -19,3 +19,8 @@ directive:
 ::
 
     import PySide6.QtSql
+
+List of Classes by Function
+---------------------------
+
+    * :ref:`Database-Classes`

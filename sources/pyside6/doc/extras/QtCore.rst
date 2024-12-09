@@ -57,5 +57,13 @@ Additional Frameworks
 Qt Core also provides some of Qt's key frameworks.
 
     * :ref:`The Animation Framework<The-Animation-Framework>`
-    * `JSON Support in Qt <https://doc.qt.io/qt-6/json.html>`_
+    * :ref:`CBOR-Support-in-Qt`
+    * :ref:`JSON-Support-in-Qt`
     * :ref:`The Event System<The-Event-System>`
+
+List of Classes by Function
+---------------------------
+
+    * :ref:`Animation-Framework`
+    * :ref:`Event-Classes`
+    * :ref:`Input-Output-and-Networking`

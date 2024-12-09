@@ -1,7 +1,6 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-# see README.md
 # A line enclosed in [] denotes a (relative) target directory
 
 [overviews]
@@ -24,16 +23,14 @@ qtconcurrent/webxml/qtconcurrentmap.webxml
 qtconcurrent/webxml/qtconcurrentrun.webxml
 qtconcurrent/webxml/qtconcurrenttask.webxml
 qtcore/webxml/animation-overview.webxml
-qtcore/webxml/animation.webxml
 qtcore/webxml/bindableproperties.webxml
+qtcore/webxml/cbor.webxml
 qtcore/webxml/containers.webxml
 qtcore/webxml/custom-types.webxml
 qtcore/webxml/datastreamformat.webxml
 qtcore/webxml/eventsandfilters.webxml
-qtcore/webxml/events.webxml
 qtcore/webxml/implicit-sharing.webxml
 qtcore/webxml/io-functions.webxml
-qtcore/webxml/io.webxml
 qtcore/webxml/ipc.webxml
 qtcore/webxml/java-style-iterators.webxml
 qtcore/webxml/json.webxml
@@ -127,8 +124,6 @@ qtdoc/webxml/wayland-and-qt.webxml
 qtgui/webxml/coordsys.webxml
 qtgui/webxml/dnd.webxml
 qtgui/webxml/gui-changes-qt6.webxml
-qtgui/webxml/painting-3d.webxml
-qtgui/webxml/painting.webxml
 qtgui/webxml/paintsystem-devices.webxml
 qtgui/webxml/paintsystem-drawing.webxml
 qtgui/webxml/paintsystem-images.webxml
@@ -145,7 +140,6 @@ qtgui/webxml/richtext-common-tasks.webxml
 qtgui/webxml/richtext-cursor.webxml
 qtgui/webxml/richtext-html-subset.webxml
 qtgui/webxml/richtext-layouts.webxml
-qtgui/webxml/richtext-processing.webxml
 qtgui/webxml/richtext-structure.webxml
 qtgui/webxml/richtext.webxml
 qthelp/webxml/helpsystem.webxml
@@ -160,7 +154,6 @@ qtmultimedia/webxml/qtmultimedia-apple.webxml
 qtmultimedia/webxml/qtmultimedia-changes-qt6.webxml
 qtmultimedia/webxml/videooverview.webxml
 qtnetwork/webxml/network-changes-qt6.webxml
-qtnetwork/webxml/network.webxml
 qtnetwork/webxml/qdtlsclientverifier-generatorparameters.webxml
 qtnetwork/webxml/qtnetwork-programming.webxml
 qtnetwork/webxml/ssl.webxml
@@ -177,7 +170,6 @@ qtpositioning/webxml/qtpositioning-android.webxml
 qtpositioning/webxml/qtpositioning-changes-qt6.webxml
 qtpositioning/webxml/qtpositioning-ios.webxml
 qtpositioning/webxml/qtpositioning-plugins.webxml
-qtprintsupport/webxml/printing.webxml
 qtprintsupport/webxml/printsupport-changes-qt6.webxml
 qtqml/webxml/qml-changes-qt6.webxml
 qtqml/webxml/qmldiskcache.webxml
@@ -267,8 +259,6 @@ qtquick/webxml/qtquick-positioning-anchors.webxml
 qtquick/webxml/qtquick-positioning-layouts.webxml
 qtquick/webxml/qtquick-positioning-righttoleft.webxml
 qtquick/webxml/qtquick-positioning-topic.webxml
-qtquick/webxml/qtquick-scenegraph-materials.webxml
-qtquick/webxml/qtquick-scenegraph-nodes.webxml
 qtquick/webxml/qtquick-statesanimations-animations.webxml
 qtquick/webxml/qtquick-statesanimations-behaviors.webxml
 qtquick/webxml/qtquick-statesanimations-states.webxml
@@ -317,7 +307,6 @@ qtsensors/webxml/qtsensors-cpp.webxml
 qtsensors/webxml/senorfwbackend.webxml
 qtsensors/webxml/sensors-backend-topics.webxml
 qtserialport/webxml/qtserialport-changes-qt6.webxml
-qtsql/webxml/database.webxml
 qtsql/webxml/qtsql-changes-qt6.webxml
 qtsql/webxml/sql-connecting.webxml
 qtsql/webxml/sql-driver.webxml
@@ -362,7 +351,6 @@ qtwidgets/webxml/qformlayout-takerowresult.webxml
 qtwidgets/webxml/qtextedit-extraselection.webxml
 qtwidgets/webxml/qtilerules.webxml
 qtwidgets/webxml/qwidget-styling.webxml
-qtwidgets/webxml/standard-dialogs.webxml
 qtwidgets/webxml/style-reference.webxml
 qtwidgets/webxml/stylesheet-customizing.webxml
 qtwidgets/webxml/stylesheet-designer.webxml
@@ -378,3 +366,18 @@ qtxml/webxml/xml-namespaces.webxml
 qtxml/webxml/xml-processing.webxml
 qtxml/webxml/xml-streaming.webxml
 qtxml/webxml/xml-tools.webxml
+
+# WebXML <group> files (lists of classes grouped by function/curated)
+[groups]
+qtcore/webxml/animation.webxml
+qtcore/webxml/events.webxml
+qtcore/webxml/io.webxml
+qtgui/webxml/painting.webxml
+qtgui/webxml/painting-3d.webxml
+qtgui/webxml/richtext-processing.webxml
+qtprintsupport/webxml/printing.webxml
+qtsql/webxml/database.webxml
+qtlocation/webxml/qml-qtlocation5-maps.webxml
+qtquick/webxml/qtquick-scenegraph-nodes.webxml
+qtquick/webxml/qtquick-scenegraph-materials.webxml
+qtnetwork/webxml/network.webxml
