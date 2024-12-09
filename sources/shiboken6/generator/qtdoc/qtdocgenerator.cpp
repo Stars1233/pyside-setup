@@ -1380,6 +1380,27 @@ static inline QString msgNonExistentAdditionalDocFile(const QString &dir,
     return result;
 }
 
+// Return rst target document name for additional docs
+// "qtcore/webxml/animation.webxml" -> "qtcore-animation.rst"
+static QString additionalDocRstFileName(const QFileInfo &fi, const QString &rstSuffix)
+{
+    QString result = fi.baseName() + rstSuffix;
+    // Disambiguate file name by directory
+    const QString dirName = fi.absolutePath();
+    QStringView prefix{dirName};
+    if (prefix.endsWith("/webxml"_L1))
+        prefix = prefix.chopped(7);
+    auto lastSlash = prefix.lastIndexOf(u'/');
+    if (lastSlash != -1) {
+        prefix = prefix.sliced(lastSlash + 1);
+        if (!result.startsWith(prefix)) {
+            result.prepend(u'-');
+            result.prepend(prefix);
+        }
+    }
+    return result;
+}
+
 void QtDocGenerator::writeAdditionalDocumentation() const
 {
     QFile additionalDocumentationFile(m_options.additionalDocumentationList);
@@ -1418,7 +1439,7 @@ void QtDocGenerator::writeAdditionalDocumentation() const
             // Normal file entry
             QFileInfo fi(m_options.parameters.docDataDir + u'/' + line);
             if (fi.isFile()) {
-                const QString rstFileName = fi.baseName() + rstSuffix;
+                const QString rstFileName = additionalDocRstFileName(fi, rstSuffix);
                 const QString rstFile = targetDir + u'/' + rstFileName;
                 const QString context = targetDir.mid(targetDir.lastIndexOf(u'/') + 1);
                 if (convertToRst(fi.absoluteFilePath(),
