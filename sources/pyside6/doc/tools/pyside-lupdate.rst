@@ -8,7 +8,7 @@ pyside6-lupdate
 
 ``pyside6-lupdate`` is a command line tool wrapping `lupdate`_. It finds
 translatable strings in Python, ``.ui``, and ``.qml`` files and generates or
-updates ``.ts`` files (see :ref:`translations`).
+updates ``.ts`` files (see :ref:`tutorial_translations`).
 
 Usage
 -----

@@ -35,7 +35,7 @@ and you will get one class called ``Ui_TheNameOfYourDesign(object)`` that
 is in charge of positioning all the elements like your design.
 
 To use this Python file, you should follow our tutorial in
-:ref:`using_ui_files`, but in summary, it is mainly importing the class
+:ref:`tutorial_uifiles`, but in summary, it is mainly importing the class
 from the generated file and setting it up in your code:
 
 .. code-block:: Python
@@ -50,7 +50,7 @@ translations, etc.
 .. note:: Remember that you need to have a class corresponding to the base
     form you selected in :ref:`pyside6-designer`, a ``QWidget``, or ``QDialog``,
     or ``QMainWindow``, etc, in order for ``setupUi`` to work. Check
-    :ref:`using_ui_files` for more information.
+    :ref:`tutorial_uifiles` for more information.
 
 .. warning:: Do not modify the content of the generated Python file from your
     ``.ui`` file, otherwise everything will be lost when you re-generate it.

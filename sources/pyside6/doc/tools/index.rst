@@ -42,7 +42,7 @@ Widget Development
         :link-type: ref
 
         drag-and-drop tool for designing Widget UIs (generates ``.ui`` files,
-        see :ref:`using_ui_files`).
+        see :ref:`tutorial_uifiles`).
 
     .. grid-item-card:: ``pyside6-uic``
         :link: pyside6-uic

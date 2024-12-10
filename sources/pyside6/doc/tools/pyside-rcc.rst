@@ -49,7 +49,7 @@ for example:
 For additional options, you can use ``pyside6-rcc -h`` in order to get
 more information about additional options.
 
-Visit the tutorial :ref:`using_qrc_files` for a hands-on example.
+Visit the tutorial :ref:`tutorial_qrcfiles` for a hands-on example.
 
 .. _`rcc`: https://doc.qt.io/qt-6/rcc.html
 

@@ -42,7 +42,7 @@ It is also possible to specify a directory containing the project file.
 
 *build*
     Builds the project, generating the required build artifacts
-    (see :ref:`using_ui_files`, :ref:`using_qrc_files`).
+    (see :ref:`tutorial_uifiles`, :ref:`tutorial_qrcfiles`).
 
 *run*
     Builds the project and runs the main.
@@ -51,7 +51,7 @@ It is also possible to specify a directory containing the project file.
     Deploys the application (see see :ref:`pyside6-deploy`).
 
 *lupdate*
-    Updates translation (.ts) files (see :ref:`translations`).
+    Updates translation (.ts) files (see :ref:`tutorial_translations`).
 
 *clean*
     Cleans the build artifacts.

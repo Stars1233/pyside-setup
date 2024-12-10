@@ -43,7 +43,7 @@ where you could adjust dimensions, names, etc.
 When your application is finished, you will save your design in a ``.ui``
 file. This ``.ui`` file can later be converted into a Python file,
 with the help of the :ref:`pyside6-uic` tool. You can find
-more details of this process in: :ref:`using_ui_files`.
+more details of this process in: :ref:`tutorial_uifiles`.
 
 If you are interested in more functionality of the tool, you can check
 the official `Qt Widgets Designer Manual`_.

@@ -11,7 +11,7 @@ version bundled with PySide and the one from Qt.
 
 For more information on how to use this tool, read Qt's documentation
 here: `Qt Linguist`_. Read more about how to translate PySide
-applications here: :ref:`translations`.
+applications here: :ref:`tutorial_translations`.
 
 .. image:: pyside6-linguist_screenshot.webp
     :width: 500

@@ -211,17 +211,17 @@ Tools
 
 * ``pyside6-rcc``: Qt Resource Compiler. This is a command line tool
   that compiles ``.qrc`` files containing binary data, for example images,
-  into executable Python code (see :ref:`using_qrc_files`).
+  into executable Python code (see :ref:`tutorial_qrcfiles`).
 * ``pyside6-uic``: Qt User Interface Compiler. This is a command line tool
   that compiles ``.ui`` files containing designs of Qt Widget-based forms
-  into executable Python code (see :ref:`using_ui_files`).
+  into executable Python code (see :ref:`tutorial_uifiles`).
 * ``pyside6-assistant``: Qt Help Viewer. This is a graphical tool that can
   be used to view Qt documentation from Qt Compressed Help files (``.qhc``).
   Currently, only the binary without documentation sets is shipped to reduce the
   wheel size. For building the documentation, see :ref:`building_documentation`.
 * ``pyside6-designer``: Qt User Interface Designer. This is a graphical tool
   to create designs of Qt Widget-based forms and use custom widgets
-  (see :ref:`using_ui_files`, :ref:`designer_custom_widgets`).
+  (see :ref:`tutorial_uifiles`, :ref:`designer_custom_widgets`).
 
 
 .. _NewEnumSystem:

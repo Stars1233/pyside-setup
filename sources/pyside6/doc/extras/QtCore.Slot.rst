@@ -27,7 +27,7 @@ PySide6.QtCore.Slot
     QtCore   pyqtSlot     Slot
     =======  ===========  ======
 
-    .. seealso:: :ref:`signals-and-slots`
+    .. seealso:: :ref:`tutorial_signals_and_slots`
 
     Q_INVOKABLE
     -----------

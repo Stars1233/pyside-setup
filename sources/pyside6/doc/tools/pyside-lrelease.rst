@@ -10,7 +10,7 @@ pyside6-lrelease
 ``pyside6-lrelease`` is a command line tool wrapping `lrelease`_. It produces
 ``.qm`` files out of ``.ts`` files. The ``.qm`` file format is a compact binary
 format that the localized application uses. It provides extremely fast lookup
-for translations (see :ref:`translations`).
+for translations (see :ref:`tutorial_translations`).
 
 Usage
 -----

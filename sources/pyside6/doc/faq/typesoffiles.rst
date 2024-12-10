@@ -64,7 +64,7 @@ The `pyside6-uic` tool generates Python code from these `.ui` files,
 which you can import from your main files, so it is not necessary
 for you to include the `.ui` files in your deployed application.
 
-For more details, see :ref:`using_ui_files`.
+For more details, see :ref:`tutorial_uifiles`.
 
 Resource Collection Files ``.qrc``
 ----------------------------------
@@ -86,7 +86,7 @@ The `pyside6-rcc` tool generates Python code from these `.qrc` files,
 so you are not required to include the listed files in your deployed
 application.
 
-For more details, see :ref:`using_qrc_files`.
+For more details, see :ref:`tutorial_qrcfiles`.
 
 Qt Modeling Language File ``.qml``
 ----------------------------------

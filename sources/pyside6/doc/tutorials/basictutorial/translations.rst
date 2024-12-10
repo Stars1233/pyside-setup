@@ -79,7 +79,7 @@ the files are converted to a binary form (``.qm`` files):
 
 To avoid having to ship the ``.qm`` files, it is recommend
 to put them into a Qt resource file along with icons and other
-applications resources (see :ref:`using_qrc_files`).
+applications resources (see :ref:`tutorial_qrcfiles`).
 The resource file ``linguist.qrc`` provides the ``example_de.qm``
 under ``:/translations``:
 

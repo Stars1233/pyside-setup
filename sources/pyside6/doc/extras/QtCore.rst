@@ -49,7 +49,7 @@ printing output.
 In addition, Qt Core provides a platform-independent mechanism for
 storing binary files in the application's executable.
 
-    * :ref:`The Qt Resource System<using_qrc_files>`
+    * :ref:`The Qt Resource System<tutorial_qrcfiles>`
 
 Additional Frameworks
 ^^^^^^^^^^^^^^^^^^^^^
