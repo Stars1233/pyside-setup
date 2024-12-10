@@ -260,37 +260,75 @@ def get_module_gallery(examples):
         # Handling description from original file
         desc = ""
         original_dir = Path(e.abs_path) / "doc"
-        try:
-            original_file = list(original_dir.glob("*.rst"))[0]
-        except IndexError:
-            # No example
-            continue
-        with original_file.open("r") as f:
-            # Title line (possible ..tags)
-            _ = f.readline()
-            # The next line is the characters under the title
-            _ = f.readline()
 
-            # The next line is always empty
-            assert (f.readline().strip() == "")
+        if e.has_doc:
+            # cannot use e.doc_file because that is the target file name
+            # so finding the original file by the name
+            original_file = (next(original_dir.glob("*.rst"), None)
+                             or next(original_dir.glob("*.md"), None))
+            if not original_file:
+                # ideally won't reach here because has_doc is True
+                print(f"example_gallery: No .rst or .md file found in {original_dir}")
+                continue
 
-            # now we read until another empty line.
-            lines = []
-            while True:
+            with original_file.open("r") as f:
+                # Read the first line
+                first_line = f.readline().strip()
+
+                # Check if the first line is a reference (starts with '(' and ends with ')=' for MD,
+                # or starts with '.. ' and ends with '::' for RST)
+                if ((e.file_format == Format.MD and first_line.startswith('(')
+                     and first_line.endswith(')='))
+                    or (e.file_format == Format.RST and first_line.startswith('.. ')
+                        and first_line.endswith('::'))):
+                    # The first line is a reference, so read the next lines until a non-empty line
+                    # is found
+                    while True:
+                        title_line = f.readline().strip()
+                        if title_line:
+                            break
+                else:
+                    # The first line is the title
+                    title_line = first_line
+
+                # The next line handling depends on the file format
                 line = f.readline().strip()
-                if line.startswith(".. tags"):
-                    # empty line
-                    _ = f.readline()
-                    # new line
+
+                if e.file_format == Format.MD:
+                    # For markdown, the second line is the empty line
+                    if line != "":
+                        # If the line is not empty, raise a runtime error
+                        raise RuntimeError(f"Unexpected line: {line} in {original_file}. "
+                                           "Needs handling.")
+                else:
+                    # For RST and other formats
+                    # The second line is the underline under the title
+                    _ = line
+                    # The next line should be empty
                     line = f.readline().strip()
+                    if line != "":
+                        raise RuntimeError(f"Unexpected line: {line} in {original_file}. "
+                                           "Needs handling.")
 
-                if not line:
-                    break
-                lines.append(line)
+                # Now read until another empty line
+                lines = []
+                while True:
+                    line = f.readline().strip()
+                    if line.startswith(".. tags") or line.startswith("#"):
+                        # Skip the empty line
+                        _ = f.readline()
+                        # Read the next line
+                        line = f.readline().strip()
 
-            desc = "".join(lines)
-            if len(desc) > 120:
-                desc = desc[:120]
+                    if not line:
+                        break
+                    lines.append(line)
+
+                desc = "".join(lines)
+                if len(desc) > 120:
+                    desc = desc[:120] + "..."
+        else:
+            print(f"example_gallery: No .rst or .md file found in {original_dir}")
 
         title = e.headline
         if not title:
