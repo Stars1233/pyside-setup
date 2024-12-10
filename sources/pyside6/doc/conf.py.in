@@ -158,12 +158,16 @@ html_theme_options = {
         "color-admonition-title--important": "#2cde85",
         "color-admonition-title-background--important": "#474b53",
         "font-stack": "'Titillium Web', sans-serif",
+        "color-background": "rgba(0, 0, 0, 0.9)",
+        "color-background-font": "#FFFFFF",
     },
     "light_css_variables": {
         "color-brand-primary": "#27138b",
         "color-brand-content": "#27138b",
         "color-admonition-title--important": "#27138b",
         "font-stack": "'Titillium Web', sans-serif",
+        "color-background": "rgba(255, 255, 255, 0.9)",
+        "color-background-font": "#000000",
     },
 }
 

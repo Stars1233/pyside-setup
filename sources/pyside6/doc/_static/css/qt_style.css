@@ -135,7 +135,7 @@ section#examples .sd-card-body{
 
 /* Example card hover */
 section#examples .cover-img img:hover {
-    background-color: black;
+    background-color: var(--color-background);
     opacity: 0.3;
 }
 
@@ -145,7 +145,7 @@ section#examples .sd-card {
 }
 
 section#examples .sd-card-hover:hover {
-    background-color: black;
+    background-color: var(--color-background);
     transform: translateY(-5px);
     box-shadow: 0 4px 8px rgba(27, 31, 35, 0.12), 0 12px 48px rgba(27, 31, 35, 0.24);
 }
@@ -155,13 +155,13 @@ section#examples .sd-card-hover:hover .sd-card-body p {
     display: block;
     left: 0;
     position: absolute;
-    color: white;
+    color: var(--color-background-font);
     right: 0;
     top: 0;
     padding: 20px;
     opacity: 1;
     z-index: 5;
-    background-color: rgba(0,0,0,0.9);
+    background-color: var(--color-background);
 }
 
 section#examples .sd-card-hover:hover a {
