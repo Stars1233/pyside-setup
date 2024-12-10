@@ -139,10 +139,11 @@ def main():
     all_projects = "shiboken6 pyside6".split()
     tested_projects = "shiboken6 pyside6".split()
     tested_projects_quoted = " ".join("'i'" for i in tested_projects)
+    runs = COIN_TESTING
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=dedent(
-            """\
+            f"""\
         Run the tests for some projects, default = {tested_projects_quoted}.
 
         Testing is now repeated up to {COIN_TESTING} times, and errors are
@@ -177,6 +178,8 @@ def main():
         type=int,
         help="use build number n (0-based), latest = -1 (default)",
     )
+    parser_test.add_argument("--reruns", "-r", default=COIN_TESTING, type=int,
+                             help=f"Number of re-runs (defaults to {COIN_TESTING})")
     parser_test.add_argument(
         "--projects",
         nargs="+",
@@ -209,7 +212,7 @@ def main():
         print(builds.selected.build_dir, "written to file", args.filename.name)
         sys.exit(0)
     elif args.subparser_name == "test":
-        pass  # we do it afterwards
+        runs = args.reruns
     elif args.subparser_name == "list":
         rp = os.path.relpath
         print()
@@ -256,7 +259,6 @@ def main():
 
     q = 5 * [0]
 
-    runs = COIN_TESTING
     fail_crit = COIN_THRESHOLD
     # now loop over the projects and accumulate
     fatal = False

@@ -341,7 +341,7 @@ def run_tests():
     """Run tests redirected into a log file with a time stamp"""
     logfile_name = datetime.datetime.today().strftime("test_%Y%m%d_%H%M.txt")
     binary = sys.executable
-    command = f'"{binary}" testrunner.py test > {logfile_name}'
+    command = f'"{binary}" testrunner.py test --reruns 2 > {logfile_name}'
     print(command_log_string([command], Path.cwd()))
     start_time = time.time()
     result = 0 if opt_dry_run else os.system(command)
