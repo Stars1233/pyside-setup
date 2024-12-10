@@ -7,7 +7,7 @@
 #include "pysideqobject.h"
 #include "pysideutils.h"
 #include "pysidestaticstrings.h"
-#include "pysideweakref.h"
+#include "qobjectconnect.h"
 #include "signalmanager.h"
 
 #include <shiboken.h>
@@ -22,6 +22,7 @@
 #include <pep384ext.h>
 #include <signature.h>
 #include <sbkenum.h>
+#include <sbkconverter.h>
 
 #include <algorithm>
 #include <optional>
@@ -74,7 +75,17 @@ QDebug operator<<(QDebug debug, const PySideSignalInstancePrivate &d)
 
 static bool isSourceDeleted(const PySideSignalInstance *p)
 {
-    return p->d == nullptr || p->d->shared->deleted;
+    return p->d == nullptr || p->d->shared->source.isNull();
+}
+
+static inline QObject *sender(const PySideSignalInstance *p)
+{
+    return p->d != nullptr ? p->d->shared->source.data() : nullptr;
+}
+
+static inline QByteArray qSignalSignature(const PySideSignalInstance *p)
+{
+    return QT_SIGNAL_SENTINEL + p->d->signature;
 }
 
 static bool connection_Check(PyObject *o)
@@ -110,12 +121,21 @@ static std::optional<QByteArrayList> parseArgumentNames(PyObject *argArguments)
     return result;
 }
 
+static const char msgSourceDeleted[] = "Signal source has been deleted";
+static const char msgTargetSignalDeleted[] = "Target signal has been deleted";
+
+static SbkConverter *metaObjConnectionConverter()
+{
+    static SbkConverter *result = Shiboken::Conversions::getConverter("QMetaObject::Connection");
+    Q_ASSERT(result);
+    return result;
+}
+
 namespace PySide::Signal {
     static QByteArray buildSignature(const QByteArray &, const QByteArray &);
     static void instanceInitialize(PySideSignalInstance *, PyObject *, PySideSignal *,
                                    const PySideSignalInstanceSharedPtr &shared, int);
     static PySideSignalData::Signature parseSignature(PyObject *);
-    static PyObject *buildQtCompatible(const QByteArray &);
 } // PySide::Signal
 
 extern "C"
@@ -373,7 +393,6 @@ static void signalInstanceFree(void *vself)
             Py_DECREF(dataPvt->next);
             dataPvt->next = nullptr;
         }
-        dataPvt->shared->deleted = true;
         delete dataPvt;
         self->d = nullptr;
     }
@@ -517,68 +536,56 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
         "O|O:SignalInstance", const_cast<char **>(kwlist), &slot, &type))
         return nullptr;
 
+    Qt::ConnectionType connectionType = Qt::AutoConnection;
+    if (type != nullptr && qstrcmp(Py_TYPE(type)->tp_name, "ConnectionType") == 0) {
+        static SbkConverter *connectionTypeConv =
+            Shiboken::Conversions::getConverter("Qt::ConnectionType");
+        Q_ASSERT(connectionTypeConv);
+        Shiboken::Conversions::pythonToCppCopy(connectionTypeConv, type, &connectionType);
+    }
+
     auto *source = reinterpret_cast<PySideSignalInstance *>(self);
     if (!source->d)
         return PyErr_Format(PyExc_RuntimeError, "cannot connect uninitialized SignalInstance");
-    if (isSourceDeleted(source))
-        return PyErr_Format(PyExc_RuntimeError, "Signal source has been deleted");
 
-    Shiboken::AutoDecRef pyArgs(PyList_New(0));
-
-    bool match = false;
-    if (Py_TYPE(slot) == PySideSignalInstance_TypeF()) {
-        PySideSignalInstance *sourceWalk = source;
-
-        //find best match
-        while (sourceWalk && !match) {
-            auto *targetWalk = reinterpret_cast<PySideSignalInstance *>(slot);
-            while (targetWalk && !match) {
+    if (Py_TYPE(slot) == PySideSignalInstance_TypeF()) { // Connect signal to signal
+        // find best match
+        for (PySideSignalInstance *sourceWalk = source; sourceWalk != nullptr; ) {
+            for (auto *targetWalk = reinterpret_cast<PySideSignalInstance *>(slot);
+                 targetWalk != nullptr; ) {
                 if (QMetaObject::checkConnectArgs(sourceWalk->d->signature,
                                                   targetWalk->d->signature)) {
-                    PyList_Append(pyArgs, sourceWalk->d->shared->source);
-                    Shiboken::AutoDecRef sourceSignature(PySide::Signal::buildQtCompatible(sourceWalk->d->signature));
-                    PyList_Append(pyArgs, sourceSignature);
+                    if (isSourceDeleted(sourceWalk))
+                        return PyErr_Format(PyExc_RuntimeError, msgSourceDeleted);
+                    if (isSourceDeleted(targetWalk))
+                        return PyErr_Format(PyExc_RuntimeError, msgTargetSignalDeleted);
 
-                    PyList_Append(pyArgs, targetWalk->d->shared->source);
-                    Shiboken::AutoDecRef targetSignature(PySide::Signal::buildQtCompatible(targetWalk->d->signature));
-                    PyList_Append(pyArgs, targetSignature);
-
-                    match = true;
+                    auto conn = PySide::qobjectConnect(sender(sourceWalk),
+                                                       qSignalSignature(sourceWalk).constData(),
+                                                       sender(targetWalk),
+                                                       qSignalSignature(targetWalk).constData(),
+                                                       connectionType);
+                    return Shiboken::Conversions::copyToPython(metaObjConnectionConverter(), &conn);
                 }
                 targetWalk = reinterpret_cast<PySideSignalInstance *>(targetWalk->d->next);
             }
             sourceWalk = reinterpret_cast<PySideSignalInstance *>(sourceWalk->d->next);
         }
-    } else {
-        // Adding references to pyArgs
-        PyList_Append(pyArgs, source->d->shared->source);
-
-        // Check signature of the slot (method or function) to match signal
-        PySideSignalInstance *matchedSlot = findSignalInstanceForSlot(source, slot);
-        Shiboken::AutoDecRef signature(PySide::Signal::buildQtCompatible(matchedSlot->d->signature));
-        PyList_Append(pyArgs, signature);
-        PyList_Append(pyArgs, slot);
-        match = true;
+        return PyErr_Format(PyExc_RuntimeError, "Failed to connect signal %s.",
+                            source->d->signature.constData());
     }
 
-    if (type)
-        PyList_Append(pyArgs, type);
-
-    if (match) {
-        Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
-        Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->shared->source,
-                                                       PySide::PySideName::qtConnect()));
-        if (pyMethod.isNull())  // PYSIDE-79: check if pyMethod exists.
-            return PyErr_Format(PyExc_RuntimeError, "method 'connect' vanished!");
-        PyObject *result = PyObject_CallObject(pyMethod, tupleArgs);
-        if (connection_Check(result))
-            return result;
-        Py_XDECREF(result);
+    if (PyCallable_Check(slot) == 0) {
+        return PyErr_Format(PyExc_TypeError, "Expected signal or callable, got \"%s\"",
+                            Py_TYPE(slot)->tp_name);
     }
-    if (!PyErr_Occurred()) // PYSIDE-79: inverse the logic. A Null return needs an error.
-        PyErr_Format(PyExc_RuntimeError, "Failed to connect signal %s.",
-                     source->d->signature.constData());
-    return nullptr;
+    if (isSourceDeleted(source))
+        return PyErr_Format(PyExc_RuntimeError, msgSourceDeleted);
+    PySideSignalInstance *matchedSlot = findSignalInstanceForSlot(source, slot);
+    auto conn = PySide::qobjectConnectCallback(sender(source),
+                                               qSignalSignature(matchedSlot).constData(),
+                                               slot, connectionType);
+    return Shiboken::Conversions::copyToPython(metaObjConnectionConverter(), &conn);
 }
 
 static int argCountInSignature(const char *signature)
@@ -592,10 +599,8 @@ static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
     if (!source->d)
         return PyErr_Format(PyExc_RuntimeError, "cannot emit uninitialized SignalInstance");
 
-    // PYSIDE-2201: Check if the object has vanished meanwhile.
-    //              Tried to revive it without exception, but this gives problems.
     if (isSourceDeleted(source))
-        return PyErr_Format(PyExc_RuntimeError, "The SignalInstance object was already deleted");
+        return PyErr_Format(PyExc_RuntimeError, msgSourceDeleted);
 
     Shiboken::AutoDecRef pyArgs(PyList_New(0));
     Py_ssize_t numArgsGiven = PySequence_Size(args);
@@ -619,17 +624,15 @@ static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
             }
         }
     }
-    Shiboken::AutoDecRef sourceSignature(PySide::Signal::buildQtCompatible(source->d->signature));
 
-    PyList_Append(pyArgs, sourceSignature);
-    for (Py_ssize_t i = 0, max = PyTuple_Size(args); i < max; i++)
-        PyList_Append(pyArgs, PyTuple_GetItem(args, i));
-
-    Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->shared->source,
-                                                   PySide::PySideName::qtEmit()));
-
-    Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
-    return PyObject_CallObject(pyMethod.object(), tupleArgs);
+    const bool ok = PySide::SignalManager::emitSignal(sender(source),
+                                                      qSignalSignature(source).constData(),
+                                                      args);
+    if (PyErr_Occurred() != nullptr)
+        return nullptr;
+    if (ok)
+        Py_RETURN_TRUE;
+    Py_RETURN_FALSE;
 }
 
 static PyObject *signalInstanceGetItem(PyObject *self, PyObject *key)
@@ -686,46 +689,74 @@ static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
     if (PyTuple_Check(args) && PyTuple_Size(args))
         slot = PyTuple_GetItem(args, 0);
 
-    bool match = false;
-    if (Py_TYPE(slot) == PySideSignalInstance_TypeF()) {
+    if (Py_TYPE(slot) == PySideSignalInstance_TypeF()) { // Disconnect signal from signal
         auto *target = reinterpret_cast<PySideSignalInstance *>(slot);
-        if (QMetaObject::checkConnectArgs(source->d->signature, target->d->signature)) {
-            PyList_Append(pyArgs, source->d->shared->source);
-            Shiboken::AutoDecRef source_signature(PySide::Signal::buildQtCompatible(source->d->signature));
-            PyList_Append(pyArgs, source_signature);
-
-            PyList_Append(pyArgs, target->d->shared->source);
-            Shiboken::AutoDecRef target_signature(PySide::Signal::buildQtCompatible(target->d->signature));
-            PyList_Append(pyArgs, target_signature);
-            match = true;
-        }
-    } else if (connection_Check(slot)) {
-        PyList_Append(pyArgs, slot);
-        match = true;
-    } else {
-        // try the matching signature, fall back to first
-        auto *matchedSlot = slot != Py_None ? findSignalInstanceForSlot(source, slot) : source;
-        PyList_Append(pyArgs, matchedSlot->d->shared->source);
-        Shiboken::AutoDecRef signature(PySide::Signal::buildQtCompatible(matchedSlot->d->signature));
-        PyList_Append(pyArgs, signature);
-
-        // disconnect all, so we need to use the c++ signature disconnect(qobj, signal, 0, 0)
-        if (slot == Py_None)
-            PyList_Append(pyArgs, slot);
-        PyList_Append(pyArgs, slot);
-        match = true;
-    }
-
-    if (match) {
-        Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
-        Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->shared->source,
-                                                       PySide::PySideName::qtDisconnect()));
-        PyObject *result = PyObject_CallObject(pyMethod, tupleArgs);
-        if (result != Py_True)
+        if (!QMetaObject::checkConnectArgs(source->d->signature, target->d->signature)) {
             warnDisconnectFailed(slot, source->d->signature);
-        return result;
+            Py_RETURN_FALSE;
+        }
+
+        if (isSourceDeleted(source))
+            return PyErr_Format(PyExc_RuntimeError, msgSourceDeleted);
+        if (isSourceDeleted(target))
+            return PyErr_Format(PyExc_RuntimeError, msgTargetSignalDeleted);
+
+        auto *qSender = sender(source);
+        const bool ok = qSender->disconnect(qSignalSignature(source).constData(),
+                                            sender(target),
+                                            qSignalSignature(target).constData());
+        if (ok)
+            Py_RETURN_TRUE;
+        warnDisconnectFailed(slot, source->d->signature);
+        Py_RETURN_FALSE;
     }
 
+    if (slot == Py_None) { // disconnect all signal receivers by signature
+        if (isSourceDeleted(source))
+            return PyErr_Format(PyExc_RuntimeError, msgSourceDeleted);
+        const bool ok =
+            source->d->shared->source->disconnect(qSignalSignature(source).constData());
+        if (ok)
+            Py_RETURN_TRUE;
+        warnDisconnectFailed(slot, source->d->signature);
+        Py_RETURN_FALSE;
+    }
+
+    if (connection_Check(slot)) { // disconnection by connection ID
+        QMetaObject::Connection conn;
+        Shiboken::Conversions::pythonToCppCopy(metaObjConnectionConverter(), slot, &conn);
+        if (conn && QObject::disconnect(conn))
+            Py_RETURN_TRUE;
+        warnDisconnectFailed(slot, source->d->signature);
+        Py_RETURN_FALSE;
+    }
+
+    // Disconnect callable
+    if (PyCallable_Check(slot) == 0) {
+        return PyErr_Format(PyExc_TypeError,
+                            "Expected signal, callable or connection id, got \"%s\"",
+                            Py_TYPE(slot)->tp_name);
+    }
+
+    // try the matching signature, fall back to first
+    auto *matchedSlot = slot != Py_None ? findSignalInstanceForSlot(source, slot) : source;
+    if (isSourceDeleted(matchedSlot))
+        return PyErr_Format(PyExc_RuntimeError, msgSourceDeleted);
+
+    const auto sourceSignature = qSignalSignature(matchedSlot);
+    // disconnect all, so we need to use the c++ signature disconnect(qobj, signal, 0, 0)
+    auto *qSender = sender(matchedSlot);
+    if (slot == Py_None) {
+        const bool ok = qSender->disconnect(sourceSignature.constData(), nullptr, nullptr);
+        if (ok)
+            Py_RETURN_TRUE;
+        warnDisconnectFailed(slot, source->d->signature);
+        Py_RETURN_FALSE;
+    }
+
+    const bool ok = PySide::qobjectDisconnectCallback(qSender, sourceSignature, slot);
+    if (ok)
+        Py_RETURN_TRUE;
     warnDisconnectFailed(slot, source->d->signature);
     Py_RETURN_FALSE;
 }
@@ -807,7 +838,7 @@ static PyObject *_getHomonymousMethod(PySideSignalInstance *inst)
     // but walk through the whole mro to find a hidden method with the same name.
     auto signalName = inst->d->signalName;
     Shiboken::AutoDecRef name(Shiboken::String::fromCString(signalName));
-    auto *mro = Py_TYPE(inst->d->shared->source)->tp_mro;
+    auto *mro = inst->d->shared->sourceType->tp_mro;
     const Py_ssize_t n = PyTuple_Size(mro);
 
     for (Py_ssize_t idx = 0; idx < n; idx++) {
@@ -825,6 +856,8 @@ static PyObject *_getHomonymousMethod(PySideSignalInstance *inst)
 static PyObject *signalInstanceCall(PyObject *self, PyObject *args, PyObject *kw)
 {
     auto *PySideSignal = reinterpret_cast<PySideSignalInstance *>(self);
+    if (isSourceDeleted(PySideSignal))
+        return PyErr_Format(PyExc_RuntimeError, msgSourceDeleted);
     auto *hom = _getHomonymousMethod(PySideSignal);
     if (!hom) {
         PyErr_Format(PyExc_TypeError, "native Qt signal instance '%s' is not callable",
@@ -832,8 +865,11 @@ static PyObject *signalInstanceCall(PyObject *self, PyObject *args, PyObject *kw
         return nullptr;
     }
 
-    Shiboken::AutoDecRef homonymousMethod(PepExt_Type_CallDescrGet(hom, PySideSignal->d->shared->source,
-                                                                   nullptr));
+    auto *source = PySide::getWrapperForQObject(sender(PySideSignal),
+                                                PySideSignal->d->shared->sourceType);
+    if (source == nullptr)
+        return PyErr_Format(PyExc_RuntimeError, msgSourceDeleted);
+    Shiboken::AutoDecRef homonymousMethod(PepExt_Type_CallDescrGet(hom, source, nullptr));
     return PyObject_Call(homonymousMethod, args, kw);
 }
 
@@ -935,7 +971,8 @@ void updateSourceObject(PyObject *source)
                     Shiboken::AutoDecRef signalInstance(reinterpret_cast<PyObject *>(inst));
                     auto *si = reinterpret_cast<PySideSignalInstance *>(signalInstance.object());
                     auto shared = std::make_shared<PySideSignalInstanceShared>();
-                    shared->source = source;
+                    shared->source = PySide::convertToQObject(source, false);
+                    shared->sourceType = Py_TYPE(source);
                     instanceInitialize(si, key, reinterpret_cast<PySideSignal *>(value),
                                        shared, 0);
                     if (PyDict_SetItem(dict, key, signalInstance) == -1)
@@ -1026,13 +1063,6 @@ static PySideSignalData::Signature parseSignature(PyObject *args)
     return result;
 }
 
-static void sourceGone(void *data)
-{
-    auto *ptr = reinterpret_cast<PySideSignalInstanceSharedPtr *>(data);
-    (*ptr)->deleted = true;
-    delete ptr;
-}
-
 static void instanceInitialize(PySideSignalInstance *self, PyObject *name,
                                PySideSignal *signal,
                                const PySideSignalInstanceSharedPtr &shared,
@@ -1041,13 +1071,6 @@ static void instanceInitialize(PySideSignalInstance *self, PyObject *name,
     self->d = new PySideSignalInstancePrivate;
     PySideSignalInstancePrivate *selfPvt = self->d;
     selfPvt->shared = shared;
-    // PYSIDE-2201: We have no reference to source. Let's take a weakref to get
-    //              notified when source gets deleted.
-    if (index == 0) {
-        auto *ptr = new PySideSignalInstanceSharedPtr(shared);
-        PySide::WeakRef::create(shared->source, sourceGone, ptr);
-    }
-
     selfPvt->next = nullptr;
     if (signal->data->signalName.isEmpty())
         signal->data->signalName = Shiboken::String::toCString(name);
@@ -1085,11 +1108,9 @@ PySideSignalInstance *initialize(PySideSignal *self, PyObject *name, PyObject *o
     PySideSignalInstance *instance = PyObject_New(PySideSignalInstance,
                                                   PySideSignalInstance_TypeF());
     auto shared = std::make_shared<PySideSignalInstanceShared>();
-    shared->source = object;
+    shared->source = PySide::convertToQObject(object, false);
+    shared->sourceType = Py_TYPE(object);
     instanceInitialize(instance, name, self, shared, 0);
-    auto *sbkObj = reinterpret_cast<SbkObject *>(object);
-    if (!Shiboken::Object::wasCreatedByPython(sbkObj))
-        Py_INCREF(object); // PYSIDE-79: this flag was crucial for a wrapper call.
     return instance;
 }
 
@@ -1111,12 +1132,14 @@ bool connect(PyObject *source, const char *signal, PyObject *callback)
     return result;
 }
 
-PySideSignalInstance *newObjectFromMethod(PyObject *source, const QList<QMetaMethod>& methodList)
+PySideSignalInstance *newObjectFromMethod(QObject *sourceQObject, PyObject *source,
+                                          const QList<QMetaMethod>& methodList)
 {
     PySideSignalInstance *root = nullptr;
     PySideSignalInstance *previous = nullptr;
     auto shared = std::make_shared<PySideSignalInstanceShared>();
-    shared->source = source;
+    shared->source = sourceQObject;
+    shared->sourceType = Py_TYPE(source);
     for (const QMetaMethod &m : methodList) {
         PySideSignalInstance *item = PyObject_New(PySideSignalInstance, PySideSignalInstance_TypeF());
         if (!root)
@@ -1157,12 +1180,6 @@ static bool compareSignals(const PySideSignalData::Signature &sig1,
                            const PySideSignalData::Signature &sig2)
 {
     return sig1.signature.isEmpty() && !sig2.signature.isEmpty();
-}
-
-static PyObject *buildQtCompatible(const QByteArray &signature)
-{
-    const auto ba = QT_SIGNAL_SENTINEL + signature;
-    return Shiboken::String::fromStringAndSize(ba, ba.size());
 }
 
 void registerSignals(PyTypeObject *pyObj, const QMetaObject *metaObject)
@@ -1213,7 +1230,9 @@ void registerSignals(PyTypeObject *pyObj, const QMetaObject *metaObject)
 
 PyObject *getObject(PySideSignalInstance *signal)
 {
-    return signal->d->shared->source;
+    if (auto *qSender = sender(signal))
+        return getWrapperForQObject(qSender, signal->d->shared->sourceType);
+    return nullptr;
 }
 
 const char *getSignature(PySideSignalInstance *signal)

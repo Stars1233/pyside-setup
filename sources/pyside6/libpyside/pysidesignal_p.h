@@ -8,6 +8,8 @@
 
 #include <QtCore/QByteArray>
 #include <QtCore/QList>
+#include <QtCore/QObject>
+#include <QtCore/QPointer>
 
 #include <memory>
 
@@ -40,8 +42,8 @@ extern "C"
 
 struct PySideSignalInstanceShared
 {
-    PyObject *source = nullptr;
-    bool deleted = false;
+    QPointer<QObject> source;
+    PyTypeObject *sourceType = nullptr;
 };
 
 using PySideSignalInstanceSharedPtr = std::shared_ptr<PySideSignalInstanceShared>;

@@ -70,7 +70,7 @@ class TestDestroyNoConnect(unittest.TestCase):
 
     def testSignalDestroyedinConnect(self):
         # PYSIDE-2328: Connect to signal of temporary
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             Foo().s.connect(None)
 
 

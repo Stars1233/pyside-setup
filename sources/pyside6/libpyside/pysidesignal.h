@@ -63,7 +63,8 @@ PYSIDE_API void registerSignals(PyTypeObject *pyObj, const QMetaObject *metaObje
  * @param   methods a list of QMetaMethod wich contains the supported signature
  * @return  Return a new reference to PyObject* of type  PySideSignal
  **/
-PYSIDE_API PySideSignalInstance *newObjectFromMethod(PyObject *source, const QList<QMetaMethod> &methods);
+PYSIDE_API PySideSignalInstance *newObjectFromMethod(QObject *sourceQObject, PyObject *source,
+                                                     const QList<QMetaMethod> &methods);
 
 /**
  * This function initializes the Signal object by creating a PySideSignalInstance

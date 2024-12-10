@@ -660,7 +660,7 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
             }
             if (!signalList.isEmpty()) {
                 auto *pySignal = reinterpret_cast<PyObject *>(
-                    Signal::newObjectFromMethod(self, signalList));
+                    Signal::newObjectFromMethod(cppSelf, self, signalList));
                 PyObject_SetAttr(self, name, pySignal);
                 return pySignal;
             }
