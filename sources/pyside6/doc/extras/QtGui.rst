@@ -13,9 +13,10 @@ Application Windows
 ^^^^^^^^^^^^^^^^^^^
 
 The most important classes in the Qt GUI module are
-:class:`QGuiApplication<PySide6.QtGui.QGuiApplication>` and
-:class:`QWindow<PySide6.QtGui.QWindow>` . A Qt application that wants
-to show content on screen will need to make use of these.
+:class:`QGuiApplication<PySide6.QtGui.QGuiApplication>`,
+:class:`~PySide6.QtGui.QWindow` and :class:`~PySide6.QtGui.QScreen`.
+A Qt application that wants to show content on screen will need to make
+use of these.
 :class:`QGuiApplication<PySide6.QtGui.QGuiApplication>` contains the
 main event loop, where all events from the window system and other
 sources are processed and dispatched. It also handles the
@@ -98,32 +99,6 @@ with :class:`QPainter<PySide6.QtGui.QPainter>` and
 :class:`QOpenGLPaintDevice<PySide6.QtOpenGL.QOpenGLPaintDevice>` to
 have OpenGL hardware-accelerated 2D graphics by sacrificing some of
 the visual quality.
-
-Vulkan Integration
-^^^^^^^^^^^^^^^^^^
-
-Qt GUI has support for the `Vulkan <https://www.khronos.org/vulkan/>`_
-API. Qt applications require the presence of the `LunarG Vulkan SDK
-<https://www.lunarg.com/vulkan-sdk/>`_ .
-
-On Windows, the SDK sets the environment variable ``VULKAN_SDK``\,
-which will be detected by the ``configure`` script.
-
-On Android, Vulkan headers were added in API level 24 of the NDK.
-
-Relevant classes:
-
-* QVulkanDeviceFunctions
-    * :class:`QVulkanExtension<~.QVulkanExtension>`
-    * QVulkanFunctions
-    * :class:`QVulkanInfoVector<~.QVulkanInfoVector>`
-    * :class:`QVulkanInstance<~.QVulkanInstance>`
-    * :class:`QVulkanWindow<~.QVulkanWindow>`
-    * :class:`QVulkanWindowRenderer<~.QVulkanWindowRenderer>`
-
-For more information, see the
-:ref:`Hello Vulkan Widget Example<Hello-Vulkan-Widget-Example>` and the
-:ref:`Hello Vulkan Window Example<Hello-Vulkan-Window-Example>` .
 
 Drag and Drop
 ^^^^^^^^^^^^^

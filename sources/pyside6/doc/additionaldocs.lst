@@ -37,6 +37,7 @@ qtcore/webxml/json.webxml
 qtcore/webxml/metaobjects.webxml
 qtcore/webxml/objecttrees.webxml
 qtcore/webxml/object.webxml
+qtcore/webxml/permissions.webxml
 qtcore/webxml/plugins.webxml
 qtcore/webxml/properties.webxml
 qtcore/webxml/qabstracteventdispatcher-timerinfo.webxml
