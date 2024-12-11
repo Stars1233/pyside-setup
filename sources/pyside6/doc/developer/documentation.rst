@@ -32,6 +32,8 @@ specific information like build instructions should be removed.
 The descriptions may link to tutorials which can be added to additionaldocs.lst
 for webxml extraction.
 
+.. _maintaining-additionaldocs:
+
 Maintaining additionaldocs.lst
 ------------------------------
 
