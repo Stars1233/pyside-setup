@@ -39,11 +39,6 @@ constexpr auto briefStartElement = "<brief>"_L1;
 constexpr auto briefEndElement = "</brief>"_L1;
 constexpr auto webxmlSuffix = ".webxml"_L1;
 
-Documentation QtDocParser::retrieveModuleDocumentation()
-{
-    return retrieveModuleDocumentation(packageName());
-}
-
 // Return the package of a type "PySide6.QtGui.QPainter" -> "PySide6.QtGui"
 static QStringView packageFromPythonType(QStringView pythonType)
 {

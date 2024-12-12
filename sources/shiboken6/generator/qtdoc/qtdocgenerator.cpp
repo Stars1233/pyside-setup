@@ -495,7 +495,6 @@ void QtDocGenerator::doGenerateClass(TextStream &s, const QString &targetDir,
 {
     qCDebug(lcShibokenDoc).noquote().nospace() << "Generating Documentation for " << metaClass->fullName();
 
-    m_docParser->setPackageName(metaClass->package());
     const QString sourceFile =
         m_docParser->fillDocumentation(std::const_pointer_cast<AbstractMetaClass>(metaClass));
 
@@ -1488,7 +1487,6 @@ bool QtDocGenerator::doSetup()
     }
 
     m_docParser->setDocumentationDataDirectory(m_options.parameters.docDataDir);
-    m_docParser->setLibrarySourceDirectory(m_options.parameters.libSourceDir);
     m_options.parameters.outputDirectory = outputDirectory();
     return true;
 }

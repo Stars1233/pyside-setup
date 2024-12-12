@@ -31,13 +31,6 @@ public:
     virtual void fillGlobalFunctionDocumentation(const AbstractMetaFunctionPtr &f);
     virtual void fillGlobalEnumDocumentation(AbstractMetaEnum &e);
 
-    /**
-     *   Process and retrieves documentation concerning the entire
-     *   module or library.
-     *   \return object containing module/library documentation information
-     */
-    virtual Documentation retrieveModuleDocumentation() = 0;
-
     void setDocumentationDataDirectory(const QString& dir)
     {
         m_docDataDir = dir;
@@ -53,34 +46,6 @@ public:
     QString documentationDataDirectory() const
     {
         return m_docDataDir;
-    }
-
-    void setLibrarySourceDirectory(const QString& dir)
-    {
-        m_libSourceDir = dir;
-    }
-    /**
-     *   Informs the location of the library being parsed. The library
-     *   source code is parsed for the documentation comments.
-     *   \return the path for the directory containing the source code of
-     *   the library beign parsed.
-     */
-    QString librarySourceDirectory() const
-    {
-        return m_libSourceDir;
-    }
-
-    void setPackageName(const QString& packageName)
-    {
-        m_packageName = packageName;
-    }
-    /**
-     *   Retrieves the name of the package (or module or library) being parsed.
-     *   \return the name of the package (module/library) being parsed
-     */
-    QString packageName() const
-    {
-        return m_packageName;
     }
 
     /**
@@ -115,9 +80,7 @@ protected:
     static QString applyDocModifications(const DocModificationList &xpathMods, const QString &xml);
 
 private:
-    QString m_packageName;
     QString m_docDataDir;
-    QString m_libSourceDir;
 
     static QString execXQuery(const XQueryPtr &xquery, const QString &query) ;
 };

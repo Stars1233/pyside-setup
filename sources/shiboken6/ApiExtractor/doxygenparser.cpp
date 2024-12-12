@@ -36,11 +36,6 @@ static QString getSectionKindAttr(const AbstractMetaFunctionCPtr &func)
     return kind;
 }
 
-Documentation DoxygenParser::retrieveModuleDocumentation()
-{
-        return retrieveModuleDocumentation(packageName());
-}
-
 QString DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
 {
     if (!metaClass)
