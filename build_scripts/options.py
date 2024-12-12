@@ -10,7 +10,7 @@ from pathlib import Path
 
 from .log import log, LogLevel
 from .qtinfo import QtInfo
-from .utils import memoize, which
+from .utils import memoize, which, Singleton
 
 _AVAILABLE_MKSPECS = ["ninja", "msvc", "mingw"] if sys.platform == "win32" else ["ninja", "make"]
 
@@ -41,7 +41,7 @@ def _warn_deprecated_option(option, replacement=None):
     log.warning(w)
 
 
-class Options(object):
+class Options(object, metaclass=Singleton):
     def __init__(self):
 
         # Dictionary containing values of all the possible options.
@@ -103,86 +103,82 @@ class Options(object):
         self.dict[name] = value
         return value
 
-
-options = Options()
-
-
-def has_option(*args, **kwargs):
-    return options.has_option(*args, **kwargs)
-
-
-def option_value(*args, **kwargs):
-    return options.option_value(*args, **kwargs)
-
-
-def _jobs_option_value():
-    """Option value for parallel builds."""
-    value = option_value('parallel', short_option_name='j')
-    if value:
-        return f"-j{value}" if not value.startswith('-j') else value
-    return ''
-
-
-def find_qtpaths():
-    # for these command --qtpaths should not be required
-    no_qtpaths_commands = ["--help", "--help-commands", "--qt-target-path", "build_base_docs"]
-
-    for no_qtpaths_command in no_qtpaths_commands:
-        if any(no_qtpaths_command in argument for argument in sys.argv):
+    def find_qtpaths(self):
+        # Skip the first run that will trigger the three different build
+        # stated of the setup process
+        if self.dict["internal-build-type"] is None:
             return None
+        # for these command --qtpaths should not be required
+        no_qtpaths_commands = ["--help", "--help-commands", "--qt-target-path", "build_base_docs"]
 
-    qtpaths = option_value("qtpaths")
-    if qtpaths:
+        for no_qtpaths_command in no_qtpaths_commands:
+            if any(no_qtpaths_command in argument for argument in sys.argv):
+                return None
+
+        qtpaths = self.option_value("qtpaths")
+        if qtpaths is not None:
+            return qtpaths
+
+        # if qtpaths is not given as cli option, try to find it in PATH
+        qtpaths = which("qtpaths6")
+        if qtpaths is not None:
+            return str(Path(qtpaths).resolve())
+
+        qtpaths = which("qtpaths")
+        if qtpaths is not None:
+            return str(Path(qtpaths).resolve())
+
+        if qtpaths is None:
+            sys.exit(-1)
+
         return qtpaths
 
-    # if qtpaths is not given as cli option, try to find it in PATH
-    qtpaths = which("qtpaths6")
-    if qtpaths:
-        return str(qtpaths.resolve())
+    def _jobs_option_value(self):
+        """Option value for parallel builds."""
+        value = self.option_value('parallel', short_option_name='j')
 
-    qtpaths = which("qtpaths")
-    if qtpaths:
-        return str(qtpaths.resolve())
+        _deprecated_option_jobs = self.option_value('jobs')
+        if _deprecated_option_jobs:
+            _warn_deprecated_option('jobs', 'parallel')
+            value = _deprecated_option_jobs
 
-    return qtpaths
+        if value:
+            return f"-j{value}" if not value.startswith('-j') else value
+        return ''
 
-
-# Declare options which need to be known when instantiating the setuptools
-# commands or even earlier during SetupRunner.run().
-OPTION = {
-    "BUILD_TYPE": option_value("build-type"),
-    "INTERNAL_BUILD_TYPE": option_value("internal-build-type"),
-    # number of parallel build jobs
-    "JOBS": _jobs_option_value(),
-    # Legacy, not used any more.
-    "JOM": has_option('jom'),
-    "MACOS_USE_LIBCPP": has_option("macos-use-libc++"),
-    "LOG_LEVEL": option_value("log-level", remove=False),
-    "QUIET": has_option('quiet'),
-    "VERBOSE_BUILD": has_option('verbose-build'),
-    "SNAPSHOT_BUILD": has_option("snapshot-build"),
-    "LIMITED_API": option_value("limited-api"),
-    "UNOPTIMIZE": option_value("unoptimize"),
-    "DISABLE_PYI": has_option("disable-pyi"),
-    "SKIP_MYPY_TEST": has_option("skip-mypy-test"),
-    "PACKAGE_TIMESTAMP": option_value("package-timestamp"),
-    # This is used automatically by setuptools.command.install object, to
-    # specify the final installation location.
-    "FINAL_INSTALL_PREFIX": option_value("prefix", remove=False),
-    "CMAKE_TOOLCHAIN_FILE": option_value("cmake-toolchain-file"),
-    "SHIBOKEN_HOST_PATH": option_value("shiboken-host-path"),
-    "SHIBOKEN_HOST_PATH_QUERY_FILE": option_value("internal-shiboken-host-path-query-file"),
-    "QT_HOST_PATH": option_value("qt-host-path"),
-    # This is used to identify the template for doc builds
-    "QTPATHS": find_qtpaths()
-    # This is an optional command line option. If --qtpaths is not provided via command-line,
-    # then qtpaths is checked inside PATH variable
-}
-
-_deprecated_option_jobs = option_value('jobs')
-if _deprecated_option_jobs:
-    _warn_deprecated_option('jobs', 'parallel')
-    OPTION["JOBS"] = _deprecated_option_jobs
+    def resolve(self):
+        return {
+            "BUILD_TYPE": self.option_value("build-type"),
+            "INTERNAL_BUILD_TYPE": self.option_value("internal-build-type"),
+            # number of parallel build jobs
+            "JOBS": self._jobs_option_value(),
+            # Legacy, not used any more.
+            "JOM": self.has_option('jom'),
+            "MACOS_USE_LIBCPP": self.has_option("macos-use-libc++"),
+            "LOG_LEVEL": self.option_value("log-level", remove=False),
+            "QUIET": self.has_option('quiet'),
+            "VERBOSE_BUILD": self.has_option('verbose-build'),
+            "SNAPSHOT_BUILD": self.has_option("snapshot-build"),
+            "LIMITED_API": self.option_value("limited-api"),
+            "UNOPTIMIZE": self.option_value("unoptimize"),
+            "DISABLE_PYI": self.has_option("disable-pyi"),
+            "SKIP_MYPY_TEST": self.has_option("skip-mypy-test"),
+            "PACKAGE_TIMESTAMP": self.option_value("package-timestamp"),
+            # This is used automatically by setuptools.command.install object, to
+            # specify the final installation location.
+            "FINAL_INSTALL_PREFIX": self.option_value("prefix", remove=False),
+            "CMAKE_TOOLCHAIN_FILE": self.option_value("cmake-toolchain-file"),
+            "SHIBOKEN_HOST_PATH": self.option_value("shiboken-host-path"),
+            "SHIBOKEN_HOST_PATH_QUERY_FILE": self.option_value(
+                "internal-shiboken-host-path-query-file"
+            ),
+            "QT_HOST_PATH": self.option_value("qt-host-path"),
+            # This is used to identify the template for doc builds
+            "QTPATHS": self.find_qtpaths()
+            # This is an optional command line option.
+            # If --qtpaths is not provided via command-line,
+            # then qtpaths is checked inside PATH variable
+        }
 
 
 class CommandMixin(object):
@@ -499,12 +495,11 @@ class CommandMixin(object):
             except Exception as e:
                 if not self.qt_target_path:
                     log.error(
-                        "\nCould not find Qt. You can pass the --qt-target-path=<qt-dir> option "
-                        "as a hint where to find Qt. Error was:\n\n\n")
+                        "Could not find Qt. You can pass the --qt-target-path=<qt-dir> option "
+                        "as a hint where to find Qt.\n")
                 else:
-                    log.error(
-                        f"\nCould not find Qt via provided option --qt-target-path={qt_target_path}"
-                        "Error was:\n\n\n")
+                    log.error("Could not find Qt via provided option "
+                              f"--qt-target-path={qt_target_path}\n")
                 raise e
 
         OPTION['CMAKE'] = self.cmake.resolve()
@@ -629,3 +624,7 @@ class CommandMixin(object):
             return False
 
         return True
+
+
+# OPTION dictionary that will be imported in other build_scripts
+OPTION = Options().resolve()

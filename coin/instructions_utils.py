@@ -9,33 +9,35 @@ import site
 import sys
 from pathlib import Path
 
-from build_scripts.options import has_option, option_value
+from build_scripts.options import Options
 from build_scripts.utils import (parse_cmake_conf_assignments_by_key,
                                  remove_tree, run_instruction)
+
+options = Options()
 
 
 class CI:
     def __init__(self):
         # Values must match COIN thrift
-        self.HOST_OS = option_value("os")
-        self.TARGET_OS = option_value("targetOs")
-        self.HOST_ARCH = option_value("hostArch")
-        self.TARGET_ARCH = option_value("targetArch")
-        self.HOST_OS_VER = option_value("osVer")
-        self.ENV_INSTALL_DIR = option_value("instdir")
-        self.ENV_AGENT_DIR = option_value("agentdir") or "."
-        self.COMPILER = option_value("compiler")
-        self.USE_SCCACHE = option_value("compiler-launcher")
-        self.INTEGRATION_ID = option_value("coinIntegrationId") or str(
+        self.HOST_OS = options.option_value("os")
+        self.TARGET_OS = options.option_value("targetOs")
+        self.HOST_ARCH = options.option_value("hostArch")
+        self.TARGET_ARCH = options.option_value("targetArch")
+        self.HOST_OS_VER = options.option_value("osVer")
+        self.ENV_INSTALL_DIR = options.option_value("instdir")
+        self.ENV_AGENT_DIR = options.option_value("agentdir") or "."
+        self.COMPILER = options.option_value("compiler")
+        self.USE_SCCACHE = options.option_value("compiler-launcher")
+        self.INTEGRATION_ID = options.option_value("coinIntegrationId") or str(
             calendar.timegm(datetime.datetime.now().timetuple())
         )
         self.FEATURES = []
-        _ci_features = option_value("features")
+        _ci_features = options.option_value("features")
         if _ci_features is not None:
             for f in _ci_features.split(", "):
                 self.FEATURES.append(f)
-        self.RELEASE_CONF = has_option("packaging")
-        self.TEST_PHASE = option_value("phase")
+        self.RELEASE_CONF = options.has_option("packaging")
+        self.TEST_PHASE = options.option_value("phase")
         if self.TEST_PHASE not in ["ALL", "BUILD"]:
             self.TEST_PHASE = "ALL"
 

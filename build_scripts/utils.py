@@ -29,6 +29,15 @@ except NameError:
     WindowsError = None
 
 
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
 def which(name):
     """
     Like shutil.which, but accepts a string or a PathLike and returns a Path
@@ -38,9 +47,8 @@ def which(name):
         if isinstance(name, Path):
             name = str(name)
         path = shutil.which(name)
-        if path is None:
-            raise TypeError("None was returned")
-        path = Path(path)
+        if path is not None:
+            path = Path(path)
     except TypeError as e:
         log.error(f"{name} was not found in PATH: {e}")
     return path
