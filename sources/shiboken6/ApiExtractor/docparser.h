@@ -5,6 +5,7 @@
 
 #include "abstractmetalang_typedefs.h"
 #include "modifications_typedefs.h"
+#include "documentation.h"
 
 #include <QtCore/QString>
 
@@ -12,11 +13,16 @@
 
 class AbstractMetaClass;
 class DocModification;
-class Documentation;
 
 class XQuery;
 
 struct FunctionDocumentation;
+
+struct ModuleDocumentation
+{
+    Documentation documentation;
+    QString qmlTypesUrl;
+};
 
 class DocParser
 {
@@ -55,7 +61,7 @@ public:
     *   \return object containing module/library documentation information
     *   \todo Merge with retrieveModuleDocumentation() on next ABI change.
     */
-    virtual Documentation retrieveModuleDocumentation(const QString& name) = 0;
+    virtual ModuleDocumentation retrieveModuleDocumentation(const QString &name) = 0;
 
     static bool skipForQuery(const AbstractMetaFunctionCPtr &func);
 

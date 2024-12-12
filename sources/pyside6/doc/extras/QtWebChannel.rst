@@ -26,5 +26,3 @@ API Reference
 ^^^^^^^^^^^^^
 
     * `JavaScript API <https://doc.qt.io/qt-6/qtwebchannel-javascript.html>`_
-
-The module also provides `QML types <https://doc.qt.io/qt-6/qtwebchannel-qmlmodule.html>`_ .

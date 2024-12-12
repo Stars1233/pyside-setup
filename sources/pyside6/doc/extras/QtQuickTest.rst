@@ -24,8 +24,7 @@ executed.
 QML API
 ^^^^^^^
 
-The `QML types <https://doc.qt.io/qt-6/qttest-qmlmodule.html>`_
-in Qt Quick Test are available through the ``QtTest`` import.
+The QML types in Qt Quick Test are available through the ``QtTest`` import.
 To use the types, add the following import statement to your ``.qml`` file:
 
 .. code-block:: JavaScript

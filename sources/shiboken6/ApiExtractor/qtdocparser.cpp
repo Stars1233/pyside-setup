@@ -476,15 +476,11 @@ bool QtDocParser::extractEnumDocumentation(const ClassDocumentation &classDocume
 
 static QString qmlReferenceLink(const QFileInfo &qmlModuleFi)
 {
-    QString result;
-    QTextStream(&result) << "<para>The module also provides <link"
-        << R"( type="page" page="https://doc.qt.io/qt-)" << QT_VERSION_MAJOR
-        << '/' << qmlModuleFi.baseName() << R"(.html")"
-        << ">QML types</link>.</para>";
-    return result;
+    return "https://doc.qt.io/qt-"_L1 + QString::number(QT_VERSION_MAJOR)
+        + u'/' + qmlModuleFi.baseName() + ".html"_L1;
 }
 
-Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
+ModuleDocumentation QtDocParser::retrieveModuleDocumentation(const QString &name)
 {
     // TODO: This method of acquiring the module name supposes that the target language uses
     // dots as module separators in package names. Improve this.
@@ -494,9 +490,8 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     const QString moduleName = completeModuleName.sliced(name.lastIndexOf(u'.') + 1);
     const QString lowerModuleName = moduleName.toLower();
 
-    const QString prefix = documentationDataDirectory() + u'/'
-                           + qdocModuleDir(completeModuleName) + u'/' + lowerModuleName;
-    const QString sourceFile = prefix + "-index.webxml"_L1;
+    const QString dirPath = documentationDataDirectory() + u'/' + qdocModuleDir(completeModuleName);
+    const QString sourceFile = dirPath + u'/' + lowerModuleName + "-index.webxml"_L1;
     if (!QFile::exists(sourceFile)) {
         qCWarning(lcShibokenDoc).noquote().nospace()
             << "Can't find qdoc file for module " <<  name << ", tried: "
@@ -510,24 +505,20 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return {};
     }
-
-    Documentation doc(docString, {}, sourceFile);
-    if (doc.isEmpty()) {
+    if (docString.isEmpty()) {
         qCWarning(lcShibokenDoc, "%s",
                   qPrintable(msgCannotFindDocumentation(sourceFile, "module", name)));
-        return doc;
+        return {};
     }
+
+    ModuleDocumentation result{Documentation{docString, {}, sourceFile}, {}};
 
     // If a QML module info file exists, insert a link to the Qt docs.
-    const QFileInfo qmlModuleFi(prefix + "-qmlmodule.webxml"_L1);
-    if (qmlModuleFi.isFile()) {
-        QString docString = doc.detailed();
-        const int pos = docString.lastIndexOf(u"</description>");
-        if (pos != -1) {
-            docString.insert(pos, qmlReferenceLink(qmlModuleFi));
-            doc.setDetailed(docString);
-        }
-    }
-
-    return doc;
+    // Use a filter as some file names are irregular.
+    // Note: These files are empty; we need to point to the web docs.
+    const QFileInfoList qmlModuleFiles =
+        QDir(dirPath).entryInfoList({"*-qmlmodule.webxml"_L1}, QDir::Files);
+    if (!qmlModuleFiles.isEmpty())
+        result.qmlTypesUrl = qmlReferenceLink(qmlModuleFiles.constFirst());
+    return result;
 }

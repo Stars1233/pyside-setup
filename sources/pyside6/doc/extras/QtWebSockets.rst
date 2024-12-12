@@ -20,8 +20,6 @@ directive:
 
     import PySide6.QtWebSockets
 
-The module also provides `QML types <https://doc.qt.io/qt-6/qtwebsockets-qmlmodule.html>`_ .
-
 Articles and Guides
 ^^^^^^^^^^^^^^^^^^^
 

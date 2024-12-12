@@ -15,5 +15,3 @@ directive:
 ::
 
     import PySide6.QtSensors
-
-The module also provides `QML types <https://doc.qt.io/qt-6/qtsensors-qmlmodule.html>`_ .

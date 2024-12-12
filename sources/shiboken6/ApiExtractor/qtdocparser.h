@@ -18,7 +18,7 @@ public:
     void fillGlobalFunctionDocumentation(const AbstractMetaFunctionPtr &f) override;
     void fillGlobalEnumDocumentation(AbstractMetaEnum &e) override;
 
-    Documentation retrieveModuleDocumentation(const QString& name) override;
+    ModuleDocumentation retrieveModuleDocumentation(const QString &name) override;
 
     static QString qdocModuleDir(const QString &pythonType);
 

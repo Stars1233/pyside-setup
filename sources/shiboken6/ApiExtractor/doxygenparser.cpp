@@ -197,8 +197,8 @@ QString DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
     return doxyFilePath;
 }
 
-Documentation DoxygenParser::retrieveModuleDocumentation(const QString& name){
-
+ModuleDocumentation DoxygenParser::retrieveModuleDocumentation(const QString &name)
+{
     QString sourceFile = documentationDataDirectory() + u"/indexpage.xml"_s;
 
     if (!QFile::exists(sourceFile)) {
@@ -218,5 +218,5 @@ Documentation DoxygenParser::retrieveModuleDocumentation(const QString& name){
     // Module documentation
     QString query = u"/doxygen/compounddef/detaileddescription"_s;
     const QString doc = getDocumentation(xquery, query, DocModificationList());
-    return Documentation(doc, {}, sourceFile);
+    return {Documentation(doc, {}, sourceFile), {}};
 }

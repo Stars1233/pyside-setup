@@ -1292,7 +1292,9 @@ void QtDocGenerator::writeModuleDocumentation()
         // Get the WebXML source file for image resolution if we
         // are re-using images from it in our .rst.
         QtXmlToSphinx::stripPythonQualifiers(&context);
-        const Documentation webXmlModuleDoc = m_docParser->retrieveModuleDocumentation(it.key());
+        const ModuleDocumentation moduleDocumentation =
+            m_docParser->retrieveModuleDocumentation(it.key());
+        const Documentation &webXmlModuleDoc = moduleDocumentation.documentation;
         if (webXmlModuleDoc.hasSourceFile())
             sourceFileNames.append(webXmlModuleDoc.sourceFile());
         if (QFileInfo::exists(moduleDocRstFileName)) {
@@ -1313,6 +1315,12 @@ void QtDocGenerator::writeModuleDocumentation()
             } else {
                 s << webXmlModuleDoc.detailed();
             }
+        }
+
+        if (!moduleDocumentation.qmlTypesUrl.isEmpty()) {
+            s << '\n' << headline("List of QML types")
+              << "\n    * `" << moduleName<< " QML Types <"
+              << moduleDocumentation.qmlTypesUrl << ">`_\n\n";
         }
 
         TypeSystemTypeEntryCPtr typeSystemEntry = typeDb->findTypeSystemType(it.key());

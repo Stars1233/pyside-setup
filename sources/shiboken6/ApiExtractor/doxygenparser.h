@@ -11,7 +11,7 @@ class DoxygenParser : public DocParser
 public:
     DoxygenParser() = default;
     QString fillDocumentation(const AbstractMetaClassPtr &metaClass) override;
-    Documentation retrieveModuleDocumentation(const QString& name) override;
+    ModuleDocumentation retrieveModuleDocumentation(const QString &name) override;
 };
 
 #endif // DOXYGENPARSER_H
