@@ -140,8 +140,11 @@ def check_allowed_python_version():
     supported = get_allowed_python_versions()
     this_py = sys.version_info[:2]
     if this_py not in supported:
-        log.error(f"Unsupported python version detected. Supported versions: {supported}")
-        sys.exit(1)
+        log.warning("*" * 80)
+        log.warning(f"Unsupported Python version detected: {this_py}.")
+        log.warning("The build will probably fail.")
+        log.warning(f"Supported versions: {supported}")
+        log.warning("*" * 80)
 
 
 qt_src_dir = ''
