@@ -1,0 +1,12 @@
+
+<RCC>
+    <qresource>
+        <file>Drumpad.qmlproject</file>
+        <file>Drumpad/TestComponent.qml</file>
+        <file>DrumpadContent/App.qml</file>
+        <file>DrumpadContent/MainScreen.ui.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>Resources/resource1.txt</file>
+        <file>Resources/resource2.txt</file>
+    </qresource>
+</RCC>
