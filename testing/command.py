@@ -134,6 +134,7 @@ def test_project(project, args, blacklist, runs):
 
 
 def main():
+    global COIN_THRESHOLD
     # create the top-level command parser
     start_time = timer()
     all_projects = "shiboken6 pyside6".split()
@@ -213,6 +214,8 @@ def main():
         sys.exit(0)
     elif args.subparser_name == "test":
         runs = args.reruns
+        if runs < COIN_TESTING:
+            COIN_THRESHOLD = 1
     elif args.subparser_name == "list":
         rp = os.path.relpath
         print()
