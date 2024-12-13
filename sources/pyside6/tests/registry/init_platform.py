@@ -104,7 +104,7 @@ from shibokensupport.signature.lib.enum_sig import SimplifyingEnumerator  # noqa
 sourcepath = os.path.splitext(__file__)[0] + ".py"
 
 
-class Formatter(object):
+class Formatter:
     """
     Formatter is formatting the signature listing of an enumerator.
 

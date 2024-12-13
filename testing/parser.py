@@ -121,7 +121,7 @@ def _parse_tests(test_log):
     return result
 
 
-class TestParser(object):
+class TestParser:
     def __init__(self, test_log):
         self._results = _parse_tests(test_log)
 

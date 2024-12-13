@@ -80,7 +80,7 @@ except AttributeError:
     have_debug = False
 
 
-class LeakFinder(object):
+class LeakFinder:
     def __init__(self):
         self.all, self.refs = self._make_snapshot()
 

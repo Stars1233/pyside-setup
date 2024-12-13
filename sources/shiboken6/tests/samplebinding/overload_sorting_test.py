@@ -18,7 +18,7 @@ from sample import (CustomOverloadSequence, ImplicitBase, ImplicitConv,
                     ImplicitTarget, SortedOverload)
 
 
-class Dummy(object):
+class Dummy:
     pass
 
 

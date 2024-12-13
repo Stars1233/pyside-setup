@@ -89,7 +89,7 @@ class SubClass(BaseClass):
         raise PropertyDel(self._spam)
 
 
-class PropertyDocBase(object):
+class PropertyDocBase:
     _spam = 1
 
     def _get_spam(self):
@@ -188,7 +188,7 @@ class PropertyTests(unittest.TestCase):
     @unittest.skipIf(sys.flags.optimize >= 2,
                      "Docstrings are omitted with -O2 and above")
     def test_property_decorator_doc_writable(self):
-        class PropertyWritableDoc(object):
+        class PropertyWritableDoc:
 
             @Property(object)
             def spam(self):

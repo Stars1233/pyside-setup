@@ -15,7 +15,7 @@ class TimeoutException(Exception):
         return repr(self.msg)
 
 
-class ProcessTimer(object):
+class ProcessTimer:
     '''Timeout function for controlling a subprocess.Popen instance.
 
     Naive implementation using busy loop, see later other means

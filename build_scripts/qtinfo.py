@@ -10,7 +10,7 @@ from .utils import (configure_cmake_project, parse_cmake_project_message_info,
                     platform_cmake_options)
 
 
-class QtInfo(object):
+class QtInfo:
     _instance = None  # singleton helpers
 
     def __new__(cls):  # __new__ always a classmethod

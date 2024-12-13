@@ -59,7 +59,7 @@ class DocModifier(type):
 if __name__ == '__main__':
 
     # tests
-    class BaseTest(object):
+    class BaseTest:
         __metaclass__ = DocModifier
 
         def testBase(self):

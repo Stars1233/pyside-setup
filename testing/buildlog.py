@@ -23,7 +23,7 @@ LogEntry = namedtuple("LogEntry", ["log_dir", "build_dir", "build_classifiers"])
 is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
 
 
-class BuildLog(object):
+class BuildLog:
     """
     This class is a convenience wrapper around a list of log entries.
 

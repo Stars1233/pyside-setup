@@ -16,7 +16,7 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtUiTools import QUiLoader
 
 
-class Window(object):
+class Window:
     def __init__(self):
         loader = QUiLoader()
         filePath = os.path.join(os.path.dirname(__file__), 'bug_426.ui')

@@ -44,7 +44,7 @@ def signal_check(thing):
     return thing and type(thing) in (Signal, SignalInstance)
 
 
-class ExactEnumerator(object):
+class ExactEnumerator:
     """
     ExactEnumerator enumerates all signatures in a module as they are.
 

@@ -15,7 +15,7 @@ init_paths()
 from sample import ObjectType
 
 
-class NewStyle(object):
+class NewStyle:
     def name(self):
         return "NewStyle"
 

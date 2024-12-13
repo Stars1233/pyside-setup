@@ -32,7 +32,7 @@ def format_dict(d):
     return result
 
 
-class InheritanceGraph(object):
+class InheritanceGraph:
     """
     Given a list of classes, determines the set of classes that they inherit
     from all the way to the root "object", and then is able to generate a

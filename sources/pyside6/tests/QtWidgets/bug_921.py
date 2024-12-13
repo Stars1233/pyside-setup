@@ -24,7 +24,7 @@ class Signaller(QObject):
     s3 = Signal()
 
 
-class Window(object):
+class Window:
 
     def __init__(self, s):
         self._window = QMainWindow()

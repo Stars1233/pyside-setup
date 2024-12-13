@@ -20,7 +20,7 @@ init_test_paths(False)
 from PySide6.QtCore import QObject, Signal, Slot
 
 
-class Mixin(object):
+class Mixin:
     mixinSignal = Signal()
 
     def __init__(self, *args, **kwargs):
@@ -39,7 +39,7 @@ class MixinTwo(Mixin):
         self.mixinTwoSlotCalled = True
 
 
-class MixinThree(object):
+class MixinThree:
     mixinThreeSignal = Signal()
 
     def __init__(self, *args, **kwargs):

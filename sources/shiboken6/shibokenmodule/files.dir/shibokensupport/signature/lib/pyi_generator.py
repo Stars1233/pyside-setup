@@ -30,7 +30,7 @@ from shibokensupport.signature.lib.tool import build_brace_pattern
 indent = " " * 4
 
 
-class Writer(object):
+class Writer:
     def __init__(self, outfile, *args):
         self.outfile = outfile
         self.history = [True, True]

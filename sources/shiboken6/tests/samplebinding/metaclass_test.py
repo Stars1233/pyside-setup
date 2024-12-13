@@ -18,7 +18,7 @@ class MetaA(type):
     pass
 
 
-class A(object):
+class A:
     __metaclass__ = MetaA
 
 

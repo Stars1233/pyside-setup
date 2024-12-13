@@ -5,7 +5,7 @@ from __future__ import annotations
 import gc
 
 
-class BasicPySlotCase(object):
+class BasicPySlotCase:
     '''Base class that tests python slots and signal emissions.
 
     Python slots are defined as any callable passed to QObject.connect().

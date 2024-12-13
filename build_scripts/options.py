@@ -41,7 +41,7 @@ def _warn_deprecated_option(option, replacement=None):
     log.warning(w)
 
 
-class Options(object, metaclass=Singleton):
+class Options(metaclass=Singleton):
     def __init__(self):
 
         # Dictionary containing values of all the possible options.
@@ -181,7 +181,7 @@ class Options(object, metaclass=Singleton):
         }
 
 
-class CommandMixin(object):
+class CommandMixin:
     """Mixin for the setuptools build/install commands handling the options."""
 
     _static_class_finalized_once = False

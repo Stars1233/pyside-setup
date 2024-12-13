@@ -23,7 +23,7 @@ sys.path.append(build_scripts_dir)
 from build_scripts.utils import detect_clang
 
 
-class TestRunner(object):
+class TestRunner:
     def __init__(self, log_entry, project, index):
         self.log_entry = log_entry
         built_path = log_entry.build_dir

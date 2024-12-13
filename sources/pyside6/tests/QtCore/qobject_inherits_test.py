@@ -44,7 +44,7 @@ class InheritsCase(unittest.TestCase):
         # QObject.inherits(classname) should fail if classname isn't a
         # QObject subclass
 
-        class Parent(object):
+        class Parent:
             # Dummy parent
             pass
 
@@ -71,6 +71,8 @@ class InheritsCase(unittest.TestCase):
 
     def testMultipleInheritance(self):
         def declareClass():
+            # Note: 'object' cannot removed from this class declaration
+            # in order to make it work with QObject.
             class Foo(object, QObject):
                 pass
 

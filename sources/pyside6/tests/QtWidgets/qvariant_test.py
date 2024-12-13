@@ -28,7 +28,7 @@ class MyItem(QGraphicsRectItem):
         return value
 
 
-class Sequence(object):
+class Sequence:
     # Having the __getitem__ method on a class transform the Python
     # type to a PySequence.
     # Before the patch: aa75437f9119d997dd290471ac3e2cc88ca88bf1

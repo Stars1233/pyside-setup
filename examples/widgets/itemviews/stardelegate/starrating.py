@@ -12,7 +12,7 @@ from PySide6.QtCore import (QPointF, QSize, Qt)
 PAINTING_SCALE_FACTOR = 20
 
 
-class StarRating(object):
+class StarRating:
     """ Handle the actual painting of the stars themselves. """
 
     def __init__(self, starCount=1, maxStarCount=5):

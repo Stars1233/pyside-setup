@@ -18,7 +18,7 @@ get_counter = 0
 set_counter = 0
 
 
-class Descriptor(object):
+class Descriptor:
     def __get__(self, obj, owner):
         global get_counter
 

@@ -24,7 +24,7 @@ from typing import TypeVar, Generic
 from _imp import is_builtin
 
 
-class ellipsis(object):
+class ellipsis:
     def __repr__(self):
         return "..."
 
@@ -126,7 +126,7 @@ class KeywordOnly(_NotCalled):
 
 
 # Parameterized primitive variables
-class _Parameterized(object):
+class _Parameterized:
     def __init__(self, type):
         self.type = type
         self.__name__ = self.__class__.__name__
@@ -149,7 +149,7 @@ class ArrayLikeVariable(_Parameterized):
 StringList = ArrayLikeVariable(str)
 
 
-class Reloader(object):
+class Reloader:
     """
     Reloder class
 

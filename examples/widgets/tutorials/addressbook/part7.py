@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog,
 
 
 class SortedDict(dict):
-    class Iterator(object):
+    class Iterator:
         def __init__(self, sorted_dict):
             self._dict = sorted_dict
             self._keys = sorted(self._dict.keys())

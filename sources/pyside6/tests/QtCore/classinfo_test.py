@@ -93,7 +93,7 @@ class TestClassInfo(unittest.TestCase):
             pass
         self.assertRaises(TypeError, make_info(), test_function)
 
-        class NotAQObject(object):
+        class NotAQObject:
             pass
         self.assertRaises(TypeError, make_info(), NotAQObject)
 

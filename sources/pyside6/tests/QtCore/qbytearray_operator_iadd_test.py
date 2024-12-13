@@ -15,7 +15,7 @@ from PySide6.QtCore import QByteArray
 from helper.docmodifier import DocModifier
 
 
-class BaseQByteArrayOperatorIAdd(object):
+class BaseQByteArrayOperatorIAdd:
     '''Base class for QByteArray += operator tests.
 
     Implementing classes should inherit from unittest.TestCase and implement

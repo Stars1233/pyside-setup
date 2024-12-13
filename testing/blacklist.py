@@ -16,7 +16,7 @@ from .buildlog import builds
 from .helper import decorate
 
 
-class BlackList(object):
+class BlackList:
     def __init__(self, blname):
         if not blname:
             f = StringIO()

@@ -19,7 +19,7 @@ from build_scripts.utils import run_process
 from build_scripts.log import log, LogLevel
 
 
-class SetupRunner(object):
+class SetupRunner:
     def __init__(self, orig_argv):
         self.invocations_list = []
 

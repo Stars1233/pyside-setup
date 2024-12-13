@@ -1,2 +1,2 @@
-class PysideImportTest2(object):
+class PysideImportTest2:
     pass

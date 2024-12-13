@@ -17,7 +17,7 @@ except ModuleNotFoundError:
     import tomli as tomllib
 
 
-class Config(object, metaclass=Singleton):
+class Config(metaclass=Singleton):
     def __init__(self):
         # Constants
         self._build_type_all = "all"

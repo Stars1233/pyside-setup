@@ -18,7 +18,7 @@ init_test_paths(False)
 from PySide6.QtCore import QCoreApplication
 
 
-class Mock(object):
+class Mock:
     def __init__(self):
         self.called = False
         self.return_value = None

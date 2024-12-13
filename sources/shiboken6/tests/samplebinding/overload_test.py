@@ -179,7 +179,7 @@ class OverloadTest(unittest.TestCase):
         # Overload.acceptSequence(void*)
         overload = Overload()
 
-        class Foo(object):
+        class Foo:
             pass
 
         foo = Foo()

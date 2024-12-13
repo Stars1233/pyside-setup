@@ -22,7 +22,7 @@ def xprint(*args, **kw):
 
 
 # This is the original testcase of PYSIDE-1564
-class Age(object):
+class Age:
     def __init__(self, age=0, **kwds):
         super().__init__(**kwds)
 
@@ -117,7 +117,7 @@ class II(G, H, QtWidgets.QLabel):
 
 # PYSIDE-2294: Friedemann's test adapted.
 #              We need to ignore positional args in mixin classes.
-class Ui_X_MainWindow(object):  # Emulating uic
+class Ui_X_MainWindow:  # Emulating uic
     def setupUi(self, MainWindow):
         MainWindow.resize(400, 300)
         self.lbl = QLabel(self)
@@ -160,7 +160,7 @@ class AdditionalMultipleInheritanceTest(UsesQApplication):
 
 # PYSIDE-2654: Additional missing init test.
 #              This must work if no __init__ is defined (Ui_Form)
-class Ui_Form(object):
+class Ui_Form:
     pass
 
 

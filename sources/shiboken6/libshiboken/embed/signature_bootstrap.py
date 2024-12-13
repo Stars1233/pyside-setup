@@ -167,7 +167,7 @@ def prepare_zipfile():
     return sys.meta_path, EmbeddableZipImporter(vzip)
 
 
-class EmbeddableZipImporter(object):
+class EmbeddableZipImporter:
 
     def __init__(self, zip_file):
         def p2m(filename):

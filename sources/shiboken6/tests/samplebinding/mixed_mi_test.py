@@ -17,7 +17,7 @@ init_paths()
 from sample import ObjectType
 
 
-class Base(object):
+class Base:
     '''Base Python class'''
 
     def __init__(self):

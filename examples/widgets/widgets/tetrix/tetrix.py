@@ -368,7 +368,7 @@ class TetrixBoard(QFrame):
                          y + self.square_height() - 1, x + self.square_width() - 1, y + 1)
 
 
-class TetrixPiece(object):
+class TetrixPiece:
     coords_table = (
         ((0, 0), (0, 0), (0, 0), (0, 0)),
         ((0, -1), (0, 0), (-1, 0), (-1, 1)),

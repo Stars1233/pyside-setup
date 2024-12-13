@@ -130,7 +130,7 @@ def get_py_library(build_type, py_version, py_prefix, py_libdir, py_include_dir)
     return py_library
 
 
-class BuildInfoCollectorMixin(object):
+class BuildInfoCollectorMixin:
     build_base: str
     build_lib: str
     cmake: str
