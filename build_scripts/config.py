@@ -2,12 +2,14 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
+import os
 import sys
-from .log import log, LogLevel
 from pathlib import Path
+from typing import Any
 
-from . import PYSIDE, PYSIDE_MODULE, SHIBOKEN, PYPROJECT_PATH
-from .utils import available_pyside_tools
+from . import PYPROJECT_PATH, PYSIDE, PYSIDE_MODULE, SHIBOKEN
+from .log import LogLevel, log
+from .utils import available_pyside_tools, Singleton
 
 try:
     import tomllib
@@ -15,7 +17,7 @@ except ModuleNotFoundError:
     import tomli as tomllib
 
 
-class Config(object):
+class Config(object, metaclass=Singleton):
     def __init__(self):
         # Constants
         self._build_type_all = "all"
@@ -28,7 +30,7 @@ class Config(object):
         # The setup.py invocation type.
         # top-level
         # internal
-        self.invocation_type = None
+        self.invocation_type: str = ""
 
         # The type of the top-level build.
         # all - build shiboken6 module, shiboken6-generator and PySide6
@@ -36,11 +38,11 @@ class Config(object):
         # shiboken6 - build only shiboken6 module
         # shiboken6-generator - build only the shiboken6-generator
         # pyside6 - build only PySide6 modules
-        self.build_type = None
+        self.build_type: str = ""
 
         # The internal build type, used for internal invocations of
         # setup.py to build a specific module only.
-        self.internal_build_type = None
+        self.internal_build_type: str = ""
 
         # Options that can be given to --build-type and
         # --internal-build-type
@@ -51,18 +53,18 @@ class Config(object):
         # Names to be passed to setuptools.setup() name key,
         # so not package name, but rather project name as it appears
         # in the wheel name and on PyPi.
-        self.shiboken_module_st_name = SHIBOKEN
-        self.shiboken_generator_st_name = f"{SHIBOKEN}-generator"
-        self.pyside_st_name = PYSIDE_MODULE
+        self.shiboken_module_st_name: str = SHIBOKEN
+        self.shiboken_generator_st_name: str = f"{SHIBOKEN}-generator"
+        self.pyside_st_name: str = PYSIDE_MODULE
 
         # Path to CMake toolchain file when intending to cross compile
         # the project.
-        self.cmake_toolchain_file = None
+        self.cmake_toolchain_file: str | os.PathLike = ""
 
         # Store where host shiboken is built during a cross-build.
-        self.shiboken_host_query_path = None
+        self.shiboken_host_query_path: str = ""
 
-        self.setup_script_dir = None
+        self.setup_script_dir: str | os.PathLike = ""
 
         # Getting data from base pyproject.toml file to be consistent
 
@@ -72,7 +74,7 @@ class Config(object):
         with open(PYPROJECT_PATH, "rb") as f:
             _pyproject_data = tomllib.load(f)["project"]
 
-        self.setup_kwargs = {}
+        self.setup_kwargs: dict[str, Any] = {}
         self.setup_kwargs['long_description_content_type'] = 'text/markdown'
 
         self.setup_kwargs['keywords'] = _pyproject_data["keywords"]
@@ -87,15 +89,15 @@ class Config(object):
         self.setup_kwargs['classifiers'] = self.classifiers
 
     def init_config(self,
-                    build_type=None,
-                    internal_build_type=None,
+                    build_type="",
+                    internal_build_type="",
                     cmd_class_dict=None,
                     package_version=None,
                     ext_modules=None,
-                    setup_script_dir=None,
-                    cmake_toolchain_file=None,
+                    setup_script_dir: str | os.PathLike = "",
+                    cmake_toolchain_file: str | os.PathLike = "",
                     log_level=LogLevel.INFO,
-                    qt_install_path: Path = None):
+                    qt_install_dir: str | os.PathLike = ""):
         """
         Sets up the global singleton config which is used in many parts
         of the setup process.
@@ -182,8 +184,8 @@ class Config(object):
             self.setup_kwargs['install_requires'] = [
                 f"{self.shiboken_module_st_name}=={package_version}"
             ]
-            if qt_install_path:
-                _pyside_tools = available_pyside_tools(qt_tools_path=qt_install_path)
+            if qt_install_dir:
+                _pyside_tools = available_pyside_tools(qt_tools_path=Path(qt_install_dir))
 
                 # replacing pyside6-android_deploy by pyside6-android-deploy for consistency
                 # Also, the tool should not exist in any other platform than Linux and macOS
@@ -209,31 +211,23 @@ class Config(object):
         elif self.is_internal_pyside_build():
             readme_filename = f'README.{PYSIDE}.md'
 
-        content = ''
-        changes = ''
-        try:
-            with open(self.setup_script_dir / readme_filename) as f:
-                readme = f.read()
-        except Exception as e:
-            log.error(f"Couldn't read contents of {readme_filename}. {e}")
-            raise
+        with open(Path(self.setup_script_dir) / readme_filename) as f:
+            readme = f.read()
 
         # Don't include CHANGES.rst for now, because we have not decided
         # how to handle change files yet.
         include_changes = False
         if include_changes:
             try:
-                with open(self.setup_script_dir / changes_filename) as f:
+                changes = ''
+                with open(Path(self.setup_script_dir) / changes_filename) as f:
                     changes = f.read()
             except Exception as e:
                 log.error(f"Couldn't read contents of {changes_filename}. {e}")
                 raise
-        content += readme
+            return f"{readme}\n\n{changes}"
 
-        if changes:
-            content += f"\n\n{changes}"
-
-        return content
+        return readme
 
     def package_name(self):
         """

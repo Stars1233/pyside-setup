@@ -1125,3 +1125,14 @@ def copy_qt_metatypes(destination_qt_dir, _vars):
 
 def in_coin():
     return os.environ.get('COIN_LAUNCH_PARAMETERS', None) is not None
+
+
+def parse_modules(modules: str) -> str:
+    module_sub_set = ""
+    for m in modules.split(','):
+        if m.startswith('Qt'):
+            m = m[2:]
+        if module_sub_set:
+            module_sub_set += ';'
+        module_sub_set += m
+    return module_sub_set

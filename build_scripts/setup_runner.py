@@ -188,7 +188,7 @@ class SetupRunner(object):
                            setup_script_dir=self.setup_script_dir,
                            cmake_toolchain_file=OPTION["CMAKE_TOOLCHAIN_FILE"],
                            log_level=OPTION["LOG_LEVEL"],
-                           qt_install_path=qt_install_path)
+                           qt_install_dir=qt_install_path)
 
         # Enable logging for both the top-level invocation of setup.py
         # as well as for child invocations. We we now use

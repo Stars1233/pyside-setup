@@ -307,7 +307,7 @@ class CommandMixin(object):
         self.shiboken_target_path = None
         self.python_target_path = None
         self.is_cross_compile = False
-        self.cmake_toolchain_file = None
+        self.cmake_toolchain_file: str = ""
         self.make_spec = None
         self.macos_arch = None
         self.macos_sysroot = None
@@ -379,7 +379,7 @@ class CommandMixin(object):
         # because we DON'T want those to be found when cross compiling.
         # Currently when cross compiling, qt-target-path MUST be used.
         using_cmake_toolchain_file = False
-        cmake_toolchain_file = None
+        cmake_toolchain_file: str = ""
         if OPTION["CMAKE_TOOLCHAIN_FILE"]:
             self.is_cross_compile = True
             using_cmake_toolchain_file = True
