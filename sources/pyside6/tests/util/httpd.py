@@ -150,4 +150,3 @@ class TestServer(threading.Thread):
     def shutdown(self):
         self.httpd.shutdown()
         self.join()
-

@@ -35,4 +35,3 @@ void GilState::abandon()
 }
 
 } // namespace Shiboken
-

@@ -39,4 +39,3 @@ if __name__ == "__main__":
     args = options.parse_args()
     data = read_data(args.file)
     print(data)
-

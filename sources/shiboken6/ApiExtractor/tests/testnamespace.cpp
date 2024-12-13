@@ -74,4 +74,3 @@ void NamespaceTest::testNamespaceInnerClassMembers()
 }
 
 QTEST_APPLESS_MAIN(NamespaceTest)
-

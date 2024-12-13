@@ -19,4 +19,3 @@ documentation here: `Balsam Asset Import Tool`_.
 .. _Maya: https://www.autodesk.com/products/maya/overview
 .. _3ds Max: https://www.autodesk.com/products/3ds-max/overview
 .. _Blender: https://www.blender.org/
-

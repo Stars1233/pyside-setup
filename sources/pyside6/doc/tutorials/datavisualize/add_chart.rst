@@ -19,5 +19,3 @@ previous chapter to add a QChartView:
    :linenos:
    :lines: 3-
    :emphasize-lines: 2-3,6,22-36,47-49
-
-

@@ -30,4 +30,3 @@ private:
 } // namespace Shiboken
 
 #endif // GILSTATE_H
-

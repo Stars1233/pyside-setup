@@ -225,4 +225,3 @@ Documentation DoxygenParser::retrieveModuleDocumentation(const QString& name){
     const QString doc = getDocumentation(xquery, query, DocModificationList());
     return Documentation(doc, {}, sourceFile);
 }
-

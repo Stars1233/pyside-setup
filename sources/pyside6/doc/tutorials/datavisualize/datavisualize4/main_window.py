@@ -30,4 +30,3 @@ class MainWindow(QMainWindow):
         # Window dimensions
         geometry = self.screen().availableGeometry()
         self.setFixedSize(geometry.width() * 0.8, geometry.height() * 0.7)
-

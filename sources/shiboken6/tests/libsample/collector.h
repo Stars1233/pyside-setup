@@ -34,4 +34,3 @@ private:
 LIBSAMPLE_API Collector &operator<<(Collector &, const IntWrapper &);
 
 #endif // COLLECTOR_H
-

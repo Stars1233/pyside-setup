@@ -130,4 +130,3 @@ attribute, but it isn't unusual that some special check is needed. The variables
 the generator as in the ``native-to-target`` tag.
 
 The ``file`` and ``snippet`` attributes are also supported (see :ref:`inject-code` nodes).
-

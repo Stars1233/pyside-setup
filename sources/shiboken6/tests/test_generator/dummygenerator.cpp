@@ -42,4 +42,3 @@ DummyGenerator::doSetup(const QMap<QString, QString>& args)
     }
     return true;
 }
-

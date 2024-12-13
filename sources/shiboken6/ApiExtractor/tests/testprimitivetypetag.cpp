@@ -37,4 +37,3 @@ void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
 }
 
 QTEST_APPLESS_MAIN(TestPrimitiveTypeTag)
-

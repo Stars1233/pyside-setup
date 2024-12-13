@@ -37,5 +37,3 @@ class TestBug915(TimedQGuiApplication):
 
 if __name__ == '__main__':
     unittest.main()
-
-

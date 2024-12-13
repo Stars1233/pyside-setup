@@ -13,4 +13,3 @@ ListView {
         Text { text: model.modelData.title }
     }
 }
-

@@ -27,4 +27,3 @@ Module Index
 ============
 
 * :ref:`modindex`
-

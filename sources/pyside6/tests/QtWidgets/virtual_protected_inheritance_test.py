@@ -82,4 +82,3 @@ if __name__ == '__main__':
     #widget.startTimer(500)
     #widget.show()
     #app.exec()
-

@@ -10,4 +10,3 @@ editing text files. It demonstrates the analogous Qt example `Application Exampl
 .. image:: application.png
     :width: 400
     :alt: application screenshot
-

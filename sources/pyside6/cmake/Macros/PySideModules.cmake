@@ -398,4 +398,3 @@ macro(HAS_QT_MODULE var name)
         set("end_${name}" "-->" PARENT_SCOPE)
     endif()
 endmacro()
-

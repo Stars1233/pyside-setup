@@ -36,4 +36,3 @@ You will now hit you breakpoint and can start debugging your code.
 .. image:: breakpoint_cpp.png
     :alt: breakpoint cpp
     :align: center
-

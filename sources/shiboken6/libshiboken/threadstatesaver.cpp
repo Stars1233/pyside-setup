@@ -28,4 +28,3 @@ void ThreadStateSaver::restore()
 }
 
 } // namespace Shiboken
-

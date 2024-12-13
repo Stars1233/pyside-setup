@@ -7,4 +7,3 @@ A Python application that demonstrates the analogous example in C++
 .. image:: editabletreemodel.png
    :width: 611
    :alt: editabletreemodel screenshot
-

@@ -62,4 +62,3 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/dummygentest-project.txt.in"
 declare_test(dummygentest)
 
 add_dependencies(dummygenerator generatorrunner)
-

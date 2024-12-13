@@ -52,4 +52,3 @@ After the creation of the application object, we have created a
 Finally, we call `app.exec()` to enter the Qt main loop and start
 to execute the Qt code. In reality, it is only here where the label
 is shown, but this can be ignored for now.
-

@@ -57,4 +57,3 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/ShibokenHelpers.cmake"
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/shiboken6${shiboken6_SUFFIX}.pc"
         DESTINATION "${LIB_INSTALL_DIR}/pkgconfig")
-

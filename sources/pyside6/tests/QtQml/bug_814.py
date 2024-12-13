@@ -63,4 +63,3 @@ class TestBug814(TimedQGuiApplication):
 
 if __name__ == '__main__':
     unittest.main()
-

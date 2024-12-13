@@ -80,5 +80,3 @@ void TestRefCountTag::testWithApiVersion()
 
 
 QTEST_APPLESS_MAIN(TestRefCountTag)
-
-

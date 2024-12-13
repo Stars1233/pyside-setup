@@ -29,4 +29,3 @@ private:
 } // namespace Shiboken
 
 #endif // THREADSTATESAVER_H
-

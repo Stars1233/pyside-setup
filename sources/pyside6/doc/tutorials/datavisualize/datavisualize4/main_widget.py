@@ -41,4 +41,3 @@ class Widget(QWidget):
 
         # Set the layout to the QWidget
         self.setLayout(self.main_layout)
-

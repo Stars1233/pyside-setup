@@ -33,4 +33,3 @@ class TestBug679(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

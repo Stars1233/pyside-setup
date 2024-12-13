@@ -232,4 +232,3 @@ Debug a PySide6 Application
 
     debugging/mixed_debugging.rst
     debugging/qml_debugging.rst
-

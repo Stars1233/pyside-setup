@@ -81,4 +81,3 @@ void TestContainer::testListOfValueType()
 }
 
 QTEST_APPLESS_MAIN(TestContainer)
-

@@ -40,6 +40,3 @@ create_pyside_module(NAME QtWebEngineWidgets
                      DEPS QtWebEngineWidgets_deps
                      TYPESYSTEM_PATH QtWebEngineWidgets_SOURCE_DIR
                      SOURCES QtWebEngineWidgets_SRC)
-
-
-

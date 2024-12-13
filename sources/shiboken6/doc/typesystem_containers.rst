@@ -281,4 +281,3 @@ opaque container.
           demonstrates an example of using an opaque container `QPointList`, which wraps a C++
           `QList<QPoint>`. The corresponding typesystem file where QPointList can be found `here
           <https://code.qt.io/cgit/pyside/pyside-setup.git/tree/sources/pyside6/PySide6/QtCore/typesystem_core_common.xml>`_
-

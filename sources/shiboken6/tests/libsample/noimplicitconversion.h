@@ -24,4 +24,3 @@ private:
 };
 
 #endif // NOIMPLICITCONVERSION_H
-

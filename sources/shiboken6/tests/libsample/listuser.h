@@ -50,4 +50,3 @@ private:
 };
 
 #endif // LISTUSER_H
-

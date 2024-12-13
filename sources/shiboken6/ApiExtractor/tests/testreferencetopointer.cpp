@@ -33,5 +33,3 @@ void TestReferenceToPointer::testReferenceToPointerArgument()
 }
 
 QTEST_APPLESS_MAIN(TestReferenceToPointer)
-
-

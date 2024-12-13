@@ -41,4 +41,3 @@ void QAbstractOAuthModifyFunctor::operator()(QAbstractOAuth::Stage stage,
 // @snippet qabstractoauth-setmodifyparametersfunction
 %CPPSELF.%FUNCTION_NAME(QAbstractOAuthModifyFunctor(%PYARG_1));
 // @snippet qabstractoauth-setmodifyparametersfunction
-

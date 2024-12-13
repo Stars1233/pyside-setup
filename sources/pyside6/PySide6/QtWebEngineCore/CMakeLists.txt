@@ -82,4 +82,3 @@ create_pyside_module(NAME QtWebEngineCore
                      DEPS QtWebEngineCore_deps
                      TYPESYSTEM_PATH QtWebEngineCore_SOURCE_DIR
                      SOURCES QtWebEngineCore_SRC)
-

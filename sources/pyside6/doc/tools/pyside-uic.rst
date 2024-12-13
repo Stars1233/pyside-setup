@@ -56,4 +56,3 @@ translations, etc.
     ``.ui`` file, otherwise everything will be lost when you re-generate it.
 
 .. _`uic`: https://doc.qt.io/qt-6/uic.html
-

@@ -41,4 +41,3 @@ private:
 };
 
 #endif // INJECTCODE_H
-

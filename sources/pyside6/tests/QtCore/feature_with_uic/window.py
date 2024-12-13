@@ -50,4 +50,3 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.pushButton.setText(QCoreApplication.translate("MainWindow", u"PushButton", None))
     # retranslateUi
-

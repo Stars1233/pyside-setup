@@ -559,4 +559,3 @@ bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
 }
 
 } // namespace Shiboken
-

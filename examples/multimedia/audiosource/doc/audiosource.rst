@@ -10,4 +10,3 @@ A Python application that demonstrates the analogous example in C++
 .. image:: audiosource.png
    :width: 400
    :alt: audiosource example
-

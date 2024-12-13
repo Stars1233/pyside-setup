@@ -92,4 +92,3 @@ LIBSHIBOKEN_API bool callInheritedInit(PyObject *self, PyObject *args, PyObject 
 } // namespace Shiboken
 
 #endif // BINDINGMANAGER_H
-

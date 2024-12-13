@@ -390,4 +390,3 @@ becomes
 .. code-block:: ini
 
      VALUE-ARGUMENT = VALUE
-

@@ -9,4 +9,3 @@ For more details, see the [Finance Manager Tutorial - Part 1](tutorial_financema
 [SQLalchemy]: https://www.sqlalchemy.org/
 [FastApi]: https://fastapi.tiangolo.com/
 [PyDantic]: https://pydantic-docs.helpmanual.io/
-

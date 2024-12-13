@@ -88,5 +88,3 @@ class Bar20 {};
 }
 
 QTEST_APPLESS_MAIN(TestTypeRevision)
-
-

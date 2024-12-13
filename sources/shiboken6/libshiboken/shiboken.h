@@ -25,4 +25,3 @@
 #include "signature.h"
 
 #endif // SHIBOKEN_H
-

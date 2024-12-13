@@ -70,4 +70,3 @@ In the following snippets you'll see those changes highlighted:
    :linenos:
    :lines: 3-
    :emphasize-lines: 46-47
-

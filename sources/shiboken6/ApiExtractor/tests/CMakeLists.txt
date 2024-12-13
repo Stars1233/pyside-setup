@@ -63,4 +63,3 @@ declare_test(testtyperevision)
 if (NOT DISABLE_DOCSTRINGS)
     declare_test(testmodifydocumentation)
 endif()
-

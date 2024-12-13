@@ -11,4 +11,3 @@ int main(int argc, char *argv[])
         args.append(argv[i]);
     return QProcess::execute("generatorrunner", args);
 }
-

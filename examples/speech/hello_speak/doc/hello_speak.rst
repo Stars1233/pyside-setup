@@ -13,4 +13,3 @@ voice.
 .. image:: hello_speak.webp
    :width: 400
    :alt: Hello Speak Screenshot
-

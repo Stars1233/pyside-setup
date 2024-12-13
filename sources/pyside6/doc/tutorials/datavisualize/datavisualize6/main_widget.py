@@ -93,4 +93,3 @@ class Widget(QWidget):
         # Getting the color from the QChart to use it on the QTableView
         color_name = self.series.pen().color().name()
         self.model.color = f"{color_name}"
-

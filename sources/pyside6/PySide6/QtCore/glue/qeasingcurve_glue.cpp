@@ -120,4 +120,3 @@ PySideEasingCurveFunctor::PySideEasingCurveFunctor(int index, PyObject *parent, 
     PyObject_SetAttr(m_parent, Shiboken::PyMagicName::ecf(), m_func);
     PySide::WeakRef::create(m_parent, deleteData, this);
 }
-

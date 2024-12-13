@@ -87,4 +87,3 @@ void TestNumericalTypedef::testUnsignedNumericalTypedef()
 }
 
 QTEST_APPLESS_MAIN(TestNumericalTypedef)
-

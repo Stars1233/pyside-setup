@@ -244,4 +244,3 @@ if(SANITIZE_ADDRESS AND NOT MSVC)
 endif()
 
 find_package(Qt6 COMPONENTS Designer)
-

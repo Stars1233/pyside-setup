@@ -208,4 +208,3 @@ QDebug operator<<(QDebug dbg, const QXmlStreamAttributes &attrs)
     dbg << ')';
     return dbg;
 }
-

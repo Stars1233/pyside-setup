@@ -23,4 +23,3 @@ the whole Qt API for non-OpenGL-specific GUI functionality.
 The QtOpenGL module is available on Windows, X11 and Mac OS X. Qt for
 Embedded Linux and OpenGL supports OpenGL ES (OpenGL for Embedded
 Systems).
-

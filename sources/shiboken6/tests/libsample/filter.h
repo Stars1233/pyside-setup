@@ -66,5 +66,3 @@ private:
 LIBSAMPLE_API Intersection operator&(const Intersection &a, const Intersection &b);
 
 #endif // FILTER_H
-
-

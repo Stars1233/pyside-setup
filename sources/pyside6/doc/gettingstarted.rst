@@ -339,4 +339,3 @@ clarify questions before you start programming.
     faq/distribution.rst
     faq/whyqtforpython.rst
     faq/porting_from2.rst
-

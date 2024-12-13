@@ -58,4 +58,3 @@ void TestTopoSort::testTopoSort()
 }
 
 QTEST_APPLESS_MAIN(TestTopoSort)
-

@@ -111,4 +111,3 @@ void DummyGenTest::testProjectFileArgumentsReading()
 QTEST_APPLESS_MAIN(DummyGenTest)
 
 #include "dummygentest.moc"
-

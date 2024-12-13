@@ -154,5 +154,3 @@ protected:
 }
 
 QTEST_APPLESS_MAIN(TestDtorInformation)
-
-

@@ -52,4 +52,3 @@ more information about additional options.
 Visit the tutorial :ref:`tutorial_qrcfiles` for a hands-on example.
 
 .. _`rcc`: https://doc.qt.io/qt-6/rcc.html
-

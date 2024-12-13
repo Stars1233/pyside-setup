@@ -195,4 +195,3 @@ bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
 }
 
 } //namespace PySide::MetaFunction
-

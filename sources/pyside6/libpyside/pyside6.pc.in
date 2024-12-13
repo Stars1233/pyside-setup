@@ -12,4 +12,3 @@ Version: @BINDING_API_VERSION_FULL@
 Libs: -L${libdir} -lpyside6@pyside6_SUFFIX@@SHIBOKEN_PYTHON_CONFIG_SUFFIX@@LIBRARY_OUTPUT_SUFFIX@
 Cflags: -I${includedir}
 Requires: shiboken6
-

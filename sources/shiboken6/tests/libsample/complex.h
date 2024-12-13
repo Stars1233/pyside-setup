@@ -29,4 +29,3 @@ private:
 };
 
 #endif // COMPLEX_H
-

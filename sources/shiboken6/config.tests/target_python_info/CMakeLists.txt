@@ -44,4 +44,3 @@ if(COMMAND _python_get_config_var)
         message(STATUS "qfp:python_info:config_dir: ${_${_PYTHON_PREFIX}_CONFIGDIR}")
     endif()
 endif()
-

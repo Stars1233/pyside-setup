@@ -7,4 +7,3 @@ A Python application that demonstrates the analogous example in C++
 .. image:: mimetypesbrowser.png
    :width: 400
    :alt: mimetypebrowser screenshot
-

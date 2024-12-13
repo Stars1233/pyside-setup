@@ -13,4 +13,3 @@ bool Obj::virtualMethod(int val)
 {
     return !bool(val%2);
 }
-

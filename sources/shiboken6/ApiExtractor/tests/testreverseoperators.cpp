@@ -126,4 +126,3 @@ void  TestReverseOperators::testSpaceshipOperator()
 }
 
 QTEST_APPLESS_MAIN(TestReverseOperators)
-

@@ -49,4 +49,3 @@ class CustomTableModel(QAbstractTableModel):
             return Qt.AlignRight
 
         return None
-

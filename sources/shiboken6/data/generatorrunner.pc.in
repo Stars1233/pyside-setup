@@ -10,4 +10,3 @@ Requires: apiextractor
 Version: @generatorrunner_VERSION@
 Libs: -L${libdir} -lgenrunner@generator_SUFFIX@
 Cflags: -I${includedir}@generator_SUFFIX@
-

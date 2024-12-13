@@ -69,4 +69,3 @@ private:
     void pureVirtualPrivate() override;
 };
 #endif // DERIVED_H
-

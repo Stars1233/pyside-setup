@@ -72,5 +72,3 @@ struct A {
 }
 
 QTEST_APPLESS_MAIN(TestRemoveField)
-
-

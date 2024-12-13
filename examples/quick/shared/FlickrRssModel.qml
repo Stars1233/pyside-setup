@@ -42,4 +42,3 @@ ListModel {
         fetchImages("json");
     }
 }
-

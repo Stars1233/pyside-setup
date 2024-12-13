@@ -250,4 +250,3 @@ packages will likely happen.
 .. _`Qt Creator`: https://www.qt.io/product/development-tools
 .. _`qtpip`: https://pypi.org/project/qtpip/
 .. _`pip`: https://pypi.org/project/pip/
-

@@ -141,4 +141,3 @@ signals:
 } // Namespace PySideCPP2
 
 #endif // TESTOBJECT_H
-

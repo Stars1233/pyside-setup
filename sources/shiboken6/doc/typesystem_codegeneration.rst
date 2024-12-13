@@ -34,4 +34,3 @@ modification is applied (see :ref:`codeinjectionsemantics`,
 The value **Target** means the modification is applied to the
 **Python Wrapper**. The value **Native** means the modification is applied to
 the **C++ Wrapper**.
-

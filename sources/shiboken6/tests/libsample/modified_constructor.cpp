@@ -12,5 +12,3 @@ int ModifiedConstructor::retrieveValue() const
 {
     return m_stored_value;
 }
-
-

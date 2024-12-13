@@ -25,4 +25,3 @@ class MyQWidget(QWidget):
 
 class Sentinel():
     value = 10
-

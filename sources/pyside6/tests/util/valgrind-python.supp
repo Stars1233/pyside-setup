@@ -345,5 +345,3 @@
    Memcheck:Value4
    fun:SHA1_Update
 }
-
-

@@ -32,4 +32,3 @@ private:
 };
 
 #endif // TESTVIEW_H
-

@@ -10,4 +10,3 @@ ListView {
     delegate: Text { text: pysideModelData }
     model: pythonModel
 }
-

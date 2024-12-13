@@ -69,4 +69,3 @@ struct LIBMINIMAL_API ListUser
 };
 
 #endif // LISTUSER_H
-

@@ -59,4 +59,3 @@ endif()
 
 add_dependencies(other sample smart)
 create_generator_target(other)
-
