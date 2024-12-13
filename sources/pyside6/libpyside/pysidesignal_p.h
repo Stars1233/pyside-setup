@@ -9,6 +9,8 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QList>
 
+#include <memory>
+
 struct PySideSignalData
 {
     struct Signature
@@ -36,11 +38,19 @@ extern "C"
     struct PySideSignalInstance;
 }; //extern "C"
 
+struct PySideSignalInstanceShared
+{
+    PyObject *source = nullptr;
+    bool deleted = false;
+};
+
+using PySideSignalInstanceSharedPtr = std::shared_ptr<PySideSignalInstanceShared>;
+
 struct PySideSignalInstancePrivate
 {
     QByteArray signalName;
     QByteArray signature;
-    PyObject *source = nullptr;
+    PySideSignalInstanceSharedPtr shared;
     PyObject *homonymousMethod = nullptr;
     PySideSignalInstance *next = nullptr;
     unsigned short attributes = 0;

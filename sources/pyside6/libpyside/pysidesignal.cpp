@@ -72,6 +72,11 @@ QDebug operator<<(QDebug debug, const PySideSignalInstancePrivate &d)
     return debug;
 }
 
+static bool isSourceDeleted(const PySideSignalInstance *p)
+{
+    return p->d == nullptr || p->d->shared->deleted;
+}
+
 static bool connection_Check(PyObject *o)
 {
     if (o == nullptr || o == Py_None)
@@ -107,7 +112,8 @@ static std::optional<QByteArrayList> parseArgumentNames(PyObject *argArguments)
 
 namespace PySide::Signal {
     static QByteArray buildSignature(const QByteArray &, const QByteArray &);
-    static void instanceInitialize(PySideSignalInstance *, PyObject *, PySideSignal *, PyObject *, int);
+    static void instanceInitialize(PySideSignalInstance *, PyObject *, PySideSignal *,
+                                   const PySideSignalInstanceSharedPtr &shared, int);
     static PySideSignalData::Signature parseSignature(PyObject *);
     static PyObject *buildQtCompatible(const QByteArray &);
 } // PySide::Signal
@@ -367,10 +373,10 @@ static void signalInstanceFree(void *vself)
             Py_DECREF(dataPvt->next);
             dataPvt->next = nullptr;
         }
+        dataPvt->shared->deleted = true;
         delete dataPvt;
         self->d = nullptr;
     }
-    self->deleted = true;
     PepExt_TypeCallFree(Py_TYPE(pySelf)->tp_base, self);
 }
 
@@ -514,7 +520,7 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
     auto *source = reinterpret_cast<PySideSignalInstance *>(self);
     if (!source->d)
         return PyErr_Format(PyExc_RuntimeError, "cannot connect uninitialized SignalInstance");
-    if (source->deleted)
+    if (isSourceDeleted(source))
         return PyErr_Format(PyExc_RuntimeError, "Signal source has been deleted");
 
     Shiboken::AutoDecRef pyArgs(PyList_New(0));
@@ -529,11 +535,11 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
             while (targetWalk && !match) {
                 if (QMetaObject::checkConnectArgs(sourceWalk->d->signature,
                                                   targetWalk->d->signature)) {
-                    PyList_Append(pyArgs, sourceWalk->d->source);
+                    PyList_Append(pyArgs, sourceWalk->d->shared->source);
                     Shiboken::AutoDecRef sourceSignature(PySide::Signal::buildQtCompatible(sourceWalk->d->signature));
                     PyList_Append(pyArgs, sourceSignature);
 
-                    PyList_Append(pyArgs, targetWalk->d->source);
+                    PyList_Append(pyArgs, targetWalk->d->shared->source);
                     Shiboken::AutoDecRef targetSignature(PySide::Signal::buildQtCompatible(targetWalk->d->signature));
                     PyList_Append(pyArgs, targetSignature);
 
@@ -545,7 +551,7 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
         }
     } else {
         // Adding references to pyArgs
-        PyList_Append(pyArgs, source->d->source);
+        PyList_Append(pyArgs, source->d->shared->source);
 
         // Check signature of the slot (method or function) to match signal
         PySideSignalInstance *matchedSlot = findSignalInstanceForSlot(source, slot);
@@ -560,7 +566,7 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
 
     if (match) {
         Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
-        Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->source,
+        Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->shared->source,
                                                        PySide::PySideName::qtConnect()));
         if (pyMethod.isNull())  // PYSIDE-79: check if pyMethod exists.
             return PyErr_Format(PyExc_RuntimeError, "method 'connect' vanished!");
@@ -588,7 +594,7 @@ static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
 
     // PYSIDE-2201: Check if the object has vanished meanwhile.
     //              Tried to revive it without exception, but this gives problems.
-    if (source->deleted)
+    if (isSourceDeleted(source))
         return PyErr_Format(PyExc_RuntimeError, "The SignalInstance object was already deleted");
 
     Shiboken::AutoDecRef pyArgs(PyList_New(0));
@@ -619,7 +625,7 @@ static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
     for (Py_ssize_t i = 0, max = PyTuple_Size(args); i < max; i++)
         PyList_Append(pyArgs, PyTuple_GetItem(args, i));
 
-    Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->source,
+    Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->shared->source,
                                                    PySide::PySideName::qtEmit()));
 
     Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
@@ -684,11 +690,11 @@ static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
     if (Py_TYPE(slot) == PySideSignalInstance_TypeF()) {
         auto *target = reinterpret_cast<PySideSignalInstance *>(slot);
         if (QMetaObject::checkConnectArgs(source->d->signature, target->d->signature)) {
-            PyList_Append(pyArgs, source->d->source);
+            PyList_Append(pyArgs, source->d->shared->source);
             Shiboken::AutoDecRef source_signature(PySide::Signal::buildQtCompatible(source->d->signature));
             PyList_Append(pyArgs, source_signature);
 
-            PyList_Append(pyArgs, target->d->source);
+            PyList_Append(pyArgs, target->d->shared->source);
             Shiboken::AutoDecRef target_signature(PySide::Signal::buildQtCompatible(target->d->signature));
             PyList_Append(pyArgs, target_signature);
             match = true;
@@ -699,7 +705,7 @@ static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
     } else {
         // try the matching signature, fall back to first
         auto *matchedSlot = slot != Py_None ? findSignalInstanceForSlot(source, slot) : source;
-        PyList_Append(pyArgs, matchedSlot->d->source);
+        PyList_Append(pyArgs, matchedSlot->d->shared->source);
         Shiboken::AutoDecRef signature(PySide::Signal::buildQtCompatible(matchedSlot->d->signature));
         PyList_Append(pyArgs, signature);
 
@@ -712,7 +718,7 @@ static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
 
     if (match) {
         Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
-        Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->source,
+        Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->shared->source,
                                                        PySide::PySideName::qtDisconnect()));
         PyObject *result = PyObject_CallObject(pyMethod, tupleArgs);
         if (result != Py_True)
@@ -801,7 +807,7 @@ static PyObject *_getHomonymousMethod(PySideSignalInstance *inst)
     // but walk through the whole mro to find a hidden method with the same name.
     auto signalName = inst->d->signalName;
     Shiboken::AutoDecRef name(Shiboken::String::fromCString(signalName));
-    auto *mro = Py_TYPE(inst->d->source)->tp_mro;
+    auto *mro = Py_TYPE(inst->d->shared->source)->tp_mro;
     const Py_ssize_t n = PyTuple_Size(mro);
 
     for (Py_ssize_t idx = 0; idx < n; idx++) {
@@ -826,7 +832,7 @@ static PyObject *signalInstanceCall(PyObject *self, PyObject *args, PyObject *kw
         return nullptr;
     }
 
-    Shiboken::AutoDecRef homonymousMethod(PepExt_Type_CallDescrGet(hom, PySideSignal->d->source,
+    Shiboken::AutoDecRef homonymousMethod(PepExt_Type_CallDescrGet(hom, PySideSignal->d->shared->source,
                                                                    nullptr));
     return PyObject_Call(homonymousMethod, args, kw);
 }
@@ -928,8 +934,10 @@ void updateSourceObject(PyObject *source)
                     auto *inst = PyObject_New(PySideSignalInstance, PySideSignalInstance_TypeF());
                     Shiboken::AutoDecRef signalInstance(reinterpret_cast<PyObject *>(inst));
                     auto *si = reinterpret_cast<PySideSignalInstance *>(signalInstance.object());
+                    auto shared = std::make_shared<PySideSignalInstanceShared>();
+                    shared->source = source;
                     instanceInitialize(si, key, reinterpret_cast<PySideSignal *>(value),
-                                       source, 0);
+                                       shared, 0);
                     if (PyDict_SetItem(dict, key, signalInstance) == -1)
                         return;     // An error occurred while setting the attribute
                 }
@@ -1020,21 +1028,31 @@ static PySideSignalData::Signature parseSignature(PyObject *args)
 
 static void sourceGone(void *data)
 {
-    auto *self = reinterpret_cast<PySideSignalInstance *>(data);
-    self->deleted = true;
+    auto *ptr = reinterpret_cast<PySideSignalInstanceSharedPtr *>(data);
+    (*ptr)->deleted = true;
+    delete ptr;
 }
 
-static void instanceInitialize(PySideSignalInstance *self, PyObject *name, PySideSignal *signal, PyObject *source, int index)
+static void instanceInitialize(PySideSignalInstance *self, PyObject *name,
+                               PySideSignal *signal,
+                               const PySideSignalInstanceSharedPtr &shared,
+                               int index)
 {
     self->d = new PySideSignalInstancePrivate;
-    self->deleted = false;
     PySideSignalInstancePrivate *selfPvt = self->d;
+    selfPvt->shared = shared;
+    // PYSIDE-2201: We have no reference to source. Let's take a weakref to get
+    //              notified when source gets deleted.
+    if (index == 0) {
+        auto *ptr = new PySideSignalInstanceSharedPtr(shared);
+        PySide::WeakRef::create(shared->source, sourceGone, ptr);
+    }
+
     selfPvt->next = nullptr;
     if (signal->data->signalName.isEmpty())
         signal->data->signalName = Shiboken::String::toCString(name);
     selfPvt->signalName = signal->data->signalName;
 
-    selfPvt->source = source;
     const auto &signature = signal->data->signatures.at(index);
     selfPvt->signature = buildSignature(self->d->signalName, signature.signature);
     selfPvt->argCount = signature.argCount;
@@ -1044,15 +1062,12 @@ static void instanceInitialize(PySideSignalInstance *self, PyObject *name, PySid
         selfPvt->homonymousMethod = signal->homonymousMethod;
         Py_INCREF(selfPvt->homonymousMethod);
     }
-    // PYSIDE-2201: We have no reference to source. Let's take a weakref to get
-    //              notified when source gets deleted.
-    PySide::WeakRef::create(source, sourceGone, self);
 
     index++;
 
     if (index < signal->data->signatures.size()) {
         selfPvt->next = PyObject_New(PySideSignalInstance, PySideSignalInstance_TypeF());
-        instanceInitialize(selfPvt->next, name, signal, source, index);
+        instanceInitialize(selfPvt->next, name, signal, shared, index);
     }
 }
 
@@ -1069,7 +1084,9 @@ PySideSignalInstance *initialize(PySideSignal *self, PyObject *name, PyObject *o
 
     PySideSignalInstance *instance = PyObject_New(PySideSignalInstance,
                                                   PySideSignalInstance_TypeF());
-    instanceInitialize(instance, name, self, object, 0);
+    auto shared = std::make_shared<PySideSignalInstanceShared>();
+    shared->source = object;
+    instanceInitialize(instance, name, self, shared, 0);
     auto *sbkObj = reinterpret_cast<SbkObject *>(object);
     if (!Shiboken::Object::wasCreatedByPython(sbkObj))
         Py_INCREF(object); // PYSIDE-79: this flag was crucial for a wrapper call.
@@ -1098,6 +1115,8 @@ PySideSignalInstance *newObjectFromMethod(PyObject *source, const QList<QMetaMet
 {
     PySideSignalInstance *root = nullptr;
     PySideSignalInstance *previous = nullptr;
+    auto shared = std::make_shared<PySideSignalInstanceShared>();
+    shared->source = source;
     for (const QMetaMethod &m : methodList) {
         PySideSignalInstance *item = PyObject_New(PySideSignalInstance, PySideSignalInstance_TypeF());
         if (!root)
@@ -1107,9 +1126,8 @@ PySideSignalInstance *newObjectFromMethod(PyObject *source, const QList<QMetaMet
             previous->d->next = item;
 
         item->d = new PySideSignalInstancePrivate;
-        item->deleted = false;
         PySideSignalInstancePrivate *selfPvt = item->d;
-        selfPvt->source = source;
+        selfPvt->shared = shared;
         QByteArray cppName(m.methodSignature());
         cppName.truncate(cppName.indexOf('('));
         // separate SignalName
@@ -1195,7 +1213,7 @@ void registerSignals(PyTypeObject *pyObj, const QMetaObject *metaObject)
 
 PyObject *getObject(PySideSignalInstance *signal)
 {
-    return signal->d->source;
+    return signal->d->shared->source;
 }
 
 const char *getSignature(PySideSignalInstance *signal)

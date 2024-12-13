@@ -30,7 +30,6 @@ extern "C"
     {
         PyObject_HEAD
         PySideSignalInstancePrivate *d;
-        bool deleted;
     };
 }; // extern "C"
 
