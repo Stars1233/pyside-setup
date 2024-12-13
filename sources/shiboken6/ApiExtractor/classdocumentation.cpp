@@ -268,6 +268,28 @@ std::optional<ClassDocumentation> parseWebXml(const QStringList &fileNames, QStr
     return result;
 }
 
+// Helpers to remove some sections with information on how to build
+// and link and the C++ reference from the WebXML module description
+static void removeElement(QByteArrayView begin, QByteArrayView end,
+                          QByteArray *data)
+{
+    auto startPos = data->indexOf(begin);
+    if (startPos != -1) {
+        auto endPos = data->indexOf(end, startPos + begin.size());
+        if (endPos != -1)
+            data->remove(startPos, endPos + end.size() - startPos);
+    }
+}
+
+static void removeSection(const QByteArray &id,
+                          QByteArray *data)
+{
+    QByteArray contentBegin = "<contents name=\"" + id + '"';
+    removeElement(contentBegin, "/>"_ba, data);
+    QByteArray sectionBegin = "<section id=\""_ba + id + "\">"_ba;
+    removeElement(sectionBegin, "</section>"_ba, data);
+}
+
 QString webXmlModuleDescription(const QString &fileName, QString *errorMessage)
 {
     QFile file(fileName);
@@ -276,8 +298,18 @@ QString webXmlModuleDescription(const QString &fileName, QString *errorMessage)
         return {};
     }
 
+    QByteArray text = file.readAll();
+    file.close();
+    removeSection("building-with-cmake"_ba, &text);
+    removeSection("building-with-qmake"_ba, &text);
+    removeSection("reference"_ba, &text);
+    removeSection("using-the-module"_ba, &text);
+
+    QBuffer buffer(&text);
+    buffer.open(QIODevice::ReadOnly);
+
     QString result;
-    QXmlStreamReader reader(&file);
+    QXmlStreamReader reader(&buffer);
     while (!reader.atEnd()) {
         switch (reader.readNext()) {
         case QXmlStreamReader::StartElement:
