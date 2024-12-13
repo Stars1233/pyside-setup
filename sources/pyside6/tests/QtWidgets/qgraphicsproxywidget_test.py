@@ -34,7 +34,7 @@ class QGraphicsProxyWidgetTest(UsesQApplication):
         view.setViewportUpdateMode(QGraphicsView.BoundingRectViewportUpdate)
         view.show()
 
-        timer = QTimer.singleShot(100, self.app.quit)
+        QTimer.singleShot(100, self.app.quit)
         self.app.exec()
 
 

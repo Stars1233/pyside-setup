@@ -24,7 +24,7 @@ class QSvgWidgetTest(unittest.TestCase):
         tigerPath = QDir.cleanPath(f"{directory}/../QtSvg/tiger.svg")
         self.assertTrue(QFileInfo.exists(tigerPath))
 
-        app = QApplication([])
+        app = QApplication([])  # noqa: F841
         fromFile = QSvgWidget()
         fromFile.load(tigerPath)
         self.assertTrue(fromFile.renderer().isValid())

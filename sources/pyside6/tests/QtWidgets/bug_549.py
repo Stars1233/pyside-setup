@@ -16,7 +16,7 @@ from PySide6.QtWidgets import QApplication, QGraphicsWidget
 
 class TestBug549(unittest.TestCase):
     def testBug(self):
-        app = QApplication([])
+        app = QApplication([])  # noqa: F841
         w = QGraphicsWidget()
         w.setContentsMargins(1, 2, 3, 4)
         self.assertEqual(w.getContentsMargins(), (1, 2, 3, 4))

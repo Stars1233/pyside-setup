@@ -67,7 +67,7 @@ class QStandardItemModelRef(UsesQApplication):
 
         for r in range(3):
             my_row = model.takeRow(0)
-            my_row = None
+            my_row = None  # noqa: F841
             for c in range(5):
                 # only rest 1 reference
                 self.assertEqual(sys.getrefcount(items[r][c]), 2)

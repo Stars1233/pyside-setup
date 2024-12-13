@@ -41,7 +41,7 @@ class QPenTest(UsesQApplication):
         style = Qt.PenStyle(0)
         cap = Qt.PenCapStyle(0)
         join = Qt.PenJoinStyle(0)
-        pen = QPen(Qt.blue, width, style, cap, join)
+        pen = QPen(Qt.blue, width, style, cap, join)  # noqa: F841
 
     def testSetPenWithPenStyleEnum(self):
         '''Calls QPainter.setPen with both enum and integer. Bug #511.'''

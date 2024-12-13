@@ -14,7 +14,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QByteArray, QFile, QIODevice
-import resources_mc
+import resources_mc  # noqa: F401
 
 
 class ResourcesUsage(unittest.TestCase):

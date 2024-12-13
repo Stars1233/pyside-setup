@@ -34,7 +34,7 @@ class QPushButtonTest(UsesQApplication):
         w = MyWidget()
         w.show()
 
-        timer = QTimer.singleShot(100, self.app.quit)
+        QTimer.singleShot(100, self.app.quit)
         self.app.exec()
 
     def buttonCb(self, checked):

@@ -21,7 +21,7 @@ class QSvgRendererTest(unittest.TestCase):
 
     def testLoad(self):
         tigerPath = os.path.join(os.path.dirname(__file__), 'tiger.svg')
-        app = QGuiApplication([])
+        app = QGuiApplication([])  # noqa: F841
 
         fromFile = QSvgRenderer(tigerPath)
         self.assertTrue(fromFile.isValid())

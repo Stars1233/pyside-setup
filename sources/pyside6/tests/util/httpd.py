@@ -46,7 +46,7 @@ class TestSecureHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         try:
             handler = self.marshall_handler()
             handler.do_request(self)
-        except:
+        except:  # noqa: E722
             self.send_response(401)
             self.send_header("WWW-Authenticate", "Basic realm='Secure Area'")
             self.send_header("Content-type", "text/plain")
@@ -97,12 +97,12 @@ class CompatTCPServer(SocketServer.TCPServer):
         if self.isPy25:
             try:
                 request, client_address = self.get_request()
-            except socket.error:
+            except socket.error:  # noqa: F821
                 return
             if self.verify_request(request, client_address):
                 try:
                     self.process_request(request, client_address)
-                except:
+                except:  # noqa: E722
                     self.handle_error(request, client_address)
                     self.close_request(request)
 
@@ -138,7 +138,7 @@ class TestServer(threading.Thread):
             try:
                 self.httpd = CompatTCPServer(('', self._port), handle)
                 break
-            except:
+            except:  # noqa: E722
                 self._port = self._port + random.randint(1, 100)
 
     def port(self):

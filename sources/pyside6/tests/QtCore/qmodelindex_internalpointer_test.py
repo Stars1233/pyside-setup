@@ -37,7 +37,7 @@ class TestQModelIndexInternalPointer(unittest.TestCase):
     def testInternalPointer(self):
         # Test QAbstractListModel.createIndex and
         # QModelIndex.internalPointer with regular Python objects
-        obj = QObject()
+        obj = QObject()  # noqa: F841
         idx = self.model.createIndex(0, 0, "Hello")
         i = idx.internalPointer()
         self.assertEqual(i, "Hello")
@@ -49,7 +49,7 @@ class TestQModelIndexInternalPointer(unittest.TestCase):
         o = [1, 2, 3]
         o_refcnt = sys.getrefcount(o)
         idx = self.model.createIndex(0, 0, o)
-        ptr = idx.internalPointer()
+        ptr = idx.internalPointer()  # noqa: F841
         self.assertEqual(sys.getrefcount(o), o_refcnt + 1)
 
     def testIndexForDefaultDataArg(self):

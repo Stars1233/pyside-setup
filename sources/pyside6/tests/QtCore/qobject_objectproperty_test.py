@@ -35,7 +35,7 @@ class TestBug378(unittest.TestCase):
     '''Test case for the bug #378'''
 
     def testBug378(self):
-        obj = ExtQObject()
+        obj = ExtQObject()  # noqa: F841
 
 
 if __name__ == '__main__':

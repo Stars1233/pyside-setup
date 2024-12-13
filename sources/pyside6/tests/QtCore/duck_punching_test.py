@@ -33,7 +33,8 @@ class Duck(QObject):
 
 
 class TestDuckPunchingOnQObjectInstance(UsesQApplication):
-    '''Test case for duck punching new implementations of C++ virtual methods into object instances.'''
+    '''Test case for duck punching new implementations of C++ virtual methods into
+       object instances.'''
 
     def setUp(self):
         # Acquire resources
@@ -65,7 +66,8 @@ class TestDuckPunchingOnQObjectInstance(UsesQApplication):
         parent.childEvent = None
 
     def testChildEventMonkeyPatchWithInheritance(self):
-        # Test if the new childEvent injected on a QObject's extension class instance is called from C++
+        '''Test if the new childEvent injected on a QObject's extension class
+           instance is called from C++'''
         parent = Duck()
 
         def childEvent(obj, event):

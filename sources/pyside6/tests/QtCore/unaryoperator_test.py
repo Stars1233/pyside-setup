@@ -42,7 +42,7 @@ class NegUnaryOperatorTest(unittest.TestCase):
         __neg__method_exists = True
         try:
             neg_qpoint = -self.qpoint
-        except:
+        except:  # noqa: E722
             __neg__method_exists = False
 
         self.assertTrue(__neg__method_exists)

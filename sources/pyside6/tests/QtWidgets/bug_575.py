@@ -19,7 +19,7 @@ from PySide6.QtWidgets import QApplication, QPlainTextEdit, QTextEdit
 
 class Bug575(unittest.TestCase):
     def testPropertyValues(self):
-        app = QApplication(sys.argv)
+        app = QApplication(sys.argv)  # noqa: F841
         textEdit = QPlainTextEdit()
         textEdit.insertPlainText("PySide INdT")
         selection = QTextEdit.ExtraSelection()

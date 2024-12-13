@@ -27,7 +27,7 @@ class Bug576(unittest.TestCase):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testWidgetParent(self):
         self._destroyed = False
-        app = QApplication(sys.argv)
+        app = QApplication(sys.argv)  # noqa: F841
         w = QWidget()
 
         b = QPushButton("test")

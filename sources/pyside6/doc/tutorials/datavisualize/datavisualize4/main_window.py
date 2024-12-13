@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
 
-from PySide6.QtCore import Slot
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import QMainWindow
 
@@ -16,7 +15,7 @@ class MainWindow(QMainWindow):
         self.menu = self.menuBar()
         self.file_menu = self.menu.addMenu("File")
 
-        ## Exit QAction
+        # Exit QAction
         exit_action = QAction("Exit", self)
         exit_action.setShortcut(QKeySequence.Quit)
         exit_action.triggered.connect(self.close)

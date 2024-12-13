@@ -28,7 +28,7 @@ class QPixmapTest(UsesQApplication):
         self.assertTrue(pixmap.size().height(), 20)
 
     def testQStringConstructor(self):
-        pixmap = QPixmap("Testing!")
+        pixmap = QPixmap("Testing!")  # noqa: F841
 
     def testQPixmapLoadFromDataWithQFile(self):
         f = QFile(os.path.join(os.path.dirname(__file__), 'sample.png'))

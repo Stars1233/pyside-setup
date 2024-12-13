@@ -46,7 +46,7 @@ class QInstallMsgHandlerTest(unittest.TestCase):
         ret = qInstallMessageHandler(None)
         self.assertEqual(ret, None)
         refcount = sys.getrefcount(handleruseless)
-        retNone = qInstallMessageHandler(handleruseless)
+        retNone = qInstallMessageHandler(handleruseless)  # noqa: F841
         self.assertEqual(sys.getrefcount(handleruseless), refcount + 1)
         rethandler = qInstallMessageHandler(None)
         self.assertEqual(rethandler, handleruseless)
@@ -54,7 +54,7 @@ class QInstallMsgHandlerTest(unittest.TestCase):
         self.assertEqual(sys.getrefcount(handleruseless), refcount)
 
     def testHandler(self):
-        rethandler = qInstallMessageHandler(handler)
+        rethandler = qInstallMessageHandler(handler)  # noqa: F841
         if QLibraryInfo.isDebugBuild():
             qDebug("Test Debug")
             self.assertEqual(param[0], QtMsgType.QtDebugMsg)

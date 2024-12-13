@@ -62,8 +62,8 @@ class QBitArrayIsIterableTest(unittest.TestCase):
         # Tests if QBitArray class is iterable
         qbitarray_is_iterable = True
         try:
-            bitarray = [bit for bit in self.qbitarray]
-        except:
+            bitarray = [bit for bit in self.qbitarray]  # noqa F841
+        except:  # noqa: E722
             qbitarray_is_iterable = False
         self.assertTrue(qbitarray_is_iterable)
 
@@ -81,8 +81,8 @@ class QBitArrayIsIterableTest(unittest.TestCase):
         ored_qbitarray, ored_bool_list = None, None
         try:
             ored_qbitarray = self.qbitarray | self.other_qbitarray
-            ored_bool_list = [b1 | b2 for b1, b2 in zip(self.qbitarray_values, self.other_qbitarray_values)]
-        except:
+            ored_bool_list = [b1 | b2 for b1, b2 in zip(self.qbitarray_values, self.other_qbitarray_values)]  # noqa: E501
+        except:  # noqa: E722
             has_or_bitwise_operator = False
         self.assertTrue(has_or_bitwise_operator)
         self.assertEqual(bool_list_from_qbitarray(ored_qbitarray), ored_bool_list)
@@ -93,8 +93,8 @@ class QBitArrayIsIterableTest(unittest.TestCase):
         anded_qbitarray, anded_bool_list = None, None
         try:
             anded_qbitarray = self.qbitarray | self.other_qbitarray
-            anded_bool_list = [b1 | b2 for b1, b2 in zip(self.qbitarray_values, self.other_qbitarray_values)]
-        except:
+            anded_bool_list = [b1 | b2 for b1, b2 in zip(self.qbitarray_values, self.other_qbitarray_values)]  # noqa: E501
+        except:  # noqa: E722
             has_and_bitwise_operator = False
         self.assertTrue(has_and_bitwise_operator)
         self.assertEqual(bool_list_from_qbitarray(anded_qbitarray), anded_bool_list)
@@ -105,8 +105,8 @@ class QBitArrayIsIterableTest(unittest.TestCase):
         xored_qbitarray, xored_bool_list = None, None
         try:
             xored_qbitarray = self.qbitarray | self.other_qbitarray
-            xored_bool_list = [b1 | b2 for b1, b2 in zip(self.qbitarray_values, self.other_qbitarray_values)]
-        except:
+            xored_bool_list = [b1 | b2 for b1, b2 in zip(self.qbitarray_values, self.other_qbitarray_values)]  # noqa: E501
+        except:  # noqa: E722
             has_xor_bitwise_operator = False
         self.assertTrue(has_xor_bitwise_operator)
         self.assertEqual(bool_list_from_qbitarray(xored_qbitarray), xored_bool_list)

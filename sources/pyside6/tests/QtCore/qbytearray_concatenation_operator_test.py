@@ -29,7 +29,6 @@ class QByteArrayConcatenationOperatorTest(unittest.TestCase):
 
     def testConcatPythonStringAndQByteArray(self):
         # Test concatenation of a Python bytes with a QByteArray, in this order
-        concat_python_string_add_qbytearray_worked = True
         qba = QByteArray(bytes('foo', "UTF-8"))
         result = bytes('bar\x00', "UTF-8") + qba
         self.assertEqual(type(result), QByteArray)

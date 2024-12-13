@@ -19,13 +19,13 @@ from PySide6.QtCore import QPoint, QPointF
 class QPointTest(unittest.TestCase):
 
     def testQPointCtor(self):
-        point = QPoint(QPoint(10, 20))
+        point = QPoint(QPoint(10, 20))  # noqa: F841
 
 
 class QPointFTest(unittest.TestCase):
 
     def testQPointFCtor(self):
-        pointf = QPointF(QPoint(10, 20))
+        pointf = QPointF(QPoint(10, 20))  # noqa: F841
 
 
 if __name__ == '__main__':

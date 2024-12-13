@@ -56,7 +56,7 @@ class TestMainWindow(UsesQApplication):
         self.assertEqual(sys.getrefcount(c), 2)
         w.setCentralWidget(c)
         self.assertEqual(sys.getrefcount(c), 3)
-        wr = weakref.ref(c, self.objDel)
+        wr = weakref.ref(c, self.objDel)  # noqa: F841
         w.setCentralWidget(None)
         c = None
         self.app.exec()
@@ -73,7 +73,7 @@ class TestMainWindow(UsesQApplication):
         w.setCentralWidget(c2)
         self.assertEqual(sys.getrefcount(c2), 3)
 
-        wr = weakref.ref(c, self.objDel)
+        wr = weakref.ref(c, self.objDel)  # noqa: F841
         w.setCentralWidget(None)
         c = None
 
