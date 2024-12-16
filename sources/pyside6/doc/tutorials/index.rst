@@ -175,7 +175,7 @@ Quick/QML: Basic tutorials
     :hidden:
 
     basictutorial/qml.rst
-    qmlintegration/qmlintegration.rstsourc
+    qmlintegration/qmlintegration.rst
     qmlapp/qmlapplication.rst
     qmlsqlintegration/qmlsqlintegration.rst
     extendedexplorer/extendedexplorer.md

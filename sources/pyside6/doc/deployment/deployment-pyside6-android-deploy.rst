@@ -37,13 +37,13 @@ The NDK required corresponds to the NDK version required by the Qt version you a
 The easiest way to download the Android NDK is through a script located in the Qt for Python
 repository. To run the script, follow these steps:
 
-#. Clone the Qt for Python repository::
+#. Clone the Qt for Python repository:
 
 .. code-block:: bash
 
     git clone https://code.qt.io/pyside/pyside-setup
 
-#. Run the script::
+#. Run the script:
 
 .. code-block:: bash
 
