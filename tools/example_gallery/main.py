@@ -564,6 +564,10 @@ def detect_pyside_example(example_root, pyproject_file):
     p = ExampleParameters()
 
     p.example_dir = pyproject_file.parent
+    if list(p.example_dir.parent.glob("*.qmlproject")) and p.example_dir.name == "Python":
+        # Design Studio project example
+        p.example_dir = pyproject_file.parent.parent
+
     if p.example_dir.name == "doc":  # Dummy pyproject in doc dir (scriptableapplication)
         p.example_dir = p.example_dir.parent
 
