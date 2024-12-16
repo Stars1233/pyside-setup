@@ -334,12 +334,17 @@ def get_module_gallery(examples):
         if not title:
             title = f"{name} from ``{underline}``."
 
+        # Clean refs from desc
+        if ":ref:" in desc:
+            desc = desc.replace(":ref:`", "")
+        desc = desc.replace("`", "")
+
         gallery += f"{ind(2)}.. grid-item-card:: {title}\n"
         gallery += f"{ind(3)}:class-item: cover-img\n"
         gallery += f"{ind(3)}:link: {doc_file_name}\n"
         gallery += f"{ind(3)}:link-type: ref\n"
         gallery += f"{ind(3)}:img-top: {img_name}\n\n"
-        gallery += f"{ind(3)}{desc}...\n"
+        gallery += f"{ind(3)}+++\n{ind(3)}{desc}\n"
 
     return f"{gallery}\n"
 
