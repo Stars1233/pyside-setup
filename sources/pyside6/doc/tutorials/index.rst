@@ -215,7 +215,7 @@ Qt Overviews
 .. toctree::
     :maxdepth: 1
 
-    ../overviews/overviews-main.rst
+    ../overviews/qtdoc-overviews-main.rst
 
 C++ and Python
 --------------
