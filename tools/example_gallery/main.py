@@ -324,7 +324,7 @@ def get_module_gallery(examples):
                         break
                     lines.append(line)
 
-                desc = "".join(lines)
+                desc = " ".join(lines)
                 if len(desc) > 120:
                     desc = desc[:120] + "..."
         else:
