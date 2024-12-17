@@ -33,7 +33,7 @@ class Lighting(QGraphicsView):
         timer.start()
 
         self.setRenderHint(QPainter.RenderHint.Antialiasing)
-        self.setFrameStyle(QFrame.NoFrame)
+        self.setFrameStyle(QFrame.Shape.NoFrame)
 
     def setup_scene(self):
         self.m_scene.setSceneRect(-300, -200, 600, 460)
@@ -44,15 +44,15 @@ class Lighting(QGraphicsView):
         self.setBackgroundBrush(linear_grad)
 
         radial_grad = QRadialGradient(30, 30, 30)
-        radial_grad.setColorAt(0, Qt.yellow)
-        radial_grad.setColorAt(0.2, Qt.yellow)
-        radial_grad.setColorAt(1, Qt.transparent)
+        radial_grad.setColorAt(0, Qt.GlobalColor.yellow)
+        radial_grad.setColorAt(0.2, Qt.GlobalColor.yellow)
+        radial_grad.setColorAt(1, Qt.GlobalColor.transparent)
 
         pixmap = QPixmap(60, 60)
-        pixmap.fill(Qt.transparent)
+        pixmap.fill(Qt.GlobalColor.transparent)
 
         with QPainter(pixmap) as painter:
-            painter.setPen(Qt.NoPen)
+            painter.setPen(Qt.PenStyle.NoPen)
             painter.setBrush(radial_grad)
             painter.drawEllipse(0, 0, 60, 60)
 
@@ -66,8 +66,8 @@ class Lighting(QGraphicsView):
                 else:
                     item = QGraphicsRectItem(0, 0, 50, 50)
 
-                item.setPen(QPen(Qt.black, 1))
-                item.setBrush(QBrush(Qt.white))
+                item.setPen(QPen(Qt.GlobalColor.black, 1))
+                item.setBrush(QBrush(Qt.GlobalColor.white))
 
                 effect = QGraphicsDropShadowEffect(self)
                 effect.setBlurRadius(8)

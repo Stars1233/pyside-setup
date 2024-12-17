@@ -19,7 +19,7 @@ def create_item(minimum, preferred, maximum, name):
     w.setMinimumSize(minimum)
     w.setPreferredSize(preferred)
     w.setMaximumSize(maximum)
-    w.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+    w.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
 
     return w
 
@@ -45,45 +45,45 @@ if __name__ == '__main__':
     l = QGraphicsAnchorLayout()  # noqa: E741
     l.setSpacing(0)
 
-    w = QGraphicsWidget(None, Qt.Window)
+    w = QGraphicsWidget(None, Qt.WindowType.Window)
     w.setPos(20, 20)
     w.setLayout(l)
 
-    # Vertical.
-    l.addAnchor(a, Qt.AnchorTop, l, Qt.AnchorTop)
-    l.addAnchor(b, Qt.AnchorTop, l, Qt.AnchorTop)
+    # Vertical
+    l.addAnchor(a, Qt.AnchorPoint.AnchorTop, l, Qt.AnchorPoint.AnchorTop)
+    l.addAnchor(b, Qt.AnchorPoint.AnchorTop, l, Qt.AnchorPoint.AnchorTop)
 
-    l.addAnchor(c, Qt.AnchorTop, a, Qt.AnchorBottom)
-    l.addAnchor(c, Qt.AnchorTop, b, Qt.AnchorBottom)
-    l.addAnchor(c, Qt.AnchorBottom, d, Qt.AnchorTop)
-    l.addAnchor(c, Qt.AnchorBottom, e, Qt.AnchorTop)
+    l.addAnchor(c, Qt.AnchorPoint.AnchorTop, a, Qt.AnchorPoint.AnchorBottom)
+    l.addAnchor(c, Qt.AnchorPoint.AnchorTop, b, Qt.AnchorPoint.AnchorBottom)
+    l.addAnchor(c, Qt.AnchorPoint.AnchorBottom, d, Qt.AnchorPoint.AnchorTop)
+    l.addAnchor(c, Qt.AnchorPoint.AnchorBottom, e, Qt.AnchorPoint.AnchorTop)
 
-    l.addAnchor(d, Qt.AnchorBottom, l, Qt.AnchorBottom)
-    l.addAnchor(e, Qt.AnchorBottom, l, Qt.AnchorBottom)
+    l.addAnchor(d, Qt.AnchorPoint.AnchorBottom, l, Qt.AnchorPoint.AnchorBottom)
+    l.addAnchor(e, Qt.AnchorPoint.AnchorBottom, l, Qt.AnchorPoint.AnchorBottom)
 
-    l.addAnchor(c, Qt.AnchorTop, f, Qt.AnchorTop)
-    l.addAnchor(c, Qt.AnchorVerticalCenter, f, Qt.AnchorBottom)
-    l.addAnchor(f, Qt.AnchorBottom, g, Qt.AnchorTop)
-    l.addAnchor(c, Qt.AnchorBottom, g, Qt.AnchorBottom)
+    l.addAnchor(c, Qt.AnchorPoint.AnchorTop, f, Qt.AnchorPoint.AnchorTop)
+    l.addAnchor(c, Qt.AnchorPoint.AnchorVerticalCenter, f, Qt.AnchorPoint.AnchorBottom)
+    l.addAnchor(f, Qt.AnchorPoint.AnchorBottom, g, Qt.AnchorPoint.AnchorTop)
+    l.addAnchor(c, Qt.AnchorPoint.AnchorBottom, g, Qt.AnchorPoint.AnchorBottom)
 
     # Horizontal.
-    l.addAnchor(l, Qt.AnchorLeft, a, Qt.AnchorLeft)
-    l.addAnchor(l, Qt.AnchorLeft, d, Qt.AnchorLeft)
-    l.addAnchor(a, Qt.AnchorRight, b, Qt.AnchorLeft)
+    l.addAnchor(l, Qt.AnchorPoint.AnchorLeft, a, Qt.AnchorPoint.AnchorLeft)
+    l.addAnchor(l, Qt.AnchorPoint.AnchorLeft, d, Qt.AnchorPoint.AnchorLeft)
+    l.addAnchor(a, Qt.AnchorPoint.AnchorRight, b, Qt.AnchorPoint.AnchorLeft)
 
-    l.addAnchor(a, Qt.AnchorRight, c, Qt.AnchorLeft)
-    l.addAnchor(c, Qt.AnchorRight, e, Qt.AnchorLeft)
+    l.addAnchor(a, Qt.AnchorPoint.AnchorRight, c, Qt.AnchorPoint.AnchorLeft)
+    l.addAnchor(c, Qt.AnchorPoint.AnchorRight, e, Qt.AnchorPoint.AnchorLeft)
 
-    l.addAnchor(b, Qt.AnchorRight, l, Qt.AnchorRight)
-    l.addAnchor(e, Qt.AnchorRight, l, Qt.AnchorRight)
-    l.addAnchor(d, Qt.AnchorRight, e, Qt.AnchorLeft)
+    l.addAnchor(b, Qt.AnchorPoint.AnchorRight, l, Qt.AnchorPoint.AnchorRight)
+    l.addAnchor(e, Qt.AnchorPoint.AnchorRight, l, Qt.AnchorPoint.AnchorRight)
+    l.addAnchor(d, Qt.AnchorPoint.AnchorRight, e, Qt.AnchorPoint.AnchorLeft)
 
-    l.addAnchor(l, Qt.AnchorLeft, f, Qt.AnchorLeft)
-    l.addAnchor(l, Qt.AnchorLeft, g, Qt.AnchorLeft)
-    l.addAnchor(f, Qt.AnchorRight, g, Qt.AnchorRight)
+    l.addAnchor(l, Qt.AnchorPoint.AnchorLeft, f, Qt.AnchorPoint.AnchorLeft)
+    l.addAnchor(l, Qt.AnchorPoint.AnchorLeft, g, Qt.AnchorPoint.AnchorLeft)
+    l.addAnchor(f, Qt.AnchorPoint.AnchorRight, g, Qt.AnchorPoint.AnchorRight)
 
     scene.addItem(w)
-    scene.setBackgroundBrush(Qt.darkGreen)
+    scene.setBackgroundBrush(Qt.GlobalColor.darkGreen)
 
     view = QGraphicsView(scene)
     view.show()

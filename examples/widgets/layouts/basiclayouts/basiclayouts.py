@@ -30,7 +30,8 @@ class Dialog(QDialog):
         big_editor.setPlainText("This widget takes up all the remaining space "
                                 "in the top-level layout.")
 
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok
+                                      | QDialogButtonBox.StandardButton.Cancel)
 
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)

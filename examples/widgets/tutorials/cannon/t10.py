@@ -93,8 +93,8 @@ class CannonField(QWidget):
 
     def paintEvent(self, event):
         with QPainter(self) as painter:
-            painter.setPen(Qt.NoPen)
-            painter.setBrush(Qt.blue)
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(Qt.GlobalColor.blue)
 
             painter.translate(0, self.height())
             painter.drawPie(QRect(-35, -35, 70, 70), 0, 90 * 16)
@@ -112,7 +112,7 @@ class MyWidget(QWidget):
         super().__init__(parent)
 
         quit = QPushButton("&Quit")
-        quit.setFont(QFont("Times", 18, QFont.Bold))
+        quit.setFont(QFont("Times", 18, QFont.Weight.Bold))
 
         quit.clicked.connect(qApp.quit)  # noqa: F821
 

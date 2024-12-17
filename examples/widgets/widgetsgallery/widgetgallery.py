@@ -154,7 +154,7 @@ class WidgetGallery(QDialog):
         disable_widgets_checkbox.toggled.connect(simple_input_widgets_groupbox.setDisabled)
 
         help_shortcut = QShortcut(self)
-        help_shortcut.setKey(QKeySequence.HelpContents)
+        help_shortcut.setKey(QKeySequence.StandardKey.HelpContents)
         help_shortcut.activated.connect(self.help_on_current_widget)
 
         top_layout = QHBoxLayout()
@@ -165,8 +165,8 @@ class WidgetGallery(QDialog):
         top_layout.addStretch(1)
         top_layout.addWidget(disable_widgets_checkbox)
 
-        dialog_buttonbox = QDialogButtonBox(QDialogButtonBox.Help
-                                            | QDialogButtonBox.Close)
+        dialog_buttonbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Help
+                                            | QDialogButtonBox.StandardButton.Close)
         init_widget(dialog_buttonbox, "dialogButtonBox")
         dialog_buttonbox.helpRequested.connect(launch_module_help)
         dialog_buttonbox.rejected.connect(self.reject)
@@ -224,7 +224,7 @@ class WidgetGallery(QDialog):
         init_widget(menu_toolbutton, "menuButton")
         menu_toolbutton.setText("Menu Button")
         tool_menu = QMenu(menu_toolbutton)
-        menu_toolbutton.setPopupMode(QToolButton.InstantPopup)
+        menu_toolbutton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         tool_menu.addAction("Option")
         tool_menu.addSeparator()
         action = tool_menu.addAction("Checkable Option")
@@ -257,7 +257,7 @@ class WidgetGallery(QDialog):
         checkbox = QCheckBox("Tri-state check box")
         init_widget(checkbox, "checkBox")
         checkbox.setTristate(True)
-        checkbox.setCheckState(Qt.PartiallyChecked)
+        checkbox.setCheckState(Qt.CheckState.PartiallyChecked)
 
         checkable_layout = QVBoxLayout()
         checkable_layout.addWidget(radiobutton_1)
@@ -300,7 +300,7 @@ class WidgetGallery(QDialog):
     def create_itemview_tabwidget(self):
         result = QTabWidget()
         init_widget(result, "bottomLeftTabWidget")
-        result.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Ignored)
+        result.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Ignored)
 
         tree_view = QTreeView()
         init_widget(tree_view, "treeView")
@@ -325,7 +325,7 @@ class WidgetGallery(QDialog):
         icon_mode_listview = QListView()
         init_widget(icon_mode_listview, "iconModeListView")
 
-        icon_mode_listview.setViewMode(QListView.IconMode)
+        icon_mode_listview.setViewMode(QListView.ViewMode.IconMode)
         icon_mode_listview.setModel(list_model)
 
         result.addTab(embed_into_hbox_layout(tree_view), "Tree View")
@@ -344,7 +344,7 @@ class WidgetGallery(QDialog):
         lineedit = QLineEdit("s3cRe7")
         init_widget(lineedit, "lineEdit")
         lineedit.setClearButtonEnabled(True)
-        lineedit.setEchoMode(QLineEdit.Password)
+        lineedit.setEchoMode(QLineEdit.EchoMode.Password)
 
         spin_box = QSpinBox()
         init_widget(spin_box, "spinBox")

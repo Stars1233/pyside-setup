@@ -21,8 +21,9 @@ class Screenshot(QWidget):
 
         self.screenshot_label = QLabel(self)
 
-        self.screenshot_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.screenshot_label.setAlignment(Qt.AlignCenter)
+        self.screenshot_label.setSizePolicy(QSizePolicy.Policy.Expanding,
+                                            QSizePolicy.Policy.Expanding)
+        self.screenshot_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         screen_geometry: QRect = self.screen().geometry()
         self.screenshot_label.setMinimumSize(
@@ -56,7 +57,7 @@ class Screenshot(QWidget):
         save_screenshot_button.clicked.connect(self.save_screenshot)
         buttons_layout.addWidget(save_screenshot_button)
         quit_screenshot_button = QPushButton("Quit", self)
-        quit_screenshot_button.setShortcut(Qt.CTRL | Qt.Key_Q)
+        quit_screenshot_button.setShortcut(Qt.Modifier.CTRL | Qt.Key.Key_Q)
         quit_screenshot_button.clicked.connect(self.close)
         buttons_layout.addWidget(quit_screenshot_button)
         buttons_layout.addStretch()
@@ -70,7 +71,7 @@ class Screenshot(QWidget):
 
     def resizeEvent(self, event):
         scaled_size = self.original_pixmap.size()
-        scaled_size.scale(self.screenshot_label.size(), Qt.KeepAspectRatio)
+        scaled_size.scale(self.screenshot_label.size(), Qt.AspectRatioMode.KeepAspectRatio)
         if scaled_size != self.screenshot_label.pixmap().size():
             self.update_screenshot_label()
 
@@ -85,14 +86,14 @@ class Screenshot(QWidget):
     @Slot()
     def save_screenshot(self):
         fmt = "png"  # In order to avoid shadowing built-in format
-        initial_path = QStandardPaths.writableLocation(QStandardPaths.PicturesLocation)
+        initial_path = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.PicturesLocation)  # noqa: E501
         if not initial_path:
             initial_path = QDir.currentPath()
         initial_path += f"/untitled.{fmt}"
 
         fileDialog = QFileDialog(self, "Save As", initial_path)
-        fileDialog.setAcceptMode(QFileDialog.AcceptSave)
-        fileDialog.setFileMode(QFileDialog.AnyFile)
+        fileDialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+        fileDialog.setFileMode(QFileDialog.FileMode.AnyFile)
         fileDialog.setDirectory(initial_path)
         mime_types = []
 
@@ -101,7 +102,7 @@ class Screenshot(QWidget):
         fileDialog.setMimeTypeFilters(mime_types)
         fileDialog.selectMimeTypeFilter("image/" + fmt)
         fileDialog.setDefaultSuffix(fmt)
-        if fileDialog.exec() != QDialog.Accepted:
+        if fileDialog.exec() != QDialog.DialogCode.Accepted:
             return
 
         file_name = fileDialog.selectedFiles()[0]
@@ -143,8 +144,8 @@ class Screenshot(QWidget):
         self.screenshot_label.setPixmap(
             self.original_pixmap.scaled(
                 self.screenshot_label.size(),
-                Qt.KeepAspectRatio,
-                Qt.SmoothTransformation,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
             )
         )
 

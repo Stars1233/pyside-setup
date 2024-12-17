@@ -46,7 +46,7 @@ class MainWindow(QMainWindow):
         self.letters.setCurrentIndex(tab_index)
 
         cursor = editor.textCursor()
-        cursor.movePosition(QTextCursor.Start)
+        cursor.movePosition(QTextCursor.MoveOperation.Start)
         top_frame = cursor.currentFrame()
         top_frame_format = top_frame.frameFormat()
         top_frame_format.setPadding(16)
@@ -54,13 +54,13 @@ class MainWindow(QMainWindow):
 
         text_format = QTextCharFormat()
         bold_format = QTextCharFormat()
-        bold_format.setFontWeight(QFont.Bold)
+        bold_format.setFontWeight(QFont.Weight.Bold)
 
         reference_frame_format = QTextFrameFormat()
         reference_frame_format.setBorder(1)
         reference_frame_format.setPadding(8)
-        reference_frame_format.setPosition(QTextFrameFormat.FloatRight)
-        reference_frame_format.setWidth(QTextLength(QTextLength.PercentageLength, 40))
+        reference_frame_format.setPosition(QTextFrameFormat.Position.FloatRight)
+        reference_frame_format.setWidth(QTextLength(QTextLength.Type.PercentageLength, 40))
         cursor.insertFrame(reference_frame_format)
 
         cursor.insertText("A company", bold_format)
@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
         cursor.insertBlock()
 
         body_frame_format = QTextFrameFormat()
-        body_frame_format.setWidth(QTextLength(QTextLength.PercentageLength, 100))
+        body_frame_format.setWidth(QTextLength(QTextLength.Type.PercentageLength, 100))
         cursor.insertFrame(body_frame_format)
 
         cursor.insertText("I would like to place an order for the following items:", text_format)
@@ -95,7 +95,7 @@ class MainWindow(QMainWindow):
         cursor.insertBlock()
 
         order_table_format = QTextTableFormat()
-        order_table_format.setAlignment(Qt.AlignHCenter)
+        order_table_format.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         order_table = cursor.insertTable(1, 2, order_table_format)
 
         order_frame_format = cursor.currentFrame().frameFormat()
@@ -189,7 +189,7 @@ class DetailsDialog(QDialog):
 
         name_label = QLabel("Name:")
         address_label = QLabel("Address:")
-        address_label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        address_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
 
         self._name_edit = QLineEdit()
         self._address_edit = QTextEdit()
@@ -197,7 +197,8 @@ class DetailsDialog(QDialog):
 
         self.setup_items_table()
 
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok
+                                      | QDialogButtonBox.StandardButton.Cancel)
 
         button_box.accepted.connect(self.verify)
         button_box.rejected.connect(self.reject)
@@ -218,7 +219,7 @@ class DetailsDialog(QDialog):
 
         for row, item in enumerate(self.items):
             name = QTableWidgetItem(item)
-            name.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+            name.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
             self._items_table.setItem(row, 0, name)
             quantity = QTableWidgetItem('1')
             self._items_table.setItem(row, 1, quantity)

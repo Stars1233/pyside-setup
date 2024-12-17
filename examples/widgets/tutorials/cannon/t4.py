@@ -19,7 +19,7 @@ class MyWidget(QWidget):
 
         self.quit = QPushButton("Quit", self)
         self.quit.setGeometry(62, 40, 75, 30)
-        self.quit.setFont(QFont("Times", 18, QFont.Bold))
+        self.quit.setFont(QFont("Times", 18, QFont.Weight.Bold))
 
         self.quit.clicked.connect(qApp.quit)  # noqa: F821
 

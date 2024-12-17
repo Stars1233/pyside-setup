@@ -26,7 +26,7 @@ class Dialog(QDialog):
         main_layout.addWidget(self._rotable_group_box, 0, 0)
         main_layout.addWidget(self._options_group_box, 1, 0)
         main_layout.addWidget(self._button_box, 2, 0)
-        main_layout.setSizeConstraint(QLayout.SetMinimumSize)
+        main_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
 
         self._main_layout = main_layout
         self.setLayout(self._main_layout)
@@ -102,7 +102,7 @@ class Dialog(QDialog):
 
         buttons_orientation_combo_box = QComboBox()
         buttons_orientation_combo_box.addItem("Horizontal", Qt.Orientation.Horizontal)
-        buttons_orientation_combo_box.addItem("Vertical", Qt.Vertical)
+        buttons_orientation_combo_box.addItem("Vertical", Qt.Orientation.Vertical)
         buttons_orientation_combo_box.currentIndexChanged[int].connect(
             self.buttons_orientation_changed)
 
@@ -117,10 +117,10 @@ class Dialog(QDialog):
     def create_button_box(self):
         self._button_box = QDialogButtonBox()
 
-        close_button = self._button_box.addButton(QDialogButtonBox.Close)
-        help_button = self._button_box.addButton(QDialogButtonBox.Help)
+        close_button = self._button_box.addButton(QDialogButtonBox.StandardButton.Close)
+        help_button = self._button_box.addButton(QDialogButtonBox.StandardButton.Help)
         rotate_widgets_button = self._button_box.addButton(
-            "Rotate &Widgets", QDialogButtonBox.ActionRole)
+            "Rotate &Widgets", QDialogButtonBox.ButtonRole.ActionRole)
 
         rotate_widgets_button.clicked.connect(self.rotate_widgets)
         close_button.clicked.connect(self.close)

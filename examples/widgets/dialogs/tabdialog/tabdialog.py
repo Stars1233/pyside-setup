@@ -35,7 +35,7 @@ class TabDialog(QDialog):
         tab_widget.addTab(ApplicationsTab(file_info, self), "Applications")
 
         button_box = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
 
         button_box.accepted.connect(self.accept)
@@ -57,20 +57,20 @@ class GeneralTab(QWidget):
 
         path_label = QLabel("Path:")
         path_value_label = QLabel(file_info.absoluteFilePath())
-        path_value_label.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        path_value_label.setFrameStyle(QFrame.Shape.Panel | QFrame.Shadow.Sunken)
 
         size_label = QLabel("Size:")
         size = file_info.size() / 1024
         size_value_label = QLabel(f"{size} K")
-        size_value_label.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        size_value_label.setFrameStyle(QFrame.Shape.Panel | QFrame.Shadow.Sunken)
 
         last_read_label = QLabel("Last Read:")
         last_read_value_label = QLabel(file_info.lastRead().toString())
-        last_read_value_label.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        last_read_value_label.setFrameStyle(QFrame.Shape.Panel | QFrame.Shadow.Sunken)
 
         last_mod_label = QLabel("Last Modified:")
         last_mod_value_label = QLabel(file_info.lastModified().toString())
-        last_mod_value_label.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        last_mod_value_label.setFrameStyle(QFrame.Shape.Panel | QFrame.Shadow.Sunken)
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(file_name_label)
@@ -109,11 +109,11 @@ class PermissionsTab(QWidget):
 
         owner_label = QLabel("Owner")
         owner_value_label = QLabel(file_info.owner())
-        owner_value_label.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        owner_value_label.setFrameStyle(QFrame.Shape.Panel | QFrame.Shadow.Sunken)
 
         group_label = QLabel("Group")
         group_value_label = QLabel(file_info.group())
-        group_value_label.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        group_value_label.setFrameStyle(QFrame.Shape.Panel | QFrame.Shadow.Sunken)
 
         permissions_layout = QVBoxLayout()
         permissions_layout.addWidget(readable)

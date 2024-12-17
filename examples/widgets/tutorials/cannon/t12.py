@@ -38,7 +38,7 @@ class LCDRange(QWidget):
         self.slider.setRange(0, 99)
         self.slider.setValue(0)
         self.label = QLabel()
-        self.label.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        self.label.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
 
         self.slider.valueChanged.connect(lcd.display)
         self.slider.valueChanged.connect(self.value_changed)
@@ -169,20 +169,20 @@ class CannonField(QWidget):
             self.paint_target(painter)
 
     def paint_shot(self, painter):
-        painter.setPen(Qt.NoPen)
-        painter.setBrush(Qt.black)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(Qt.GlobalColor.black)
         painter.drawRect(self.shot_rect())
 
     def paint_target(self, painter):
-        painter.setPen(Qt.black)
-        painter.setBrush(Qt.red)
+        painter.setPen(Qt.GlobalColor.black)
+        painter.setBrush(Qt.GlobalColor.red)
         painter.drawRect(self.target_rect())
 
     barrel_rect = QRect(33, -4, 15, 8)
 
     def paint_cannon(self, painter):
-        painter.setPen(Qt.NoPen)
-        painter.setBrush(Qt.blue)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(Qt.GlobalColor.blue)
 
         painter.save()
         painter.translate(0, self.height())
@@ -225,7 +225,7 @@ class MyWidget(QWidget):
         super().__init__(parent)
 
         quit = QPushButton("&Quit")
-        quit.setFont(QFont("Times", 18, QFont.Bold))
+        quit.setFont(QFont("Times", 18, QFont.Weight.Bold))
 
         quit.clicked.connect(qApp.quit)  # noqa: F821
 
@@ -244,7 +244,7 @@ class MyWidget(QWidget):
         cannon_field.force_changed.connect(force.set_value)
 
         shoot = QPushButton("&Shoot")
-        shoot.setFont(QFont("Times", 18, QFont.Bold))
+        shoot.setFont(QFont("Times", 18, QFont.Weight.Bold))
 
         shoot.clicked.connect(cannon_field.shoot)
 

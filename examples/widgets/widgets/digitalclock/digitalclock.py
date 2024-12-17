@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QApplication, QLCDNumber
 class DigitalClock(QLCDNumber):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setSegmentStyle(QLCDNumber.Filled)
+        self.setSegmentStyle(QLCDNumber.SegmentStyle.Filled)
         self.setDigitCount(8)
 
         self.timer = QTimer(self)

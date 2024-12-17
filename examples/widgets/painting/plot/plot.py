@@ -53,7 +53,7 @@ class PlotWidget(QWidget):
     def paintEvent(self, event):
         with QPainter(self) as painter:
             rect = QRect(QPoint(0, 0), self.size())
-            painter.fillRect(rect, Qt.white)
+            painter.fillRect(rect, Qt.GlobalColor.white)
             painter.translate(-self._points[0].x(), 0)
             painter.drawPolyline(self._points)
 

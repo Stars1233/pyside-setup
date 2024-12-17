@@ -63,7 +63,7 @@ class BorderLayout(QLayout):
         self.add(QWidgetItem(widget), position)
 
     def expandingDirections(self) -> Qt.Orientations:
-        return Qt.Orientation.Horizontal | Qt.Vertical
+        return Qt.Orientation.Horizontal | Qt.Orientation.Vertical
 
     def hasHeightForWidth(self) -> bool:
         return False
@@ -238,7 +238,7 @@ class Window(QWidget):
     @staticmethod
     def create_label(text: str):
         label = QLabel(text)
-        label.setFrameStyle(QFrame.Box | QFrame.Raised)
+        label.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Raised)
         return label
 
 

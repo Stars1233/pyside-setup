@@ -37,14 +37,14 @@ class PainterWidget(QWidget):
 
         self.setFixedSize(680, 480)
         self.pixmap = QPixmap(self.size())
-        self.pixmap.fill(Qt.white)
+        self.pixmap.fill(Qt.GlobalColor.white)
 
         self.previous_pos = None
         self.painter = QPainter()
         self.pen = QPen()
         self.pen.setWidth(10)
-        self.pen.setCapStyle(Qt.RoundCap)
-        self.pen.setJoinStyle(Qt.RoundJoin)
+        self.pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        self.pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
 
     def paintEvent(self, event: QPaintEvent):
         """Override method from QWidget
@@ -98,12 +98,12 @@ class PainterWidget(QWidget):
     def load(self, filename: str):
         """ load pixmap from filename """
         self.pixmap.load(filename)
-        self.pixmap = self.pixmap.scaled(self.size(), Qt.KeepAspectRatio)
+        self.pixmap = self.pixmap.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio)
         self.update()
 
     def clear(self):
         """ Clear the pixmap """
-        self.pixmap.fill(Qt.white)
+        self.pixmap.fill(Qt.GlobalColor.white)
         self.update()
 
 
@@ -115,19 +115,19 @@ class MainWindow(QMainWindow):
 
         self.painter_widget = PainterWidget()
         self.bar = self.addToolBar("Menu")
-        self.bar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        self.bar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         self._save_action = self.bar.addAction(
-            qApp.style().standardIcon(QStyle.SP_DialogSaveButton),  # noqa: F821
+            qApp.style().standardIcon(QStyle.StandardPixmap.SP_DialogSaveButton),  # noqa: F821
             "Save", self.on_save
         )
-        self._save_action.setShortcut(QKeySequence.Save)
+        self._save_action.setShortcut(QKeySequence.StandardKey.Save)
         self._open_action = self.bar.addAction(
-            qApp.style().standardIcon(QStyle.SP_DialogOpenButton),  # noqa: F821
+            qApp.style().standardIcon(QStyle.StandardPixmap.SP_DialogOpenButton),  # noqa: F821
             "Open", self.on_open
         )
-        self._open_action.setShortcut(QKeySequence.Open)
+        self._open_action.setShortcut(QKeySequence.StandardKey.Open)
         self.bar.addAction(
-            qApp.style().standardIcon(QStyle.SP_DialogResetButton),  # noqa: F821
+            qApp.style().standardIcon(QStyle.StandardPixmap.SP_DialogResetButton),  # noqa: F821
             "Clear",
             self.painter_widget.clear,
         )
@@ -139,7 +139,7 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self.painter_widget)
 
-        self.color = Qt.black
+        self.color = Qt.GlobalColor.black
         self.set_color(self.color)
 
         self.mime_type_filters = ["image/png", "image/jpeg"]
@@ -149,14 +149,14 @@ class MainWindow(QMainWindow):
 
         dialog = QFileDialog(self, "Save File")
         dialog.setMimeTypeFilters(self.mime_type_filters)
-        dialog.setFileMode(QFileDialog.AnyFile)
-        dialog.setAcceptMode(QFileDialog.AcceptSave)
+        dialog.setFileMode(QFileDialog.FileMode.AnyFile)
+        dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
         dialog.setDefaultSuffix("png")
         dialog.setDirectory(
-            QStandardPaths.writableLocation(QStandardPaths.PicturesLocation)
+            QStandardPaths.writableLocation(QStandardPaths.StandardLocation.PicturesLocation)
         )
 
-        if dialog.exec() == QFileDialog.Accepted:
+        if dialog.exec() == QFileDialog.DialogCode.Accepted:
             if dialog.selectedFiles():
                 self.painter_widget.save(dialog.selectedFiles()[0])
 
@@ -165,14 +165,14 @@ class MainWindow(QMainWindow):
 
         dialog = QFileDialog(self, "Save File")
         dialog.setMimeTypeFilters(self.mime_type_filters)
-        dialog.setFileMode(QFileDialog.ExistingFile)
-        dialog.setAcceptMode(QFileDialog.AcceptOpen)
+        dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+        dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
         dialog.setDefaultSuffix("png")
         dialog.setDirectory(
-            QStandardPaths.writableLocation(QStandardPaths.PicturesLocation)
+            QStandardPaths.writableLocation(QStandardPaths.StandardLocation.PicturesLocation)
         )
 
-        if dialog.exec() == QFileDialog.Accepted:
+        if dialog.exec() == QFileDialog.DialogCode.Accepted:
             if dialog.selectedFiles():
                 self.painter_widget.load(dialog.selectedFiles()[0])
 
@@ -184,7 +184,7 @@ class MainWindow(QMainWindow):
         if color:
             self.set_color(color)
 
-    def set_color(self, color: QColor = Qt.black):
+    def set_color(self, color: QColor = Qt.GlobalColor.black):
 
         self.color = color
         # Create color icon

@@ -87,7 +87,7 @@ class MyWidget(QWidget):
         super().__init__(parent)
 
         quit = QPushButton("Quit")
-        quit.setFont(QFont("Times", 18, QFont.Bold))
+        quit.setFont(QFont("Times", 18, QFont.Weight.Bold))
 
         quit.clicked.connect(qApp.quit)  # noqa: F821
 

@@ -18,8 +18,8 @@ class DragLabel(QLabel):
         super().__init__(text, parent)
 
         self.setAutoFillBackground(True)
-        self.setFrameShape(QFrame.Panel)
-        self.setFrameShadow(QFrame.Raised)
+        self.setFrameShape(QFrame.Shape.Panel)
+        self.setFrameShadow(QFrame.Shadow.Raised)
 
     def mousePressEvent(self, event):
         hot_spot = event.position().toPoint()
@@ -38,9 +38,10 @@ class DragLabel(QLabel):
         drag.setPixmap(pixmap)
         drag.setHotSpot(hot_spot)
 
-        drop_action = drag.exec(Qt.CopyAction | Qt.MoveAction, Qt.CopyAction)
+        drop_action = drag.exec(Qt.DropAction.CopyAction | Qt.DropAction.MoveAction,
+                                Qt.DropAction.CopyAction)
 
-        if drop_action == Qt.MoveAction:
+        if drop_action == Qt.DropAction.MoveAction:
             self.close()
             self.update()
 
@@ -50,7 +51,7 @@ class DragWidget(QWidget):
         super().__init__(parent)
 
         dictionary_file = QFile(':/dictionary/words.txt')
-        dictionary_file.open(QIODevice.ReadOnly)
+        dictionary_file.open(QIODevice.OpenModeFlag.ReadOnly)
 
         x = 5
         y = 5
@@ -65,7 +66,7 @@ class DragWidget(QWidget):
                 y += word_label.height() + 2
 
         new_palette = self.palette()
-        new_palette.setColor(QPalette.Window, Qt.white)
+        new_palette.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.white)
         self.setPalette(new_palette)
 
         self.setAcceptDrops(True)
@@ -75,7 +76,7 @@ class DragWidget(QWidget):
     def dragEnterEvent(self, event):
         if event.mimeData().hasText():
             if event.source() in self.children():
-                event.setDropAction(Qt.MoveAction)
+                event.setDropAction(Qt.DropAction.MoveAction)
                 event.accept()
             else:
                 event.acceptProposedAction()
@@ -102,7 +103,7 @@ class DragWidget(QWidget):
                 position += QPoint(new_label.width(), 0)
 
             if event.source() in self.children():
-                event.setDropAction(Qt.MoveAction)
+                event.setDropAction(Qt.DropAction.MoveAction)
                 event.accept()
             else:
                 event.acceptProposedAction()

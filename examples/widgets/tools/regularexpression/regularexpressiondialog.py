@@ -56,13 +56,13 @@ def codeToPattern(code: str) -> str:
 
 def createHorizontalSeparator() -> QFrame:
     result = QFrame()
-    result.setFrameStyle(QFrame.HLine | QFrame.Sunken)
+    result.setFrameStyle(QFrame.Shape.HLine | QFrame.Shadow.Sunken)
     return result
 
 
 def createVerticalSeparator() -> QFrame:
     result = QFrame()
-    result.setFrameStyle(QFrame.VLine | QFrame.Sunken)
+    result.setFrameStyle(QFrame.Shape.VLine | QFrame.Shadow.Sunken)
     return result
 
 
@@ -102,7 +102,7 @@ class PatternLineEdit(QLineEdit):
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         menu = self.createStandardContextMenu()
-        menu.setAttribute(Qt.WA_DeleteOnClose)
+        menu.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         menu.addSeparator()
         self.escapeSelectionAction.setEnabled(self.hasSelectedText())
         menu.addAction(self.escapeSelectionAction)
@@ -118,8 +118,8 @@ class DisplayLineEdit(QLineEdit):
         self.setReadOnly(True)
         self.disablePalette: QPalette = self.palette()
         self.disablePalette.setBrush(
-            QPalette.Base,
-            self.disablePalette.brush(QPalette.Disabled, QPalette.Base),
+            QPalette.ColorRole.Base,
+            self.disablePalette.brush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Base),
         )
         self.setPalette(self.disablePalette)
 
@@ -129,7 +129,7 @@ class DisplayLineEdit(QLineEdit):
         self.copyAction.triggered.connect(
             lambda: QGuiApplication.clipboard().setText(self.text())
         )
-        self.addAction(self.copyAction, QLineEdit.TrailingPosition)
+        self.addAction(self.copyAction, QLineEdit.ActionPosition.TrailingPosition)
 
 
 class RegularExpressionDialog(QDialog):
@@ -167,7 +167,7 @@ class RegularExpressionDialog(QDialog):
 
     def setTextColor(self, widget: QWidget, color: QColor):
         self.palette: QPalette = widget.palette()
-        self.palette.setColor(QPalette.Text, color)
+        self.palette.setColor(QPalette.ColorRole.Text, color)
         widget.setPalette(self.palette)
 
     @Slot()
@@ -183,7 +183,7 @@ class RegularExpressionDialog(QDialog):
 
         self.setTextColor(
             self.patternLineEdit,
-            self.subjectTextEdit.palette().color(QPalette.Text),
+            self.subjectTextEdit.palette().color(QPalette.ColorRole.Text),
         )
         self.matchDetailsTreeWidget.clear()
         self.namedGroupsTreeWidget.clear()
@@ -214,28 +214,28 @@ class RegularExpressionDialog(QDialog):
         matchType: QRegularExpression.MatchType = QRegularExpression.MatchType(
             self.matchTypeComboBox.currentData()
         )
-        patternOptions = QRegularExpression.NoPatternOption
-        matchOptions = QRegularExpression.NoMatchOption
+        patternOptions = QRegularExpression.PatternOption.NoPatternOption
+        matchOptions = QRegularExpression.MatchOption.NoMatchOption
 
         if self.anchoredMatchOptionCheckBox.isChecked():
-            matchOptions |= QRegularExpression.AnchorAtOffsetMatchOption
+            matchOptions |= QRegularExpression.MatchOption.AnchorAtOffsetMatchOption
         if self.dontCheckSubjectStringMatchOptionCheckBox.isChecked():
-            matchOptions |= QRegularExpression.DontCheckSubjectStringMatchOption
+            matchOptions |= QRegularExpression.MatchOption.DontCheckSubjectStringMatchOption
 
         if self.caseInsensitiveOptionCheckBox.isChecked():
-            patternOptions |= QRegularExpression.CaseInsensitiveOption
+            patternOptions |= QRegularExpression.PatternOption.CaseInsensitiveOption
         if self.dotMatchesEverythingOptionCheckBox.isChecked():
-            patternOptions |= QRegularExpression.DotMatchesEverythingOption
+            patternOptions |= QRegularExpression.PatternOption.DotMatchesEverythingOption
         if self.multilineOptionCheckBox.isChecked():
-            patternOptions |= QRegularExpression.MultilineOption
+            patternOptions |= QRegularExpression.PatternOption.MultilineOption
         if self.extendedPatternSyntaxOptionCheckBox.isChecked():
-            patternOptions |= QRegularExpression.ExtendedPatternSyntaxOption
+            patternOptions |= QRegularExpression.PatternOption.ExtendedPatternSyntaxOption
         if self.invertedGreedinessOptionCheckBox.isChecked():
-            patternOptions |= QRegularExpression.InvertedGreedinessOption
+            patternOptions |= QRegularExpression.PatternOption.InvertedGreedinessOption
         if self.dontCaptureOptionCheckBox.isChecked():
-            patternOptions |= QRegularExpression.DontCaptureOption
+            patternOptions |= QRegularExpression.PatternOption.DontCaptureOption
         if self.useUnicodePropertiesOptionCheckBox.isChecked():
-            patternOptions |= QRegularExpression.UseUnicodePropertiesOption
+            patternOptions |= QRegularExpression.PatternOption.UseUnicodePropertiesOption
 
         self.regularExpression.setPatternOptions(patternOptions)
 
@@ -302,7 +302,7 @@ class RegularExpressionDialog(QDialog):
         self.horizontalLayout.addWidget(createVerticalSeparator())
         self.horizontalLayout.addWidget(self.setupInfoUi())
 
-        self._font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
+        self._font = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
         self.patternLineEdit.setFont(self._font)
         self.rawStringLiteralLineEdit.setFont(self._font)
         self.escapedPatternLineEdit.setFont(self._font)
@@ -314,7 +314,7 @@ class RegularExpressionDialog(QDialog):
         container = QWidget()
 
         form_layout = QFormLayout(container)
-        form_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        form_layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         form_layout.setContentsMargins(QMargins())
 
         form_layout.addRow(QLabel("<h3>Options</h3>"))
@@ -351,15 +351,15 @@ class RegularExpressionDialog(QDialog):
         form_layout.addRow("Match &offset:", self.offsetSpinBox)
 
         self.matchTypeComboBox = QComboBox()
-        self.matchTypeComboBox.addItem("Normal", QRegularExpression.NormalMatch)
+        self.matchTypeComboBox.addItem("Normal", QRegularExpression.MatchType.NormalMatch)
         self.matchTypeComboBox.addItem(
             "Partial prefer complete",
-            QRegularExpression.PartialPreferCompleteMatch,
+            QRegularExpression.MatchType.PartialPreferCompleteMatch,
         )
         self.matchTypeComboBox.addItem(
-            "Partial prefer first", QRegularExpression.PartialPreferFirstMatch
+            "Partial prefer first", QRegularExpression.MatchType.PartialPreferFirstMatch
         )
-        self.matchTypeComboBox.addItem("No match", QRegularExpression.NoMatch)
+        self.matchTypeComboBox.addItem("No match", QRegularExpression.MatchType.NoMatch)
         form_layout.addRow("Match &type:", self.matchTypeComboBox)
 
         self.dontCheckSubjectStringMatchOptionCheckBox = QCheckBox(
@@ -382,7 +382,7 @@ class RegularExpressionDialog(QDialog):
         container = QWidget()
 
         form_layout = QFormLayout(container)
-        form_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        form_layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         form_layout.setContentsMargins(QMargins())
 
         self.matchInfoLabel = QLabel("<h3>Match information</h3>")
@@ -393,7 +393,7 @@ class RegularExpressionDialog(QDialog):
         self.matchDetailsTreeWidget.setHeaderLabels(
             ["Match index", "Group index", "Captured string"]
         )
-        self.matchDetailsTreeWidget.setSizeAdjustPolicy(QTreeWidget.AdjustToContents)
+        self.matchDetailsTreeWidget.setSizeAdjustPolicy(QTreeWidget.SizeAdjustPolicy.AdjustToContents)  # noqa: E501
         form_layout.addRow("Match details:", self.matchDetailsTreeWidget)
 
         form_layout.addRow(createHorizontalSeparator())
@@ -407,7 +407,7 @@ class RegularExpressionDialog(QDialog):
 
         self.namedGroupsTreeWidget = QTreeWidget()
         self.namedGroupsTreeWidget.setHeaderLabels(["Index", "Named group"])
-        self.namedGroupsTreeWidget.setSizeAdjustPolicy(QTreeWidget.AdjustToContents)
+        self.namedGroupsTreeWidget.setSizeAdjustPolicy(QTreeWidget.SizeAdjustPolicy.AdjustToContents)  # noqa: E501
         self.namedGroupsTreeWidget.setRootIsDecorated(False)
         form_layout.addRow("Named groups:", self.namedGroupsTreeWidget)
 
@@ -416,7 +416,7 @@ class RegularExpressionDialog(QDialog):
     def setupTextUi(self):
         container = QWidget()
         form_layout = QFormLayout(container)
-        form_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        form_layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         form_layout.setContentsMargins(QMargins())
 
         self.regexpAndSubjectLabel = QLabel(

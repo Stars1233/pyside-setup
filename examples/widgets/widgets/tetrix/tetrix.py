@@ -33,23 +33,23 @@ class TetrixWindow(QWidget):
         self.board = TetrixBoard()
 
         next_piece_label = QLabel()
-        next_piece_label.setFrameStyle(QFrame.Box | QFrame.Raised)
-        next_piece_label.setAlignment(Qt.AlignCenter)
+        next_piece_label.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Raised)
+        next_piece_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.board.set_next_piece_label(next_piece_label)
 
         score_lcd = QLCDNumber(5)
-        score_lcd.setSegmentStyle(QLCDNumber.Filled)
+        score_lcd.setSegmentStyle(QLCDNumber.SegmentStyle.Filled)
         level_lcd = QLCDNumber(2)
-        level_lcd.setSegmentStyle(QLCDNumber.Filled)
+        level_lcd.setSegmentStyle(QLCDNumber.SegmentStyle.Filled)
         lines_lcd = QLCDNumber(5)
-        lines_lcd.setSegmentStyle(QLCDNumber.Filled)
+        lines_lcd.setSegmentStyle(QLCDNumber.SegmentStyle.Filled)
 
         start_button = QPushButton("&Start")
-        start_button.setFocusPolicy(Qt.NoFocus)
+        start_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         quit_button = QPushButton("&Quit")
-        quit_button.setFocusPolicy(Qt.NoFocus)
+        quit_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         pause_button = QPushButton("&Pause")
-        pause_button.setFocusPolicy(Qt.NoFocus)
+        pause_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         start_button.clicked.connect(self.board.start)
         pause_button.clicked.connect(self.board.pause)
@@ -77,7 +77,7 @@ class TetrixWindow(QWidget):
 
     def create_label(self, text):
         lbl = QLabel(text)
-        lbl.setAlignment(Qt.AlignHCenter | Qt.AlignBottom)
+        lbl.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignBottom)
         return lbl
 
 
@@ -107,8 +107,8 @@ class TetrixBoard(QFrame):
         self.level = 0
         self.board = None
 
-        self.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-        self.setFocusPolicy(Qt.StrongFocus)
+        self.setFrameStyle(QFrame.Shape.Panel | QFrame.Shadow.Sunken)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self._is_started = False
         self._is_paused = False
         self.clear_board()
@@ -181,7 +181,7 @@ class TetrixBoard(QFrame):
             rect = self.contentsRect()
 
             if self._is_paused:
-                painter.drawText(rect, Qt.AlignCenter, "Pause")
+                painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, "Pause")
                 return
 
             board_top = rect.bottom() - TetrixBoard.board_height * self.square_height()
@@ -209,17 +209,17 @@ class TetrixBoard(QFrame):
             return
 
         key = event.key()
-        if key == Qt.Key_Left:
+        if key == Qt.Key.Key_Left:
             self.try_move(self._cur_piece, self._cur_x - 1, self._cur_y)
-        elif key == Qt.Key_Right:
+        elif key == Qt.Key.Key_Right:
             self.try_move(self._cur_piece, self._cur_x + 1, self._cur_y)
-        elif key == Qt.Key_Down:
+        elif key == Qt.Key.Key_Down:
             self.try_move(self._cur_piece.rotated_right(), self._cur_x, self._cur_y)
-        elif key == Qt.Key_Up:
+        elif key == Qt.Key.Key_Up:
             self.try_move(self._cur_piece.rotated_left(), self._cur_x, self._cur_y)
-        elif key == Qt.Key_Space:
+        elif key == Qt.Key.Key_Space:
             self.drop_down()
-        elif key == Qt.Key_D:
+        elif key == Qt.Key.Key_D:
             self.one_line_down()
         else:
             super(TetrixBoard, self).keyPressEvent(event)

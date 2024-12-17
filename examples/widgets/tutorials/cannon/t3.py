@@ -18,7 +18,7 @@ if __name__ == '__main__':
     window.resize(200, 120)
 
     quit = QPushButton("Quit", window)
-    quit.setFont(QFont("Times", 18, QFont.Bold))
+    quit.setFont(QFont("Times", 18, QFont.Weight.Bold))
     quit.setGeometry(10, 40, 180, 40)
     quit.clicked.connect(app.quit)
 

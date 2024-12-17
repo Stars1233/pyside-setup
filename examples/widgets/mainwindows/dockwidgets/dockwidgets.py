@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
         self._text_edit.clear()
 
         cursor = self._text_edit.textCursor()
-        cursor.movePosition(QTextCursor.Start)
+        cursor.movePosition(QTextCursor.MoveOperation.Start)
         top_frame = cursor.currentFrame()
         top_frame_format = top_frame.frameFormat()
         top_frame_format.setPadding(16)
@@ -48,14 +48,14 @@ class MainWindow(QMainWindow):
 
         text_format = QTextCharFormat()
         bold_format = QTextCharFormat()
-        bold_format.setFontWeight(QFont.Bold)
+        bold_format.setFontWeight(QFont.Weight.Bold)
         italic_format = QTextCharFormat()
         italic_format.setFontItalic(True)
 
         table_format = QTextTableFormat()
         table_format.setBorder(1)
         table_format.setCellPadding(16)
-        table_format.setAlignment(Qt.AlignRight)
+        table_format.setAlignment(Qt.AlignmentFlag.AlignRight)
         cursor.insertTable(1, 1, table_format)
         cursor.insertText("The Firm", bold_format)
         cursor.insertBlock()
@@ -95,9 +95,9 @@ class MainWindow(QMainWindow):
     def save(self):
         dialog = QFileDialog(self, "Choose a file name")
         dialog.setMimeTypeFilters(['text/html'])
-        dialog.setAcceptMode(QFileDialog.AcceptSave)
+        dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
         dialog.setDefaultSuffix('html')
-        if dialog.exec() != QDialog.Accepted:
+        if dialog.exec() != QDialog.DialogCode.Accepted:
             return
 
         filename = dialog.selectedFiles()[0]
@@ -162,24 +162,24 @@ class MainWindow(QMainWindow):
     def create_actions(self):
         icon = QIcon.fromTheme('document-new', QIcon(':/images/new.png'))
         self._new_letter_act = QAction(icon, "&New Letter",
-                                       self, shortcut=QKeySequence.New,
+                                       self, shortcut=QKeySequence.StandardKey.New,
                                        statusTip="Create a new form letter",
                                        triggered=self.new_letter)
 
         icon = QIcon.fromTheme('document-save', QIcon(':/images/save.png'))
         self._save_act = QAction(icon, "&Save...", self,
-                                 shortcut=QKeySequence.Save,
+                                 shortcut=QKeySequence.StandardKey.Save,
                                  statusTip="Save the current form letter", triggered=self.save)
 
         icon = QIcon.fromTheme('document-print', QIcon(':/images/print.png'))
         self._print_act = QAction(icon, "&Print...", self,
-                                  shortcut=QKeySequence.Print,
+                                  shortcut=QKeySequence.StandardKey.Print,
                                   statusTip="Print the current form letter",
                                   triggered=self.print_)
 
         icon = QIcon.fromTheme('edit-undo', QIcon(':/images/undo.png'))
         self._undo_act = QAction(icon, "&Undo", self,
-                                 shortcut=QKeySequence.Undo,
+                                 shortcut=QKeySequence.StandardKey.Undo,
                                  statusTip="Undo the last editing action", triggered=self.undo)
 
         self._quit_act = QAction("&Quit", self, shortcut="Ctrl+Q",
@@ -226,7 +226,8 @@ class MainWindow(QMainWindow):
 
     def create_dock_windows(self):
         dock = QDockWidget("Customers", self)
-        dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea
+                             | Qt.DockWidgetArea.RightDockWidgetArea)
         self._customer_list = QListWidget(dock)
         self._customer_list.addItems((
             "John Doe, Harmony Enterprises, 12 Lakeside, Ambleton",
@@ -236,7 +237,7 @@ class MainWindow(QMainWindow):
             "Sol Harvey, Chicos Coffee, 53 New Springs, Eccleston",
             "Sally Hobart, Tiroli Tea, 67 Long River, Fedula"))
         dock.setWidget(self._customer_list)
-        self.addDockWidget(Qt.RightDockWidgetArea, dock)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
         self._view_menu.addAction(dock.toggleViewAction())
 
         dock = QDockWidget("Paragraphs", self)
@@ -260,7 +261,7 @@ class MainWindow(QMainWindow):
             "You made an overpayment (more than $5). Do you wish to buy more "
             "items, or should we return the excess to you?"))
         dock.setWidget(self._paragraphs_list)
-        self.addDockWidget(Qt.RightDockWidgetArea, dock)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
         self._view_menu.addAction(dock.toggleViewAction())
 
         self._customer_list.currentTextChanged.connect(self.insert_customer)

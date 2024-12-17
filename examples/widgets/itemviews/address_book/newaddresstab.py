@@ -26,7 +26,7 @@ class NewAddressTab(QWidget):
 
         layout = QVBoxLayout()
         layout.addWidget(description_label)
-        layout.addWidget(add_button, 0, Qt.AlignCenter)
+        layout.addWidget(add_button, 0, Qt.AlignmentFlag.AlignCenter)
 
         self.setLayout(layout)
 

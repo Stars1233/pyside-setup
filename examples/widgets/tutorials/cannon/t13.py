@@ -39,8 +39,8 @@ class LCDRange(QWidget):
         self.slider.setRange(0, 99)
         self.slider.setValue(0)
         self.label = QLabel()
-        self.label.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
-        self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        self.label.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+        self.label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
 
         self.slider.valueChanged.connect(lcd.display)
         self.slider.valueChanged.connect(self.value_changed)
@@ -185,9 +185,9 @@ class CannonField(QWidget):
     def paintEvent(self, event):
         with QPainter(self) as painter:
             if self._game_ended:
-                painter.setPen(Qt.black)
-                painter.setFont(QFont("Courier", 48, QFont.Bold))
-                painter.drawText(self.rect(), Qt.AlignCenter, "Game Over")
+                painter.setPen(Qt.GlobalColor.black)
+                painter.setFont(QFont("Courier", 48, QFont.Weight.Bold))
+                painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, "Game Over")
 
             self.paint_cannon(painter)
             if self.is_shooting():
@@ -196,20 +196,20 @@ class CannonField(QWidget):
                 self.paint_target(painter)
 
     def paint_shot(self, painter):
-        painter.setPen(Qt.NoPen)
-        painter.setBrush(Qt.black)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(Qt.GlobalColor.black)
         painter.drawRect(self.shot_rect())
 
     def paint_target(self, painter):
-        painter.setPen(Qt.black)
-        painter.setBrush(Qt.red)
+        painter.setPen(Qt.GlobalColor.black)
+        painter.setBrush(Qt.GlobalColor.red)
         painter.drawRect(self.target_rect())
 
     barrel_rect = QRect(33, -4, 15, 8)
 
     def paint_cannon(self, painter):
-        painter.setPen(Qt.NoPen)
-        painter.setBrush(Qt.blue)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(Qt.GlobalColor.blue)
 
         painter.save()
         painter.translate(0, self.height())
@@ -258,7 +258,7 @@ class GameBoard(QWidget):
         super().__init__(parent)
 
         quit = QPushButton("&Quit")
-        quit.setFont(QFont("Times", 18, QFont.Bold))
+        quit.setFont(QFont("Times", 18, QFont.Weight.Bold))
 
         quit.clicked.connect(qApp.quit)  # noqa: F821
 
@@ -280,13 +280,13 @@ class GameBoard(QWidget):
         self._cannon_field.missed.connect(self.missed)
 
         shoot = QPushButton("&Shoot")
-        shoot.setFont(QFont("Times", 18, QFont.Bold))
+        shoot.setFont(QFont("Times", 18, QFont.Weight.Bold))
 
         shoot.clicked.connect(self.fire)
         self._cannon_field.can_shoot.connect(shoot.setEnabled)
 
         restart = QPushButton("&New Game")
-        restart.setFont(QFont("Times", 18, QFont.Bold))
+        restart.setFont(QFont("Times", 18, QFont.Weight.Bold))
 
         restart.clicked.connect(self.new_game)
 

@@ -24,7 +24,7 @@ class FontInfoDialog(QDialog):
         text_edit.setReadOnly(True)
         text_edit.setFont(QFontDatabase.systemFont(QFontDatabase.FixedFont))
         main_layout.addWidget(text_edit)
-        button_box = QDialogButtonBox(QDialogButtonBox.Close, self)
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close, self)
         button_box.rejected.connect(self.reject)
         main_layout.addWidget(button_box)
 

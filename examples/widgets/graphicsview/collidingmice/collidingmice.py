@@ -58,12 +58,12 @@ class Mouse(QGraphicsItem):
         painter.drawEllipse(-10, -20, 20, 40)
 
         # Eyes.
-        painter.setBrush(Qt.white)
+        painter.setBrush(Qt.GlobalColor.white)
         painter.drawEllipse(-10, -17, 8, 8)
         painter.drawEllipse(2, -17, 8, 8)
 
         # Nose.
-        painter.setBrush(Qt.black)
+        painter.setBrush(Qt.GlobalColor.black)
         painter.drawEllipse(QRectF(-2, -22, 4, 4))
 
         # Pupils.
@@ -72,9 +72,9 @@ class Mouse(QGraphicsItem):
 
         # Ears.
         if self.scene().collidingItems(self):
-            painter.setBrush(Qt.red)
+            painter.setBrush(Qt.GlobalColor.red)
         else:
-            painter.setBrush(Qt.darkYellow)
+            painter.setBrush(Qt.GlobalColor.darkYellow)
 
         painter.drawEllipse(-17, -12, 16, 16)
         painter.drawEllipse(1, -12, 16, 16)
@@ -84,7 +84,7 @@ class Mouse(QGraphicsItem):
         path.cubicTo(-5, 22, -5, 22, 0, 25)
         path.cubicTo(5, 27, 5, 32, 0, 30)
         path.cubicTo(-5, 32, -5, 42, 0, 35)
-        painter.setBrush(Qt.NoBrush)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawPath(path)
 
     def advance(self, phase):
@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     scene = QGraphicsScene()
     scene.setSceneRect(-300, -300, 600, 600)
-    scene.setItemIndexMethod(QGraphicsScene.NoIndex)
+    scene.setItemIndexMethod(QGraphicsScene.ItemIndexMethod.NoIndex)
 
     for i in range(MOUSE_COUNT):
         mouse = Mouse()
@@ -166,9 +166,9 @@ if __name__ == '__main__':
     view = QGraphicsView(scene)
     view.setRenderHint(QPainter.RenderHint.Antialiasing)
     view.setBackgroundBrush(QBrush(QPixmap(':/images/cheese.jpg')))
-    view.setCacheMode(QGraphicsView.CacheBackground)
-    view.setViewportUpdateMode(QGraphicsView.BoundingRectViewportUpdate)
-    view.setDragMode(QGraphicsView.ScrollHandDrag)
+    view.setCacheMode(QGraphicsView.CacheModeFlag.CacheBackground)
+    view.setViewportUpdateMode(QGraphicsView.ViewportUpdateMode.BoundingRectViewportUpdate)
+    view.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
     view.setWindowTitle("Colliding Mice")
     view.resize(400, 300)
     view.show()

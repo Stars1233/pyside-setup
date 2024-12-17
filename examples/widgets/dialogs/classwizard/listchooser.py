@@ -34,7 +34,8 @@ class ValidatingInputDialog(QDialog):
         self._form_layout.addRow(label, self._lineedit)
         layout.addLayout(self._form_layout)
 
-        bb = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        bb = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok
+                              | QDialogButtonBox.StandardButton.Cancel)
         layout.addWidget(bb)
         bb.rejected.connect(self.reject)
         bb.accepted.connect(self.accept)

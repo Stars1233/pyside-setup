@@ -42,7 +42,7 @@ class StarRating:
         painter.save()
 
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
-        painter.setPen(Qt.NoPen)
+        painter.setPen(Qt.PenStyle.NoPen)
 
         if isEditable:
             painter.setBrush(palette.highlight())
@@ -55,7 +55,7 @@ class StarRating:
 
         for i in range(self.MAX_STAR_COUNT):
             if i < self.star_count:
-                painter.drawPolygon(self._star_polygon, Qt.WindingFill)
+                painter.drawPolygon(self._star_polygon, Qt.FillRule.WindingFill)
             elif isEditable:
                 painter.drawPolygon(self._diamond_polygon, Qt.WindingFill)
             painter.translate(1.0, 0.0)

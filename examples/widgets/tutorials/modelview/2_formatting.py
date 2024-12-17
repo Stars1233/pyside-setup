@@ -43,15 +43,15 @@ class MyModel(QAbstractTableModel):
 
         elif role == Qt.ItemDataRole.BackgroundRole:
             if row == 1 and col == 2:  # change background only for cell(1,2)
-                return QBrush(Qt.red)
+                return QBrush(Qt.GlobalColor.red)
 
         elif role == Qt.ItemDataRole.TextAlignmentRole:
             if row == 1 and col == 1:  # change text alignment only for cell(1,1)
-                return Qt.AlignRight | Qt.AlignVCenter
+                return Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
 
         elif role == Qt.ItemDataRole.CheckStateRole:
             if row == 1 and col == 0:  # add a checkbox to cell(1,0)
-                return Qt.Checked
+                return Qt.CheckState.Checked
 
         return None
 #! [1]

@@ -33,13 +33,13 @@ class ImageViewer(QMainWindow):
         self._scale_factor = 1.0
         self._first_file_dialog = True
         self._image_label = QLabel()
-        self._image_label.setBackgroundRole(QPalette.Base)
-        self._image_label.setSizePolicy(QSizePolicy.Ignored,
-                                        QSizePolicy.Ignored)
+        self._image_label.setBackgroundRole(QPalette.ColorRole.Base)
+        self._image_label.setSizePolicy(QSizePolicy.Policy.Ignored,
+                                        QSizePolicy.Policy.Ignored)
         self._image_label.setScaledContents(True)
 
         self._scroll_area = QScrollArea()
-        self._scroll_area.setBackgroundRole(QPalette.Dark)
+        self._scroll_area.setBackgroundRole(QPalette.ColorRole.Dark)
         self._scroll_area.setWidget(self._image_label)
         self._scroll_area.setVisible(False)
         self.setCentralWidget(self._scroll_area)
@@ -73,7 +73,8 @@ class ImageViewer(QMainWindow):
     def _set_image(self, new_image):
         self._image = new_image
         if self._image.colorSpace().isValid():
-            self._image.convertToColorSpace(QColorSpace.SRgb)
+            color_space = QColorSpace(QColorSpace.NamedColorSpace.SRgb)
+            self._image.convertToColorSpace(color_space)
         self._image_label.setPixmap(QPixmap.fromImage(self._image))
         self._scale_factor = 1.0
 
@@ -101,16 +102,16 @@ class ImageViewer(QMainWindow):
     @Slot()
     def _open(self):
         dialog = QFileDialog(self, "Open File")
-        self._initialize_image_filedialog(dialog, QFileDialog.AcceptOpen)
-        while (dialog.exec() == QDialog.Accepted
+        self._initialize_image_filedialog(dialog, QFileDialog.AcceptMode.AcceptOpen)
+        while (dialog.exec() == QDialog.DialogCode.Accepted
                and not self.load_file(dialog.selectedFiles()[0])):
             pass
 
     @Slot()
     def _save_as(self):
         dialog = QFileDialog(self, "Save File As")
-        self._initialize_image_filedialog(dialog, QFileDialog.AcceptSave)
-        while (dialog.exec() == QDialog.Accepted
+        self._initialize_image_filedialog(dialog, QFileDialog.AcceptMode.AcceptSave)
+        while (dialog.exec() == QDialog.DialogCode.Accepted
                and not self._save_file(dialog.selectedFiles()[0])):
             pass
 
@@ -118,7 +119,7 @@ class ImageViewer(QMainWindow):
     def _print_(self):
         printer = QPrinter()
         dialog = QPrintDialog(printer, self)
-        if dialog.exec() == QDialog.Accepted:
+        if dialog.exec() == QDialog.DialogCode.Accepted:
             with QPainter(printer) as painter:
                 pixmap = self._image_label.pixmap()
                 rect = painter.viewport()
@@ -176,7 +177,7 @@ class ImageViewer(QMainWindow):
 
         self._open_act = file_menu.addAction("&Open...")
         self._open_act.triggered.connect(self._open)
-        self._open_act.setShortcut(QKeySequence.Open)
+        self._open_act.setShortcut(QKeySequence.StandardKey.Open)
 
         self._save_as_act = file_menu.addAction("&Save As...")
         self._save_as_act.triggered.connect(self._save_as)
@@ -184,7 +185,7 @@ class ImageViewer(QMainWindow):
 
         self._print_act = file_menu.addAction("&Print...")
         self._print_act.triggered.connect(self._print_)
-        self._print_act.setShortcut(QKeySequence.Print)
+        self._print_act.setShortcut(QKeySequence.StandardKey.Print)
         self._print_act.setEnabled(False)
 
         file_menu.addSeparator()
@@ -197,23 +198,23 @@ class ImageViewer(QMainWindow):
 
         self._copy_act = edit_menu.addAction("&Copy")
         self._copy_act.triggered.connect(self._copy)
-        self._copy_act.setShortcut(QKeySequence.Copy)
+        self._copy_act.setShortcut(QKeySequence.StandardKey.Copy)
         self._copy_act.setEnabled(False)
 
         self._paste_act = edit_menu.addAction("&Paste")
         self._paste_act.triggered.connect(self._paste)
-        self._paste_act.setShortcut(QKeySequence.Paste)
+        self._paste_act.setShortcut(QKeySequence.StandardKey.Paste)
 
         view_menu = self.menuBar().addMenu("&View")
 
         self._zoom_in_act = view_menu.addAction("Zoom &In (25%)")
-        self._zoom_in_act.setShortcut(QKeySequence.ZoomIn)
+        self._zoom_in_act.setShortcut(QKeySequence.StandardKey.ZoomIn)
         self._zoom_in_act.triggered.connect(self._zoom_in)
         self._zoom_in_act.setEnabled(False)
 
         self._zoom_out_act = view_menu.addAction("Zoom &Out (25%)")
         self._zoom_out_act.triggered.connect(self._zoom_out)
-        self._zoom_out_act.setShortcut(QKeySequence.ZoomOut)
+        self._zoom_out_act.setShortcut(QKeySequence.StandardKey.ZoomOut)
         self._zoom_out_act.setEnabled(False)
 
         self._normal_size_act = view_menu.addAction("&Normal Size")
@@ -264,7 +265,7 @@ class ImageViewer(QMainWindow):
     def _initialize_image_filedialog(self, dialog, acceptMode):
         if self._first_file_dialog:
             self._first_file_dialog = False
-            locations = QStandardPaths.standardLocations(QStandardPaths.PicturesLocation)
+            locations = QStandardPaths.standardLocations(QStandardPaths.StandardLocation.PicturesLocation)  # noqa: E501
             directory = locations[-1] if locations else QDir.currentPath()
             dialog.setDirectory(directory)
 
@@ -274,5 +275,5 @@ class ImageViewer(QMainWindow):
         dialog.setMimeTypeFilters(mime_types)
         dialog.selectMimeTypeFilter("image/jpeg")
         dialog.setAcceptMode(acceptMode)
-        if acceptMode == QFileDialog.AcceptSave:
+        if acceptMode == QFileDialog.AcceptMode.AcceptSave:
             dialog.setDefaultSuffix("jpg")

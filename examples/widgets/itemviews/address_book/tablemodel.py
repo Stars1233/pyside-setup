@@ -105,6 +105,6 @@ class TableModel(QAbstractTableModel):
             manually adjust each tableView to have NoEditTriggers.
         """
         if not index.isValid():
-            return Qt.ItemIsEnabled
+            return Qt.ItemFlag.ItemIsEnabled
         return Qt.ItemFlags(QAbstractTableModel.flags(self, index)
-                            | Qt.ItemIsEditable)
+                            | Qt.ItemFlag.ItemIsEditable)

@@ -20,8 +20,8 @@ class CircleWidget(QWidget):
         self.antialiased = False
         self._frame_no = 0
 
-        self.setBackgroundRole(QPalette.Base)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setBackgroundRole(QPalette.ColorRole.Base)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
     def set_float_based(self, floatBased):
         self._float_based = floatBased
@@ -94,9 +94,9 @@ class Window(QWidget):
 
     def create_label(self, text):
         label = QLabel(text)
-        label.setAlignment(Qt.AlignCenter)
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label.setMargin(2)
-        label.setFrameStyle(QFrame.Box | QFrame.Sunken)
+        label.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
         return label
 
 

@@ -81,8 +81,8 @@ class FileListModel(QAbstractListModel):
         directory = QDir(path)
 
         self.beginResetModel()
-        directory_filter = QDir.AllEntries | QDir.NoDot
-        self._file_list = directory.entryInfoList(directory_filter, QDir.Name)
+        directory_filter = QDir.Filter.AllEntries | QDir.Filter.NoDot
+        self._file_list = directory.entryInfoList(directory_filter, QDir.SortFlag.Name)
         self._file_count = 0
         self.endResetModel()
 
@@ -101,8 +101,8 @@ class Window(QWidget):
         self._view.setModel(self._model)
 
         self._log_viewer = QPlainTextEdit()
-        self._log_viewer.setSizePolicy(QSizePolicy(QSizePolicy.Preferred,
-                                       QSizePolicy.Preferred))
+        self._log_viewer.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Preferred,
+                                       QSizePolicy.Policy.Preferred))
 
         self._model.number_populated.connect(self.update_log)
         self._view.activated.connect(self.activated)
