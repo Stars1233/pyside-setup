@@ -53,12 +53,12 @@ Pages of examples that exist in Python should be removed.
 
     for F in *.webxml
     do
-        echo "$F" | egrep '(-index)|(-module)|(-qmlmodule)\.webxml$' > /dev/null
+        echo "$F" | egrep '(-index|example|cmake|private-module|-changes-qt6|-module.web|-qmlmodule.web)' > /dev/null
         if [ $? -ne 0 ]
         then
             if fgrep '<para>' "$F" > /dev/null # Exclude reference only
             then
-                egrep "(<class )|(<namespace )" $F > /dev/null || echo $F
+                egrep "(<namespace|<class|<struct|<group|<union)" $F > /dev/null || echo $F
             fi
         fi
     done
