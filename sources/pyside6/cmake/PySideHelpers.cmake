@@ -133,7 +133,7 @@ macro(collect_optional_modules)
          WebEngineQuick WebSockets HttpServer)
     find_package(Qt${QT_MAJOR_VERSION}WebEngineQuick)
     # for Windows and Linux, QtWebView depends on QtWebEngine to render content
-    if ((WIN32 OR UNIX) AND NOT APPLE AND Qt${QT_MAJOR_VERSION}WebEngineQuick_FOUND)
+    if(Qt${QT_MAJOR_VERSION}WebEngineQuick_FOUND OR APPLE)
         list(APPEND ALL_OPTIONAL_MODULES WebView)
     endif()
     list(APPEND ALL_OPTIONAL_MODULES 3DCore 3DRender 3DInput 3DLogic 3DAnimation 3DExtras)

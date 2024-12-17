@@ -1,4 +1,5 @@
-# Copyright (C) 2023 The Qt Company Ltd.
-# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (C) 2024 The Qt Company Ltd.
+# SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
-# Tests to be added later
+PYSIDE_TEST(test_webview.py)
+
