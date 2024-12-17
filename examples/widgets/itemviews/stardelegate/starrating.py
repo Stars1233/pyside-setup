@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from math import (cos, sin, pi)
 
-from PySide6.QtGui import (QPainter, QPolygonF)
+from PySide6.QtGui import (QPainter, QPainterStateGuard, QPolygonF)
 from PySide6.QtCore import (QPointF, QSize, Qt)
 
 PAINTING_SCALE_FACTOR = 20
@@ -39,25 +39,22 @@ class StarRating:
 
     def paint(self, painter, rect, palette, isEditable=False):
         """ Paint the stars (and/or diamonds if we're in editing mode). """
-        painter.save()
+        with QPainterStateGuard(painter):
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+            painter.setPen(Qt.NoPen)
 
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
-        painter.setPen(Qt.PenStyle.NoPen)
+            if isEditable:
+                painter.setBrush(palette.highlight())
+            else:
+                painter.setBrush(palette.windowText())
 
-        if isEditable:
-            painter.setBrush(palette.highlight())
-        else:
-            painter.setBrush(palette.windowText())
+            y_offset = (rect.height() - PAINTING_SCALE_FACTOR) / 2
+            painter.translate(rect.x(), rect.y() + y_offset)
+            painter.scale(PAINTING_SCALE_FACTOR, PAINTING_SCALE_FACTOR)
 
-        y_offset = (rect.height() - PAINTING_SCALE_FACTOR) / 2
-        painter.translate(rect.x(), rect.y() + y_offset)
-        painter.scale(PAINTING_SCALE_FACTOR, PAINTING_SCALE_FACTOR)
-
-        for i in range(self.MAX_STAR_COUNT):
-            if i < self.star_count:
-                painter.drawPolygon(self._star_polygon, Qt.FillRule.WindingFill)
-            elif isEditable:
-                painter.drawPolygon(self._diamond_polygon, Qt.WindingFill)
-            painter.translate(1.0, 0.0)
-
-        painter.restore()
+            for i in range(self.MAX_STAR_COUNT):
+                if i < self.star_count:
+                    painter.drawPolygon(self._star_polygon, Qt.FillRule.WindingFill)
+                elif isEditable:
+                    painter.drawPolygon(self._diamond_polygon, Qt.FillRule.WindingFill)
+                painter.translate(1.0, 0.0)

@@ -7,8 +7,8 @@ from __future__ import annotations
 
 from PySide6.QtCore import QPoint, QRect, QSize, Qt, qVersion
 from PySide6.QtGui import (QBrush, QConicalGradient, QLinearGradient, QPainter,
-                           QPainterPath, QPalette, QPen, QPixmap, QPolygon,
-                           QRadialGradient)
+                           QPainterStateGuard, QPainterPath, QPalette, QPen,
+                           QPixmap, QPolygon, QRadialGradient)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QGridLayout,
                                QLabel, QSpinBox, QWidget)
 
@@ -86,44 +86,42 @@ class RenderArea(QWidget):
 
             for x in range(0, self.width(), 100):
                 for y in range(0, self.height(), 100):
-                    painter.save()
-                    painter.translate(x, y)
-                    if self.transformed:
-                        painter.translate(50, 50)
-                        painter.rotate(60.0)
-                        painter.scale(0.6, 0.9)
-                        painter.translate(-50, -50)
+                    with QPainterStateGuard(painter):
+                        painter.translate(x, y)
+                        if self.transformed:
+                            painter.translate(50, 50)
+                            painter.rotate(60.0)
+                            painter.scale(0.6, 0.9)
+                            painter.translate(-50, -50)
 
-                    if self.shape == RenderArea.Line:
-                        painter.drawLine(rect.bottomLeft(), rect.topRight())
-                    elif self.shape == RenderArea.Points:
-                        painter.drawPoints(RenderArea.points)
-                    elif self.shape == RenderArea.Polyline:
-                        painter.drawPolyline(RenderArea.points)
-                    elif self.shape == RenderArea.Polygon:
-                        painter.drawPolygon(RenderArea.points)
-                    elif self.shape == RenderArea.Rect:
-                        painter.drawRect(rect)
-                    elif self.shape == RenderArea.RoundedRect:
-                        painter.drawRoundedRect(rect, 25, 25, Qt.SizeMode.RelativeSize)
-                    elif self.shape == RenderArea.Ellipse:
-                        painter.drawEllipse(rect)
-                    elif self.shape == RenderArea.Arc:
-                        painter.drawArc(rect, start_angle, arc_length)
-                    elif self.shape == RenderArea.Chord:
-                        painter.drawChord(rect, start_angle, arc_length)
-                    elif self.shape == RenderArea.Pie:
-                        painter.drawPie(rect, start_angle, arc_length)
-                    elif self.shape == RenderArea.Path:
-                        painter.drawPath(path)
-                    elif self.shape == RenderArea.Text:
-                        qv = qVersion()
-                        painter.drawText(rect, Qt.AlignmentFlag.AlignCenter,
-                                         f"PySide 6\nQt {qv}")
-                    elif self.shape == RenderArea.Pixmap:
-                        painter.drawPixmap(10, 10, self.pixmap)
-
-                    painter.restore()
+                        if self.shape == RenderArea.Line:
+                            painter.drawLine(rect.bottomLeft(), rect.topRight())
+                        elif self.shape == RenderArea.Points:
+                            painter.drawPoints(RenderArea.points)
+                        elif self.shape == RenderArea.Polyline:
+                            painter.drawPolyline(RenderArea.points)
+                        elif self.shape == RenderArea.Polygon:
+                            painter.drawPolygon(RenderArea.points)
+                        elif self.shape == RenderArea.Rect:
+                            painter.drawRect(rect)
+                        elif self.shape == RenderArea.RoundedRect:
+                            painter.drawRoundedRect(rect, 25, 25, Qt.SizeMode.RelativeSize)
+                        elif self.shape == RenderArea.Ellipse:
+                            painter.drawEllipse(rect)
+                        elif self.shape == RenderArea.Arc:
+                            painter.drawArc(rect, start_angle, arc_length)
+                        elif self.shape == RenderArea.Chord:
+                            painter.drawChord(rect, start_angle, arc_length)
+                        elif self.shape == RenderArea.Pie:
+                            painter.drawPie(rect, start_angle, arc_length)
+                        elif self.shape == RenderArea.Path:
+                            painter.drawPath(path)
+                        elif self.shape == RenderArea.Text:
+                            qv = qVersion()
+                            painter.drawText(rect, Qt.AlignmentFlag.AlignCenter,
+                                             f"PySide 6\nQt {qv}")
+                        elif self.shape == RenderArea.Pixmap:
+                            painter.drawPixmap(10, 10, self.pixmap)
 
             painter.setPen(self.palette().dark().color())
             painter.setBrush(Qt.BrushStyle.NoBrush)

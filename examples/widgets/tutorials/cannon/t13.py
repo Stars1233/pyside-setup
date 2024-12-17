@@ -11,7 +11,7 @@ import random
 
 from PySide6.QtCore import (QPoint, QRect, QTime, QTimer, Qt,
                             Signal, Slot, qWarning)
-from PySide6.QtGui import QColor, QFont, QPainter, QPalette, QRegion
+from PySide6.QtGui import QColor, QFont, QPainter, QPainterStateGuard, QPalette, QRegion
 from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLabel,
                                QLCDNumber, QPushButton, QSizePolicy, QSlider,
                                QVBoxLayout, QWidget)
@@ -211,12 +211,11 @@ class CannonField(QWidget):
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(Qt.GlobalColor.blue)
 
-        painter.save()
-        painter.translate(0, self.height())
-        painter.drawPie(QRect(-35, -35, 70, 70), 0, 90 * 16)
-        painter.rotate(-self._current_angle)
-        painter.drawRect(CannonField.barrel_rect)
-        painter.restore()
+        with QPainterStateGuard(painter):
+            painter.translate(0, self.height())
+            painter.drawPie(QRect(-35, -35, 70, 70), 0, 90 * 16)
+            painter.rotate(-self._current_angle)
+            painter.drawRect(CannonField.barrel_rect)
 
     def cannon_rect(self):
         result = QRect(0, 0, 50, 50)

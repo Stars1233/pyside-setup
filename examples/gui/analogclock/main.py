@@ -5,7 +5,8 @@ from __future__ import annotations
 import sys
 
 from PySide6.QtCore import QPoint, QTimer, QTime, Qt
-from PySide6.QtGui import QGuiApplication, QPainter, QPalette, QPolygon, QRasterWindow
+from PySide6.QtGui import (QGuiApplication, QPainter, QPainterStateGuard,
+                           QPalette, QPolygon, QRasterWindow)
 
 """Simplified PySide6 port of the gui/analogclock example from Qt v6.x"""
 
@@ -54,10 +55,9 @@ class AnalogClockWindow(QRasterWindow):
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(self._hour_color)
 
-        painter.save()
-        painter.rotate(30.0 * ((time.hour() + time.minute() / 60.0)))
-        painter.drawConvexPolygon(self._hour_hand)
-        painter.restore()
+        with QPainterStateGuard(painter):
+            painter.rotate(30.0 * ((time.hour() + time.minute() / 60.0)))
+            painter.drawConvexPolygon(self._hour_hand)
 
         for _ in range(0, 12):
             painter.drawRect(73, -3, 16, 6)
@@ -65,19 +65,17 @@ class AnalogClockWindow(QRasterWindow):
 
         painter.setBrush(self._minute_color)
 
-        painter.save()
-        painter.rotate(6.0 * time.minute())
-        painter.drawConvexPolygon(self._minute_hand)
-        painter.restore()
+        with QPainterStateGuard(painter):
+            painter.rotate(6.0 * time.minute())
+            painter.drawConvexPolygon(self._minute_hand)
 
         painter.setBrush(self._seconds_color)
 
-        painter.save()
-        painter.rotate(6.0 * time.second())
-        painter.drawConvexPolygon(self._seconds_hand)
-        painter.drawEllipse(-3, -3, 6, 6)
-        painter.drawEllipse(-5, -68, 10, 10)
-        painter.restore()
+        with QPainterStateGuard(painter):
+            painter.rotate(6.0 * time.second())
+            painter.drawConvexPolygon(self._seconds_hand)
+            painter.drawEllipse(-3, -3, 6, 6)
+            painter.drawEllipse(-5, -68, 10, 10)
 
         painter.setPen(self._minute_color)
 
