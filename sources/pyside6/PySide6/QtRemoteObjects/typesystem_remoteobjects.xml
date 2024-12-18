@@ -8,6 +8,9 @@
     <load-typesystem name="templates/core_common.xml" generate="no"/>
     <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
     <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
+    <inject-code class="native" position="beginning">
+    #include "pysideremoteobjects.h"
+    </inject-code>
 
     <rejection class="QRemoteObjectStringLiterals"/>
     <rejection class="*" function-name="getTypeNameAndMetaobjectFromClassInfo"/>
@@ -26,6 +29,10 @@
     </object-type>
     <object-type name="QRemoteObjectNode">
         <enum-type name="ErrorCode"/>
+        <add-function signature="acquire(PyTypeObject*, PyObject* @name@ = 0)"
+                      return-type="PyTypeObject*">
+            <inject-code class="target" file="../glue/qtremoteobjects.cpp" snippet="node-acquire"/>
+        </add-function>
     </object-type>
     <object-type name="QRemoteObjectPendingCall">
         <enum-type name="Error"/>
@@ -35,7 +42,12 @@
     <object-type name="QRemoteObjectRegistryHost"/>
     <object-type name="QRemoteObjectReplica">
         <enum-type name="State"/>
-        <!-- protected: <enum-type name="ConstructorType"/>  -->
+        <enum-type name="ConstructorType" python-type="IntEnum"/> <!-- Needed even though protected -->
+        <modify-function signature="QRemoteObjectReplica(QRemoteObjectReplica::ConstructorType)">
+            <modify-argument index="1">
+                <replace-default-expression with="{}"/>
+            </modify-argument>
+        </modify-function>
     </object-type>
     <object-type name="QRemoteObjectSettingsStore"/>
     <value-type name="QRemoteObjectSourceLocationInfo"/>
@@ -52,5 +64,8 @@
     <suppress-warning text="skipping protected field 'QRemoteObjectReplica::d_impl' with unmatched type 'QSharedPointer'"/>
     <!-- QtNetwork is pulled in via QtRemoteObjectsDepends. -->
     <suppress-warning text="^Scoped enum 'Q(Ocsp)|(Dtls).*' does not have a type entry.*$"/>
+
+    <inject-code class="target" position="end"
+                 file="../glue/qtremoteobjects.cpp" snippet="qtro-init"/>
 
 </typesystem>

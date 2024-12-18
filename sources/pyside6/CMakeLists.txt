@@ -25,6 +25,10 @@ if(Qt${QT_MAJOR_VERSION}Qml_FOUND)
     add_subdirectory(libpysideqml)
 endif()
 
+if(Qt${QT_MAJOR_VERSION}RemoteObjects_FOUND)
+    add_subdirectory(libpysideremoteobjects)
+endif()
+
 if(Qt${QT_MAJOR_VERSION}UiTools_FOUND)
     add_subdirectory(plugins/uitools)
     find_package(Qt6 COMPONENTS Designer)

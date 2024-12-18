@@ -29,19 +29,22 @@ ${QtRemoteObjects_GEN_DIR}/qtroserveriodevice_wrapper.cpp
 ${QtRemoteObjects_GEN_DIR}/qtremoteobjects_module_wrapper.cpp
 )
 
+find_package(Qt6 REQUIRED COMPONENTS Core)
+
 set(QtRemoteObjects_include_dirs ${QtRemoteObjects_SOURCE_DIR}
                                  ${QtRemoteObjects_BINARY_DIR}
                                  ${Qt${QT_MAJOR_VERSION}RemoteObjects_INCLUDE_DIRS}
+                                 ${libpysideremoteobjects_SOURCE_DIR}
                                  ${SHIBOKEN_INCLUDE_DIR}
                                  ${libpyside_SOURCE_DIR}
                                  ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                                  ${QtCore_GEN_DIR}
                                  ${QtNetwork_GEN_DIR})
 
-set(QtRemoteObjects_libraries    pyside6
-                                 ${Qt${QT_MAJOR_VERSION}RemoteObjects_LIBRARIES})
-
 set(QtRemoteObjects_deps QtCore QtNetwork)
+
+set(QtRemoteObjects_libraries    pyside6 pyside6remoteobjects
+                                 ${Qt${QT_MAJOR_VERSION}RemoteObjects_LIBRARIES})
 
 create_pyside_module(NAME QtRemoteObjects
                      INCLUDE_DIRS QtRemoteObjects_include_dirs

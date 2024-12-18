@@ -199,6 +199,9 @@ endforeach()
 # Whether to add libpysideqml
 find_package(Qt6 COMPONENTS Qml)
 
+# Whether to add libpysideremoteobjects
+find_package(Qt6 COMPONENTS RemoteObjects)
+
 string(REGEX MATCHALL "[0-9]+" qt_version_helper "${Qt${QT_MAJOR_VERSION}Core_VERSION}")
 
 list(GET qt_version_helper 0 QT_VERSION_MAJOR)

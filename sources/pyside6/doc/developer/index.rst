@@ -36,3 +36,4 @@ many features and implementation details that the project has:
    signature_doc.rst
    mypy-correctness.rst
    feature-motivation.rst
+   remoteobjects.md
