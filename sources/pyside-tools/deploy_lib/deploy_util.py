@@ -21,22 +21,38 @@ def config_option_exists():
 
 def cleanup(config: Config, is_android: bool = False):
     """
-        Cleanup the generated build folders/files
+    Cleanup the generated build folders/files.
+
+    Parameters:
+    config (Config): The configuration object containing paths and settings.
+    is_android (bool): Flag indicating if the cleanup is for an Android project. Default is False.
     """
     if config.generated_files_path.exists():
-        shutil.rmtree(config.generated_files_path)
-        logging.info("[DEPLOY] Deployment directory purged")
+        try:
+            shutil.rmtree(config.generated_files_path)
+            logging.info("[DEPLOY] Deployment directory purged")
+        except PermissionError as e:
+            print(f"{type(e).__name__}: {e}")
+            logging.warning(f"[DEPLOY] Could not delete {config.generated_files_path}")
 
     if is_android:
         buildozer_spec: Path = config.project_dir / "buildozer.spec"
         if buildozer_spec.exists():
-            buildozer_spec.unlink()
-            logging.info(f"[DEPLOY] {str(buildozer_spec)} removed")
+            try:
+                buildozer_spec.unlink()
+                logging.info(f"[DEPLOY] {str(buildozer_spec)} removed")
+            except PermissionError as e:
+                print(f"{type(e).__name__}: {e}")
+                logging.warning(f"[DEPLOY] Could not delete {buildozer_spec}")
 
         buildozer_build: Path = config.project_dir / ".buildozer"
         if buildozer_build.exists():
-            shutil.rmtree(buildozer_build)
-            logging.info(f"[DEPLOY] {str(buildozer_build)} removed")
+            try:
+                shutil.rmtree(buildozer_build)
+                logging.info(f"[DEPLOY] {str(buildozer_build)} removed")
+            except PermissionError as e:
+                print(f"{type(e).__name__}: {e}")
+                logging.warning(f"[DEPLOY] Could not delete {buildozer_build}")
 
 
 def create_config_file(main_file: Path, dry_run: bool = False):
