@@ -3109,6 +3109,7 @@
       <enum-type name="TypeInterpretation"/>
       <enum-type name="YUVLayout"/>
   </value-type>
+  <value-type name="QPdfOutputIntent"/>
   <object-type name="QPdfWriter">
       <enum-type name="ColorModel" since="6.8"/>
   </object-type>
