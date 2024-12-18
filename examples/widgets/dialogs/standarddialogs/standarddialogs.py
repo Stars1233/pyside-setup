@@ -21,13 +21,14 @@ from PySide6.QtWidgets import (QApplication, QColorDialog, QCheckBox, QDialog,
 class DialogOptionsWidget(QGroupBox):
     """Widget displaying a number of check boxes representing the dialog
        options."""
-    def __init__(self, parent=None):
+    def __init__(self, zero_value, parent=None):
         super().__init__(parent)
+        self._zero_value = zero_value
         self._layout = QVBoxLayout(self)
         self._mapping = {}
 
     def value(self):
-        result = 0
+        result = self._zero_value
         for checkbox, value in self._mapping.items():
             if checkbox.isChecked():
                 result |= value
@@ -73,7 +74,7 @@ class Dialog(QDialog):
         self._color_label = QLabel()
         self._color_label.setFrameStyle(frame_style)
         self._color_button = QPushButton("QColorDialog.get&Color()")
-        self._color_options = DialogOptionsWidget()
+        self._color_options = DialogOptionsWidget(QColorDialog.ColorDialogOption(0))
         self._color_options.add_checkbox("Show alpha channel",
                                          QColorDialog.ShowAlphaChannel)
         self._color_options.add_checkbox("No buttons",
@@ -82,7 +83,7 @@ class Dialog(QDialog):
         self._font_label = QLabel()
         self._font_label.setFrameStyle(frame_style)
         self._font_button = QPushButton("QFontDialog.get&Font()")
-        self._font_options = DialogOptionsWidget()
+        self._font_options = DialogOptionsWidget(QFontDialog.FontDialogOption(0))
         self._font_options.add_checkbox("Do not use native dialog",
                                         QFontDialog.DontUseNativeDialog)
         self._font_options.add_checkbox("Show scalable fonts",
@@ -111,7 +112,7 @@ class Dialog(QDialog):
         self._save_file_name_label.setFrameStyle(frame_style)
         self._save_file_name_button = QPushButton("QFileDialog.get&SaveFileName()")
 
-        self._file_options = DialogOptionsWidget()
+        self._file_options = DialogOptionsWidget(QFileDialog.Option(0))
         self._file_options.add_checkbox("Do not use native dialog",
                                         QFileDialog.DontUseNativeDialog)
         self._file_options.add_checkbox("Show directories only",
