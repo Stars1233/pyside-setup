@@ -47,7 +47,7 @@ class CppVirtualTest(unittest.TestCase):
     def testCpp(self):
         '''C++ calling C++ virtual method in multiple inheritance scenario'''
         obj = ImplementsNone()
-        self.assertTrue(ObjectType.processEvent([obj], Event(Event.BASIC_EVENT)))
+        self.assertTrue(ObjectType.processEvent([obj], Event(Event.EventType.BASIC_EVENT)))
         self.assertRaises(AttributeError, getattr, obj, 'event_processed')
 
         self.assertEqual(obj.callSum0(1, 2, 3), 6)
@@ -59,7 +59,7 @@ class PyVirtualTest(unittest.TestCase):
     def testEvent(self):
         '''C++ calling Python reimplementation of virtual in multiple inheritance'''
         obj = ImplementsBoth()
-        self.assertTrue(ObjectType.processEvent([obj], Event(Event.BASIC_EVENT)))
+        self.assertTrue(ObjectType.processEvent([obj], Event(Event.EventType.BASIC_EVENT)))
         self.assertTrue(obj.event_processed)
 
         self.assertEqual(obj.callSum1(1, 2, 3), 12)

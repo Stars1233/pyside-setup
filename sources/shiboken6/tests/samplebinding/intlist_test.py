@@ -36,7 +36,7 @@ class IntListTest(unittest.TestCase):
         '''IntList constructor receives no parameter.'''
         il = IntList()
         self.assertEqual(len(il), 0)
-        self.assertEqual(il.constructorUsed(), IntList.NoParamsCtor)
+        self.assertEqual(il.constructorUsed(), IntList.CtorEnum.NoParamsCtor)
 
     def testIntListCtor_int(self):
         '''IntList constructor receives an integer.'''
@@ -44,7 +44,7 @@ class IntListTest(unittest.TestCase):
         il = IntList(value)
         self.assertEqual(len(il), 1)
         self.assertEqual(il[0], value)
-        self.assertEqual(il.constructorUsed(), IntList.IntCtor)
+        self.assertEqual(il.constructorUsed(), IntList.CtorEnum.IntCtor)
 
     def testIntListCtor_IntList(self):
         '''IntList constructor receives an IntList object.'''
@@ -53,7 +53,7 @@ class IntListTest(unittest.TestCase):
         self.assertEqual(len(il1), len(il2))
         for i in range(len(il1)):
             self.assertEqual(il1[i], il2[i])
-        self.assertEqual(il2.constructorUsed(), IntList.CopyCtor)
+        self.assertEqual(il2.constructorUsed(), IntList.CtorEnum.CopyCtor)
 
     def testIntListCtor_ListOfInts(self):
         '''IntList constructor receives an integer list.'''
@@ -62,7 +62,7 @@ class IntListTest(unittest.TestCase):
         self.assertEqual(len(il), len(ints))
         for i in range(len(il)):
             self.assertEqual(il[i], ints[i])
-        self.assertEqual(il.constructorUsed(), IntList.ListOfIntCtor)
+        self.assertEqual(il.constructorUsed(), IntList.CtorEnum.ListOfIntCtor)
 
     def testIntListAttributeTypeCheck(self):
         '''Attribute values to IntList.'''

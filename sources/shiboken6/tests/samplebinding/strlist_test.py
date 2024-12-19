@@ -24,7 +24,7 @@ class StrListTest(unittest.TestCase):
         '''StrList constructor receives no parameter.'''
         sl = StrList()
         self.assertEqual(len(sl), 0)
-        self.assertEqual(sl.constructorUsed(), StrList.NoParamsCtor)
+        self.assertEqual(sl.constructorUsed(), StrList.CtorEnum.NoParamsCtor)
 
     def testStrListCtor_Str(self):
         '''StrList constructor receives a Str object.'''
@@ -32,7 +32,7 @@ class StrListTest(unittest.TestCase):
         sl = StrList(s)
         self.assertEqual(len(sl), 1)
         self.assertEqual(sl[0], s)
-        self.assertEqual(sl.constructorUsed(), StrList.StrCtor)
+        self.assertEqual(sl.constructorUsed(), StrList.CtorEnum.StrCtor)
 
     def testStrListCtor_PythonString(self):
         '''StrList constructor receives a Python string.'''
@@ -40,7 +40,7 @@ class StrListTest(unittest.TestCase):
         sl = StrList(s)
         self.assertEqual(len(sl), 1)
         self.assertEqual(sl[0], s)
-        self.assertEqual(sl.constructorUsed(), StrList.StrCtor)
+        self.assertEqual(sl.constructorUsed(), StrList.CtorEnum.StrCtor)
 
     def testStrListCtor_StrList(self):
         '''StrList constructor receives a StrList object.'''
@@ -48,7 +48,7 @@ class StrListTest(unittest.TestCase):
         sl2 = StrList(sl1)
         #self.assertEqual(len(sl1), len(sl2))
         #self.assertEqual(sl1, sl2)
-        self.assertEqual(sl2.constructorUsed(), StrList.CopyCtor)
+        self.assertEqual(sl2.constructorUsed(), StrList.CtorEnum.CopyCtor)
 
     def testStrListCtor_ListOfStrs(self):
         '''StrList constructor receives a Python list of Str objects.'''
@@ -56,7 +56,7 @@ class StrListTest(unittest.TestCase):
         sl = StrList(strs)
         self.assertEqual(len(sl), len(strs))
         self.assertEqual(sl, strs)
-        self.assertEqual(sl.constructorUsed(), StrList.ListOfStrCtor)
+        self.assertEqual(sl.constructorUsed(), StrList.CtorEnum.ListOfStrCtor)
 
     def testStrListCtor_MixedListOfStrsAndPythonStrings(self):
         '''StrList constructor receives a Python list of mixed Str objects and Python strings.'''
@@ -64,7 +64,7 @@ class StrListTest(unittest.TestCase):
         sl = StrList(strs)
         self.assertEqual(len(sl), len(strs))
         self.assertEqual(sl, strs)
-        self.assertEqual(sl.constructorUsed(), StrList.ListOfStrCtor)
+        self.assertEqual(sl.constructorUsed(), StrList.CtorEnum.ListOfStrCtor)
 
     def testCompareStrListWithTupleOfStrs(self):
         '''Compares StrList with a Python tuple of Str objects.'''

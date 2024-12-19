@@ -20,8 +20,8 @@ from sample import Photon
 
 class TemplateInheritingClassTest(unittest.TestCase):
     def testClassBasics(self):
-        self.assertEqual(Photon.ValueIdentity.classType(), Photon.IdentityType)
-        self.assertEqual(Photon.ValueDuplicator.classType(), Photon.DuplicatorType)
+        self.assertEqual(Photon.ValueIdentity.classType(), Photon.ClassType.IdentityType)
+        self.assertEqual(Photon.ValueDuplicator.classType(), Photon.ClassType.DuplicatorType)
 
     def testInstanceBasics(self):
         value = 123

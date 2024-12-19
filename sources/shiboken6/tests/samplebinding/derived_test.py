@@ -58,11 +58,11 @@ class DerivedTest(unittest.TestCase):
 
         result = derived.otherOverloaded(1, 2, True, 3.3)
         self.assertEqual(type(result), Derived.OtherOverloadedFuncEnum)
-        self.assertEqual(result, sample.Derived.OtherOverloadedFunc_iibd)
+        self.assertEqual(result, sample.Derived.OtherOverloadedFuncEnum.OtherOverloadedFunc_iibd)
 
         result = derived.otherOverloaded(1, 2.2)
         self.assertEqual(type(result), Derived.OtherOverloadedFuncEnum)
-        self.assertEqual(result, Derived.OtherOverloadedFunc_id)
+        self.assertEqual(result, Derived.OtherOverloadedFuncEnum.OtherOverloadedFunc_id)
 
     def testOverloadedMethodCallWithDifferentNumericTypes(self):
         '''Test if the correct overloaded method accepts a different numeric type as argument.'''

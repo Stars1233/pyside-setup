@@ -40,13 +40,13 @@ class DecisorTest(unittest.TestCase):
         objecttype = ObjectType()
         objectmodel = ObjectModel()
         self.assertEqual(ObjectModel.receivesObjectTypeFamily(objecttype),
-                         ObjectModel.ObjectTypeCalled)
+                         ObjectModel.MethodCalled.ObjectTypeCalled)
         self.assertNotEqual(ObjectModel.receivesObjectTypeFamily(objecttype),
-                            ObjectModel.ObjectModelCalled)
+                            ObjectModel.MethodCalled.ObjectModelCalled)
         self.assertEqual(ObjectModel.receivesObjectTypeFamily(objectmodel),
-                         ObjectModel.ObjectModelCalled)
+                         ObjectModel.MethodCalled.ObjectModelCalled)
         self.assertNotEqual(ObjectModel.receivesObjectTypeFamily(objectmodel),
-                            ObjectModel.ObjectTypeCalled)
+                            ObjectModel.MethodCalled.ObjectTypeCalled)
 
 
 if __name__ == '__main__':

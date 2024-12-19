@@ -18,7 +18,7 @@ class TestFilters(unittest.TestCase):
 
     def testAnd(self):
 
-        f1 = Data(Data.Name, "joe")
+        f1 = Data(Data.Field.Name, "joe")
         f2 = Union()
 
         inter = f1 & f2

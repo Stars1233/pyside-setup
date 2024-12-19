@@ -116,16 +116,19 @@ class ModificationsTest(unittest.TestCase):
     def testOverloadedMethodModifications(self):
         '''Tests modifications to an overloaded method'''
         # overloaded(int, bool[removed], int, double)
-        self.assertEqual(self.mods.overloaded(1, 2, 3.1), Modifications.Overloaded_ibid)
+        self.assertEqual(self.mods.overloaded(1, 2, 3.1),
+                         Modifications.OverloadedModFunc.Overloaded_ibid)
         # overloaded(int, bool, int[removed,default=321], int)
-        self.assertEqual(self.mods.overloaded(1, True, 2), Modifications.Overloaded_ibii)
+        self.assertEqual(self.mods.overloaded(1, True, 2),
+                         Modifications.OverloadedModFunc.Overloaded_ibii)
         # the others weren't modified
-        self.assertEqual(self.mods.overloaded(1, True, 2, False), Modifications.Overloaded_ibib)
+        self.assertEqual(self.mods.overloaded(1, True, 2, False),
+                         Modifications.OverloadedModFunc.Overloaded_ibib)
         self.assertEqual(self.mods.overloaded(1, False, 2, Point(3, 4)),
-                         Modifications.Overloaded_ibiP)
+                         Modifications.OverloadedModFunc.Overloaded_ibiP)
         self.assertRaises(TypeError, self.mods.overloaded, 1, True, Point(2, 3), Point(4, 5))
         self.assertEqual(self.mods.over(1, True, Point(2, 3), Point(4, 5)),
-                         Modifications.Overloaded_ibPP)
+                         Modifications.OverloadedModFunc.Overloaded_ibPP)
 
     def testPointArrayModification(self):
         points = (Point(1, 1), Point(2, 2))
@@ -210,7 +213,7 @@ class ModificationsTest(unittest.TestCase):
         # qualified by the enum scope.
         modifications = Modifications()
         modifications.setEnumValue()
-        self.assertEqual(modifications.enumValue(), Modifications.TestEnumValue2)
+        self.assertEqual(modifications.enumValue(), Modifications.TestEnum.TestEnumValue2)
 
     def testSetGetAttro(self):
         modifications = Modifications()

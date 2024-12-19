@@ -65,7 +65,7 @@ class TestEventLoopWithThread(unittest.TestCase):
         thread.start()
 
         evaluated = ObjectType.processEvent(objs,
-                                            Event(Event.BASIC_EVENT))
+                                            Event(Event.EventType.BASIC_EVENT))
 
         thread.join()
 

@@ -41,7 +41,7 @@ class TestEnumFromRemovedNamespace(unittest.TestCase):
     def testEnumPromotedToUpperNamespace(self):
         sample.UnremovedNamespace
         sample.UnremovedNamespace.RemovedNamespace3_Enum
-        sample.UnremovedNamespace.RemovedNamespace3_Enum_Value0
+        sample.UnremovedNamespace.RemovedNamespace3_Enum.RemovedNamespace3_Enum_Value0
         sample.UnremovedNamespace.RemovedNamespace3_AnonymousEnum_Value0
 
     def testNestedFunctionFromRemovedNamespace(self):

@@ -29,8 +29,9 @@ class EnumTest(unittest.TestCase):
     '''Test case for Python representation of C++ enums.'''
 
     def testHashability(self):
-        self.assertEqual(hash(SampleNamespace.TwoIn), hash(SampleNamespace.TwoOut))
-        self.assertNotEqual(hash(SampleNamespace.TwoIn), hash(SampleNamespace.OneIn))
+        self.assertEqual(hash(SampleNamespace.InValue.TwoIn), hash(SampleNamespace.OutValue.TwoOut))
+        self.assertNotEqual(hash(SampleNamespace.InValue.TwoIn),
+                            hash(SampleNamespace.InValue.OneIn))
 
     def testEnumValuesInsideEnum(self):
         '''Enum values should be accessible inside the enum as well as outside.'''
@@ -50,13 +51,13 @@ class EnumTest(unittest.TestCase):
     def testBuildingEnumWithDefaultValue(self):
         '''Enum constructor with default value'''
         enum = SampleNamespace.Option()
-        self.assertEqual(enum, SampleNamespace.None_)
+        self.assertEqual(enum, SampleNamespace.Option.None_)
 
     def testEnumConversionToAndFromPython(self):
         '''Conversion of enum objects from Python to C++ back again.'''
-        enumout = SampleNamespace.enumInEnumOut(SampleNamespace.TwoIn)
-        self.assertTrue(enumout, SampleNamespace.TwoOut)
-        self.assertEqual(repr(enumout), repr(SampleNamespace.TwoOut))
+        enumout = SampleNamespace.enumInEnumOut(SampleNamespace.InValue.TwoIn)
+        self.assertTrue(enumout, SampleNamespace.OutValue.TwoOut)
+        self.assertEqual(repr(enumout), repr(SampleNamespace.OutValue.TwoOut))
 
     def testEnumConstructorWithTooManyParameters(self):
         '''Calling the constructor of non-extensible enum with the wrong number of parameters.'''
@@ -69,9 +70,9 @@ class EnumTest(unittest.TestCase):
     def testEnumItemAsDefaultValueToIntArgument(self):
         '''Calls function with an enum item as default value to an int argument.'''
         self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(),
-                         SampleNamespace.ZeroIn)
-        self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(SampleNamespace.ZeroOut),  # noqa E:501
-                         SampleNamespace.ZeroOut)
+                         SampleNamespace.InValue.ZeroIn)
+        self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(SampleNamespace.OutValue.ZeroOut),  # noqa E:501
+                         SampleNamespace.OutValue.ZeroOut)
         self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(123), 123)
 
     def testAnonymousGlobalEnums(self):
@@ -90,20 +91,21 @@ class EnumTest(unittest.TestCase):
         self.assertEqual(sum, 1)
 
     def testSetEnum(self):
-        event = Event(Event.ANY_EVENT)
-        self.assertEqual(event.eventType(), Event.ANY_EVENT)
-        event.setEventType(Event.BASIC_EVENT)
-        self.assertEqual(event.eventType(), Event.BASIC_EVENT)
-        event.setEventTypeByConstRef(Event.SOME_EVENT)
-        self.assertEqual(event.eventType(), Event.SOME_EVENT)
-        event.setEventTypeByConstPtr(Event.BASIC_EVENT)
-        self.assertEqual(event.eventType(), Event.BASIC_EVENT)
+        event = Event(Event.EventType.ANY_EVENT)
+        self.assertEqual(event.eventType(), Event.EventType.ANY_EVENT)
+        event.setEventType(Event.EventType.BASIC_EVENT)
+        self.assertEqual(event.eventType(), Event.EventType.BASIC_EVENT)
+        event.setEventTypeByConstRef(Event.EventType.SOME_EVENT)
+        self.assertEqual(event.eventType(), Event.EventType.SOME_EVENT)
+        event.setEventTypeByConstPtr(Event.EventType.BASIC_EVENT)
+        self.assertEqual(event.eventType(), Event.EventType.BASIC_EVENT)
 
     def testEnumArgumentWithDefaultValue(self):
         '''Option enumArgumentWithDefaultValue(Option opt = UnixTime);'''
-        self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(), SampleNamespace.UnixTime)
-        self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(SampleNamespace.RandomNumber),  # noqa E:501
-                         SampleNamespace.RandomNumber)
+        self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(),
+                         SampleNamespace.Option.UnixTime)
+        self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(SampleNamespace.Option.RandomNumber),  # noqa E:501
+                         SampleNamespace.Option.RandomNumber)
 
 
 class MyEvent(Event):
@@ -124,7 +126,7 @@ class EnumOverloadTest(unittest.TestCase):
         '''Overload with Enums and ints with default value'''
         o = ObjectType()
 
-        self.assertEqual(o.callWithEnum('', Event.ANY_EVENT, 9), 81)
+        self.assertEqual(o.callWithEnum('', Event.EventType.ANY_EVENT, 9), 81)
         self.assertEqual(o.callWithEnum('', 9), 9)
 
 
@@ -132,7 +134,8 @@ class EnumOperators(unittest.TestCase):
     '''Test case for operations on enums'''
 
     def testInequalitySameObject(self):
-        self.assertFalse(Event.ANY_EVENT != Event.ANY_EVENT)
+        self.assertFalse(Event.EventType.ANY_EVENT
+                         != Event.EventType.ANY_EVENT)
 
 
 if __name__ == '__main__':

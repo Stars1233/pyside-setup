@@ -61,8 +61,8 @@ class TestClassesUnderNamespace(unittest.TestCase):
 
     def testInlineNamespaces(self):
         cls = SampleNamespace.ClassWithinInlineNamespace()
-        cls.setValue(SampleNamespace.EWIN_Value1)
-        self.assertEqual(cls.value(), SampleNamespace.EWIN_Value1)
+        cls.setValue(SampleNamespace.EnumWithinInlineNamespace.EWIN_Value1)
+        self.assertEqual(cls.value(), SampleNamespace.EnumWithinInlineNamespace.EWIN_Value1)
 
 
 if __name__ == '__main__':

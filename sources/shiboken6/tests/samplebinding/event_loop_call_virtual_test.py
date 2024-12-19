@@ -40,7 +40,7 @@ class TestEventLoop(unittest.TestCase):
         objs = [ObjectType(), NoOverride(), Override()]
 
         evaluated = ObjectType.processEvent(objs,
-                                            Event(Event.BASIC_EVENT))
+                                            Event(Event.EventType.BASIC_EVENT))
 
         self.assertEqual(evaluated, 3)
         self.assertTrue(objs[2].called)

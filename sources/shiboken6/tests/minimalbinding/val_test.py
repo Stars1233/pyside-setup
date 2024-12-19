@@ -58,8 +58,8 @@ class ValTest(unittest.TestCase):
 
     def testPassAndReceiveEnumValue(self):
         val = Val(0)
-        self.assertEqual(val.oneOrTheOtherEnumValue(Val.One), Val.Other)
-        self.assertEqual(val.oneOrTheOtherEnumValue(Val.Other), Val.One)
+        self.assertEqual(val.oneOrTheOtherEnumValue(Val.ValEnum.One), Val.ValEnum.Other)
+        self.assertEqual(val.oneOrTheOtherEnumValue(Val.ValEnum.Other), Val.ValEnum.One)
 
     def testPassValueTypeFromExtendedClass(self):
         val = ExtVal(0)

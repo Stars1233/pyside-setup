@@ -74,7 +74,7 @@ class TimeTest(unittest.TestCase):
         '''Method without parameters: Time.somethingCompletelyDifferent()'''
         time = Time()
         result = time.somethingCompletelyDifferent()
-        self.assertEqual(result, Time.ZeroArgs)
+        self.assertEqual(result, Time.NumArgs.ZeroArgs)
 
     def testMethodWithAllParamers(self):
         '''Method with all parameters:
@@ -85,25 +85,26 @@ class TimeTest(unittest.TestCase):
         time = Time()
         obj = ObjectType()
         result = time.somethingCompletelyDifferent(1, 2, ImplicitConv(2), obj)
-        self.assertEqual(result, Time.FourArgs)
+        self.assertEqual(result, Time.NumArgs.FourArgs)
 
     def testMethodWithThreeParamers(self):
         '''Method with 3 parameters: Time.somethingCompletelyDifferent(...)'''
         time = Time()
-        result = time.somethingCompletelyDifferent(1, 2, ImplicitConv(ImplicitConv.CtorOne))
-        self.assertEqual(result, Time.ThreeArgs)
+        result = time.somethingCompletelyDifferent(1, 2,
+                                                   ImplicitConv(ImplicitConv.CtorEnum.CtorOne))
+        self.assertEqual(result, Time.NumArgs.ThreeArgs)
 
     def testMethodWithTwoParamers(self):
         '''Method with 2 parameters: Time.somethingCompletelyDifferent(...)'''
         time = Time()
         result = time.somethingCompletelyDifferent(1, 2)
-        self.assertEqual(result, Time.TwoArgs)
+        self.assertEqual(result, Time.NumArgs.TwoArgs)
 
     def testMethodWithThreeParamersAndImplicitConversion(self):
         '''Method with 3 parameters, the last one triggers an implicit conversion.'''
         time = Time()
-        result = time.somethingCompletelyDifferent(1, 2, ImplicitConv.CtorOne)
-        self.assertEqual(result, Time.ThreeArgs)
+        result = time.somethingCompletelyDifferent(1, 2, ImplicitConv.CtorEnum.CtorOne)
+        self.assertEqual(result, Time.NumArgs.ThreeArgs)
 
     # PYSIDE-1436: These tests crash at shutdown due to `assert(Not)?Equal`.
     def testCompareWithPythonTime(self):

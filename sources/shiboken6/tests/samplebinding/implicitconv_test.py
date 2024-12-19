@@ -23,24 +23,24 @@ class ImplicitConvTest(unittest.TestCase):
     def testImplicitConversions(self):
         '''Test if overloaded function call decisor takes implicit conversions into account.'''
         ic = ImplicitConv.implicitConvCommon(ImplicitConv())
-        self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorNone)
+        self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorEnum.CtorNone)
 
         ic = ImplicitConv.implicitConvCommon(3)
-        self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorOne)
+        self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorEnum.CtorOne)
         self.assertEqual(ic.objId(), 3)
 
-        ic = ImplicitConv.implicitConvCommon(ImplicitConv.CtorThree)
-        self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorThree)
+        ic = ImplicitConv.implicitConvCommon(ImplicitConv.CtorEnum.CtorThree)
+        self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorEnum.CtorThree)
 
         obj = ObjectType()
         ic = ImplicitConv.implicitConvCommon(obj)
-        self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorObjectTypeReference)
+        self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorEnum.CtorObjectTypeReference)
 
         ic = ImplicitConv.implicitConvCommon(42.42)
         self.assertEqual(ic.value(), 42.42)
 
         ic = ImplicitConv(None)
-        self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorPrimitiveType)
+        self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorEnum.CtorPrimitiveType)
 
 
 if __name__ == '__main__':

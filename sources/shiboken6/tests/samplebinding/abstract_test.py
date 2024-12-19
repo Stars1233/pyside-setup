@@ -80,7 +80,7 @@ class AbstractTest(unittest.TestCase):
     def testEnumParameterOnVirtualMethodCall(self):
         '''testEnumParameterOnVirtualMethodCall'''
         c = Concrete()
-        c.callVirtualGettingEnum(Abstract.Short)
+        c.callVirtualGettingEnum(Abstract.PrintFormat.Short)
         self.assertTrue(c.virtual_getting_enum)
 
 

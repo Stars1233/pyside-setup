@@ -25,7 +25,7 @@ class TestPen(unittest.TestCase):
         self.assertEqual(pen.ctorType(), Pen.EmptyCtor)
 
     def testPenWithEnumConstructor(self):
-        pen = Pen(SampleNamespace.RandomNumber)
+        pen = Pen(SampleNamespace.Option.RandomNumber)
         self.assertEqual(pen.ctorType(), Pen.EnumCtor)
 
     def testPenWithColorConstructor(self):

@@ -63,7 +63,7 @@ class OddBoolTest(unittest.TestCase):
         self.assertEqual(t1, t2)
 
     def testSpaceshipOperator(self):
-        if not SpaceshipComparisonTester.HasSpaceshipOperator:
+        if not SpaceshipComparisonTester.Enabled.HasSpaceshipOperator:
             print("Skipping Spaceship Operator test")
             return
         t1 = SpaceshipComparisonTester(42)
