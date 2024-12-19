@@ -52,7 +52,7 @@ class Bug825 (C):
 
     def paint(self, painter):
         global paintCalled
-        pen = QPen(Qt.black, 2)
+        pen = QPen(Qt.GlobalColor.black, 2)
         painter.setPen(pen)
         painter.drawPie(self.boundingRect(), 0, 128)
         paintCalled = True

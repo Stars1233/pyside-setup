@@ -45,7 +45,7 @@ class QTimeDeepCopy(DeepCopyHelper, unittest.TestCase):
 
 class QDateTimeDeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
-        self.original = QDateTime(2010, 5, 18, 10, 24, 45, 223, Qt.LocalTime)
+        self.original = QDateTime(2010, 5, 18, 10, 24, 45, 223, Qt.TimeSpec.LocalTime)
 
 
 class QSizeDeepCopy(DeepCopyHelper, unittest.TestCase):

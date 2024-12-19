@@ -36,7 +36,8 @@ class TestBug879 (unittest.TestCase):
         self.assertEqual(self.box.text(), '0')
 
     def sendKbdEvent(self):
-        ev = QKeyEvent(QEvent.KeyPress, Qt.Key_A, Qt.NoModifier, 'a')
+        ev = QKeyEvent(QEvent.Type.KeyPress, Qt.Key.Key_A,
+                       Qt.KeyboardModifier.NoModifier, 'a')
         QCoreApplication.sendEvent(self.box, ev)
 
 

@@ -50,9 +50,9 @@ class TestQML(UsesQApplication):
         file = Path(__file__).resolve().parent / 'bug_847.qml'
         self.assertTrue(file.is_file())
         view.setSource(QUrl.fromLocalFile(file))
-        while view.status() == QQuickView.Loading:
+        while view.status() == QQuickView.Status.Loading:
             self.app.processEvents()
-        self.assertEqual(view.status(), QQuickView.Ready)
+        self.assertEqual(view.status(), QQuickView.Status.Ready)
         self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.rootObject().setProperty('pythonObject', view)
 

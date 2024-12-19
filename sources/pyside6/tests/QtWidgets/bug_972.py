@@ -12,7 +12,8 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QSizeF
-from PySide6.QtWidgets import QGraphicsProxyWidget, QSizePolicy, QPushButton, QGraphicsScene, QGraphicsView
+from PySide6.QtWidgets import (QGraphicsProxyWidget, QSizePolicy, QPushButton,
+                               QGraphicsScene, QGraphicsView)
 
 from helper.timedqapplication import TimedQApplication
 
@@ -24,7 +25,7 @@ def createItem(minimum, preferred, maximum, name):
     w.setMinimumSize(minimum)
     w.setPreferredSize(preferred)
     w.setMaximumSize(maximum)
-    w.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+    w.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
 
     return w
 
@@ -39,10 +40,10 @@ class TestBug972 (TimedQApplication):
         prefSize = QSizeF(210, 100)
         maxSize = QSizeF(300, 100)
 
-        a = createItem(minSize, prefSize, maxSize, "A")
-        b = createItem(minSize, prefSize, maxSize, "B")
-        c = createItem(minSize, prefSize, maxSize, "C")
-        d = createItem(minSize, prefSize, maxSize, "D")
+        a = createItem(minSize, prefSize, maxSize, "A")  # noqa: F841
+        b = createItem(minSize, prefSize, maxSize, "B")  # noqa: F841
+        c = createItem(minSize, prefSize, maxSize, "C")  # noqa: F841
+        d = createItem(minSize, prefSize, maxSize, "D")  # noqa: F841
 
         view = QGraphicsView(scene)
         view.show()

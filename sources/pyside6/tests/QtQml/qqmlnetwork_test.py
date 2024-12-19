@@ -65,7 +65,7 @@ class TestQQmlNetworkFactory(TimedQGuiApplication):
         self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
 
-        self.assertEqual(view.status(), QQuickView.Ready)
+        self.assertEqual(view.status(), QQuickView.Status.Ready)
 
         timer = QTimer()
         timer.timeout.connect(check_done)

@@ -20,23 +20,23 @@ from PySide6.QtCore import QCollator, QLocale, Qt
 class QCollatorTest(unittest.TestCase):
     def testState(self):
         c = QCollator()
-        c.setCaseSensitivity(Qt.CaseInsensitive)
-        c.setLocale(QLocale.German)
+        c.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        c.setLocale(QLocale.Language.German)
 
         print("compare a and b:", c.compare("a", "b"))
 
-        self.assertEqual(c.caseSensitivity(), Qt.CaseInsensitive)
-        self.assertEqual(c.locale(), QLocale(QLocale.German))
+        self.assertEqual(c.caseSensitivity(), Qt.CaseSensitivity.CaseInsensitive)
+        self.assertEqual(c.locale(), QLocale(QLocale.Language.German))
 
-        c.setLocale(QLocale.French)
+        c.setLocale(QLocale.Language.French)
         c.setNumericMode(True)
         c.setIgnorePunctuation(True)
-        c.setLocale(QLocale.NorwegianBokmal)
+        c.setLocale(QLocale.Language.NorwegianBokmal)
 
-        self.assertEqual(c.caseSensitivity(), Qt.CaseInsensitive)
+        self.assertEqual(c.caseSensitivity(), Qt.CaseSensitivity.CaseInsensitive)
         self.assertEqual(c.numericMode(), True)
         self.assertEqual(c.ignorePunctuation(), True)
-        self.assertEqual(c.locale(), QLocale(QLocale.NorwegianBokmal))
+        self.assertEqual(c.locale(), QLocale(QLocale.Language.NorwegianBokmal))
 
 
 if __name__ == '__main__':

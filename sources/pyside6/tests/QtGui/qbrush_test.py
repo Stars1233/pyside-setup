@@ -28,8 +28,8 @@ class Constructor(UsesQApplication):
         obj = QBrush(color)
         self.assertEqual(obj.color(), color)
 
-        obj = QBrush(Qt.blue)
-        self.assertEqual(obj.color(), Qt.blue)
+        obj = QBrush(Qt.GlobalColor.blue)
+        self.assertEqual(obj.color(), Qt.GlobalColor.blue)
 
     def testGradient(self):
         """Test type discovery on class hierarchies with non-virtual

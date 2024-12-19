@@ -120,7 +120,7 @@ class qmetaobject_test(unittest.TestCase):
         app = QCoreApplication()  # noqa: F841
         sender = SemaphoreSender()
         receiver = SemaphoreReceiver()
-        sender.signal.connect(receiver.receiverSlot, Qt.QueuedConnection)
+        sender.signal.connect(receiver.receiverSlot, Qt.ConnectionType.QueuedConnection)
         sender.emitSignal()
         while not receiver.semaphore:
             QCoreApplication.processEvents()

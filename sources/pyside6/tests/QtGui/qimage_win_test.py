@@ -19,8 +19,8 @@ from helper.usesqapplication import UsesQApplication
 
 
 def create_image():
-    result = QImage(20, 20, QImage.Format_RGB32)
-    result.fill(Qt.white)
+    result = QImage(20, 20, QImage.Format.Format_RGB32)
+    result.fill(Qt.GlobalColor.white)
     return result
 
 

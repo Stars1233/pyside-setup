@@ -116,19 +116,19 @@ class ParentCase(unittest.TestCase):
         search_result = parent.findChild(QObject, nested_child_name)
         self.assertTrue(search_result)
         search_result = parent.findChild(QObject, nested_child_name,
-                                         Qt.FindChildrenRecursively)
+                                         Qt.FindChildOption.FindChildrenRecursively)
         self.assertTrue(search_result)
         search_result = parent.findChild(QObject, nested_child_name,
-                                         Qt.FindDirectChildrenOnly)
+                                         Qt.FindChildOption.FindDirectChildrenOnly)
         self.assertFalse(search_result)
 
         search_results = parent.findChildren(QObject, nested_child_name)
         self.assertEqual(len(search_results), 1)
         search_result = parent.findChildren(QObject, nested_child_name,
-                                            Qt.FindChildrenRecursively)
+                                            Qt.FindChildOption.FindChildrenRecursively)
         self.assertEqual(len(search_results), 1)
         search_results = parent.findChildren(QObject, nested_child_name,
-                                             Qt.FindDirectChildrenOnly)
+                                             Qt.FindChildOption.FindDirectChildrenOnly)
         self.assertEqual(len(search_results), 0)
 
     def testFindChildWithoutName(self):

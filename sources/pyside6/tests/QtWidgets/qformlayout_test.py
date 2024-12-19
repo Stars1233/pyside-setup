@@ -32,7 +32,7 @@ class QFormLayoutTest(UsesQApplication):
         self.assertTrue(isinstance(row, int))
         self.assertTrue(isinstance(role, QFormLayout.ItemRole))
         self.assertEqual(row, 0)
-        self.assertEqual(role, QFormLayout.SpanningRole)
+        self.assertEqual(role, QFormLayout.ItemRole.SpanningRole)
 
     def testGetWidgetPosition(self):
         formlayout = QFormLayout()
@@ -48,7 +48,7 @@ class QFormLayoutTest(UsesQApplication):
         self.assertTrue(isinstance(row, int))
         self.assertTrue(isinstance(role, QFormLayout.ItemRole))
         self.assertEqual(row, 0)
-        self.assertEqual(role, QFormLayout.SpanningRole)
+        self.assertEqual(role, QFormLayout.ItemRole.SpanningRole)
 
     def testGetLayoutPosition(self):
         formlayout = QFormLayout()
@@ -64,7 +64,7 @@ class QFormLayoutTest(UsesQApplication):
         self.assertTrue(isinstance(row, int))
         self.assertTrue(isinstance(role, QFormLayout.ItemRole))
         self.assertEqual(row, 0)
-        self.assertEqual(role, QFormLayout.SpanningRole)
+        self.assertEqual(role, QFormLayout.ItemRole.SpanningRole)
 
     def testTakeRow(self):
         window = QMainWindow()

@@ -17,12 +17,12 @@ from PySide6.QtCore import QSysInfo
 class TestQSysInfo(unittest.TestCase):
 
     def testEnumEndian(self):
-        self.assertEqual(QSysInfo.BigEndian.value, 0)
-        self.assertEqual(QSysInfo.LittleEndian.value, 1)
-        self.assertTrue(QSysInfo.ByteOrder.value > -1)
+        self.assertEqual(QSysInfo.Endian.BigEndian.value, 0)
+        self.assertEqual(QSysInfo.Endian.LittleEndian.value, 1)
+        self.assertTrue(QSysInfo.Endian.ByteOrder.value > -1)
 
     def testEnumSizes(self):
-        self.assertTrue(QSysInfo.WordSize.value > 0)
+        self.assertTrue(QSysInfo.Sizes.WordSize.value > 0)
 
 
 if __name__ == '__main__':

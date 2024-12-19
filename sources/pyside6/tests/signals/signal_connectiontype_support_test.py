@@ -32,7 +32,7 @@ class TestConnectionTypeSupport(unittest.TestCase):
         """Connect signal using a Qt.ConnectionType as argument"""
         obj1 = Sender()
 
-        obj1.foo.connect(self.callback, Qt.DirectConnection)
+        obj1.foo.connect(self.callback, Qt.ConnectionType.DirectConnection)
         self.args = tuple()
         obj1.foo.emit(*self.args)
 

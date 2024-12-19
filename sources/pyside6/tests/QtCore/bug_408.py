@@ -31,7 +31,7 @@ class QIODeviceTest(unittest.TestCase):
 
     def testIt(self):
         device = MyDevice("hello world\nhello again")
-        device.open(QIODevice.ReadOnly)
+        device.open(QIODevice.OpenModeFlag.ReadOnly)
 
         s = QTextStream(device)
         self.assertEqual(s.readLine(), "hello world")

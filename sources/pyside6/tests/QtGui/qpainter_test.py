@@ -27,7 +27,7 @@ except ModuleNotFoundError:
 class QPainterDrawText(UsesQApplication):
     def setUp(self):
         super(QPainterDrawText, self).setUp()
-        self.image = QImage(32, 32, QImage.Format_ARGB32)
+        self.image = QImage(32, 32, QImage.Format.Format_ARGB32)
         self.painter = QPainter(self.image)
         self.text = 'teste!'
 
@@ -42,14 +42,15 @@ class QPainterDrawText(UsesQApplication):
     def testDrawText(self):
         # bug #254
         rect = self.painter.drawText(100, 100, 100, 100,
-                                     Qt.AlignCenter | Qt.TextWordWrap,
+                                     Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap,
                                      self.text)
         self.assertTrue(isinstance(rect, QRect))
 
     def testDrawTextWithRect(self):
         # bug #225
         rect = QRect(100, 100, 100, 100)
-        newRect = self.painter.drawText(rect, Qt.AlignCenter | Qt.TextWordWrap,
+        newRect = self.painter.drawText(rect,
+                                        Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap,
                                         self.text)
 
         self.assertTrue(isinstance(newRect, QRect))
@@ -57,7 +58,8 @@ class QPainterDrawText(UsesQApplication):
     def testDrawTextWithRectF(self):
         '''QPainter.drawText(QRectF, ... ,QRectF*) inject code'''
         rect = QRectF(100, 52.3, 100, 100)
-        newRect = self.painter.drawText(rect, Qt.AlignCenter | Qt.TextWordWrap,
+        newRect = self.painter.drawText(rect,
+                                        Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap,
                                         self.text)
 
         self.assertTrue(isinstance(newRect, QRectF))
@@ -105,7 +107,7 @@ class SetBrushWithOtherArgs(UsesQApplication):
     '''Using qpainter.setBrush with args other than QBrush'''
 
     def testSetBrushGradient(self):
-        image = QImage(32, 32, QImage.Format_ARGB32)
+        image = QImage(32, 32, QImage.Format.Format_ARGB32)
         with QPainter(image) as painter:
             gradient = QLinearGradient(0, 0, 0, 0)
             painter.setBrush(gradient)

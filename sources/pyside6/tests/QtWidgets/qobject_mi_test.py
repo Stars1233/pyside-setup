@@ -42,9 +42,9 @@ class DoubleQObjectInheritanceTest(UsesQApplication):
 
         # QIntValidator methods
         state, string, number = obj.validate('aaaa', 0)
-        self.assertEqual(state, QValidator.Invalid)
+        self.assertEqual(state, QValidator.State.Invalid)
         state, string, number = obj.validate('33', 0)
-        self.assertEqual(state, QValidator.Acceptable)
+        self.assertEqual(state, QValidator.State.Acceptable)
 
 
 if __name__ == '__main__':

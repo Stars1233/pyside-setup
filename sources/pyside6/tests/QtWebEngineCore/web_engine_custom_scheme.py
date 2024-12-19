@@ -8,15 +8,14 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from PySide6.QtCore import QBuffer, Qt, QTimer
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout
-from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtWebEngineCore import (QWebEngineProfile,
-                                     QWebEngineUrlScheme,
-                                     QWebEngineUrlSchemeHandler)
+from PySide6.QtCore import QBuffer, Qt, QTimer  # noqa: E402
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout  # noqa: E402
+from PySide6.QtWebEngineWidgets import QWebEngineView  # noqa: E402
+from PySide6.QtWebEngineCore import (QWebEngineProfile, QWebEngineUrlScheme,  # noqa: E402
+                                     QWebEngineUrlSchemeHandler)  # noqa: E402
 
 
 class TestSchemeHandler(QWebEngineUrlSchemeHandler):
@@ -34,7 +33,7 @@ class TestSchemeHandler(QWebEngineUrlSchemeHandler):
 class MainTest(unittest.TestCase):
     def test_SchemeHandlerRedirect(self):
         self._loaded = False
-        QApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+        QApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
         app = QApplication([])
 
         scheme_name = bytes("testpy", "UTF-8")

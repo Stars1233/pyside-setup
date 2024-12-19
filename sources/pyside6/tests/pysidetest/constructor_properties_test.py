@@ -24,22 +24,22 @@ if not is_pypy:
 class ConstructorPropertiesTest(unittest.TestCase):
 
     def setUp(self):
-        qApp or QApplication()
+        qApp or QApplication()  # noqa: F821
         if not is_pypy:
             feature.reset()
 
     def tearDown(self):
         if not is_pypy:
             feature.reset()
-        qApp.shutdown()
+        qApp.shutdown()  # noqa: F821
 
     # PYSIDE-1019: First property extension was support by the constructor.
     def testCallConstructor(self):
         label = QLabel(
-            frameStyle=QFrame.Panel | QFrame.Sunken,    # QFrame attr, no property
-            lineWidth=2,                                # QFrame property
-            text="first line\nsecond line",             # QLabel property
-            alignment=Qt.AlignBottom | Qt.AlignRight    # QLabel property
+            frameStyle=QFrame.Shape.Panel | QFrame.Shadow.Sunken,  # QFrame attr, no property
+            lineWidth=2,                                           # QFrame property
+            text="first line\nsecond line",                        # QLabel property
+            alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight  # QLabel property
         )
         self.assertEqual(label.lineWidth(), 2)
         self.assertRaises(AttributeError, lambda: QLabel(
@@ -49,13 +49,13 @@ class ConstructorPropertiesTest(unittest.TestCase):
     # PYSIDE-1705: The same with snake_case
     @unittest.skipIf(is_pypy, "feature switching is not yet possible in PyPy")
     def testCallConstructor_snake(self):
-        from __feature__ import snake_case
+        from __feature__ import snake_case  # noqa: F401
 
         label = QLabel(
-            frame_style=QFrame.Panel | QFrame.Sunken,   # QFrame attr, no property
-            line_width=2,                               # QFrame property
-            text="first line\nsecond line",             # QLabel property
-            alignment=Qt.AlignBottom | Qt.AlignRight    # QLabel property
+            frame_style=QFrame.Shape.Panel | QFrame.Shadow.Sunken,  # QFrame attr, no property
+            line_width=2,                                           # QFrame property
+            text="first line\nsecond line",                         # QLabel property
+            alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight  # QLabel property
         )
         self.assertEqual(label.line_width(), 2)
         self.assertRaises(AttributeError, lambda: QLabel(
@@ -65,13 +65,13 @@ class ConstructorPropertiesTest(unittest.TestCase):
     # PYSIDE-1705: The same with true_property
     @unittest.skipIf(is_pypy, "feature switching is not yet possible in PyPy")
     def testCallConstructor_prop(self):
-        from __feature__ import true_property
+        from __feature__ import true_property  # noqa: F401
 
         label = QLabel(
-            frameStyle=QFrame.Panel | QFrame.Sunken,    # QFrame attr, no property
-            lineWidth=2,                                # QFrame property
-            text="first line\nsecond line",             # QLabel property
-            alignment=Qt.AlignBottom | Qt.AlignRight    # QLabel property
+            frameStyle=QFrame.Shape.Panel | QFrame.Shadow.Sunken,  # QFrame attr, no property
+            lineWidth=2,                                           # QFrame property
+            text="first line\nsecond line",                        # QLabel property
+            alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight  # QLabel property
         )
         self.assertEqual(label.lineWidth, 2)
         self.assertRaises(AttributeError, lambda: QLabel(
@@ -81,13 +81,13 @@ class ConstructorPropertiesTest(unittest.TestCase):
     # PYSIDE-1705: The same with snake_case and true_property
     @unittest.skipIf(is_pypy, "feature switching is not yet possible in PyPy")
     def testCallConstructor_prop_snake(self):
-        from __feature__ import snake_case, true_property
+        from __feature__ import snake_case, true_property  # noqa: F401
 
         label = QLabel(
-            frame_style=QFrame.Panel | QFrame.Sunken,   # QFrame attr, no property
+            frame_style=QFrame.Shape.Panel | QFrame.Shadow.Sunken,   # QFrame attr, no property
             line_width=2,                               # QFrame property
             text="first line\nsecond line",             # QLabel property
-            alignment=Qt.AlignBottom | Qt.AlignRight    # QLabel property
+            alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight  # QLabel property
         )
         self.assertEqual(label.line_width, 2)
         self.assertRaises(AttributeError, lambda: QLabel(

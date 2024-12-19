@@ -31,7 +31,7 @@ class GetCharTest(unittest.TestCase):
     def testBasic(self):
         '''QFile.getChar'''
         obj = QFile(self.filename)
-        obj.open(QIODevice.ReadOnly)
+        obj.open(QIODevice.OpenModeFlag.ReadOnly)
         try:
             self.assertEqual(obj.getChar(), (True, 'a'))
             self.assertFalse(obj.getChar()[0])
@@ -40,7 +40,7 @@ class GetCharTest(unittest.TestCase):
 
     def testBug721(self):
         obj = QFile(self.filename)
-        obj.open(QIODevice.ReadOnly)
+        obj.open(QIODevice.OpenModeFlag.ReadOnly)
         try:
             memory = obj.map(0, 1)
             self.assertEqual(len(memory), 1)
@@ -56,7 +56,7 @@ class GetCharTest(unittest.TestCase):
         dir = QTemporaryDir(QDir.tempPath() + "/XXXXXX.dir")
         self.assertTrue(dir.isValid())
         saveFile = QSaveFile(dir.path() + "/test.dat")
-        self.assertTrue(saveFile.open(QIODevice.WriteOnly))
+        self.assertTrue(saveFile.open(QIODevice.OpenModeFlag.WriteOnly))
         saveFile.write(bytes("Test", "UTF-8"))
         self.assertTrue(saveFile.commit())
         self.assertTrue(os.path.exists(QDir.toNativeSeparators(saveFile.fileName())))

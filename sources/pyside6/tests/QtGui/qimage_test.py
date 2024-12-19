@@ -35,16 +35,16 @@ class QImageTest(UsesQApplication):
         img2.setColorSpace(img0.colorSpace())
         self.assertEqual(img0, img2)
 
-        ## test scanLine method
+        # test scanLine method
         data1 = img0.scanLine(0)
         data2 = img1.scanLine(0)
         self.assertEqual(data1, data2)
 
     def testEmptyBuffer(self):
-        img = QImage(bytes('', "UTF-8"), 100, 100, QImage.Format_ARGB32)
+        img = QImage(bytes('', "UTF-8"), 100, 100, QImage.Format.Format_ARGB32)  # noqa: F841
 
     def testEmptyStringAsBuffer(self):
-        img = QImage(bytes('', "UTF-8"), 100, 100, QImage.Format_ARGB32)
+        img = QImage(bytes('', "UTF-8"), 100, 100, QImage.Format.Format_ARGB32)  # noqa: F841
 
     def testXpmConstructor(self):
         img = QImage(xpm)

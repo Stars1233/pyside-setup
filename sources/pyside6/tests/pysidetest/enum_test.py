@@ -26,8 +26,8 @@ class ListConnectionTest(unittest.TestCase):
         self.assertEqual(TestObjectWithoutNamespace.Enum2.Option4, 4)
 
     def testFlagComparisonOperators(self):  # PYSIDE-1696, compare to self
-        f1 = Qt.AlignHCenter | Qt.AlignBottom
-        f2 = Qt.AlignHCenter | Qt.AlignBottom
+        f1 = Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignBottom
+        f2 = Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignBottom
         self.assertTrue(f1 == f1)
         self.assertTrue(f1 <= f1)
         self.assertTrue(f1 >= f1)
@@ -42,10 +42,10 @@ class ListConnectionTest(unittest.TestCase):
         self.assertFalse(f1 < f2)
         self.assertFalse(f1 > f2)
 
-        self.assertTrue(Qt.AlignHCenter < Qt.AlignBottom)
-        self.assertFalse(Qt.AlignHCenter > Qt.AlignBottom)
-        self.assertFalse(Qt.AlignBottom < Qt.AlignHCenter)
-        self.assertTrue(Qt.AlignBottom > Qt.AlignHCenter)
+        self.assertTrue(Qt.AlignmentFlag.AlignHCenter < Qt.AlignmentFlag.AlignBottom)
+        self.assertFalse(Qt.AlignmentFlag.AlignHCenter > Qt.AlignmentFlag.AlignBottom)
+        self.assertFalse(Qt.AlignmentFlag.AlignBottom < Qt.AlignmentFlag.AlignHCenter)
+        self.assertTrue(Qt.AlignmentFlag.AlignBottom > Qt.AlignmentFlag.AlignHCenter)
 
 
 # PYSIDE-1735: We are testing that opcodes do what they are supposed to do.

@@ -21,7 +21,7 @@ from PySide6.QtWidgets import QStyle, QWidget
 class BugTest(UsesQApplication):
     def testCase(self):
         s = QWidget().style()
-        i = s.standardIcon(QStyle.SP_TitleBarMinButton)
+        i = s.standardIcon(QStyle.StandardPixmap.SP_TitleBarMinButton)
         self.assertEqual(type(i), QIcon)
 
 

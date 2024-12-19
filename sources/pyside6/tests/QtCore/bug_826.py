@@ -30,8 +30,8 @@ class TestEvent(QEvent):
 
 class TestEnums(unittest.TestCase):
     def testUserTypesValues(self):
-        self.assertTrue(QEvent.User <= TestEvent.TestEventType <= QEvent.MaxUser)
-        self.assertTrue(QEvent.User <= TEST_EVENT_TYPE <= QEvent.MaxUser)
+        self.assertTrue(QEvent.Type.User <= TestEvent.TestEventType <= QEvent.Type.MaxUser)
+        self.assertTrue(QEvent.Type.User <= TEST_EVENT_TYPE <= QEvent.Type.MaxUser)
 
 
 if __name__ == '__main__':

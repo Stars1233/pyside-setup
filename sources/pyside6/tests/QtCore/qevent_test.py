@@ -23,14 +23,14 @@ class QEventTypeFlag(unittest.TestCase):
     def testFlagAccess(self):
         # QEvent.Type flags usage
 
-        event = QEvent(QEvent.Timer)
-        self.assertEqual(event.type(), QEvent.Timer)
+        event = QEvent(QEvent.Type.Timer)
+        self.assertEqual(event.type(), QEvent.Type.Timer)
 
-        event = QEvent(QEvent.Close)
-        self.assertEqual(event.type(), QEvent.Close)
+        event = QEvent(QEvent.Type.Close)
+        self.assertEqual(event.type(), QEvent.Type.Close)
 
-        event = QEvent(QEvent.IconTextChange)
-        self.assertEqual(event.type(), QEvent.IconTextChange)
+        event = QEvent(QEvent.Type.IconTextChange)
+        self.assertEqual(event.type(), QEvent.Type.IconTextChange)
 
 
 if __name__ == '__main__':

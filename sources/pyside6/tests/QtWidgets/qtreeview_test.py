@@ -77,7 +77,7 @@ class QWidgetTest(UsesQApplication):
 
     def testHeader(self):
         tree = QTreeView()
-        tree.setHeader(QHeaderView(Qt.Horizontal))
+        tree.setHeader(QHeaderView(Qt.Orientation.Horizontal))
         self.assertIsNotNone(tree.header())
 
 

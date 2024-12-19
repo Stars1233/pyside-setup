@@ -21,7 +21,7 @@ class QTextDocumentWriterTest(unittest.TestCase):
         text = 'foobar'
         doc = QTextDocument(text)
         b = QBuffer()
-        b.open(QBuffer.ReadWrite)
+        b.open(QBuffer.OpenModeFlag.ReadWrite)
         writer = QTextDocumentWriter(b, bytes("plaintext", "UTF-8"))
         writer.write(doc)
         b.close()

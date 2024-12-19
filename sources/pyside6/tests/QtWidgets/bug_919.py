@@ -29,7 +29,7 @@ class MyWidget(QPushButton):
         p = QPainter(self)
         style = QApplication.style()
         option = QStyleOptionButton()
-        style.drawControl(QStyle.CE_PushButton, option, p)
+        style.drawControl(QStyle.ControlElement.CE_PushButton, option, p)
         self._painted = True
         QTimer.singleShot(0, self._emitPainted)
 

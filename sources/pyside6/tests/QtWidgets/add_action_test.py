@@ -40,8 +40,8 @@ class AddActionTest(UsesQApplication):
         '''QMenuBar.addAction(id, callback)'''
         menubar = QMenuBar()
         action = menubar.addAction("Accounts", self._callback)
-        action.activate(QAction.Trigger)
-        action.setShortcut(Qt.Key_A)
+        action.activate(QAction.ActionEvent.Trigger)
+        action.setShortcut(Qt.Key.Key_A)
         self.assertTrue(self.called)
 
     def testWithCppSlot(self):
@@ -51,8 +51,8 @@ class AddActionTest(UsesQApplication):
         widget.setCheckable(True)
         widget.setChecked(False)
         action = menubar.addAction("Accounts", widget, SLOT("toggle()"))
-        action.setShortcut(Qt.Key_A)
-        action.activate(QAction.Trigger)
+        action.setShortcut(Qt.Key.Key_A)
+        action.activate(QAction.ActionEvent.Trigger)
         self.assertTrue(widget.isChecked())
 
 

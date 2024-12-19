@@ -37,7 +37,7 @@ class QPixmapTest(UsesQApplication):
 
     def testQPixmapLoadFromDataWithQFile(self):
         f = QFile(self._sample_file)
-        self.assertTrue(f.open(QIODevice.ReadOnly))
+        self.assertTrue(f.open(QIODevice.OpenModeFlag.ReadOnly))
         data = f.read(f.size())
         f.close()
         pixmap = QPixmap()
@@ -54,8 +54,9 @@ class QPixmapToImage(UsesQApplication):
 
     def testFilledImage(self):
         '''QPixmap.fill + toImage + image.pixel'''
+        red = QColor(Qt.GlobalColor.red)
         pixmap = QPixmap(100, 200)
-        pixmap.fill(Qt.red)  # Default Qt.white
+        pixmap.fill(red)  # Default Qt.GlobalColor.white
 
         self.assertEqual(pixmap.height(), 200)
         self.assertEqual(pixmap.width(), 100)
@@ -66,7 +67,7 @@ class QPixmapToImage(UsesQApplication):
         self.assertEqual(image.width(), 100)
 
         pixel = image.pixel(10, 10)
-        self.assertEqual(pixel, QColor(Qt.red).rgba())
+        self.assertEqual(pixel, red.rgba())
 
 
 if __name__ == '__main__':

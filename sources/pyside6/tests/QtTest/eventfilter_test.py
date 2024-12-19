@@ -33,8 +33,8 @@ class KeyEventFilter(QObject):
         self.processed = False
 
     def eventFilter(self, obj, event):
-        if self.widget == obj and event.type() == self.eventType and \
-               isinstance(event, QKeyEvent) and event.key() == self.key:
+        if (self.widget == obj and event.type() == self.eventType
+                and isinstance(event, QKeyEvent) and event.key() == self.key):
             self.processed = True
             return True
 
@@ -45,8 +45,8 @@ class EventFilterTest(UsesQApplication):
 
     def testKeyEvent(self):
         widget = QLineEdit()
-        key = Qt.Key_A
-        eventFilter = KeyEventFilter(widget, QEvent.KeyPress, key)
+        key = Qt.Key.Key_A
+        eventFilter = KeyEventFilter(widget, QEvent.Type.KeyPress, key)
         widget.installEventFilter(eventFilter)
 
         QTest.keyClick(widget, key)

@@ -20,8 +20,8 @@ from PySide6.QtGui import QColor, QImage, QPixelFormat, qPixelFormatRgba
 
 class QPixelFormatTest(UsesQApplication):
     def test(self):
-        image = QImage(QSize(200, 200), QImage.Format_ARGB32)
-        image.fill(QColor(Qt.red))
+        image = QImage(QSize(200, 200), QImage.Format.Format_ARGB32)
+        image.fill(QColor(Qt.GlobalColor.red))
         pixelFormat = image.pixelFormat()
         print(pixelFormat.greenSize())
         self.assertEqual(pixelFormat.alphaSize(), 8)
@@ -31,9 +31,10 @@ class QPixelFormatTest(UsesQApplication):
         self.assertEqual(pixelFormat.bitsPerPixel(), 32)
 
     def testHelpers(self):
-        format = qPixelFormatRgba(8, 8, 8, 8, QPixelFormat.UsesAlpha,
-                                  QPixelFormat.AtBeginning, QPixelFormat.Premultiplied,
-                                  QPixelFormat.UnsignedByte)
+        format = qPixelFormatRgba(8, 8, 8, 8, QPixelFormat.AlphaUsage.UsesAlpha,
+                                  QPixelFormat.AlphaPosition.AtBeginning,
+                                  QPixelFormat.AlphaPremultiplied.Premultiplied,
+                                  QPixelFormat.TypeInterpretation.UnsignedByte)
         self.assertEqual(format.redSize(), 8)
 
 

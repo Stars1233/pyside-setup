@@ -33,7 +33,7 @@ class ResourcesUsage(unittest.TestCase):
                 orig.remove(carriage_return, 1)
 
         f = QFile(':/quote.txt')  # |QIODevice.Text
-        self.assertTrue(f.open(QIODevice.ReadOnly), f.errorString())
+        self.assertTrue(f.open(QIODevice.OpenModeFlag.ReadOnly), f.errorString())
         copy = f.readAll()
         f.close()
         self.assertEqual(orig, copy)
@@ -45,7 +45,7 @@ class ResourcesUsage(unittest.TestCase):
         orig = file.read_bytes()
 
         f = QFile(':/sample.png')
-        self.assertTrue(f.open(QIODevice.ReadOnly), f.errorString())
+        self.assertTrue(f.open(QIODevice.OpenModeFlag.ReadOnly), f.errorString())
         copy = f.readAll()
         f.close()
         self.assertEqual(len(orig), len(copy))

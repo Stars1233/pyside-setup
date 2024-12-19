@@ -43,7 +43,8 @@ class HttpSignalsCase(UsesQApplication):
         self.assertTrue(self.server.listen())
         self.client = QTcpSocket()
         self.client.connected.connect(self.onClientConnect)
-        self.client.connectToHost(QHostAddress(QHostAddress.LocalHost), self.server.serverPort())
+        self.client.connectToHost(QHostAddress(QHostAddress.SpecialAddress.LocalHost),
+                                  self.server.serverPort())
 
     def done(self):
         self.serverConnection.close()

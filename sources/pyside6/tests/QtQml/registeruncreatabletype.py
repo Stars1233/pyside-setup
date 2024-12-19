@@ -48,7 +48,7 @@ class TestQmlSupport(unittest.TestCase):
         component = QQmlComponent(engine, QUrl.fromLocalFile(file))
 
         # Check that the uncreatable item produces the correct error
-        self.assertEqual(component.status(), QQmlComponent.Error)
+        self.assertEqual(component.status(), QQmlComponent.Status.Error)
         errorFound = False
         for e in component.errors():
             if noCreationReason in e.toString():

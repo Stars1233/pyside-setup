@@ -30,7 +30,7 @@ class QSvgWidgetTest(unittest.TestCase):
         self.assertTrue(fromFile.renderer().isValid())
 
         tigerFile = QFile(tigerPath)
-        tigerFile.open(QFile.ReadOnly)
+        tigerFile.open(QFile.OpenModeFlag.ReadOnly)
         tigerData = tigerFile.readAll()
         fromContents = QSvgWidget()
         fromContents.load(tigerData)

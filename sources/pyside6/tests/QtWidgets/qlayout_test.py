@@ -69,32 +69,32 @@ class QLayoutTest(UsesQApplication):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testOwnershipTransfer(self):
         b = QPushButton("teste")
-        l = MyLayout()
+        layout = MyLayout()
 
-        l.addWidget(b)
+        layout.addWidget(b)
 
         self.assertEqual(sys.getrefcount(b), 2)
 
         w = QWidget()
 
         # transfer ref
-        w.setLayout(l)
+        w.setLayout(layout)
 
         self.assertEqual(sys.getrefcount(b), 3)
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testReferenceTransfer(self):
         b = QPushButton("teste")
-        l = QHBoxLayout()
+        layout = QHBoxLayout()
 
         # keep ref
-        l.addWidget(b)
+        layout.addWidget(b)
         self.assertEqual(sys.getrefcount(b), 3)
 
         w = QWidget()
 
         # transfer ref
-        w.setLayout(l)
+        w.setLayout(layout)
 
         self.assertEqual(sys.getrefcount(b), 3)
 
@@ -106,17 +106,17 @@ class QLayoutTest(UsesQApplication):
     def testMissingFunctions(self):
         w = QWidget()
         b = QPushButton("test")
-        l = MissingItemAtLayout()
+        layout = MissingItemAtLayout()
 
-        l.addWidget(b)
+        layout.addWidget(b)
 
-        self.assertRaises(RuntimeError, w.setLayout, l)
+        self.assertRaises(RuntimeError, w.setLayout, layout)
 
     def testQFormLayout(self):
         w = QWidget()
         formLayout = QFormLayout()
         spacer = QSpacerItem(100, 30)
-        formLayout.setItem(0, QFormLayout.SpanningRole, spacer)
+        formLayout.setItem(0, QFormLayout.ItemRole.SpanningRole, spacer)
         w.setLayout(formLayout)
         w.show()
         QTimer.singleShot(10, w.close)

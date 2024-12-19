@@ -32,7 +32,7 @@ class Sender(QObject):
         super().__init__()
 
     def emit_test_sig(self):
-        self.test_sig.emit(Qt.AlignLeft, "bla")
+        self.test_sig.emit(Qt.AlignmentFlag.AlignLeft, "bla")
 
 
 class TestSignalNewEnum(unittest.TestCase):

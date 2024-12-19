@@ -31,7 +31,8 @@ new_functions = """
     PySide6.QtCore.QAbstractListModel().parent()
     PySide6.QtCore.QAbstractTableModel().parent()
     PySide6.QtCore.QFile().resize(qint64)
-    m = PySide6.QtCore.QMutex(); m.tryLock(); m.unlock() # prevent a message "QMutex: destroying locked mutex"
+    # prevent a message "QMutex: destroying locked mutex"
+    m = PySide6.QtCore.QMutex(); m.tryLock(); m.unlock()
     PySide6.QtCore.QSortFilterProxyModel().parent()
     PySide6.QtCore.QTemporaryFile(tfarg).open(openMode)
 """
@@ -58,7 +59,8 @@ new_functions += """
     PySide6.QtWidgets.QGestureEvent([]).ignore()
     PySide6.QtWidgets.QGestureEvent([]).isAccepted()
     PySide6.QtWidgets.QGestureEvent([]).setAccepted(_bool)
-    # PySide6.QtWidgets.QGraphicsView().render(qPaintDevice,qPoint,qRegion,renderFlags) # QPaintDevice: NotImplementedError
+    # QPaintDevice: NotImplementedError
+    # PySide6.QtWidgets.QGraphicsView().render(qPaintDevice,qPoint,qRegion,renderFlags)
     PySide6.QtWidgets.QGridLayout().addWidget(qWidget)
     PySide6.QtWidgets.QInputDialog().open()
     PySide6.QtWidgets.QLineEdit().addAction(qAction)
@@ -75,13 +77,16 @@ new_functions += """
     # PySide6.QtPrintSupport.QPageSetupDialog().open() # Segmentation fault: 11
     # PySide6.QtPrintSupport.QPrintDialog().open() # opens the dialog, but works
     PySide6.QtPrintSupport.QPrintDialog().printer()
-    PySide6.QtPrintSupport.QPrintPreviewDialog().open() # note: this prints something, but really shouldn't ;-)
+    # note: this prints something, but really shouldn't ;-)
+    PySide6.QtPrintSupport.QPrintPreviewDialog().open()
 """ if "PySide6.QtPrintSupport" in sys.modules else ""
 
 new_functions += """
     PySide6.QtHelp.QHelpContentModel().parent()
-    # PySide6.QtHelp.QHelpIndexModel().createIndex(_int,_int,quintptr) # returned NULL without setting an error
-    # PySide6.QtHelp.QHelpIndexModel().createIndex(_int,_int,object()) # returned NULL without setting an error
+    # returns NULL without setting an error
+    # PySide6.QtHelp.QHelpIndexModel().createIndex(_int,_int,quintptr)
+    # returns NULL without setting an error
+    # PySide6.QtHelp.QHelpIndexModel().createIndex(_int,_int,object())
 """ if "PySide6.QtHelp" in sys.modules else ""
 
 new_functions += """
@@ -107,7 +112,7 @@ class MainTest(unittest.TestCase):
         tfarg = os.path.join(PySide6.QtCore.QDir.tempPath(), "XXXXXX.tmp")  # noqa: F841,F405
         findStr = 'bla'  # noqa: F841,F405
         orientation = PySide6.QtCore.Qt.Orientations()  # noqa: F841,F405
-        openMode = PySide6.QtCore.QIODevice.OpenMode(PySide6.QtCore.QIODevice.ReadOnly)  # noqa: F841,F405
+        openMode = PySide6.QtCore.QIODevice.OpenMode(PySide6.QtCore.QIODevice.OpenModeFlag.ReadOnly)  # noqa: F841,F405,E501
         qModelIndex = PySide6.QtCore.QModelIndex()  # noqa: F841,F405
         transformationMode = PySide6.QtCore.Qt.TransformationMode()  # noqa: F841,F405
         qObject = PySide6.QtCore.QObject()  # noqa: F841,F405
@@ -152,7 +157,7 @@ class MainTest(unittest.TestCase):
         """
         try:
             qApp = (  # noqa: F841
-                PySide6.QtWidgets.QApplication.instance() or PySide6.QtWidgets.QApplication([])  # noqa: F405
+                PySide6.QtWidgets.QApplication.instance() or PySide6.QtWidgets.QApplication([])  # noqa: F405,E501
             )
         except AttributeError:
             unittest.TestCase().skipTest("this test makes only sense if QtWidgets is available.")

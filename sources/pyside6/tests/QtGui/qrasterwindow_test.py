@@ -28,7 +28,7 @@ class StaticTextRasterWindow(QRasterWindow):
     def paintEvent(self, event):
         clientRect = QRect(QPoint(0, 0), self.size())
         with QPainter(self) as painter:
-            painter.fillRect(clientRect, QColor(Qt.red))
+            painter.fillRect(clientRect, QColor(Qt.GlobalColor.red))
             painter.drawStaticText(QPoint(10, 10), self.text)
 
 
@@ -43,16 +43,16 @@ class TextDocumentWindow(QRasterWindow):
     def paintEvent(self, event):
         with QPainter(self) as painter:
             clientRect = QRect(QPoint(0, 0), self.size())
-            painter.fillRect(clientRect, QColor(Qt.white))
+            painter.fillRect(clientRect, QColor(Qt.GlobalColor.white))
             ctx = QAbstractTextDocumentLayout.PaintContext()
             ctx.clip = clientRect
 
             sel = QAbstractTextDocumentLayout.Selection()
             cursor = QTextCursor(self.m_document)
-            cursor.movePosition(QTextCursor.Start)
-            cursor.movePosition(QTextCursor.NextWord, QTextCursor.KeepAnchor)
+            cursor.movePosition(QTextCursor.MoveOperation.Start)
+            cursor.movePosition(QTextCursor.MoveOperation.NextWord, QTextCursor.MoveMode.KeepAnchor)
             sel.cursor = cursor
-            sel.format.setForeground(Qt.red)
+            sel.format.setForeground(Qt.GlobalColor.red)
             ctx.selections = [sel]
 
             self.m_document.documentLayout().draw(painter, ctx)

@@ -50,7 +50,7 @@ class EditorCreatedByDelegateTest(UsesQApplication):
         editor = view.getEditorWidgetFromItemDelegate()
         self.assertEqual(type(editor), QComboBox)
         self.assertEqual(editor.count(), 1)
-        self.assertEqual(editor.itemData(0, Qt.DisplayRole), id_text)
+        self.assertEqual(editor.itemData(0, Qt.ItemDataRole.DisplayRole), id_text)
         editor.metaObject()
 
     def testDelegateKeepsReferenceToEditor(self):
@@ -60,7 +60,7 @@ class EditorCreatedByDelegateTest(UsesQApplication):
         editor = view.getEditorWidgetFromItemDelegate()
         self.assertEqual(type(editor), QComboBox)
         self.assertEqual(editor.count(), 1)
-        self.assertEqual(editor.itemData(0, Qt.DisplayRole), id_text)
+        self.assertEqual(editor.itemData(0, Qt.ItemDataRole.DisplayRole), id_text)
         editor.metaObject()
 
     def testIntDelegate(self):
@@ -68,7 +68,7 @@ class EditorCreatedByDelegateTest(UsesQApplication):
            for anything that fits into a int. Verify by checking that a spin
            box is created as item view editor for int."""
         item = QStandardItem()
-        item.setData(123123, Qt.EditRole)  # <-- QVariant conversion here
+        item.setData(123123, Qt.ItemDataRole.EditRole)  # <-- QVariant conversion here
         model = QStandardItemModel()
         model.appendRow(item)
         style_option = QStyleOptionViewItem()

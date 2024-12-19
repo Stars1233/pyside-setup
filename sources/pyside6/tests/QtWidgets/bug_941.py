@@ -22,10 +22,11 @@ def foo(a, b):
 class TestBug941 (unittest.TestCase):
 
     def testIt(self):
-        app = QApplication([])
-        view = QHeaderView(Qt.Horizontal)
+        app = QApplication([])  # noqa: F841
+        view = QHeaderView(Qt.Orientation.Horizontal)
         self.assertTrue(view.sortIndicatorChanged.connect(foo))
-        view.sortIndicatorChanged.emit(0, Qt.Vertical)  # this can't raise an exception!
+        # this can't raise an exception!
+        view.sortIndicatorChanged.emit(0, Qt.Orientation.Vertical)
 
 
 if __name__ == '__main__':

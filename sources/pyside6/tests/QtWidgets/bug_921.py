@@ -28,7 +28,7 @@ class Window:
 
     def __init__(self, s):
         self._window = QMainWindow()
-        self._window.setAttribute(Qt.WA_DeleteOnClose, True)
+        self._window.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
         self._window.setWindowTitle("Demo!")
 
         self._s = s

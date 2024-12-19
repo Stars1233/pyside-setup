@@ -28,7 +28,7 @@ def create_bitarray(string):
 
 def serialize_bitarray(bit_array):
     buffer = QByteArray()
-    stream = QDataStream(buffer, QIODevice.WriteOnly)
+    stream = QDataStream(buffer, QIODevice.OpenModeFlag.WriteOnly)
     stream << bit_array
     return buffer
 
@@ -38,8 +38,8 @@ class QDataStreamWrite(unittest.TestCase):
 
     def setUp(self):
         self.ba = QByteArray()
-        self.read = QDataStream(self.ba, QIODevice.ReadOnly)
-        self.write = QDataStream(self.ba, QIODevice.WriteOnly)
+        self.read = QDataStream(self.ba, QIODevice.OpenModeFlag.ReadOnly)
+        self.write = QDataStream(self.ba, QIODevice.OpenModeFlag.WriteOnly)
 
     def testWriteUInt8(self):
         '''QDataStream.writeUInt8 (accepting str of size 1)'''
@@ -93,8 +93,8 @@ class QDataStreamShift(unittest.TestCase):
 
     def setUp(self):
         self.ba = QByteArray()
-        self.stream = QDataStream(self.ba, QIODevice.WriteOnly)
-        self.read_stream = QDataStream(self.ba, QIODevice.ReadOnly)
+        self.stream = QDataStream(self.ba, QIODevice.OpenModeFlag.WriteOnly)
+        self.read_stream = QDataStream(self.ba, QIODevice.OpenModeFlag.ReadOnly)
 
     def testQCharValid(self):
         '''QDataStream <<>> QChar - valid'''
@@ -256,7 +256,7 @@ class QDataStreamShiftBitArray(unittest.TestCase):
         '''Check the >> operator for the given data set'''
 
         for data, expectedStatus, expectedString in data_set:
-            stream = QDataStream(data, QIODevice.ReadOnly)
+            stream = QDataStream(data, QIODevice.OpenModeFlag.ReadOnly)
             string = QBitArray()
             stream >> string
 
@@ -274,14 +274,14 @@ class QDataStreamShiftBitArray(unittest.TestCase):
 
         data = []
         for expected in test_set:
-            data.append((serialize_bitarray(expected), QDataStream.Ok, expected))
+            data.append((serialize_bitarray(expected), QDataStream.Status.Ok, expected))
         self._check_bitarray(data)
 
     def testPastEnd(self):
         '''QDataStream >> QBitArray reading past the end of the data'''
         serialized = serialize_bitarray(create_bitarray('1001110'))
         serialized.resize(serialized.size() - 2)
-        self._check_bitarray([(serialized, QDataStream.ReadPastEnd, QBitArray())])
+        self._check_bitarray([(serialized, QDataStream.Status.ReadPastEnd, QBitArray())])
 
 
 class QDataStreamBuffer(unittest.TestCase):
@@ -290,7 +290,7 @@ class QDataStreamBuffer(unittest.TestCase):
         self.assertEqual(data.readRawData(4), None)
 
         ba = QByteArray()
-        data = QDataStream(ba, QIODevice.WriteOnly)
+        data = QDataStream(ba, QIODevice.OpenModeFlag.WriteOnly)
         data.writeRawData('AB\x00C')
         self.assertEqual(ba.data(), bytes('AB\x00C', "UTF-8"))
 
@@ -301,7 +301,7 @@ class QDataStreamBuffer(unittest.TestCase):
         test_data = b'AB\0'
         data = QDataStream()
         ba = QByteArray()
-        data = QDataStream(ba, QIODevice.WriteOnly)
+        data = QDataStream(ba, QIODevice.OpenModeFlag.WriteOnly)
         data.writeRawData(test_data)
         self.assertEqual(ba.data(), test_data)
         data = QDataStream(ba)
@@ -312,7 +312,7 @@ class QDataStreamBuffer(unittest.TestCase):
         self.assertEqual(dataOne.readBytes(4), None)
 
         ba = QByteArray()
-        data = QDataStream(ba, QIODevice.WriteOnly)
+        data = QDataStream(ba, QIODevice.OpenModeFlag.WriteOnly)
         # writeBytes() writes a quint32 containing the length of the data,
         # followed by the data.
         data.writeBytes(bytes('AB\x00C', 'UTF-8'))

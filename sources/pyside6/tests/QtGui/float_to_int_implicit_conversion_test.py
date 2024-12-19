@@ -26,7 +26,7 @@ class SetPixelFloat(UsesQApplication):
         # Acquire resources
         super(SetPixelFloat, self).setUp()
         self.color = qRgb(255, 0, 0)
-        self.image = QImage(200, 200, QImage.Format_RGB32)
+        self.image = QImage(200, 200, QImage.Format.Format_RGB32)
 
     def tearDown(self):
         # Release resources

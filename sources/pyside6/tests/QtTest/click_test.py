@@ -28,10 +28,10 @@ class MouseClickTest(UsesQApplication):
         button.setCheckable(True)
         button.setChecked(False)
 
-        QTest.mouseClick(button, Qt.LeftButton)
+        QTest.mouseClick(button, Qt.MouseButton.LeftButton)
         self.assertTrue(button.isChecked())
 
-        QTest.mouseClick(button, Qt.LeftButton)
+        QTest.mouseClick(button, Qt.MouseButton.LeftButton)
         self.assertFalse(button.isChecked())
 
 

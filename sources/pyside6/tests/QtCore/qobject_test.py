@@ -76,8 +76,8 @@ class ObjectNameCase(unittest.TestCase):
         obj = Obj()
         # On first connect, UniqueConnection returns True, and on the second
         # it must return False, and not a RuntimeError (PYSIDE-34)
-        self.assertTrue(obj.signal.connect(obj.empty, Qt.UniqueConnection))
-        self.assertFalse(obj.signal.connect(obj.empty, Qt.UniqueConnection))
+        self.assertTrue(obj.signal.connect(obj.empty, Qt.ConnectionType.UniqueConnection))
+        self.assertFalse(obj.signal.connect(obj.empty, Qt.ConnectionType.UniqueConnection))
 
     def testDisconnect(self):
         obj = Obj()

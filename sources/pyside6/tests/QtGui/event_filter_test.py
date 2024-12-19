@@ -18,7 +18,7 @@ from PySide6.QtGui import QWindow
 
 class MyFilter(QObject):
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.KeyPress:
+        if event.type() == QEvent.Type.KeyPress:
             pass
         return QObject.eventFilter(self, obj, event)
 

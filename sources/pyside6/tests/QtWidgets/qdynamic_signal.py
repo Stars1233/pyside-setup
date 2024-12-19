@@ -9,13 +9,13 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from PySide6.QtCore import QObject
-from PySide6.QtWidgets import QInputDialog
+from PySide6.QtCore import QObject  # noqa: E402
+from PySide6.QtWidgets import QInputDialog  # noqa: E402
 
-from helper.usesqapplication import UsesQApplication
+from helper.usesqapplication import UsesQApplication  # noqa: E402
 
 
 class DynamicSignalTest(UsesQApplication):
@@ -25,7 +25,7 @@ class DynamicSignalTest(UsesQApplication):
 
     def testQDialog(self):
         dlg = QInputDialog()
-        dlg.setInputMode(QInputDialog.TextInput)
+        dlg.setInputMode(QInputDialog.InputMode.TextInput)
         lst = dlg.children()
         self.assertTrue(len(lst))
         obj = lst[0]

@@ -8,10 +8,10 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from PySide6.QtGui import QPageRanges, Qt
+from PySide6.QtGui import QPageRanges, Qt  # noqa: E402
 
 
 class QTextDocumentFunctions(unittest.TestCase):
@@ -19,7 +19,7 @@ class QTextDocumentFunctions(unittest.TestCase):
     def testFunctions(self):
         self.assertFalse(Qt.mightBeRichText('bla'))
         self.assertTrue(Qt.mightBeRichText('<html><head/><body><p>bla</p></body></html>'))
-        html = Qt.convertFromPlainText("A & B", Qt.WhiteSpaceNormal)
+        html = Qt.convertFromPlainText("A & B", Qt.WhiteSpaceMode.WhiteSpaceNormal)
         self.assertEqual(html, '<p>A &amp; B</p>')
 
 

@@ -20,14 +20,14 @@ from PySide6.QtCore import QCoreApplication, QSocketNotifier
 
 class QSocketNotifierTest(unittest.TestCase):
     def testClass(self):
-        app = QCoreApplication([])
+        app = QCoreApplication([])  # noqa: F841
         # socketpair is not available on Windows
         if os.name != "nt":
             w_sock, r_sock = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
 
             self.assertIsInstance(r_sock.fileno(), int)
 
-            notifier = QSocketNotifier(r_sock.fileno(), QSocketNotifier.Read)
+            notifier = QSocketNotifier(r_sock.fileno(), QSocketNotifier.Type.Read)
 
             self.assertIsNotNone(notifier)
 

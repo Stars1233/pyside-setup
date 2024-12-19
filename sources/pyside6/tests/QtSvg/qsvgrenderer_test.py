@@ -27,7 +27,7 @@ class QSvgRendererTest(unittest.TestCase):
         self.assertTrue(fromFile.isValid())
 
         tigerFile = QFile(tigerPath)
-        tigerFile.open(QFile.ReadOnly)
+        tigerFile.open(QFile.OpenModeFlag.ReadOnly)
         tigerData = tigerFile.readAll()
         fromContents = QSvgRenderer(tigerData)
         self.assertTrue(fromContents.isValid())

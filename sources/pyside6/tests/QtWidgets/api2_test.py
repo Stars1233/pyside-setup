@@ -43,9 +43,9 @@ class DoubleQObjectInheritanceTest(UsesQApplication):
 
         # QIntValidator methods
         state, string, number = obj.validate('Test', 0)
-        self.assertEqual(state, QValidator.Invalid)
+        self.assertEqual(state, QValidator.State.Invalid)
         state, string, number = obj.validate('33', 0)
-        self.assertEqual(state, QValidator.Acceptable)
+        self.assertEqual(state, QValidator.State.Acceptable)
 
     def testQSpinBox(self):
         obj = WidgetValidatorQSpinBox()

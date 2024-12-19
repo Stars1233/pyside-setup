@@ -32,7 +32,7 @@ class HttpSignalsCase(unittest.TestCase):
         self.socket = QUdpSocket()
 
         self.server = QUdpSocket()
-        self.server.bind(QHostAddress(QHostAddress.LocalHost), 45454)
+        self.server.bind(QHostAddress(QHostAddress.SpecialAddress.LocalHost), 45454)
 
     def tearDown(self):
         # Release resources
@@ -43,7 +43,7 @@ class HttpSignalsCase(unittest.TestCase):
         gc.collect()
 
     def sendPackage(self):
-        addr = QHostAddress(QHostAddress.LocalHost)
+        addr = QHostAddress(QHostAddress.SpecialAddress.LocalHost)
         self.socket.writeDatagram(bytes('datagram', "UTF-8"), addr, 45454)
 
     def callback(self):

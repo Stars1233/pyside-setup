@@ -36,7 +36,7 @@ class Receiver(QObject):
     @Slot(QHostInfo)
     def info_received(self, host_info):
         name = host_info.hostName()
-        if host_info.error() == QHostInfo.NoError:
+        if host_info.error() == QHostInfo.HostInfoError.NoError:
             addresses = [a.toString() for a in host_info.addresses()]
             addresses_str = ', '.join(addresses)
             print(f'"{name}" resolved to {addresses_str}')

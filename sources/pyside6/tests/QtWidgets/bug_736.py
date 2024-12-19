@@ -17,9 +17,9 @@ from PySide6.QtWidgets import QApplication, QSlider
 class TestBug736 (unittest.TestCase):
 
     def testIt(self):
-        app = QApplication([])
-        slider = QSlider(Qt.Horizontal)
-        slider2 = QSlider(Qt.Horizontal)
+        app = QApplication([])  # noqa: F841
+        slider = QSlider(Qt.Orientation.Horizontal)
+        slider2 = QSlider(Qt.Orientation.Horizontal)
 
         slider2.setMaximum(10)
         slider.valueChanged[int].connect(slider2.setMaximum)

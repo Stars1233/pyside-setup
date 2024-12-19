@@ -10,15 +10,15 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from helper.helper import quickview_errorstring
+from helper.helper import quickview_errorstring  # noqa: E402
 
-from PySide6.QtCore import QObject, QUrl, Slot, QTimer
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtQml import QQmlIncubationController, VolatileBool
-from PySide6.QtQuick import QQuickView
+from PySide6.QtCore import QObject, QUrl, Slot, QTimer  # noqa: E402
+from PySide6.QtGui import QGuiApplication  # noqa: E402
+from PySide6.QtQml import QQmlIncubationController, VolatileBool  # noqa: E402
+from PySide6.QtQuick import QQuickView  # noqa: E402
 
 
 class CustomIncubationController(QObject, QQmlIncubationController):
@@ -52,7 +52,7 @@ class TestBug(unittest.TestCase):
         view = QQuickView()
         controller = CustomIncubationController(self)
         view.engine().setIncubationController(controller)
-        view.setResizeMode(QQuickView.SizeRootObjectToView)
+        view.setResizeMode(QQuickView.ResizeMode.SizeRootObjectToView)
         file = Path(__file__).resolve().parent / 'qqmlincubator_incubateWhile.qml'
         self.assertTrue(file.is_file())
         view.setSource(QUrl.fromLocalFile(file))
@@ -62,7 +62,7 @@ class TestBug(unittest.TestCase):
         root = view.rootObject()
         # The QML code will issue an interrupt signal after half of its items are loaded.
         root.shouldInterrupt.connect(controller.interrupter)
-        res = app.exec()
+        res = app.exec()  # noqa: F841
 
         itemsToCreate = root.property("itemsToCreate")
         loadedItems = root.property("loadedItems")

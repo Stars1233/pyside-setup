@@ -35,15 +35,16 @@ class QVariantTest(UsesQApplication):
 
     def testQKeySequenceQVariantOperator(self):
         # bug #775
-        ks = QKeySequence(Qt.ShiftModifier, Qt.ControlModifier, Qt.Key_P, Qt.Key_R)
+        ks = QKeySequence(Qt.KeyboardModifier.ShiftModifier, Qt.KeyboardModifier.ControlModifier,
+                          Qt.Key.Key_P, Qt.Key.Key_R)
         self.assertEqual(TestObject.checkType(ks), 4107)
 
     def testQKeySequenceMoreVariations(self):
-        QAction().setShortcut(Qt.CTRL | Qt.Key_B)
-        QAction().setShortcut(Qt.CTRL | Qt.ALT | Qt.Key_B)
-        QAction().setShortcut(Qt.CTRL | Qt.AltModifier | Qt.Key_B)
-        QAction().setShortcut(QKeySequence(QKeyCombination(Qt.CTRL | Qt.Key_B)))
-        QKeySequence(Qt.CTRL | Qt.Key_Q)
+        QAction().setShortcut(Qt.Modifier.CTRL | Qt.Key.Key_B)
+        QAction().setShortcut(Qt.Modifier.CTRL | Qt.Modifier.ALT | Qt.Key.Key_B)
+        QAction().setShortcut(Qt.Modifier.CTRL | Qt.KeyboardModifier.AltModifier | Qt.Key.Key_B)
+        QAction().setShortcut(QKeySequence(QKeyCombination(Qt.Modifier.CTRL | Qt.Key.Key_B)))
+        QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_Q)
 
     def testEnum(self):
         # Testing C++ class

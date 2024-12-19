@@ -37,13 +37,13 @@ class ListModel(QAbstractListModel):
         super().__init__()
 
     def roleNames(self):
-        return {Qt.DisplayRole: b'pysideModelData'}
+        return {Qt.ItemDataRole.DisplayRole: b'pysideModelData'}
 
     def rowCount(self, parent=QModelIndex()):
         return 3
 
     def data(self, index, role):
-        if index.isValid() and role == Qt.DisplayRole:
+        if index.isValid() and role == Qt.ItemDataRole.DisplayRole:
             return 'blubb'
         return None
 

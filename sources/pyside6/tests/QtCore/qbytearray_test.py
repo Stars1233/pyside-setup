@@ -108,7 +108,7 @@ class QByteArrayOnQDataStream(unittest.TestCase):
     '''
     def testIt(self):
         a = QByteArray()
-        b = QDataStream(a, QIODevice.WriteOnly)
+        b = QDataStream(a, QIODevice.OpenModeFlag.WriteOnly)
         b.writeUInt16(5000)
         # The __repr__ not suppose to crash anymore
         self.assertNotEqual(repr(b), None)

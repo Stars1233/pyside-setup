@@ -19,7 +19,8 @@ from PySide6.QtCore import QCryptographicHash, QMessageAuthenticationCode
 
 class TestQMessageAuthenticationCode (unittest.TestCase):
     def test(self):
-        code = QMessageAuthenticationCode(QCryptographicHash.Sha1, bytes('bla', "UTF-8"))
+        code = QMessageAuthenticationCode(QCryptographicHash.Algorithm.Sha1,
+                                          bytes('bla', "UTF-8"))
         result = code.result()
         self.assertTrue(result.size() > 0)
         print(result.toHex())

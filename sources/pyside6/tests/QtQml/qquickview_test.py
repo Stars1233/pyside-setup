@@ -54,7 +54,7 @@ class TestQQuickView(TimedQGuiApplication):
         self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
 
-        self.assertEqual(view.status(), QQuickView.Ready)
+        self.assertEqual(view.status(), QQuickView.Status.Ready)
         rootObject = view.rootObject()
         self.assertTrue(rootObject)
         context = QQmlEngine.contextForObject(rootObject)
@@ -81,7 +81,7 @@ class TestQQuickView(TimedQGuiApplication):
         self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.show()
 
-        self.assertEqual(view.status(), QQuickView.Ready)
+        self.assertEqual(view.status(), QQuickView.Status.Ready)
 
 
 if __name__ == '__main__':

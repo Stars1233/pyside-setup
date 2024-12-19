@@ -23,11 +23,12 @@ class QKeySequenceTest(UsesQApplication):
         # bug #774
         # PYSIDE-1735: Remapped from Qt.Modifier to Qt.KeyboardModifier
         #              Note that Qt.(Keyboard)?Modifier will be no longer IntFlag.
-        ks = QKeySequence(Qt.ShiftModifier, Qt.ControlModifier, Qt.Key_P, Qt.Key_R)
-        self.assertEqual(ks[0].keyboardModifiers(), Qt.ShiftModifier)
-        self.assertEqual(ks[1].keyboardModifiers(), Qt.ControlModifier)
-        self.assertEqual(ks[2].key(), Qt.Key_P)
-        self.assertEqual(ks[3].key(), Qt.Key_R)
+        ks = QKeySequence(Qt.KeyboardModifier.ShiftModifier, Qt.KeyboardModifier.ControlModifier,
+                          Qt.Key.Key_P, Qt.Key.Key_R)
+        self.assertEqual(ks[0].keyboardModifiers(), Qt.KeyboardModifier.ShiftModifier)
+        self.assertEqual(ks[1].keyboardModifiers(), Qt.KeyboardModifier.ControlModifier)
+        self.assertEqual(ks[2].key(), Qt.Key.Key_P)
+        self.assertEqual(ks[3].key(), Qt.Key.Key_R)
 
         def testAutoMnemonic(self):
             qt_set_sequence_auto_mnemonic(True)

@@ -22,7 +22,7 @@ class QTextStreamTestCase(unittest.TestCase):
         self.temp_file = tempfile.NamedTemporaryFile(delete=False)
         self.temp_file.close()
         self.f = QFile(self.temp_file.name)
-        self.f.open(QIODevice.WriteOnly)
+        self.f.open(QIODevice.OpenModeFlag.WriteOnly)
         self.strings = ('foo', 'bar')
         self.stream = QTextStream(self.f)
 

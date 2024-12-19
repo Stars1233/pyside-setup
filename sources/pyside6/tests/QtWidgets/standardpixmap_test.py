@@ -19,7 +19,7 @@ from helper.usesqapplication import UsesQApplication
 
 class StandardPixmapTest(UsesQApplication):
     def testDefaultOptions(self):  # Bug 253
-        pixmap = self.app.style().standardPixmap(QStyle.SP_DirClosedIcon)
+        pixmap = self.app.style().standardPixmap(QStyle.StandardPixmap.SP_DirClosedIcon)
         self.assertTrue(isinstance(pixmap, QPixmap))
 
 

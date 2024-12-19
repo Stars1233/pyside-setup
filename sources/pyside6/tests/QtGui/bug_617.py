@@ -24,7 +24,7 @@ class Bug617(unittest.TestCase):
     def testRepr(self):
         c = QColor.fromRgb(1, 2, 3, 4)
         s = c.spec()
-        self.assertEqual(repr(s), repr(QColor.Rgb))
+        self.assertEqual(repr(s), repr(QColor.Spec.Rgb))
 
     def testOutOfBounds(self):
         e = MyEvent()

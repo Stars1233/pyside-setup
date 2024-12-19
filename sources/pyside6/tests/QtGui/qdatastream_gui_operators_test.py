@@ -25,11 +25,11 @@ class QPixmapQDatastream(UsesQApplication):
         self.source_pixmap = QPixmap(100, 100)
         # PYSIDE-1533: Use Qt.transparent to force Format_ARGB32_Premultiplied
         # when converting to QImage in any case.
-        self.source_pixmap.fill(Qt.transparent)
+        self.source_pixmap.fill(Qt.GlobalColor.transparent)
         self.output_pixmap = QPixmap()
         self.buffer = QByteArray()
-        self.read_stream = QDataStream(self.buffer, QIODevice.ReadOnly)
-        self.write_stream = QDataStream(self.buffer, QIODevice.WriteOnly)
+        self.read_stream = QDataStream(self.buffer, QIODevice.OpenModeFlag.ReadOnly)
+        self.write_stream = QDataStream(self.buffer, QIODevice.OpenModeFlag.WriteOnly)
 
     def testStream(self):
         self.write_stream << self.source_pixmap
@@ -38,7 +38,7 @@ class QPixmapQDatastream(UsesQApplication):
 
         image = self.output_pixmap.toImage()
         pixel = image.pixel(10, 10)
-        self.assertEqual(pixel, QColor(Qt.transparent).rgba())
+        self.assertEqual(pixel, QColor(Qt.GlobalColor.transparent).rgba())
         self.assertEqual(self.source_pixmap.toImage(), image)
 
 

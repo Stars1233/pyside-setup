@@ -22,7 +22,9 @@ class QPdfWriterTest(UsesQApplication):
         temporaryFile = QTemporaryFile(QDir.tempPath() + "/pdfwriter_test_XXXXXX.pdf")
         self.assertTrue(temporaryFile.open())
         pdfWriter = QPdfWriter(temporaryFile)
-        pdfWriter.setPageLayout(QPageLayout(QPageSize(QPageSize.A4), QPageLayout.Portrait, QMarginsF(10, 10, 10, 10)))
+        pdfWriter.setPageLayout(QPageLayout(QPageSize(QPageSize.PageSizeId.A4),
+                                QPageLayout.Orientation.Portrait,
+                                QMarginsF(10, 10, 10, 10)))
         doc = QTextDocument("Some text")
         doc.print_(pdfWriter)
         temporaryFile.close()

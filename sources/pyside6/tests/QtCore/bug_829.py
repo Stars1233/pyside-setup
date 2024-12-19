@@ -31,19 +31,19 @@ class QVariantConversions(unittest.TestCase):
         del confFile
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        s = QSettings(self._confFileName, QSettings.IniFormat)
-        self.assertEqual(s.status(), QSettings.NoError)
+        s = QSettings(self._confFileName, QSettings.Format.IniFormat)
+        self.assertEqual(s.status(), QSettings.Status.NoError)
         # Save value
         s.setValue('x', {1: 'a'})
         s.sync()
-        self.assertEqual(s.status(), QSettings.NoError)
+        self.assertEqual(s.status(), QSettings.Status.NoError)
         del s
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
 
         # Restore value
-        s = QSettings(self._confFileName, QSettings.IniFormat)
-        self.assertEqual(s.status(), QSettings.NoError)
+        s = QSettings(self._confFileName, QSettings.Format.IniFormat)
+        self.assertEqual(s.status(), QSettings.Status.NoError)
         self.assertEqual(s.value('x'), {1: 'a'})
 
     def __del__(self):

@@ -44,7 +44,7 @@ class TestBugPYSIDE164(unittest.TestCase):
         eventloop = QEventLoop()
         emitter = Emitter()
         receiver = Receiver(eventloop)
-        emitter.signal.connect(receiver.receive, Qt.BlockingQueuedConnection)
+        emitter.signal.connect(receiver.receive, Qt.ConnectionType.BlockingQueuedConnection)
         emitter.start()
         retval = eventloop.exec()
         emitter.wait(2000)

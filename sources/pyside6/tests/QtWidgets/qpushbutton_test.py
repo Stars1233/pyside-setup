@@ -43,7 +43,7 @@ class QPushButtonTest(UsesQApplication):
     def testBoolinSignal(self):
         b = QPushButton()
         b.setCheckable(True)
-        b.setShortcut(Qt.Key_A)
+        b.setShortcut(Qt.Key.Key_A)
         self._clicked = False
         b.toggled[bool].connect(self.buttonCb)
         b.toggle()

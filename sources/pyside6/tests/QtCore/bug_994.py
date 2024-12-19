@@ -29,7 +29,7 @@ class TestBug944 (unittest.TestCase):
 
     def testIt(self):
         device = MyIODevice()
-        device.open(QIODevice.ReadOnly)
+        device.open(QIODevice.OpenModeFlag.ReadOnly)
         s = QTextStream(device)
         self.assertEqual(s.read(4), "\0a\0a")
         self.assertEqual(device.readLine(), "\0b\0b\0b\0b")

@@ -32,7 +32,7 @@ class LabelWindow(QDialog):
     def replace(self, unit):
         old_item = self.test_layout.itemAtPosition(0, 0)
         old_label = old_item.widget()
-        ref = weakref.ref(old_item, self._destroyed)
+        ref = weakref.ref(old_item, self._destroyed)  # noqa: F841
 
         self.test_layout.removeWidget(old_label)
         unit.assertRaises(RuntimeError, old_item.widget)
@@ -42,7 +42,7 @@ class LabelWindow(QDialog):
 
         label = QLabel("Label New")
         old_label.deleteLater()
-        label.setAlignment(Qt.AlignCenter)
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.test_layout.addWidget(label, 0, 0)
 
     def _destroyed(self, obj):

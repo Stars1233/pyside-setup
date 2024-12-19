@@ -20,7 +20,8 @@ class TestQTimeZone (unittest.TestCase):
         timeZone = QTimeZone(id)
         self.assertTrue(timeZone.isValid())
         self.assertEqual(timeZone.id(), id)
-        name = timeZone.displayName(QTimeZone.GenericTime, QTimeZone.DefaultName)
+        name = timeZone.displayName(QTimeZone.TimeType.GenericTime,
+                                    QTimeZone.NameType.DefaultName)
         self.assertTrue(name)
 
 

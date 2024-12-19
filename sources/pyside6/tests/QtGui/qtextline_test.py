@@ -31,7 +31,7 @@ class QTextLineTest(UsesQApplication):
 
     def testTextOption(self):
         """PYSIDE-2088, large enum values causing MSVC issues."""
-        v = QTextOption.IncludeTrailingSpaces | QTextOption.ShowTabsAndSpaces
+        v = QTextOption.Flag.IncludeTrailingSpaces | QTextOption.Flag.ShowTabsAndSpaces
         self.assertEqual(v.value, 2147483649)
 
 

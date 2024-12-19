@@ -23,7 +23,7 @@ class MyValidator1(QValidator):
         return "fixed"
 
     def validate(self, input, pos):
-        return (QValidator.Acceptable, "fixed", 1)
+        return (QValidator.State.Acceptable, "fixed", 1)
 
 
 class MyValidator2(QValidator):
@@ -31,7 +31,7 @@ class MyValidator2(QValidator):
         return "fixed"
 
     def validate(self, input, pos):
-        return (QValidator.Acceptable, "fixed")
+        return (QValidator.State.Acceptable, "fixed")
 
 
 class MyValidator3(QValidator):
@@ -39,7 +39,7 @@ class MyValidator3(QValidator):
         return "fixed"
 
     def validate(self, input, pos):
-        return (QValidator.Acceptable,)
+        return (QValidator.State.Acceptable,)
 
 
 class MyValidator4(QValidator):
@@ -47,15 +47,15 @@ class MyValidator4(QValidator):
         return "fixed"
 
     def validate(self, input, pos):
-        return QValidator.Acceptable
+        return QValidator.State.Acceptable
 
 
 class MyValidator5(QValidator):
     def validate(self, input, pos):
         if input.islower():
-            return (QValidator.Intermediate, input, pos)
+            return (QValidator.State.Intermediate, input, pos)
         else:
-            return (QValidator.Acceptable, input, pos)
+            return (QValidator.State.Acceptable, input, pos)
 
     def fixup(self, input):
         return "22"
@@ -115,7 +115,7 @@ class QValidatorTest(UsesQApplication):
         line.show()
         line.setValidator(MyValidator5())
         line.setText("foo")
-        QTest.keyClick(line, Qt.Key_Return)
+        QTest.keyClick(line, Qt.Key.Key_Return)
         self.assertEqual(line.text(), "22")
 
 

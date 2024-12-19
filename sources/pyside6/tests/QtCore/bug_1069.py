@@ -19,7 +19,7 @@ from PySide6.QtCore import QByteArray, QDataStream, QIODevice
 class QDataStreamOpOverloadTestCase(unittest.TestCase):
     def setUp(self):
         self.ba = QByteArray()
-        self.stream = QDataStream(self.ba, QIODevice.WriteOnly)
+        self.stream = QDataStream(self.ba, QIODevice.OpenModeFlag.WriteOnly)
 
     def testIt(self):
         self.stream << "hello"

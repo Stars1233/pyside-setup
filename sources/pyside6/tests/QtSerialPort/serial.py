@@ -11,36 +11,36 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from PySide6.QtSerialPort import QSerialPort, QSerialPortInfo
-from PySide6.QtCore import QIODevice
+from PySide6.QtSerialPort import QSerialPort, QSerialPortInfo  # noqa: E402
+from PySide6.QtCore import QIODevice  # noqa: E402
 
 
 class QSerialPortTest(unittest.TestCase):
     def testDefaultConstructedPort(self):
         serialPort = QSerialPort()
 
-        self.assertEqual(serialPort.error(), QSerialPort.NoError)
+        self.assertEqual(serialPort.error(), QSerialPort.SerialPortError.NoError)
         self.assertTrue(not serialPort.errorString() == "")
 
         # properties
-        defaultBaudRate = QSerialPort.Baud9600
+        defaultBaudRate = QSerialPort.BaudRate.Baud9600
         self.assertEqual(serialPort.baudRate(), defaultBaudRate)
-        self.assertEqual(serialPort.baudRate(QSerialPort.Input), defaultBaudRate)
-        self.assertEqual(serialPort.baudRate(QSerialPort.Output), defaultBaudRate)
-        self.assertEqual(serialPort.dataBits(), QSerialPort.Data8)
-        self.assertEqual(serialPort.parity(), QSerialPort.NoParity)
-        self.assertEqual(serialPort.stopBits(), QSerialPort.OneStop)
-        self.assertEqual(serialPort.flowControl(), QSerialPort.NoFlowControl)
+        self.assertEqual(serialPort.baudRate(QSerialPort.Direction.Input), defaultBaudRate)
+        self.assertEqual(serialPort.baudRate(QSerialPort.Direction.Output), defaultBaudRate)
+        self.assertEqual(serialPort.dataBits(), QSerialPort.DataBits.Data8)
+        self.assertEqual(serialPort.parity(), QSerialPort.Parity.NoParity)
+        self.assertEqual(serialPort.stopBits(), QSerialPort.StopBits.OneStop)
+        self.assertEqual(serialPort.flowControl(), QSerialPort.FlowControl.NoFlowControl)
 
-        self.assertEqual(serialPort.pinoutSignals(), QSerialPort.NoSignal)
+        self.assertEqual(serialPort.pinoutSignals(), QSerialPort.PinoutSignal.NoSignal)
         self.assertEqual(serialPort.isRequestToSend(), False)
         self.assertEqual(serialPort.isDataTerminalReady(), False)
 
         # QIODevice
-        self.assertEqual(serialPort.openMode(), QIODevice.NotOpen)
+        self.assertEqual(serialPort.openMode(), QIODevice.OpenModeFlag.NotOpen)
         self.assertTrue(not serialPort.isOpen())
         self.assertTrue(not serialPort.isReadable())
         self.assertTrue(not serialPort.isWritable())

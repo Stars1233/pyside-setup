@@ -44,8 +44,8 @@ class QAppPresence(unittest.TestCase):
         self.qapp = QGuiApplication([])
         f = Foo()
 
-        self.sc = MyShortcut(QKeySequence(Qt.Key_Return), f, f.slot_of_foo)
-        self.scstd = MyShortcut(QKeySequence.Copy, f, f.slot_of_copy)
+        self.sc = MyShortcut(QKeySequence(Qt.Key.Key_Return), f, f.slot_of_foo)
+        self.scstd = MyShortcut(QKeySequence.StandardKey.Copy, f, f.slot_of_copy)
         QTimer.singleShot(0, self.init)
         self.qapp.exec()
         self.assertEqual(f.ok, True)

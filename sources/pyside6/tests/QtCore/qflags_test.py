@@ -27,12 +27,16 @@ class QFlagTest(unittest.TestCase):
         f.close()
 
         f = QFile(fileName)
-        self.assertEqual(f.open(QIODevice.Truncate | QIODevice.Text | QIODevice.ReadWrite), True)
+        of = (QIODevice.OpenModeFlag.Truncate | QIODevice.OpenModeFlag.Text
+              | QIODevice.OpenModeFlag.ReadWrite)
+        self.assertEqual(f.open(of), True)
         om = f.openMode()
-        self.assertEqual(om & QIODevice.Truncate, QIODevice.Truncate)
-        self.assertEqual(om & QIODevice.Text, QIODevice.Text)
-        self.assertEqual(om & QIODevice.ReadWrite, QIODevice.ReadWrite)
-        self.assertTrue(om == QIODevice.Truncate | QIODevice.Text | QIODevice.ReadWrite)
+        self.assertEqual(om & QIODevice.OpenModeFlag.Truncate, QIODevice.OpenModeFlag.Truncate)
+        self.assertEqual(om & QIODevice.OpenModeFlag.Text, QIODevice.OpenModeFlag.Text)
+        self.assertEqual(om & QIODevice.OpenModeFlag.ReadWrite, QIODevice.OpenModeFlag.ReadWrite)
+        expected = (QIODevice.OpenModeFlag.Truncate | QIODevice.OpenModeFlag.Text
+                    | QIODevice.OpenModeFlag.ReadWrite)
+        self.assertTrue(om == expected)
         f.close()
 
 
@@ -41,53 +45,57 @@ class QFlagOperatorTest(unittest.TestCase):
 
     def testInvert(self):
         '''QFlags ~ (invert) operator'''
-        self.assertEqual(type(~QIODevice.ReadOnly), QIODevice.OpenMode)
+        self.assertEqual(type(~QIODevice.OpenModeFlag.ReadOnly), QIODevice.OpenMode)
 
     def testOr(self):
         '''QFlags | (or) operator'''
-        self.assertEqual(type(QIODevice.ReadOnly | QIODevice.WriteOnly), QIODevice.OpenMode)
+        self.assertEqual(type(QIODevice.OpenModeFlag.ReadOnly | QIODevice.OpenModeFlag.WriteOnly),
+                         QIODevice.OpenMode)
 
     def testAnd(self):
         '''QFlags & (and) operator'''
-        self.assertEqual(type(QIODevice.ReadOnly & QIODevice.WriteOnly), QIODevice.OpenMode)
+        self.assertEqual(type(QIODevice.OpenModeFlag.ReadOnly & QIODevice.OpenModeFlag.WriteOnly),
+                         QIODevice.OpenMode)
 
     def testIOr(self):
         '''QFlags |= (ior) operator'''
         flag = Qt.WindowFlags()
-        self.assertTrue(Qt.Widget == 0)
-        self.assertFalse(flag & Qt.Widget)
-        result = flag & Qt.Widget
+        self.assertTrue(Qt.WindowType.Widget == 0)
+        self.assertFalse(flag & Qt.WindowType.Widget)
+        result = flag & Qt.WindowType.Widget
         self.assertTrue(result == 0)
-        flag |= Qt.WindowMinimizeButtonHint
-        self.assertTrue(flag & Qt.WindowMinimizeButtonHint)
+        flag |= Qt.WindowType.WindowMinimizeButtonHint
+        self.assertTrue(flag & Qt.WindowType.WindowMinimizeButtonHint)
 
     def testInvertOr(self):
         '''QFlags ~ (invert) operator over the result of an | (or) operator'''
-        self.assertEqual(type(~(Qt.ItemIsSelectable | Qt.ItemIsEditable)), Qt.ItemFlags)
+        self.assertEqual(type(~(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEditable)),
+                         Qt.ItemFlags)
 
     def testEqual(self):
         '''QFlags == operator'''
-        flags = Qt.Window
-        flags |= Qt.WindowMinimizeButtonHint
-        flag_type = (flags & Qt.WindowType_Mask)
-        self.assertEqual(flag_type, Qt.Window)
+        flags = Qt.WindowType.Window
+        flags |= Qt.WindowType.WindowMinimizeButtonHint
+        flag_type = (flags & Qt.WindowType.WindowType_Mask)
+        self.assertEqual(flag_type, Qt.WindowType.Window)
 
-        self.assertEqual(Qt.KeyboardModifiers(Qt.ControlModifier), Qt.ControlModifier)
+        self.assertEqual(Qt.KeyboardModifiers(Qt.KeyboardModifier.ControlModifier),
+                         Qt.KeyboardModifier.ControlModifier)
 
     def testOperatorBetweenFlags(self):
         '''QFlags & QFlags'''
-        flags = Qt.NoItemFlags | Qt.ItemIsUserCheckable
-        newflags = Qt.NoItemFlags | Qt.ItemIsUserCheckable
+        flags = Qt.ItemFlag.NoItemFlags | Qt.ItemFlag.ItemIsUserCheckable
+        newflags = Qt.ItemFlag.NoItemFlags | Qt.ItemFlag.ItemIsUserCheckable
         self.assertTrue(flags & newflags)
 
     def testOperatorDifferentOrder(self):
         '''Different ordering of arguments'''
-        flags = Qt.NoItemFlags | Qt.ItemIsUserCheckable
-        self.assertEqual(flags | Qt.ItemIsEnabled, Qt.ItemIsEnabled | flags)
+        flags = Qt.ItemFlag.NoItemFlags | Qt.ItemFlag.ItemIsUserCheckable
+        self.assertEqual(flags | Qt.ItemFlag.ItemIsEnabled, Qt.ItemFlag.ItemIsEnabled | flags)
 
     def testEqualNonNumericalObject(self):
         '''QFlags ==,!= non-numerical object '''
-        flags = Qt.NoItemFlags | Qt.ItemIsUserCheckable
+        flags = Qt.ItemFlag.NoItemFlags | Qt.ItemFlag.ItemIsUserCheckable
 
         self.assertTrue(flags != None)  # noqa: E711
         self.assertFalse(flags == None)  # noqa: E711
@@ -108,7 +116,7 @@ class QFlagOperatorTest(unittest.TestCase):
 class QFlagsOnQVariant(unittest.TestCase):
     def testQFlagsOnQVariant(self):
         o = QObject()
-        o.setProperty("foo", QIODevice.ReadOnly | QIODevice.WriteOnly)
+        o.setProperty("foo", QIODevice.OpenModeFlag.ReadOnly | QIODevice.OpenModeFlag.WriteOnly)
         self.assertEqual(type(o.property("foo")), QIODevice.OpenMode)
 
 

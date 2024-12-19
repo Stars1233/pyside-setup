@@ -24,7 +24,7 @@ class TestQLineF (unittest.TestCase):
         tuple_ = l1.intersects(l2)
         self.assertEqual(tuple, tuple_.__class__)
         (value, p) = tuple_
-        self.assertEqual(QLineF.BoundedIntersection, value)
+        self.assertEqual(QLineF.IntersectionType.BoundedIntersection, value)
         self.assertEqual(QPointF(1, 0), p)
 
 

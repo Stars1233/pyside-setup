@@ -81,9 +81,9 @@ class QVariantConversionTest(UsesQApplication):
         """
         PYSIDE-1798: Test enum is obtained correctly when return through QVariant
         """
-        self.obj.setProperty("test", Qt.SolidLine)
+        self.obj.setProperty("test", Qt.PenStyle.SolidLine)
         self.assertTrue(isinstance(self.obj.property("test"), Qt.PenStyle))
-        self.assertEqual(self.obj.property("test"), Qt.SolidLine)
+        self.assertEqual(self.obj.property("test"), Qt.PenStyle.SolidLine)
 
     def testString(self):
         self.obj.setProperty("test", "test")

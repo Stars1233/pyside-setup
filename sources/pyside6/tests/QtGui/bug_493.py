@@ -20,10 +20,10 @@ class TestBug493(unittest.TestCase):
     def testIt(self):
         # We need a qapp otherwise Qt will crash when trying to detect the
         # current platform
-        app = QGuiApplication([])
-        ev1 = QKeyEvent(QEvent.KeyRelease, Qt.Key_Delete, Qt.NoModifier)
-        ev2 = QKeyEvent(QEvent.KeyRelease, Qt.Key_Copy, Qt.NoModifier)
-        ks = QKeySequence.Delete
+        app = QGuiApplication([])  # noqa: F841
+        ev1 = QKeyEvent(QEvent.Type.KeyRelease, Qt.Key.Key_Delete, Qt.KeyboardModifier.NoModifier)
+        ev2 = QKeyEvent(QEvent.Type.KeyRelease, Qt.Key.Key_Copy, Qt.KeyboardModifier.NoModifier)
+        ks = QKeySequence.StandardKey.Delete
 
         self.assertTrue(ev1.matches(ks))
         self.assertFalse(ev2.matches(ks))

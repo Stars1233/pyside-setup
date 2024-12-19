@@ -30,7 +30,7 @@ class TestQProcess (unittest.TestCase):
         pid = p.processId()
         # We can't test the pid method result because it returns 0 when the
         # process isn't running
-        if p.state() == QProcess.Running:
+        if p.state() == QProcess.ProcessState.Running:
             self.assertNotEqual(pid, 0)
             p.waitForFinished()
         else:

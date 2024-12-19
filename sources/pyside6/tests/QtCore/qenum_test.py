@@ -50,22 +50,22 @@ class TestEnum(unittest.TestCase):
 class TestQFlags(unittest.TestCase):
 
     def testToItn(self):
-        om = QIODevice.NotOpen
+        om = QIODevice.OpenModeFlag.NotOpen
         omcmp = om.value
 
-        self.assertEqual(om, QIODevice.NotOpen)
+        self.assertEqual(om, QIODevice.OpenModeFlag.NotOpen)
         self.assertTrue(omcmp == 0)
 
-        self.assertTrue(omcmp != QIODevice.ReadOnly)
+        self.assertTrue(omcmp != QIODevice.OpenModeFlag.ReadOnly)
         self.assertTrue(omcmp != 1)
 
     def testToIntInFunction(self):
-        om = QIODevice.WriteOnly
+        om = QIODevice.OpenModeFlag.WriteOnly
         self.assertEqual(int(om.value), 2)
 
     def testNonExtensibleEnums(self):
         try:
-            om = QIODevice.OpenMode(QIODevice.WriteOnly)  # noqa: F841
+            om = QIODevice.OpenMode(QIODevice.OpenModeFlag.WriteOnly)  # noqa: F841
             self.assertFail()
         except:  # noqa: E722
             pass
@@ -76,8 +76,8 @@ class TestEnumPickling(unittest.TestCase):
     def testPickleEnum(self):
 
         # Pickling of enums with different depth works.
-        ret = pickle.loads(pickle.dumps(QIODevice.Append))
-        self.assertEqual(ret, QIODevice.Append)
+        ret = pickle.loads(pickle.dumps(QIODevice.OpenModeFlag.Append))
+        self.assertEqual(ret, QIODevice.OpenModeFlag.Append)
 
         ret = pickle.loads(pickle.dumps(Qt.Key.Key_Asterisk))
         self.assertEqual(ret, Qt.Key.Key_Asterisk)

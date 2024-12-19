@@ -20,36 +20,36 @@ from PySide6.QtCore import QLocale
 
 class QLocaleTestToNumber(unittest.TestCase):
     def testToNumberInt(self):
-        obj = QLocale(QLocale.C)
+        obj = QLocale(QLocale.Language.C)
         self.assertEqual((37, True), obj.toInt('37'))
 
     def testToNumberFloat(self):
-        obj = QLocale(QLocale.C)
+        obj = QLocale(QLocale.Language.C)
         self.assertEqual((ctypes.c_float(37.109).value, True),
                          obj.toFloat('37.109'))
 
     def testToNumberDouble(self):
-        obj = QLocale(QLocale.C)
+        obj = QLocale(QLocale.Language.C)
         self.assertEqual((ctypes.c_double(37.109).value, True),
                          obj.toDouble('37.109'))
 
     def testToNumberShort(self):
-        obj = QLocale(QLocale.C)
+        obj = QLocale(QLocale.Language.C)
         self.assertEqual((ctypes.c_short(37).value, True),
                          obj.toShort('37'))
 
     def testToNumberLong(self):
-        obj = QLocale(QLocale.C)
+        obj = QLocale(QLocale.Language.C)
         self.assertEqual((ctypes.c_long(37).value, True),
                          obj.toLong('37'))
 
     def testToNumberULongLong(self):
-        obj = QLocale(QLocale.C)
+        obj = QLocale(QLocale.Language.C)
         self.assertEqual((ctypes.c_ulonglong(37).value, True),
                          obj.toULongLong('37'))
 
     def testToNumberULongLongNegative(self):
-        obj = QLocale(QLocale.C)
+        obj = QLocale(QLocale.Language.C)
         self.assertTrue(not obj.toULongLong('-37')[1])
 
     def testToCurrencyString(self):

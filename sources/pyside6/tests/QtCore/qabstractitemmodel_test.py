@@ -50,11 +50,11 @@ class TestQModelIndexInternalPointer(unittest.TestCase):
     def testQIdentityProxyModel(self):
         sourceModel = QStringListModel(['item1', 'item2'])
         sourceIndex = sourceModel.index(0, 0)
-        sourceData = str(sourceModel.data(sourceIndex, Qt.DisplayRole))
+        sourceData = str(sourceModel.data(sourceIndex, Qt.ItemDataRole.DisplayRole))
         proxyModel = QIdentityProxyModel()
         proxyModel.setSourceModel(sourceModel)
         proxyIndex = proxyModel.mapFromSource(sourceIndex)
-        proxyData = str(proxyModel.data(proxyIndex, Qt.DisplayRole))
+        proxyData = str(proxyModel.data(proxyIndex, Qt.ItemDataRole.DisplayRole))
         self.assertEqual(sourceData, proxyData)
 
     def testMultiDataModel(self):

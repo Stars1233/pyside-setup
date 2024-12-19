@@ -23,7 +23,7 @@ class DnsLookupTestCase(unittest.TestCase):
 
     def setUp(self):
         self._app = QCoreApplication([])
-        self._lookup = QDnsLookup(QDnsLookup.ANY, 'www.qt.io')
+        self._lookup = QDnsLookup(QDnsLookup.Type.ANY, 'www.qt.io')
         self._lookup.finished.connect(self._finished)
 
     def tearDown(self):
@@ -32,7 +32,7 @@ class DnsLookupTestCase(unittest.TestCase):
         gc.collect()
 
     def _finished(self):
-        if self._lookup.error() == QDnsLookup.NoError:
+        if self._lookup.error() == QDnsLookup.Error.NoError:
             nameRecords = self._lookup.canonicalNameRecords()
             if nameRecords:
                 print(nameRecords[0].name())

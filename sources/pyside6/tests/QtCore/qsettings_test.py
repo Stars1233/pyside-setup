@@ -22,7 +22,7 @@ class TestQSettings(unittest.TestCase):
         file = Path(__file__).resolve().parent / 'qsettings_test.ini'
         self.assertTrue(file.is_file())
         file_path = QDir.fromNativeSeparators(os.fspath(file))
-        settings = QSettings(file_path, QSettings.IniFormat)
+        settings = QSettings(file_path, QSettings.Format.IniFormat)
 
         r = settings.value('var1')
         self.assertEqual(type(r), list)
@@ -51,7 +51,7 @@ class TestQSettings(unittest.TestCase):
         dir = QTemporaryDir(f'{temp_dir}/qsettings_XXXXXX')
         self.assertTrue(dir.isValid())
         file_name = dir.filePath('foo.ini')
-        settings = QSettings(file_name, QSettings.IniFormat)
+        settings = QSettings(file_name, QSettings.Format.IniFormat)
         sample_list = ["a", "b"]
         string_list_of_empty = [""]
         settings.setValue('zero_value', 0)
@@ -65,7 +65,7 @@ class TestQSettings(unittest.TestCase):
         gc.collect()
 
         # Loading values already set
-        settings = QSettings(file_name, QSettings.IniFormat)
+        settings = QSettings(file_name, QSettings.Format.IniFormat)
 
         # Getting value that doesn't exist
         r = settings.value("variable")

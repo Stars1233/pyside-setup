@@ -46,7 +46,7 @@ class QTimeReprCopy(ReprCopyHelper, unittest.TestCase):
 
 class QDateTimeReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
-        self.original = QDateTime(2010, 5, 18, 10, 24, 45, 223, Qt.LocalTime)
+        self.original = QDateTime(2010, 5, 18, 10, 24, 45, 223, Qt.TimeSpec.LocalTime)
 
 
 class QSizeReprCopy(ReprCopyHelper, unittest.TestCase):

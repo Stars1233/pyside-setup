@@ -44,13 +44,13 @@ class OpenGLWindow(QOpenGLWindow):
     def initializeGL(self):
         profile = QOpenGLVersionProfile()
         profile.setVersion(1, 3)
-        profile.setProfile(QSurfaceFormat.CompatibilityProfile)
+        profile.setProfile(QSurfaceFormat.OpenGLContextProfile.CompatibilityProfile)
         self.m_functions = QOpenGLVersionFunctionsFactory.get(profile)
         self.m_functions.initializeOpenGLFunctions()
 
         print("GL_MAX_LIGHTS=", self.m_functions.glGetIntegerv(GL.GL_MAX_LIGHTS))
-        image = QImage(QSize(200, 200), QImage.Format_RGBA8888)
-        image.fill(QColor(Qt.red))
+        image = QImage(QSize(200, 200), QImage.Format.Format_RGBA8888)
+        image.fill(QColor(Qt.GlobalColor.red))
         self.m_texture = QOpenGLTexture(image)
 
     def paintGL(self):

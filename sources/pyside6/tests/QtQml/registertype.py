@@ -58,7 +58,7 @@ class PieSlice (QQuickPaintedItem):
         global paintCalled
         pen = QPen(self._color, 2)
         painter.setPen(pen)
-        painter.setRenderHints(QPainter.Antialiasing, True)
+        painter.setRenderHints(QPainter.RenderHint.Antialiasing, True)
         painter.drawPie(self.boundingRect(), self._fromAngle * 16, self._angleSpan * 16)
         paintCalled = True
 

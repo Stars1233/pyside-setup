@@ -20,8 +20,8 @@ class QTextStreamShiftTest(unittest.TestCase):
 
     def setUp(self):
         self.ba = QByteArray()
-        self.read = QTextStream(self.ba, QIODevice.ReadOnly)
-        self.write = QTextStream(self.ba, QIODevice.WriteOnly)
+        self.read = QTextStream(self.ba, QIODevice.OpenModeFlag.ReadOnly)
+        self.write = QTextStream(self.ba, QIODevice.OpenModeFlag.WriteOnly)
 
     def testNumber(self):
         '''QTextStream << number'''
@@ -84,7 +84,8 @@ class QTextStreamReadLinesFromDevice(unittest.TestCase):
         data.append((QByteArray(bytes('ole', "UTF-8")), ['ole']))
         data.append((QByteArray(bytes('ole\n', "UTF-8")), ['ole']))
         data.append((QByteArray(bytes('ole\r\n', "UTF-8")), ['ole']))
-        data.append((QByteArray(bytes('ole\r\ndole\r\ndoffen', "UTF-8")), ['ole', 'dole', 'doffen']))
+        data.append((QByteArray(bytes('ole\r\ndole\r\ndoffen', "UTF-8")),
+                    ['ole', 'dole', 'doffen']))
 
         self._check_data(data)
 

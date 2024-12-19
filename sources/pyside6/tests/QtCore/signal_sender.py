@@ -82,7 +82,7 @@ class TestConstructorConnection(UsesQApplication):
         model = QStringListModel(data_list,
                                  destroyed=destroyed_handler,
                                  dataChanged=changed_handler)
-        model.setData(model.index(0, 0), "bla", Qt.EditRole)
+        model.setData(model.index(0, 0), "bla", Qt.ItemDataRole.EditRole)
         del model
         # PYSIDE-535: Need to collect garbage twice in PyPy to trigger deletion
         gc.collect()

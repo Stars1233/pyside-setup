@@ -40,7 +40,7 @@ class LineEditAccessible(QAccessibleInterface):
         return None
 
     def backgroundColor(self):
-        return QColor(Qt.white)
+        return QColor(Qt.GlobalColor.white)
 
     def child(self, index):
         return None
@@ -55,7 +55,7 @@ class LineEditAccessible(QAccessibleInterface):
         return None
 
     def foregroundColor(self):
-        return QColor(Qt.black)
+        return QColor(Qt.GlobalColor.black)
 
     def indexOfChild(self, child):
         return -1
@@ -125,7 +125,7 @@ class QAccessibleTest(UsesQApplication):
     def setUp(self):
         super().setUp()
         QAccessible.installFactory(accessible_factory)
-        window = Window()
+        window = Window()  # noqa: F841
 
     def testLineEdits(self):
         window = Window()

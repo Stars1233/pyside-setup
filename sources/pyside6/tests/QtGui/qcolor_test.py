@@ -64,7 +64,7 @@ class QColorEqualGlobalColor(unittest.TestCase):
 
     def testEqualGlobalColor(self):
         '''QColor == Qt::GlobalColor'''
-        self.assertEqual(QColor(255, 0, 0), Qt.red)
+        self.assertEqual(QColor(255, 0, 0), Qt.GlobalColor.red)
 
 
 class QColorCopy(unittest.TestCase):

@@ -73,7 +73,7 @@ class PyObjectType(UsesQApplication):
         self.called = False
         self.running = True
         o = Sender()
-        o.dummy2.connect(self.mySlot2, Qt.QueuedConnection)
+        o.dummy2.connect(self.mySlot2, Qt.ConnectionType.QueuedConnection)
         o.callDummy2()
         self.app.exec()
         self.assertEqual(self.callCount, 1)
@@ -82,7 +82,7 @@ class PyObjectType(UsesQApplication):
         self.called = False
         self.running = True
         o = Sender()
-        o.dummy2.connect(self.mySlot2, Qt.QueuedConnection)
+        o.dummy2.connect(self.mySlot2, Qt.ConnectionType.QueuedConnection)
         o.callDummy2()
         o.callDummy2()
         self.app.exec()

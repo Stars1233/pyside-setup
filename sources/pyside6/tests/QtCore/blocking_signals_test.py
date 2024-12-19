@@ -139,14 +139,14 @@ class TestQFileSignalBlocking(unittest.TestCase):
 
         self.qfile.aboutToClose.connect(self.callback)
 
-        self.assertTrue(self.qfile.open(QFile.ReadOnly))
+        self.assertTrue(self.qfile.open(QFile.OpenModeFlag.ReadOnly))
         self.qfile.close()
         self.assertTrue(self.called)
 
         self.called = False
         self.qfile.blockSignals(True)
 
-        self.assertTrue(self.qfile.open(QFile.ReadOnly))
+        self.assertTrue(self.qfile.open(QFile.OpenModeFlag.ReadOnly))
         self.qfile.close()
         self.assertTrue(not self.called)
 

@@ -70,10 +70,10 @@ class PythonSignalToCppSlots(UsesQApplication):
         sender.dummy.emit()
         new_dir = timeline.direction()
 
-        if orig_dir == QTimeLine.Forward:
-            self.assertEqual(new_dir, QTimeLine.Backward)
+        if orig_dir == QTimeLine.Direction.Forward:
+            self.assertEqual(new_dir, QTimeLine.Direction.Backward)
         else:
-            self.assertEqual(new_dir, QTimeLine.Forward)
+            self.assertEqual(new_dir, QTimeLine.Direction.Forward)
 
     def testWithArgs(self):
         '''Connect python signals to QTimeLine.setCurrentTime(int)'''
@@ -117,10 +117,10 @@ class CppSignalsToCppSlots(UsesQApplication):
 
         new_dir = timeline.direction()
 
-        if orig_dir == QTimeLine.Forward:
-            self.assertEqual(new_dir, QTimeLine.Backward)
+        if orig_dir == QTimeLine.Direction.Forward:
+            self.assertEqual(new_dir, QTimeLine.Direction.Backward)
         else:
-            self.assertEqual(new_dir, QTimeLine.Forward)
+            self.assertEqual(new_dir, QTimeLine.Direction.Forward)
 
 
 called = False
@@ -159,8 +159,8 @@ class EmitEnum(UsesQApplication):
         self.arg = None
         p = QProcess()
         p.stateChanged.connect(self.slot)
-        p.stateChanged.emit(QProcess.NotRunning)
-        self.assertEqual(self.arg, QProcess.NotRunning)
+        p.stateChanged.emit(QProcess.ProcessState.NotRunning)
+        self.assertEqual(self.arg, QProcess.ProcessState.NotRunning)
 
 
 if __name__ == '__main__':

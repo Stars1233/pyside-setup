@@ -75,7 +75,7 @@ class SignalObjectTest(UsesQApplication):
 
     def testConnectionType(self):
         o = MyObject()
-        o.timeout.connect(self.cb, type=Qt.DirectConnection)
+        o.timeout.connect(self.cb, type=Qt.ConnectionType.DirectConnection)
         o.start(100)
         self.app.exec()
         self.assertTrue(self._cb_called)
