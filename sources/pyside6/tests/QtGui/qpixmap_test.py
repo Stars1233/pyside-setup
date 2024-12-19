@@ -17,6 +17,11 @@ from PySide6.QtCore import QFile, QIODevice, QObject, QSize, Qt
 
 
 class QPixmapTest(UsesQApplication):
+
+    def setUp(self):
+        super().setUp()
+        self._sample_file = Path(__file__).resolve().parent / 'sample.png'
+
     def testQVariantConstructor(self):
         obj = QObject()
         pixmap = QPixmap()
@@ -31,7 +36,7 @@ class QPixmapTest(UsesQApplication):
         pixmap = QPixmap("Testing!")  # noqa: F841
 
     def testQPixmapLoadFromDataWithQFile(self):
-        f = QFile(os.path.join(os.path.dirname(__file__), 'sample.png'))
+        f = QFile(self._sample_file)
         self.assertTrue(f.open(QIODevice.ReadOnly))
         data = f.read(f.size())
         f.close()
@@ -39,7 +44,8 @@ class QPixmapTest(UsesQApplication):
         self.assertTrue(pixmap.loadFromData(data))
 
     def testQPixmapLoadFromDataWithPython(self):
-        data = open(os.path.join(os.path.dirname(__file__), 'sample.png'), 'rb').read()
+        with self._sample_file.open('rb') as f:
+            data = f.read()
         pixmap = QPixmap()
         self.assertTrue(pixmap.loadFromData(data))
 
