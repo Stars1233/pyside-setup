@@ -92,7 +92,7 @@ class Window(QWidget):
         self.setWindowTitle("Basic Sort/Filter Model")
         self.resize(500, 450)
 
-        self._proxy_view.sortByColumn(1, Qt.AscendingOrder)
+        self._proxy_view.sortByColumn(1, Qt.SortOrder.AscendingOrder)
         self._filter_column_combo_box.setCurrentIndex(1)
 
         self._filter_pattern_line_edit.setText("Andy|Grace")
@@ -115,7 +115,7 @@ class Window(QWidget):
         reg_exp = QRegularExpression(pattern)
         if not self._filter_case_sensitivity_check_box.isChecked():
             options = reg_exp.patternOptions()
-            options |= QRegularExpression.CaseInsensitiveOption
+            options |= QRegularExpression.PatternOption.CaseInsensitiveOption
             reg_exp.setPatternOptions(options)
         self._proxy_model.setFilterRegularExpression(reg_exp)
 
@@ -126,9 +126,9 @@ class Window(QWidget):
     @Slot()
     def sort_changed(self):
         if self._sort_case_sensitivity_check_box.isChecked():
-            case_sensitivity = Qt.CaseSensitive
+            case_sensitivity = Qt.CaseSensitivity.CaseSensitive
         else:
-            case_sensitivity = Qt.CaseInsensitive
+            case_sensitivity = Qt.CaseSensitivity.CaseInsensitive
 
         self._proxy_model.setSortCaseSensitivity(case_sensitivity)
 

@@ -40,7 +40,7 @@ class TextBalloon(QQuickPaintedItem):
         brush = QBrush(QColor("#007430"))
 
         painter.setBrush(brush)
-        painter.setPen(Qt.NoPen)
+        painter.setPen(Qt.PenStyle.NoPen)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         itemSize = self.size()
@@ -73,7 +73,7 @@ if __name__ == "__main__":
         QQmlDebuggingEnabler.enableDebugging(True)
     app = QApplication(sys.argv)
     view = QQuickView()
-    view.setResizeMode(QQuickView.SizeRootObjectToView)
+    view.setResizeMode(QQuickView.ResizeMode.SizeRootObjectToView)
     qml_file = Path(__file__).parent / "main.qml"
     view.setSource(QUrl.fromLocalFile(qml_file))
 

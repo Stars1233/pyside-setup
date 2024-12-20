@@ -301,19 +301,19 @@ class GraphWidget(QGraphicsView):
     def keyPressEvent(self, event):
         key = event.key()
 
-        if key == Qt.Key_Up:
+        if key == Qt.Key.Key_Up:
             self._center_node.moveBy(0, -20)
-        elif key == Qt.Key_Down:
+        elif key == Qt.Key.Key_Down:
             self._center_node.moveBy(0, 20)
-        elif key == Qt.Key_Left:
+        elif key == Qt.Key.Key_Left:
             self._center_node.moveBy(-20, 0)
-        elif key == Qt.Key_Right:
+        elif key == Qt.Key.Key_Right:
             self._center_node.moveBy(20, 0)
-        elif key == Qt.Key_Plus:
+        elif key == Qt.Key.Key_Plus:
             self.scale_view(1.2)
-        elif key == Qt.Key_Minus:
+        elif key == Qt.Key.Key_Minus:
             self.scale_view(1 / 1.2)
-        elif key == Qt.Key_Space or key == Qt.Key_Enter:
+        elif key == Qt.Key.Key_Space or key == Qt.Key.Key_Enter:
             for item in self.scene().items():
                 if isinstance(item, Node):
                     item.setPos(-150 + random(300), -150 + random(300))

@@ -17,9 +17,9 @@ class TopographicSeries(QSurface3DSeries):
         super().__init__()
         self._sampleCountX = 0.0
         self._sampleCountZ = 0.0
-        self.setDrawMode(QSurface3DSeries.DrawSurface)
+        self.setDrawMode(QSurface3DSeries.DrawFlag.DrawSurface)
         self.setShading(QSurface3DSeries.Shading.Flat)
-        self.setBaseColor(Qt.white)
+        self.setBaseColor(Qt.GlobalColor.white)
 
     def sampleCountX(self):
         return self._sampleCountX

@@ -18,7 +18,7 @@ def remove_backspace(keys):
     result = keys.copy()
     # Chromium already handles navigate on backspace when appropriate.
     for i, key in enumerate(result):
-        if (key[0].key() & Qt.Key_unknown) == Qt.Key_Backspace:
+        if (key[0].key() & Qt.Key.Key_unknown) == Qt.Key.Key_Backspace:
             del result[i]
             break
     return result
@@ -51,8 +51,8 @@ class BrowserWindow(QMainWindow):
         self._reload_icon = QIcon.fromTheme(QIcon.ThemeIcon.ViewRefresh,
                                             QIcon(":view-refresh.png"))
 
-        self.setAttribute(Qt.WA_DeleteOnClose, True)
-        self.setFocusPolicy(Qt.ClickFocus)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+        self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
 
         if not forDevTools:
             self._progress_bar = QProgressBar(self)
@@ -97,7 +97,7 @@ class BrowserWindow(QMainWindow):
 
             focus_url_line_edit_action = QAction(self)
             self.addAction(focus_url_line_edit_action)
-            focus_url_line_edit_action.setShortcut(QKeySequence(Qt.CTRL | Qt.Key_L))
+            focus_url_line_edit_action.setShortcut(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_L))
             focus_url_line_edit_action.triggered.connect(self._focus_url_lineEdit)
 
         self.handle_web_view_title_changed("")
@@ -140,27 +140,27 @@ class BrowserWindow(QMainWindow):
 
     def create_file_menu(self, tabWidget):
         file_menu = QMenu("File")
-        file_menu.addAction("&New Window", QKeySequence.New,
+        file_menu.addAction("&New Window", QKeySequence.StandardKey.New,
                             self.handle_new_window_triggered)
         file_menu.addAction("New &Incognito Window",
                             self.handle_new_incognito_window_triggered)
 
         new_tab_action = QAction("New Tab", self)
-        new_tab_action.setShortcuts(QKeySequence.AddTab)
+        new_tab_action.setShortcuts(QKeySequence.StandardKey.AddTab)
         new_tab_action.triggered.connect(self._new_tab)
         file_menu.addAction(new_tab_action)
 
-        file_menu.addAction("&Open File...", QKeySequence.Open,
+        file_menu.addAction("&Open File...", QKeySequence.StandardKey.Open,
                             self.handle_file_open_triggered)
         file_menu.addSeparator()
 
         close_tab_action = QAction("Close Tab", self)
-        close_tab_action.setShortcuts(QKeySequence.Close)
+        close_tab_action.setShortcuts(QKeySequence.StandardKey.Close)
         close_tab_action.triggered.connect(self._close_current_tab)
         file_menu.addAction(close_tab_action)
 
         self._close_action = QAction("Quit", self)
-        self._close_action.setShortcut(QKeySequence(Qt.CTRL | Qt.Key_Q))
+        self._close_action.setShortcut(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_Q))
         self._close_action.triggered.connect(self.close)
         file_menu.addAction(self._close_action)
 
@@ -182,15 +182,15 @@ class BrowserWindow(QMainWindow):
     def create_edit_menu(self):
         edit_menu = QMenu("Edit")
         find_action = edit_menu.addAction("Find")
-        find_action.setShortcuts(QKeySequence.Find)
+        find_action.setShortcuts(QKeySequence.StandardKey.Find)
         find_action.triggered.connect(self.handle_find_action_triggered)
 
         find_next_action = edit_menu.addAction("Find Next")
-        find_next_action.setShortcut(QKeySequence.FindNext)
+        find_next_action.setShortcut(QKeySequence.StandardKey.FindNext)
         find_next_action.triggered.connect(self._find_next)
 
         find_previous_action = edit_menu.addAction("Find Previous")
-        find_previous_action.setShortcut(QKeySequence.FindPrevious)
+        find_previous_action.setShortcut(QKeySequence.StandardKey.FindPrevious)
         find_previous_action.triggered.connect(self._find_previous)
         return edit_menu
 
@@ -243,25 +243,25 @@ class BrowserWindow(QMainWindow):
         view_menu = QMenu("View")
         self._stop_action = view_menu.addAction("Stop")
         shortcuts = []
-        shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_Period))
-        shortcuts.append(QKeySequence(Qt.Key_Escape))
+        shortcuts.append(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_Period))
+        shortcuts.append(QKeySequence(Qt.Key.Key_Escape))
         self._stop_action.setShortcuts(shortcuts)
         self._stop_action.triggered.connect(self._stop)
 
         self._reload_action = view_menu.addAction("Reload Page")
-        self._reload_action.setShortcuts(QKeySequence.Refresh)
+        self._reload_action.setShortcuts(QKeySequence.StandardKey.Refresh)
         self._reload_action.triggered.connect(self._reload)
 
         zoom_in = view_menu.addAction("Zoom In")
-        zoom_in.setShortcut(QKeySequence(Qt.CTRL | Qt.Key_Plus))
+        zoom_in.setShortcut(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_Plus))
         zoom_in.triggered.connect(self._zoom_in)
 
         zoom_out = view_menu.addAction("Zoom Out")
-        zoom_out.setShortcut(QKeySequence(Qt.CTRL | Qt.Key_Minus))
+        zoom_out.setShortcut(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_Minus))
         zoom_out.triggered.connect(self._zoom_out)
 
         reset_zoom = view_menu.addAction("Reset Zoom")
-        reset_zoom.setShortcut(QKeySequence(Qt.CTRL | Qt.Key_0))
+        reset_zoom.setShortcut(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_0))
         reset_zoom.triggered.connect(self._reset_zoom)
 
         view_menu.addSeparator()
@@ -286,25 +286,25 @@ class BrowserWindow(QMainWindow):
         menu = QMenu("Window")
         self._next_tab_action = QAction("Show Next Tab", self)
         shortcuts = []
-        shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BraceRight))
-        shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_PageDown))
-        shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BracketRight))
-        shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_Less))
+        shortcuts.append(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_BraceRight))
+        shortcuts.append(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_PageDown))
+        shortcuts.append(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_BracketRight))
+        shortcuts.append(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_Less))
         self._next_tab_action.setShortcuts(shortcuts)
         self._next_tab_action.triggered.connect(tabWidget.next_tab)
 
         self._previous_tab_action = QAction("Show Previous Tab", self)
         shortcuts.clear()
-        shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BraceLeft))
-        shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_PageUp))
-        shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BracketLeft))
-        shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_Greater))
+        shortcuts.append(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_BraceLeft))
+        shortcuts.append(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_PageUp))
+        shortcuts.append(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_BracketLeft))
+        shortcuts.append(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_Greater))
         self._previous_tab_action.setShortcuts(shortcuts)
         self._previous_tab_action.triggered.connect(tabWidget.previous_tab)
 
         self._inspector_action = QAction("Open inspector in window", self)
         shortcuts.clear()
-        shortcuts.append(QKeySequence(Qt.CTRL | Qt.SHIFT | Qt.Key_I))
+        shortcuts.append(QKeySequence(Qt.Modifier.CTRL | Qt.Modifier.SHIFT | Qt.Key.Key_I))
         self._inspector_action.setShortcuts(shortcuts)
         self._inspector_action.triggered.connect(self._emit_dev_tools_requested)
         self._window_menu = menu
@@ -337,11 +337,11 @@ class BrowserWindow(QMainWindow):
 
     @Slot()
     def _back(self):
-        self._tab_widget.trigger_web_page_action(QWebEnginePage.Back)
+        self._tab_widget.trigger_web_page_action(QWebEnginePage.WebAction.Back)
 
     @Slot()
     def _forward(self):
-        self._tab_widget.trigger_web_page_action(QWebEnginePage.Forward)
+        self._tab_widget.trigger_web_page_action(QWebEnginePage.WebAction.Forward)
 
     @Slot()
     def _stop_reload(self):
@@ -354,10 +354,10 @@ class BrowserWindow(QMainWindow):
         navigation_bar.toggleViewAction().setEnabled(False)
 
         self._history_back_action = QAction(self)
-        back_shortcuts = remove_backspace(QKeySequence.keyBindings(QKeySequence.Back))
+        back_shortcuts = remove_backspace(QKeySequence.keyBindings(QKeySequence.StandardKey.Back))
 
         # For some reason Qt doesn't bind the dedicated Back key to Back.
-        back_shortcuts.append(QKeySequence(Qt.Key_Back))
+        back_shortcuts.append(QKeySequence(Qt.Key.Key_Back))
         self._history_back_action.setShortcuts(back_shortcuts)
         self._history_back_action.setIconVisibleInMenu(False)
         back_icon = QIcon.fromTheme(QIcon.ThemeIcon.GoPrevious,
@@ -368,8 +368,8 @@ class BrowserWindow(QMainWindow):
         navigation_bar.addAction(self._history_back_action)
 
         self._history_forward_action = QAction(self)
-        fwd_shortcuts = remove_backspace(QKeySequence.keyBindings(QKeySequence.Forward))
-        fwd_shortcuts.append(QKeySequence(Qt.Key_Forward))
+        fwd_shortcuts = remove_backspace(QKeySequence.keyBindings(QKeySequence.StandardKey.Forward))
+        fwd_shortcuts.append(QKeySequence(Qt.Key.Key_Forward))
         self._history_forward_action.setShortcuts(fwd_shortcuts)
         self._history_forward_action.setIconVisibleInMenu(False)
         next_icon = QIcon.fromTheme(QIcon.ThemeIcon.GoNext,
@@ -385,7 +385,7 @@ class BrowserWindow(QMainWindow):
 
         self._url_line_edit = QLineEdit(self)
         self._fav_action = QAction(self)
-        self._url_line_edit.addAction(self._fav_action, QLineEdit.LeadingPosition)
+        self._url_line_edit.addAction(self._fav_action, QLineEdit.ActionPosition.LeadingPosition)
         self._url_line_edit.setClearButtonEnabled(True)
         navigation_bar.addWidget(self._url_line_edit)
 
@@ -399,13 +399,13 @@ class BrowserWindow(QMainWindow):
         return navigation_bar
 
     def handle_web_action_enabled_changed(self, action, enabled):
-        if action == QWebEnginePage.Back:
+        if action == QWebEnginePage.WebAction.Back:
             self._history_back_action.setEnabled(enabled)
-        elif action == QWebEnginePage.Forward:
+        elif action == QWebEnginePage.WebAction.Forward:
             self._history_forward_action.setEnabled(enabled)
-        elif action == QWebEnginePage.Reload:
+        elif action == QWebEnginePage.WebAction.Reload:
             self._reload_action.setEnabled(enabled)
-        elif action == QWebEnginePage.Stop:
+        elif action == QWebEnginePage.WebAction.Stop:
             self._stop_action.setEnabled(enabled)
         else:
             print("Unhandled webActionChanged signal", file=sys.stderr)
@@ -437,7 +437,7 @@ class BrowserWindow(QMainWindow):
         if not self.current_tab():
             return
         search, ok = QInputDialog.getText(self, "Find", "Find:",
-                                          QLineEdit.Normal, self._last_search)
+                                          QLineEdit.EchoMode.Normal, self._last_search)
         if ok and search:
             self._last_search = search
             self.current_tab().findText(self._last_search)
@@ -465,12 +465,12 @@ class BrowserWindow(QMainWindow):
 
     def handle_web_view_load_progress(self, progress):
         if 0 < progress and progress < 100:
-            self._stop_reload_action.setData(QWebEnginePage.Stop)
+            self._stop_reload_action.setData(QWebEnginePage.WebAction.Stop)
             self._stop_reload_action.setIcon(self._stop_icon)
             self._stop_reload_action.setToolTip("Stop loading the current page")
             self._progress_bar.setValue(progress)
         else:
-            self._stop_reload_action.setData(QWebEnginePage.Reload)
+            self._stop_reload_action.setData(QWebEnginePage.WebAction.Reload)
             self._stop_reload_action.setIcon(self._reload_icon)
             self._stop_reload_action.setToolTip("Reload the current page")
             self._progress_bar.setValue(0)
@@ -486,12 +486,12 @@ class BrowserWindow(QMainWindow):
     def handle_dev_tools_requested(self, source):
         page = self._browser.create_dev_tools_window().current_tab().page()
         source.setDevToolsPage(page)
-        source.triggerAction(QWebEnginePage.InspectElement)
+        source.triggerAction(QWebEnginePage.WebAction.InspectElement)
 
     def handle_find_text_finished(self, result):
         sb = self.statusBar()
         if result.numberOfMatches() == 0:
-            sb.showMessage(f'"{self._lastSearch}" not found.')
+            sb.showMessage(f'"{self._last_search}" not found.')
         else:
             active = result.activeMatch()
             number = result.numberOfMatches()

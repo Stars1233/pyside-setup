@@ -15,7 +15,7 @@ if __name__ == '__main__':
     view.engine().addImportPath(Path(__file__).parent)
     view.loadFromModule("Bars", "Main")
     view.setTitle("Monthly income / expenses")
-    view.setResizeMode(QQuickView.SizeRootObjectToView)
+    view.setResizeMode(QQuickView.ResizeMode.SizeRootObjectToView)
     view.setColor("black")
     view.show()
 

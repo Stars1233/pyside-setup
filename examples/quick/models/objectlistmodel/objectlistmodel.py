@@ -50,7 +50,7 @@ if __name__ == '__main__':
                 DataObject("Item 4", "yellow")]
 
     view = QQuickView()
-    view.setResizeMode(QQuickView.SizeRootObjectToView)
+    view.setResizeMode(QQuickView.ResizeMode.SizeRootObjectToView)
     view.setInitialProperties({"model": dataList})
 
     qml_file = Path(__file__).parent / "view.qml"

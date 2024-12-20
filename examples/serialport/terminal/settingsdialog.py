@@ -26,13 +26,13 @@ class Settings():
         self.name = ""
         self.baud_rate = 0
         self.string_baud_rate = ""
-        self.data_bits = QSerialPort.Data8
+        self.data_bits = QSerialPort.DataBits.Data8
         self.string_data_bits = ""
-        self.parity = QSerialPort.NoParity
+        self.parity = QSerialPort.Parity.NoParity
         self.string_parity = ""
-        self.stop_bits = QSerialPort.OneStop
+        self.stop_bits = QSerialPort.StopBits.OneStop
         self.string_stop_bits = ""
-        self.flow_control = QSerialPort.SoftwareControl
+        self.flow_control = QSerialPort.FlowControl.SoftwareControl
         self.string_flow_control = ""
         self.local_echo_enabled = False
 
@@ -48,7 +48,7 @@ class SettingsDialog(QDialog):
         self.m_currentSettings = Settings()
         self.m_intValidator = QIntValidator(0, 4000000, self)
 
-        self.m_ui.baudRateBox.setInsertPolicy(QComboBox.NoInsert)
+        self.m_ui.baudRateBox.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
 
         self.m_ui.applyButton.clicked.connect(self.apply)
         self.m_ui.serialPortInfoListBox.currentIndexChanged.connect(self.show_port_info)
@@ -106,33 +106,33 @@ class SettingsDialog(QDialog):
             self.m_ui.serialPortInfoListBox.clearEditText()
 
     def fill_ports_parameters(self):
-        self.m_ui.baudRateBox.addItem("9600", QSerialPort.Baud9600)
-        self.m_ui.baudRateBox.addItem("19200", QSerialPort.Baud19200)
-        self.m_ui.baudRateBox.addItem("38400", QSerialPort.Baud38400)
-        self.m_ui.baudRateBox.addItem("115200", QSerialPort.Baud115200)
+        self.m_ui.baudRateBox.addItem("9600", QSerialPort.BaudRate.Baud9600)
+        self.m_ui.baudRateBox.addItem("19200", QSerialPort.BaudRate.Baud19200)
+        self.m_ui.baudRateBox.addItem("38400", QSerialPort.BaudRate.Baud38400)
+        self.m_ui.baudRateBox.addItem("115200", QSerialPort.BaudRate.Baud115200)
         self.m_ui.baudRateBox.addItem("Custom")
 
-        self.m_ui.dataBitsBox.addItem("5", QSerialPort.Data5)
-        self.m_ui.dataBitsBox.addItem("6", QSerialPort.Data6)
-        self.m_ui.dataBitsBox.addItem("7", QSerialPort.Data7)
-        self.m_ui.dataBitsBox.addItem("8", QSerialPort.Data8)
+        self.m_ui.dataBitsBox.addItem("5", QSerialPort.DataBits.Data5)
+        self.m_ui.dataBitsBox.addItem("6", QSerialPort.DataBits.Data6)
+        self.m_ui.dataBitsBox.addItem("7", QSerialPort.DataBits.Data7)
+        self.m_ui.dataBitsBox.addItem("8", QSerialPort.DataBits.Data8)
         self.m_ui.dataBitsBox.setCurrentIndex(3)
 
-        self.m_ui.parityBox.addItem("None", QSerialPort.NoParity)
-        self.m_ui.parityBox.addItem("Even", QSerialPort.EvenParity)
-        self.m_ui.parityBox.addItem("Odd", QSerialPort.OddParity)
-        self.m_ui.parityBox.addItem("Mark", QSerialPort.MarkParity)
-        self.m_ui.parityBox.addItem("Space", QSerialPort.SpaceParity)
+        self.m_ui.parityBox.addItem("None", QSerialPort.Parity.NoParity)
+        self.m_ui.parityBox.addItem("Even", QSerialPort.Parity.EvenParity)
+        self.m_ui.parityBox.addItem("Odd", QSerialPort.Parity.OddParity)
+        self.m_ui.parityBox.addItem("Mark", QSerialPort.Parity.MarkParity)
+        self.m_ui.parityBox.addItem("Space", QSerialPort.Parity.SpaceParity)
 
-        self.m_ui.stopBitsBox.addItem("1", QSerialPort.OneStop)
+        self.m_ui.stopBitsBox.addItem("1", QSerialPort.StopBits.OneStop)
         if sys.platform == "win32":
-            self.m_ui.stopBitsBox.addItem("1.5", QSerialPort.OneAndHalfStop)
+            self.m_ui.stopBitsBox.addItem("1.5", QSerialPort.StopBits.OneAndHalfStop)
 
-        self.m_ui.stopBitsBox.addItem("2", QSerialPort.TwoStop)
+        self.m_ui.stopBitsBox.addItem("2", QSerialPort.StopBits.TwoStop)
 
-        self.m_ui.flowControlBox.addItem("None", QSerialPort.NoFlowControl)
-        self.m_ui.flowControlBox.addItem("RTS/CTS", QSerialPort.HardwareControl)
-        self.m_ui.flowControlBox.addItem("XON/XOFF", QSerialPort.SoftwareControl)
+        self.m_ui.flowControlBox.addItem("None", QSerialPort.FlowControl.NoFlowControl)
+        self.m_ui.flowControlBox.addItem("RTS/CTS", QSerialPort.FlowControl.HardwareControl)
+        self.m_ui.flowControlBox.addItem("XON/XOFF", QSerialPort.FlowControl.SoftwareControl)
 
     def fill_ports_info(self):
         self.m_ui.serialPortInfoListBox.clear()

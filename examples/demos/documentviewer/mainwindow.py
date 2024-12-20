@@ -67,7 +67,7 @@ class MainWindow(QMainWindow):
     def onActionOpenTriggered(self):
         fileDialog = QFileDialog(self, "Open Document",
                                  self._currentDir.absolutePath())
-        while (fileDialog.exec() == QDialog.Accepted
+        while (fileDialog.exec() == QDialog.DialogCode.Accepted
                and not self.openFile(fileDialog.selectedFiles()[0])):
             pass
 

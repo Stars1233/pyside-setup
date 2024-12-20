@@ -35,10 +35,10 @@ class BlurPicker(QGraphicsView):
         self.index = 0
 
         self._animation.setDuration(400)
-        self._animation.setEasingCurve(QEasingCurve.InOutSine)
+        self._animation.setEasingCurve(QEasingCurve.Type.InOutSine)
 
         self.setRenderHint(QPainter.RenderHint.Antialiasing, True)
-        self.setFrameStyle(QFrame.NoFrame)
+        self.setFrameStyle(QFrame.Shape.NoFrame)
 
     @Property(float)
     def index(self) -> float:
@@ -86,9 +86,9 @@ class BlurPicker(QGraphicsView):
 
     def keyPressEvent(self, event):
         delta = 0
-        if event.key() == Qt.Key_Left:
+        if event.key() == Qt.Key.Key_Left:
             delta = -1
-        elif event.key() == Qt.Key_Right:
+        elif event.key() == Qt.Key.Key_Right:
             delta = 1
 
         if self._animation.state() == QAbstractAnimation.Stopped and delta:
@@ -100,7 +100,7 @@ class BlurPicker(QGraphicsView):
         right = event.position().x() > (self.width() / 2)
         delta = 1 if right else -1
 
-        if self._animation.state() == QAbstractAnimation.Stopped:
+        if self._animation.state() == QAbstractAnimation.State.Stopped:
             self._animation.setEndValue(self._index + delta)
             self._animation.start()
             event.accept()

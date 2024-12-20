@@ -35,7 +35,7 @@ class QGraphicsRectWidget(QGraphicsWidget):
 
     def paint(self, painter: QPainter,
               option: QStyleOptionGraphicsItem, widget: QWidget | None = None):
-        painter.fillRect(self.rect(), Qt.blue)
+        painter.fillRect(self.rect(), Qt.GlobalColor.blue)
 
 
 class StateSwitchTransition(QAbstractTransition):
@@ -110,7 +110,7 @@ if __name__ == '__main__':
     button4.setZValue(3)
 
     scene = QGraphicsScene(0, 0, 300, 300)
-    scene.setBackgroundBrush(Qt.black)
+    scene.setBackgroundBrush(Qt.GlobalColor.black)
     scene.addItem(button1)
     scene.addItem(button2)
     scene.addItem(button3)
@@ -118,9 +118,9 @@ if __name__ == '__main__':
 
     window = GraphicsView(scene)
     window.setFrameStyle(0)
-    window.setAlignment(Qt.AlignLeft | Qt.AlignTop)
-    window.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-    window.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    window.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+    window.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+    window.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
     machine = QStateMachine()
 
@@ -178,28 +178,28 @@ if __name__ == '__main__':
 
     anim = QPropertyAnimation(button4, b"geometry")
     anim.setDuration(1000)
-    anim.setEasingCurve(QEasingCurve.OutElastic)
+    anim.setEasingCurve(QEasingCurve.Type.OutElastic)
     animation_group.addAnimation(anim)
 
     sub_group = QSequentialAnimationGroup(animation_group)
     sub_group.addPause(100)
     anim = QPropertyAnimation(button3, b"geometry")
     anim.setDuration(1000)
-    anim.setEasingCurve(QEasingCurve.OutElastic)
+    anim.setEasingCurve(QEasingCurve.Type.OutElastic)
     sub_group.addAnimation(anim)
 
     sub_group = QSequentialAnimationGroup(animation_group)
     sub_group.addPause(150)
     anim = QPropertyAnimation(button2, b"geometry")
     anim.setDuration(1000)
-    anim.setEasingCurve(QEasingCurve.OutElastic)
+    anim.setEasingCurve(QEasingCurve.Type.OutElastic)
     sub_group.addAnimation(anim)
 
     sub_group = QSequentialAnimationGroup(animation_group)
     sub_group.addPause(200)
     anim = QPropertyAnimation(button1, b"geometry")
     anim.setDuration(1000)
-    anim.setEasingCurve(QEasingCurve.OutElastic)
+    anim.setEasingCurve(QEasingCurve.Type.OutElastic)
     sub_group.addAnimation(anim)
 
     state_switcher = StateSwitcher(machine)

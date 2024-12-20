@@ -49,14 +49,14 @@ class TrafficLightWidget(QWidget):
     def __init__(self):
         super().__init__()
         vbox = QVBoxLayout(self)
-        self._red_light = LightWidget(Qt.red)
+        self._red_light = LightWidget(Qt.GlobalColor.red)
         vbox.addWidget(self._red_light)
-        self._yellow_light = LightWidget(Qt.yellow)
+        self._yellow_light = LightWidget(Qt.GlobalColor.yellow)
         vbox.addWidget(self._yellow_light)
-        self._green_light = LightWidget(Qt.green)
+        self._green_light = LightWidget(Qt.GlobalColor.green)
         vbox.addWidget(self._green_light)
         pal = QPalette()
-        pal.setColor(QPalette.Window, Qt.black)
+        pal.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.black)
         self.setPalette(pal)
         self.setAutoFillBackground(True)
 

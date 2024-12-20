@@ -18,8 +18,8 @@ class WebPopupWindow(QWidget):
         self._fav_action = QAction(self)
         self._view = view
 
-        self.setAttribute(Qt.WA_DeleteOnClose)
-        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+        self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -30,7 +30,7 @@ class WebPopupWindow(QWidget):
         self._view.setFocus()
 
         self._url_line_edit.setReadOnly(True)
-        self._url_line_edit.addAction(self._fav_action, QLineEdit.LeadingPosition)
+        self._url_line_edit.addAction(self._fav_action, QLineEdit.ActionPosition.LeadingPosition)
 
         self._view.titleChanged.connect(self.setWindowTitle)
         self._view.urlChanged.connect(self._url_changed)

@@ -59,13 +59,13 @@ class Window(QWidget):
         self.setWindowTitle(self.tr("Hello GL"))
 
     def create_slider(self):
-        slider = QSlider(Qt.Vertical)
+        slider = QSlider(Qt.Orientation.Vertical)
 
         slider.setRange(0, 360 * 16)
         slider.setSingleStep(16)
         slider.setPageStep(15 * 16)
         slider.setTickInterval(15 * 16)
-        slider.setTickPosition(QSlider.TicksRight)
+        slider.setTickPosition(QSlider.TickPosition.TicksRight)
         return slider
 
     def closeEvent(self, event):
@@ -73,7 +73,7 @@ class Window(QWidget):
         event.accept()
 
     def keyPressEvent(self, event):
-        if self.isWindow() and event.key() == Qt.Key_Escape:
+        if self.isWindow() and event.key() == Qt.Key.Key_Escape:
             self.close()
         else:
             super().keyPressEvent(event)
@@ -96,13 +96,13 @@ class Window(QWidget):
                                     "Main window already occupied")
             return
 
-        self.setAttribute(Qt.WA_DeleteOnClose, False)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
         self._dock_btn.setText("Undock")
         mainWindow.setCentralWidget(self)
 
     def undock(self):
         self.setParent(None)
-        self.setAttribute(Qt.WA_DeleteOnClose)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         geometry = self.screen().availableGeometry()
         x = geometry.x() + (geometry.width() - self.width()) / 2
         y = geometry.y() + (geometry.height() - self.height()) / 2

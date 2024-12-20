@@ -46,7 +46,7 @@ class PersonModel (QAbstractListModel):
         if role == Qt.ItemDataRole.DisplayRole:
             return d.name
         if role == Qt.ItemDataRole.DecorationRole:
-            return Qt.black
+            return Qt.GlobalColor.black
         if role == PersonModel.MyRole:
             return d.myrole
         return None
@@ -60,7 +60,7 @@ class PersonModel (QAbstractListModel):
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
     view = QQuickView()
-    view.setResizeMode(QQuickView.SizeRootObjectToView)
+    view.setResizeMode(QQuickView.ResizeMode.SizeRootObjectToView)
 
     qml_file = os.fspath(Path(__file__).resolve().parent / 'view.qml')
     view.setSource(QUrl.fromLocalFile(qml_file))

@@ -140,23 +140,23 @@ class SurfaceGraphModifier(QObject):
 
         # Set the gradients for multi-surface layers
         grOne = QLinearGradient()
-        grOne.setColorAt(0.0, Qt.black)
-        grOne.setColorAt(0.38, Qt.darkYellow)
-        grOne.setColorAt(0.39, Qt.darkGreen)
-        grOne.setColorAt(0.5, Qt.darkGray)
-        grOne.setColorAt(1.0, Qt.gray)
+        grOne.setColorAt(0.0, Qt.GlobalColor.black)
+        grOne.setColorAt(0.38, Qt.GlobalColor.darkYellow)
+        grOne.setColorAt(0.39, Qt.GlobalColor.darkGreen)
+        grOne.setColorAt(0.5, Qt.GlobalColor.darkGray)
+        grOne.setColorAt(1.0, Qt.GlobalColor.gray)
         self._heightMapSeriesOne.setBaseGradient(grOne)
         self._heightMapSeriesOne.setColorStyle(QGraphsTheme.ColorStyle.RangeGradient)
 
         grTwo = QLinearGradient()
-        grTwo.setColorAt(0.39, Qt.blue)
-        grTwo.setColorAt(0.4, Qt.white)
+        grTwo.setColorAt(0.39, Qt.GlobalColor.blue)
+        grTwo.setColorAt(0.4, Qt.GlobalColor.white)
         self._heightMapSeriesTwo.setBaseGradient(grTwo)
         self._heightMapSeriesTwo.setColorStyle(QGraphsTheme.ColorStyle.RangeGradient)
 
         grThree = QLinearGradient()
-        grThree.setColorAt(0.0, Qt.white)
-        grThree.setColorAt(0.05, Qt.black)
+        grThree.setColorAt(0.0, Qt.GlobalColor.white)
+        grThree.setColorAt(0.05, Qt.GlobalColor.black)
         self._heightMapSeriesThree.setBaseGradient(grThree)
         self._heightMapSeriesThree.setColorStyle(QGraphsTheme.ColorStyle.RangeGradient)
 
@@ -223,7 +223,7 @@ class SurfaceGraphModifier(QObject):
     @Slot(bool)
     def enableSqrtSinModel(self, enable):
         if enable:
-            self._sqrtSinSeries.setDrawMode(QSurface3DSeries.DrawSurfaceAndWireframe)
+            self._sqrtSinSeries.setDrawMode(QSurface3DSeries.DrawFlag.DrawSurfaceAndWireframe)
             self._sqrtSinSeries.setShading(QSurface3DSeries.Shading.Flat)
 
             self._graph.axisX().setLabelFormat("%.2f")
@@ -275,11 +275,11 @@ class SurfaceGraphModifier(QObject):
     @Slot(bool)
     def enableHeightMapModel(self, enable):
         if enable:
-            self._heightMapSeriesOne.setDrawMode(QSurface3DSeries.DrawSurface)
+            self._heightMapSeriesOne.setDrawMode(QSurface3DSeries.DrawFlag.DrawSurface)
             self._heightMapSeriesOne.setShading(QSurface3DSeries.Shading.Flat)
-            self._heightMapSeriesTwo.setDrawMode(QSurface3DSeries.DrawSurface)
+            self._heightMapSeriesTwo.setDrawMode(QSurface3DSeries.DrawFlag.DrawSurface)
             self._heightMapSeriesTwo.setShading(QSurface3DSeries.Shading.Flat)
-            self._heightMapSeriesThree.setDrawMode(QSurface3DSeries.DrawSurface)
+            self._heightMapSeriesThree.setDrawMode(QSurface3DSeries.DrawFlag.DrawSurface)
             self._heightMapSeriesThree.setShading(QSurface3DSeries.Shading.Flat)
 
             self._graph.axisX().setLabelFormat("%.1f N")
@@ -443,7 +443,7 @@ class SurfaceGraphModifier(QObject):
 
     def setBlackToYellowGradient(self):
         gr = QLinearGradient()
-        gr.setColorAt(0.0, Qt.black)
+        gr.setColorAt(0.0, Qt.GlobalColor.black)
         gr.setColorAt(0.33, Qt.blue)
         gr.setColorAt(0.67, Qt.red)
         gr.setColorAt(1.0, Qt.yellow)
@@ -467,8 +467,8 @@ class SurfaceGraphModifier(QObject):
         positionOnePipe = QVector3D(39.0, 45.0, 19.2)
         positionOneLabel = QVector3D(39.0, 107.0, 19.2)
         if show:
-            color = QImage(2, 2, QImage.Format_RGB32)
-            color.fill(Qt.red)
+            color = QImage(2, 2, QImage.Format.Format_RGB32)
+            color.fill(Qt.GlobalColor.red)
             file_name = os.fspath(self._data_path / "oilrig.mesh")
             item = QCustom3DItem(file_name, positionOne,
                                  QVector3D(0.025, 0.025, 0.025),
@@ -499,8 +499,8 @@ class SurfaceGraphModifier(QObject):
         positionTwoPipe = QVector3D(34.5, 45.0, 23.4)
         positionTwoLabel = QVector3D(34.5, 107.0, 23.4)
         if show:
-            color = QImage(2, 2, QImage.Format_RGB32)
-            color.fill(Qt.red)
+            color = QImage(2, 2, QImage.Format.Format_RGB32)
+            color.fill(Qt.GlobalColor.red)
             item = QCustom3DItem()
             file_name = os.fspath(self._data_path / "oilrig.mesh")
             item.setMeshFile(file_name)
@@ -532,7 +532,7 @@ class SurfaceGraphModifier(QObject):
         positionThree = QVector3D(34.5, 86.0, 19.1)
         positionThreeLabel = QVector3D(34.5, 116.0, 19.1)
         if show:
-            color = QImage(2, 2, QImage.Format_RGB32)
+            color = QImage(2, 2, QImage.Format.Format_RGB32)
             color.fill(Qt.darkMagenta)
             item = QCustom3DItem()
             file_name = os.fspath(self._data_path / "refinery.mesh")
@@ -569,13 +569,13 @@ class SurfaceGraphModifier(QObject):
         s2 = self._graph.seriesList()[2]
         if highlight:
             grThree = QLinearGradient()
-            grThree.setColorAt(0.0, Qt.black)
+            grThree.setColorAt(0.0, Qt.GlobalColor.black)
             grThree.setColorAt(0.05, Qt.red)
             s2.setBaseGradient(grThree)
         else:
             grThree = QLinearGradient()
-            grThree.setColorAt(0.0, Qt.white)
-            grThree.setColorAt(0.05, Qt.black)
+            grThree.setColorAt(0.0, Qt.GlobalColor.white)
+            grThree.setColorAt(0.05, Qt.GlobalColor.black)
             s2.setBaseGradient(grThree)
 
     @Slot(bool)

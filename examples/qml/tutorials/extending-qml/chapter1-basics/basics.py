@@ -56,7 +56,7 @@ if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
 
     view = QQuickView()
-    view.setResizeMode(QQuickView.SizeRootObjectToView)
+    view.setResizeMode(QQuickView.ResizeMode.SizeRootObjectToView)
     qml_file = os.fspath(Path(__file__).resolve().parent / 'app.qml')
     view.setSource(QUrl.fromLocalFile(qml_file))
     if view.status() == QQuickView.Status.Error:

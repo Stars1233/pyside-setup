@@ -40,20 +40,20 @@ class MainWindow(QMainWindow):
 
         if file_name:
             in_file = QFile(file_name)
-            if in_file.open(QFile.ReadOnly | QFile.Text):
+            if in_file.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
                 stream = QTextStream(in_file)
                 self._editor.setPlainText(stream.readAll())
 
     def setup_editor(self):
         class_format = QTextCharFormat()
-        class_format.setFontWeight(QFont.Bold)
-        class_format.setForeground(Qt.blue)
+        class_format.setFontWeight(QFont.Weight.Bold)
+        class_format.setForeground(Qt.GlobalColor.blue)
         pattern = r'^\s*class\s+\w+\(.*$'
         self._highlighter.add_mapping(pattern, class_format)
 
         function_format = QTextCharFormat()
         function_format.setFontItalic(True)
-        function_format.setForeground(Qt.blue)
+        function_format.setForeground(Qt.GlobalColor.blue)
         pattern = r'^\s*def\s+\w+\s*\(.*\)\s*:\s*$'
         self._highlighter.add_mapping(pattern, function_format)
 
@@ -61,7 +61,7 @@ class MainWindow(QMainWindow):
         comment_format.setBackground(QColor("#77ff77"))
         self._highlighter.add_mapping(r'^\s*#.*$', comment_format)
 
-        font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
+        font = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
         self._editor = QPlainTextEdit()
         self._editor.setFont(font)
         self._highlighter.setDocument(self._editor.document())
@@ -70,15 +70,15 @@ class MainWindow(QMainWindow):
         file_menu = self.menuBar().addMenu(self.tr("&File"))
 
         new_file_act = file_menu.addAction(self.tr("&New..."))
-        new_file_act.setShortcut(QKeySequence(QKeySequence.New))
+        new_file_act.setShortcut(QKeySequence(QKeySequence.StandardKey.New))
         new_file_act.triggered.connect(self.new_file)
 
         open_file_act = file_menu.addAction(self.tr("&Open..."))
-        open_file_act.setShortcut(QKeySequence(QKeySequence.Open))
+        open_file_act.setShortcut(QKeySequence(QKeySequence.StandardKey.Open))
         open_file_act.triggered.connect(self.open_file)
 
         quit_act = file_menu.addAction(self.tr("E&xit"))
-        quit_act.setShortcut(QKeySequence(QKeySequence.Quit))
+        quit_act.setShortcut(QKeySequence(QKeySequence.StandardKey.Quit))
         quit_act.triggered.connect(self.close)
 
         help_menu = self.menuBar().addMenu("&Help")

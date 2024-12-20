@@ -15,28 +15,28 @@ from PySide6.QtGraphsWidgets import Q3DSurfaceWidgetItem
 
 def gradientBtoYPB_Pixmap():
     grBtoY = QLinearGradient(0, 0, 1, 100)
-    grBtoY.setColorAt(1.0, Qt.black)
-    grBtoY.setColorAt(0.67, Qt.blue)
-    grBtoY.setColorAt(0.33, Qt.red)
-    grBtoY.setColorAt(0.0, Qt.yellow)
+    grBtoY.setColorAt(1.0, Qt.GlobalColor.black)
+    grBtoY.setColorAt(0.67, Qt.GlobalColor.blue)
+    grBtoY.setColorAt(0.33, Qt.GlobalColor.red)
+    grBtoY.setColorAt(0.0, Qt.GlobalColor.yellow)
     pm = QPixmap(24, 100)
     with QPainter(pm) as pmp:
         pmp.setBrush(QBrush(grBtoY))
-        pmp.setPen(Qt.NoPen)
+        pmp.setPen(Qt.PenStyle.NoPen)
         pmp.drawRect(0, 0, 24, 100)
     return pm
 
 
 def gradientGtoRPB_Pixmap():
     grGtoR = QLinearGradient(0, 0, 1, 100)
-    grGtoR.setColorAt(1.0, Qt.darkGreen)
-    grGtoR.setColorAt(0.5, Qt.yellow)
-    grGtoR.setColorAt(0.2, Qt.red)
-    grGtoR.setColorAt(0.0, Qt.darkRed)
+    grGtoR.setColorAt(1.0, Qt.GlobalColor.darkGreen)
+    grGtoR.setColorAt(0.5, Qt.GlobalColor.yellow)
+    grGtoR.setColorAt(0.2, Qt.GlobalColor.red)
+    grGtoR.setColorAt(0.0, Qt.GlobalColor.darkRed)
     pm = QPixmap(24, 100)
     with QPainter(pm) as pmp:
         pmp.setBrush(QBrush(grGtoR))
-        pmp.setPen(Qt.NoPen)
+        pmp.setPen(Qt.PenStyle.NoPen)
         pmp.drawRect(0, 0, 24, 100)
     return pm
 
@@ -46,19 +46,19 @@ def highlightPixmap():
     WIDTH = 110
     BORDER = 10
     gr = QLinearGradient(0, 0, 1, HEIGHT - 2 * BORDER)
-    gr.setColorAt(1.0, Qt.black)
-    gr.setColorAt(0.8, Qt.darkGreen)
-    gr.setColorAt(0.6, Qt.green)
-    gr.setColorAt(0.4, Qt.yellow)
-    gr.setColorAt(0.2, Qt.red)
-    gr.setColorAt(0.0, Qt.darkRed)
+    gr.setColorAt(1.0, Qt.GlobalColor.black)
+    gr.setColorAt(0.8, Qt.GlobalColor.darkGreen)
+    gr.setColorAt(0.6, Qt.GlobalColor.green)
+    gr.setColorAt(0.4, Qt.GlobalColor.yellow)
+    gr.setColorAt(0.2, Qt.GlobalColor.red)
+    gr.setColorAt(0.0, Qt.GlobalColor.darkRed)
     pmHighlight = QPixmap(WIDTH, HEIGHT)
-    pmHighlight.fill(Qt.transparent)
+    pmHighlight.fill(Qt.GlobalColor.transparent)
     with QPainter(pmHighlight) as pmpHighlight:
         pmpHighlight.setBrush(QBrush(gr))
-        pmpHighlight.setPen(Qt.NoPen)
+        pmpHighlight.setPen(Qt.PenStyle.NoPen)
         pmpHighlight.drawRect(BORDER, BORDER, 35, HEIGHT - 2 * BORDER)
-        pmpHighlight.setPen(Qt.black)
+        pmpHighlight.setPen(Qt.GlobalColor.black)
         step = (HEIGHT - 2 * BORDER) / 5
         for i in range(0, 6):
             yPos = i * step + BORDER
@@ -80,13 +80,13 @@ class SurfaceGraph(QObject):
         hLayout = QHBoxLayout(self._surfaceWidget)
         surfaceGraphWidget.setMinimumSize(minimum_graph_size)
         surfaceGraphWidget.setMaximumSize(maximum_graph_size)
-        surfaceGraphWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        surfaceGraphWidget.setFocusPolicy(Qt.StrongFocus)
-        surfaceGraphWidget.setResizeMode(QQuickWidget.SizeRootObjectToView)
+        surfaceGraphWidget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        surfaceGraphWidget.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        surfaceGraphWidget.setResizeMode(QQuickWidget.ResizeMode.SizeRootObjectToView)
         hLayout.addWidget(surfaceGraphWidget, 1)
         vLayout = QVBoxLayout()
         hLayout.addLayout(vLayout)
-        vLayout.setAlignment(Qt.AlignTop)
+        vLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         # Create control widgets
         modelGroupBox = QGroupBox("Model")
         sqrtSinModelRB = QRadioButton(self._surfaceWidget)

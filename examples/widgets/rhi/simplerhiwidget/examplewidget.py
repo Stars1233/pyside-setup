@@ -24,7 +24,7 @@ VERTEX_DATA = numpy.array([ 0.0,  0.5, 1.0, 0.0, 0.0,  # noqa E:201
 
 def getShader(name):
     f = QFile(name)
-    if f.open(QIODevice.ReadOnly):
+    if f.open(QIODevice.OpenModeFlag.ReadOnly):
         return QShader.fromSerialized(f.readAll())
     return QShader()
 
@@ -62,17 +62,17 @@ class ExampleRhiWidget(QRhiWidget):
 
         if not self.m_pipeline:
             vertex_size = 4 * VERTEX_DATA.size
-            self.m_vbuf = self.m_rhi.newBuffer(QRhiBuffer.Immutable,
-                                               QRhiBuffer.VertexBuffer, vertex_size)
+            self.m_vbuf = self.m_rhi.newBuffer(QRhiBuffer.Type.Immutable,
+                                               QRhiBuffer.UsageFlag.VertexBuffer, vertex_size)
             self.m_vbuf.create()
 
-            self.m_ubuf = self.m_rhi.newBuffer(QRhiBuffer.Dynamic,
-                                               QRhiBuffer.UniformBuffer, 64)
+            self.m_ubuf = self.m_rhi.newBuffer(QRhiBuffer.Type.Dynamic,
+                                               QRhiBuffer.UsageFlag.UniformBuffer, 64)
             self.m_ubuf.create()
 
             self.m_srb = self.m_rhi.newShaderResourceBindings()
             bindings = [
-                QRhiShaderResourceBinding.uniformBuffer(0, QRhiShaderResourceBinding.VertexStage,
+                QRhiShaderResourceBinding.uniformBuffer(0, QRhiShaderResourceBinding.StageFlag.VertexStage,  # noqa: E501
                                                         self.m_ubuf)
             ]
             self.m_srb.setBindings(bindings)
@@ -80,9 +80,9 @@ class ExampleRhiWidget(QRhiWidget):
 
             self.m_pipeline = self.m_rhi.newGraphicsPipeline()
             stages = [
-                QRhiShaderStage(QRhiShaderStage.Vertex,
+                QRhiShaderStage(QRhiShaderStage.Type.Vertex,
                                 getShader(":/shader_assets/color.vert.qsb")),
-                QRhiShaderStage(QRhiShaderStage.Fragment,
+                QRhiShaderStage(QRhiShaderStage.Type.Fragment,
                                 getShader(":/shader_assets/color.frag.qsb"))
             ]
             self.m_pipeline.setShaderStages(stages)
@@ -90,8 +90,8 @@ class ExampleRhiWidget(QRhiWidget):
             input_bindings = [QRhiVertexInputBinding(5 * 4)]  # sizeof(float)
             inputLayout.setBindings(input_bindings)
             attributes = [  # 4: sizeof(float)
-                QRhiVertexInputAttribute(0, 0, QRhiVertexInputAttribute.Float2, 0),
-                QRhiVertexInputAttribute(0, 1, QRhiVertexInputAttribute.Float3, 2 * 4)
+                QRhiVertexInputAttribute(0, 0, QRhiVertexInputAttribute.Format.Float2, 0),
+                QRhiVertexInputAttribute(0, 1, QRhiVertexInputAttribute.Format.Float3, 2 * 4)
             ]
             inputLayout.setAttributes(attributes)
             self.m_pipeline.setVertexInputLayout(inputLayout)

@@ -20,7 +20,7 @@ class Server(QDialog):
         super().__init__(parent)
 
         status_label = QLabel()
-        status_label.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        status_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
         quit_button = QPushButton("Quit")
         quit_button.setAutoDefault(False)
 
@@ -60,8 +60,8 @@ class Server(QDialog):
 
     def send_fortune(self):
         block = QByteArray()
-        out = QDataStream(block, QIODevice.WriteOnly)
-        out.setVersion(QDataStream.Qt_4_0)
+        out = QDataStream(block, QIODevice.OpenModeFlag.WriteOnly)
+        out.setVersion(QDataStream.Version.Qt_4_0)
         out.writeUInt16(0)
         fortune = self.fortunes[random.randint(0, len(self.fortunes) - 1)]
 

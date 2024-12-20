@@ -148,10 +148,10 @@ class AbstractViewer(QObject):
         if not self.hasContent():
             self.statusMessage("No content to print.", type)
             return
-        printer = QPrinter(QPrinter.HighResolution)
+        printer = QPrinter(QPrinter.PrinterMode.HighResolution)
         dlg = QPrintDialog(printer, self.mainWindow())
         dlg.setWindowTitle("Print Document")
-        if dlg.exec() == QDialog.Accepted:
+        if dlg.exec() == QDialog.DialogCode.Accepted:
             self.printDocument(printer)
         else:
             self.statusMessage("Printing canceled!", type)

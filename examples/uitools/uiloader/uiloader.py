@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     ui_file = QFile(ui_file_name)
-    if not ui_file.open(QIODevice.ReadOnly):
+    if not ui_file.open(QIODevice.OpenModeFlag.ReadOnly):
         reason = ui_file.errorString()
         print(f"Cannot open {ui_file_name}: {reason}")
         sys.exit(-1)

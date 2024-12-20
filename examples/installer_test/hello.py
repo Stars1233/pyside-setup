@@ -36,7 +36,7 @@ class MyWidget(QWidget):
 
         self.button = QPushButton("Click me!")
         self.text = QLabel(f"Hello World auto_quit={auto_quit}")
-        self.text.setAlignment(Qt.AlignCenter)
+        self.text.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.text)

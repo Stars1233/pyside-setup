@@ -41,8 +41,8 @@ class Client(QDialog):
         quit_button = QPushButton("Quit")
 
         button_box = QDialogButtonBox()
-        button_box.addButton(self._get_fortune_button, QDialogButtonBox.ActionRole)
-        button_box.addButton(quit_button, QDialogButtonBox.RejectRole)
+        button_box.addButton(self._get_fortune_button, QDialogButtonBox.ButtonRole.ActionRole)
+        button_box.addButton(quit_button, QDialogButtonBox.ButtonRole.RejectRole)
 
         self._tcp_socket = QTcpSocket(self)
 
@@ -73,7 +73,7 @@ class Client(QDialog):
 
     def read_fortune(self):
         instr = QDataStream(self._tcp_socket)
-        instr.setVersion(QDataStream.Qt_4_0)
+        instr.setVersion(QDataStream.Version.Qt_4_0)
 
         if self._block_size == 0:
             if self._tcp_socket.bytesAvailable() < 2:
@@ -95,13 +95,13 @@ class Client(QDialog):
         self._get_fortune_button.setEnabled(True)
 
     def display_error(self, socketError):
-        if socketError == QAbstractSocket.RemoteHostClosedError:
+        if socketError == QAbstractSocket.SocketError.RemoteHostClosedError:
             pass
-        elif socketError == QAbstractSocket.HostNotFoundError:
+        elif socketError == QAbstractSocket.SocketError.HostNotFoundError:
             QMessageBox.information(self, "Fortune Client",
                                     "The host was not found. Please check the host name and "
                                     "port settings.")
-        elif socketError == QAbstractSocket.ConnectionRefusedError:
+        elif socketError == QAbstractSocket.SocketError.ConnectionRefusedError:
             QMessageBox.information(self, "Fortune Client",
                                     "The connection was refused by the peer. Make sure the "
                                     "fortune server is running, and check that the host name "

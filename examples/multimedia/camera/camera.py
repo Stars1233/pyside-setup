@@ -153,10 +153,10 @@ class Camera(QMainWindow):
             return
 
         key = event.key()
-        if key == Qt.Key_CameraFocus:
+        if key == Qt.Key.Key_CameraFocus:
             self.displayViewfinder()
             event.accept()
-        elif key == Qt.Key_Camera:
+        elif key == Qt.Key.Key_Camera:
             if self.m_doImageCapture:
                 self.takeImage()
             else:
@@ -176,8 +176,9 @@ class Camera(QMainWindow):
 
     @Slot(int, QImage)
     def processCapturedImage(self, requestId, img):
-        scaled_image = img.scaled(self._ui.viewfinder.size(), Qt.KeepAspectRatio,
-                                  Qt.SmoothTransformation)
+        scaled_image = img.scaled(self._ui.viewfinder.size(),
+                                  Qt.AspectRatioMode.KeepAspectRatio,
+                                  Qt.TransformationMode.SmoothTransformation)
 
         self._ui.lastImagePreviewLabel.setPixmap(QPixmap.fromImage(scaled_image))
 
@@ -261,17 +262,17 @@ class Camera(QMainWindow):
 
     @Slot(QMediaRecorder.RecorderState)
     def updateRecorderState(self, state):
-        if state == QMediaRecorder.StoppedState:
+        if state == QMediaRecorder.RecorderState.StoppedState:
             self._ui.recordButton.setEnabled(True)
             self._ui.pauseButton.setEnabled(True)
             self._ui.stopButton.setEnabled(False)
             self._ui.metaDataButton.setEnabled(True)
-        elif state == QMediaRecorder.PausedState:
+        elif state == QMediaRecorder.RecorderState.PausedState:
             self._ui.recordButton.setEnabled(True)
             self._ui.pauseButton.setEnabled(False)
             self._ui.stopButton.setEnabled(True)
             self._ui.metaDataButton.setEnabled(False)
-        elif state == QMediaRecorder.RecordingState:
+        elif state == QMediaRecorder.RecorderState.RecordingState:
             self._ui.recordButton.setEnabled(False)
             self._ui.pauseButton.setEnabled(True)
             self._ui.stopButton.setEnabled(True)
@@ -344,8 +345,8 @@ class Camera(QMainWindow):
     def showMetaDataDialog(self):
         if not self.m_metaDataDialog:
             self.m_metaDataDialog = MetaDataDialog(self)
-        self.m_metaDataDialog.setAttribute(Qt.WA_DeleteOnClose, False)
-        if self.m_metaDataDialog.exec() == QDialog.Accepted:
+        self.m_metaDataDialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
+        if self.m_metaDataDialog.exec() == QDialog.DialogCode.Accepted:
             self.saveMetaData()
 
     @Slot()
@@ -355,13 +356,13 @@ class Camera(QMainWindow):
             val = self.m_metaDataDialog.m_metaDataFields[i].text()
             if val:
                 key = QMediaMetaData.Key(i)
-                if key == QMediaMetaData.CoverArtImage:
+                if key == QMediaMetaData.Key.CoverArtImage:
                     cover_art = QImage(val)
                     data.insert(key, cover_art)
-                elif key == QMediaMetaData.ThumbnailImage:
+                elif key == QMediaMetaData.Key.ThumbnailImage:
                     thumbnail = QImage(val)
                     data.insert(key, thumbnail)
-                elif key == QMediaMetaData.Date:
+                elif key == QMediaMetaData.Key.Date:
                     date = QDateTime.fromString(val)
                     data.insert(key, date)
                 else:

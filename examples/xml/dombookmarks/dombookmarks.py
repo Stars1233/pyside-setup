@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
             return
 
         in_file = QFile(file_name)
-        if not in_file.open(QFile.ReadOnly | QFile.Text):
+        if not in_file.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
             reason = in_file.errorString()
             QMessageBox.warning(self, "DOM Bookmarks",
                                 f"Cannot read file {file_name}:\n{reason}.")
@@ -56,7 +56,7 @@ class MainWindow(QMainWindow):
             return
 
         out_file = QFile(file_name)
-        if not out_file.open(QFile.WriteOnly | QFile.Text):
+        if not out_file.open(QFile.OpenModeFlag.WriteOnly | QFile.Text):
             reason = out_file.errorString()
             QMessageBox.warning(self, "DOM Bookmarks",
                                 f"Cannot write file {file_name}:\n{reason}.")
@@ -73,14 +73,14 @@ class MainWindow(QMainWindow):
     def create_menus(self):
         self._file_menu = self.menuBar().addMenu("&File")
         self._file_menu.addAction(QAction("&Open...", self,
-                                          shortcut=QKeySequence(
-                                              Qt.CTRL | Qt.Key_O), triggered=self.open))
+                                          shortcut=QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_O),
+                                          triggered=self.open))
         self._file_menu.addAction(QAction("&Save As...", self,
-                                          shortcut=QKeySequence(
-                                              Qt.CTRL | Qt.Key_S), triggered=self.save_as))
+                                          shortcut=QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_S),
+                                          triggered=self.save_as))
         self._file_menu.addAction(QAction("E&xit", self,
-                                          shortcut=QKeySequence(
-                                              Qt.CTRL | Qt.Key_Q), triggered=self.close))
+                                          shortcut=QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_Q),
+                                          triggered=self.close))
 
         self.menuBar().addSeparator()
 
@@ -93,7 +93,7 @@ class XbelTree(QTreeWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.header().setSectionResizeMode(QHeaderView.Stretch)
+        self.header().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.setHeaderLabels(("Title", "Location"))
 
         self._dom_document = QDomDocument()
@@ -103,11 +103,12 @@ class XbelTree(QTreeWidget):
         self._folder_icon = QIcon()
         self._bookmark_icon = QIcon()
 
-        self._folder_icon.addPixmap(self.style().standardPixmap(QStyle.SP_DirClosedIcon),
-                                    QIcon.Normal, QIcon.Off)
-        self._folder_icon.addPixmap(self.style().standardPixmap(QStyle.SP_DirOpenIcon),
-                                    QIcon.Normal, QIcon.On)
-        self._bookmark_icon.addPixmap(self.style().standardPixmap(QStyle.SP_FileIcon))
+        style = self.style()
+        self._folder_icon.addPixmap(style.standardPixmap(QStyle.StandardPixmap.SP_DirClosedIcon),
+                                    QIcon.Mode.Normal, QIcon.State.Off)
+        self._folder_icon.addPixmap(style.standardPixmap(QStyle.StandardPixmap.SP_DirOpenIcon),
+                                    QIcon.Mode.Normal, QIcon.State.On)
+        self._bookmark_icon.addPixmap(style.standardPixmap(QStyle.StandardPixmap.SP_FileIcon))
 
     def read(self, device):
         ok, errorStr, errorLine, errorColumn = self._dom_document.setContent(device, True)
@@ -173,7 +174,7 @@ class XbelTree(QTreeWidget):
         if not title:
             title = "Folder"
 
-        item.setFlags(item.flags() | Qt.ItemIsEditable)
+        item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
         item.setIcon(0, self._folder_icon)
         item.setText(0, title)
 
@@ -191,13 +192,13 @@ class XbelTree(QTreeWidget):
                 if not title:
                     title = "Folder"
 
-                child_item.setFlags(item.flags() | Qt.ItemIsEditable)
+                child_item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
                 child_item.setIcon(0, self._bookmark_icon)
                 child_item.setText(0, title)
                 child_item.setText(1, child.attribute('href'))
             elif child.tagName() == 'separator':
                 child_item = self.create_item(child, item)
-                child_item.setFlags(item.flags() & ~(Qt.ItemIsSelectable | Qt.ItemIsEditable))
+                child_item.setFlags(item.flags() & ~(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEditable))  # noqa: E501
                 child_item.setText(0, 30 * "\xb7")
 
             child = child.nextSiblingElement()

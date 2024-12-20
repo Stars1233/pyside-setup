@@ -126,7 +126,7 @@ class PdfViewer(AbstractViewer):
     def openPdfFile(self):
         self.disablePrinting()
 
-        if self._file.open(QIODevice.ReadOnly):
+        if self._file.open(QIODevice.OpenModeFlag.ReadOnly):
             self._document.load(self._file)
 
         documentTitle = self._document.metaData(QPdfDocument.MetaDataField.Title)

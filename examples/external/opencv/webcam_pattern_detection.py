@@ -57,8 +57,8 @@ class Thread(QThread):
 
             # Creating and scaling QImage
             h, w, ch = color_frame.shape
-            img = QImage(color_frame.data, w, h, ch * w, QImage.Format_RGB888)
-            scaled_img = img.scaled(640, 480, Qt.KeepAspectRatio)
+            img = QImage(color_frame.data, w, h, ch * w, QImage.Format.Format_RGB888)
+            scaled_img = img.scaled(640, 480, Qt.AspectRatioMode.KeepAspectRatio)
 
             # Emit signal
             self.updateFrame.emit(scaled_img)
@@ -79,7 +79,8 @@ class Window(QMainWindow):
         self.menu_file.addAction(exit)
 
         self.menu_about = self.menu.addMenu("&About")
-        about = QAction("About Qt", self, shortcut=QKeySequence(QKeySequence.HelpContents),
+        about = QAction("About Qt", self,
+                        shortcut=QKeySequence(QKeySequence.StandardKey.HelpContents),
                         triggered=qApp.aboutQt)  # noqa: F821
         self.menu_about.addAction(about)
 
@@ -94,7 +95,7 @@ class Window(QMainWindow):
 
         # Model group
         self.group_model = QGroupBox("Trained model")
-        self.group_model.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        self.group_model.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         model_layout = QHBoxLayout()
 
         self.combobox = QComboBox()
@@ -110,8 +111,8 @@ class Window(QMainWindow):
         buttons_layout = QHBoxLayout()
         self.button1 = QPushButton("Start")
         self.button2 = QPushButton("Stop/Close")
-        self.button1.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        self.button2.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        self.button1.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        self.button2.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         buttons_layout.addWidget(self.button2)
         buttons_layout.addWidget(self.button1)
 

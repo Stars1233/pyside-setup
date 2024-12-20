@@ -25,8 +25,8 @@ class ScatterGraph(QObject):
         hLayout = QHBoxLayout(self._scatterWidget)
         scatterGraphWidget.setMinimumSize(minimum_graph_size)
         scatterGraphWidget.setMaximumSize(maximum_graph_size)
-        scatterGraphWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        scatterGraphWidget.setFocusPolicy(Qt.StrongFocus)
+        scatterGraphWidget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        scatterGraphWidget.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         hLayout.addWidget(scatterGraphWidget, 1)
 
         vLayout = QVBoxLayout()
@@ -98,7 +98,7 @@ class ScatterGraph(QObject):
         vLayout.addWidget(QLabel("Change theme"))
         vLayout.addWidget(themeList)
         vLayout.addWidget(QLabel("Adjust shadow quality"))
-        vLayout.addWidget(shadowQuality, 1, Qt.AlignTop)
+        vLayout.addWidget(shadowQuality, 1, Qt.AlignmentFlag.AlignTop)
 
         modifier = ScatterDataModifier(scatterGraph, self)
 

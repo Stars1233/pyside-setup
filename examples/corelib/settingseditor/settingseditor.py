@@ -28,7 +28,7 @@ class TypeChecker:
     def __init__(self, parent=None):
         self.bool_exp = QRegularExpression('^(true)|(false)$')
         assert self.bool_exp.isValid()
-        self.bool_exp.setPatternOptions(QRegularExpression.CaseInsensitiveOption)
+        self.bool_exp.setPatternOptions(QRegularExpression.PatternOption.CaseInsensitiveOption)
 
         self.byteArray_exp = QRegularExpression(r'^[\x00-\xff]*$')
         assert self.byteArray_exp.isValid()
@@ -106,13 +106,13 @@ class TypeChecker:
                           min(int(match.captured(3)), 255),
                           min(int(match.captured(4)), 255))
         if isinstance(original_value, QDate):
-            value = QDate.fromString(text, Qt.ISODate)
+            value = QDate.fromString(text, Qt.DateFormat.ISODate)
             return value if value.isValid() else None
         if isinstance(original_value, QDateTime):
-            value = QDateTime.fromString(text, Qt.ISODate)
+            value = QDateTime.fromString(text, Qt.DateFormat.ISODate)
             return value if value.isValid() else None
         if isinstance(original_value, QTime):
-            value = QTime.fromString(text, Qt.ISODate)
+            value = QTime.fromString(text, Qt.DateFormat.ISODate)
             return value if value.isValid() else None
         if isinstance(original_value, QPoint):
             match = self.point_exp.match(text)
@@ -173,8 +173,8 @@ class MainWindow(QMainWindow):
             self.load_ini_file(file_name)
 
     def load_ini_file(self, file_name):
-        settings = QSettings(file_name, QSettings.IniFormat)
-        if settings.status() != QSettings.NoError:
+        settings = QSettings(file_name, QSettings.Format.IniFormat)
+        if settings.status() != QSettings.Status.NoError:
             return
         self.set_settings_object(settings)
         self.fallbacks_action.setEnabled(False)
@@ -186,7 +186,7 @@ class MainWindow(QMainWindow):
                                                    "Property List Files (*.plist)")
 
         if file_name:
-            settings = QSettings(file_name, QSettings.NativeFormat)
+            settings = QSettings(file_name, QSettings.Format.NativeFormat)
             self.set_settings_object(settings)
             self.fallbacks_action.setEnabled(False)
 
@@ -197,7 +197,7 @@ class MainWindow(QMainWindow):
                                         QLineEdit.Normal, 'HKEY_CURRENT_USER\\')
 
         if ok and path != '':
-            settings = QSettings(path, QSettings.NativeFormat)
+            settings = QSettings(path, QSettings.Format.NativeFormat)
             self.set_settings_object(settings)
             self.fallbacks_action.setEnabled(False)
 
@@ -322,15 +322,17 @@ class LocationDialog(QDialog):
         self.locations_groupbox = QGroupBox("Setting Locations")
 
         self.locations_table = QTableWidget()
-        self.locations_table.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.locations_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.locations_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.locations_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.locations_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.locations_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.locations_table.setColumnCount(2)
         self.locations_table.setHorizontalHeaderLabels(("Location", "Access"))
-        self.locations_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.locations_table.horizontalHeader().resizeSection(1, 180)
+        header = self.locations_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header.resizeSection(1, 180)
 
-        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok
+                                           | QDialogButtonBox.StandardButton.Cancel)
 
         self.format_combo.activated.connect(self.update_locations)
         self.scope_cCombo.activated.connect(self.update_locations)
@@ -361,15 +363,15 @@ class LocationDialog(QDialog):
 
     def format(self):
         if self.format_combo.currentIndex() == 0:
-            return QSettings.NativeFormat
+            return QSettings.Format.NativeFormat
         else:
-            return QSettings.IniFormat
+            return QSettings.Format.IniFormat
 
     def scope(self):
         if self.scope_cCombo.currentIndex() == 0:
-            return QSettings.UserScope
+            return QSettings.Scope.UserScope
         else:
-            return QSettings.SystemScope
+            return QSettings.Scope.SystemScope
 
     def organization(self):
         return self.organization_combo.currentText()
@@ -386,12 +388,12 @@ class LocationDialog(QDialog):
 
         for i in range(2):
             if i == 0:
-                if self.scope() == QSettings.SystemScope:
+                if self.scope() == QSettings.Scope.SystemScope:
                     continue
 
-                actual_scope = QSettings.UserScope
+                actual_scope = QSettings.Scope.UserScope
             else:
-                actual_scope = QSettings.SystemScope
+                actual_scope = QSettings.Scope.SystemScope
 
             for j in range(2):
                 if j == 0:
@@ -420,13 +422,13 @@ class LocationDialog(QDialog):
                         disable = False
                     else:
                         item1.setText("Read-only")
-                    self.button_box.button(QDialogButtonBox.Ok).setDisabled(disable)
+                    self.button_box.button(QDialogButtonBox.StandardButton.Ok).setDisabled(disable)
                 else:
                     item1.setText("Read-only fallback")
 
                 if disable:
-                    item0.setFlags(item0.flags() & ~Qt.ItemIsEnabled)
-                    item1.setFlags(item1.flags() & ~Qt.ItemIsEnabled)
+                    item0.setFlags(item0.flags() & ~Qt.ItemFlag.ItemIsEnabled)
+                    item1.setFlags(item1.flags() & ~Qt.ItemFlag.ItemIsEnabled)
 
                 self.locations_table.setItem(row, 0, item0)
                 self.locations_table.setItem(row, 1, item1)
@@ -442,8 +444,8 @@ class SettingsTree(QTreeWidget):
         self.setItemDelegate(VariantDelegate(self._type_checker, self))
 
         self.setHeaderLabels(("Setting", "Type", "Value"))
-        self.header().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.header().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.header().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
 
         self.settings = None
         self.refresh_timer = QTimer()
@@ -452,12 +454,12 @@ class SettingsTree(QTreeWidget):
 
         self.group_icon = QIcon()
         style = self.style()
-        self.group_icon.addPixmap(style.standardPixmap(QStyle.SP_DirClosedIcon),
-                                  QIcon.Normal, QIcon.Off)
-        self.group_icon.addPixmap(style.standardPixmap(QStyle.SP_DirOpenIcon),
-                                  QIcon.Normal, QIcon.On)
+        self.group_icon.addPixmap(style.standardPixmap(QStyle.StandardPixmap.SP_DirClosedIcon),
+                                  QIcon.Mode.Normal, QIcon.State.Off)
+        self.group_icon.addPixmap(style.standardPixmap(QStyle.StandardPixmap.SP_DirOpenIcon),
+                                  QIcon.Mode.Normal, QIcon.State.On)
         self.key_icon = QIcon()
-        self.key_icon.addPixmap(style.standardPixmap(QStyle.SP_FileIcon))
+        self.key_icon.addPixmap(style.standardPixmap(QStyle.StandardPixmap.SP_FileIcon))
 
         self.refresh_timer.timeout.connect(self.maybe_refresh)
 
@@ -515,7 +517,7 @@ class SettingsTree(QTreeWidget):
         self.itemChanged.connect(self.update_setting)
 
     def event(self, event):
-        if event.type() == QEvent.WindowActivate:
+        if event.type() == QEvent.Type.WindowActivate:
             if self.isActiveWindow() and self.auto_refresh:
                 self.maybe_refresh()
 
@@ -598,7 +600,7 @@ class SettingsTree(QTreeWidget):
             item = QTreeWidgetItem(self, after)
 
         item.setText(0, text)
-        item.setFlags(item.flags() | Qt.ItemIsEditable)
+        item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
         return item
 
     def delete_item(self, parent, index):

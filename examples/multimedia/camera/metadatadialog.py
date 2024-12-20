@@ -13,11 +13,11 @@ IMAGE_FILTER = "Image Files (*.png *.jpg *.bmp)"
 
 
 def default_value(key):
-    if key == QMediaMetaData.Title:
+    if key == QMediaMetaData.Key.Title:
         return "Qt Camera Example"
-    if key == QMediaMetaData.Author:
+    if key == QMediaMetaData.Key.Author:
         return "The Qt Company"
-    if key == QMediaMetaData.Date:
+    if key == QMediaMetaData.Key.Date:
         return QDateTime.currentDateTime().toString()
     return ""
 
@@ -35,14 +35,14 @@ class MetaDataDialog(QDialog):
             line_edit = QLineEdit(default_value(key))
             line_edit.setClearButtonEnabled(True)
             self.m_metaDataFields.append(line_edit)
-            if key == QMediaMetaData.ThumbnailImage:
+            if key == QMediaMetaData.Key.ThumbnailImage:
                 open_thumbnail = QPushButton("Open")
                 open_thumbnail.clicked.connect(self.open_thumbnail_image)
                 layout = QHBoxLayout()
                 layout.addWidget(line_edit)
                 layout.addWidget(open_thumbnail)
                 meta_data_layout.addRow(label, layout)
-            elif key == QMediaMetaData.CoverArtImage:
+            elif key == QMediaMetaData.Key.CoverArtImage:
                 open_cover_art = QPushButton("Open")
                 open_cover_art.clicked.connect(self.open_cover_art_image)
                 layout = QHBoxLayout()
@@ -59,7 +59,8 @@ class MetaDataDialog(QDialog):
         dialog_layout = QVBoxLayout(self)
         dialog_layout.addWidget(scroll_area)
 
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok
+                                      | QDialogButtonBox.StandardButton.Cancel)
         dialog_layout.addWidget(button_box)
 
         self.setWindowTitle("Set Metadata")

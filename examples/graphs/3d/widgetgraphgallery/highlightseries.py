@@ -26,7 +26,7 @@ class HighlightSeries(QSurface3DSeries):
         self._position = {}
         self._topographicSeries = None
         self._minHeight = 0.0
-        self.setDrawMode(QSurface3DSeries.DrawSurface)
+        self.setDrawMode(QSurface3DSeries.DrawFlag.DrawSurface)
         self.setShading(QSurface3DSeries.Shading.Flat)
         self.setVisible(False)
 
@@ -84,12 +84,12 @@ class HighlightSeries(QSurface3DSeries):
         ratio = self._minHeight / value
 
         gr = QLinearGradient()
-        gr.setColorAt(0.0, Qt.black)
-        gr.setColorAt(DARK_GREEN_POS * ratio, Qt.darkGreen)
-        gr.setColorAt(GREEN_POS * ratio, Qt.green)
-        gr.setColorAt(YELLOW_POS * ratio, Qt.yellow)
-        gr.setColorAt(RED_POS * ratio, Qt.red)
-        gr.setColorAt(DARK_RED_POS * ratio, Qt.darkRed)
+        gr.setColorAt(0.0, Qt.GlobalColor.black)
+        gr.setColorAt(DARK_GREEN_POS * ratio, Qt.GlobalColor.darkGreen)
+        gr.setColorAt(GREEN_POS * ratio, Qt.GlobalColor.green)
+        gr.setColorAt(YELLOW_POS * ratio, Qt.GlobalColor.yellow)
+        gr.setColorAt(RED_POS * ratio, Qt.GlobalColor.red)
+        gr.setColorAt(DARK_RED_POS * ratio, Qt.GlobalColor.darkRed)
 
         self.setBaseGradient(gr)
         self.setColorStyle(QGraphsTheme.ColorStyle.RangeGradient)

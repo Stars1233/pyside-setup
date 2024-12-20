@@ -32,7 +32,7 @@ class TxtViewer(AbstractViewer):
         cutIcon = QIcon.fromTheme(QIcon.ThemeIcon.EditCut,
                                   QIcon(":/demos/documentviewer/images/cut.png"))
         cutAct = QAction(cutIcon, "Cut", self)
-        cutAct.setShortcuts(QKeySequence.Cut)
+        cutAct.setShortcuts(QKeySequence.StandardKey.Cut)
         cutAct.setStatusTip("Cut the current selection's contents to the clipboard")
         cutAct.triggered.connect(self._textEdit.cut)
         editMenu.addAction(cutAct)
@@ -41,7 +41,7 @@ class TxtViewer(AbstractViewer):
         copyIcon = QIcon.fromTheme(QIcon.ThemeIcon.EditCopy,
                                    QIcon(":/demos/documentviewer/images/copy.png"))
         copyAct = QAction(copyIcon, "Copy", self)
-        copyAct.setShortcuts(QKeySequence.Copy)
+        copyAct.setShortcuts(QKeySequence.StandardKey.Copy)
         copyAct.setStatusTip("Copy the current selection's contents to the clipboard")
         copyAct.triggered.connect(self._textEdit.copy)
         editMenu.addAction(copyAct)
@@ -50,7 +50,7 @@ class TxtViewer(AbstractViewer):
         pasteIcon = QIcon.fromTheme(QIcon.ThemeIcon.EditPaste,
                                     QIcon(":/demos/documentviewer/images/paste.png"))
         pasteAct = QAction(pasteIcon, "Paste", self)
-        pasteAct.setShortcuts(QKeySequence.Paste)
+        pasteAct.setShortcuts(QKeySequence.StandardKey.Paste)
         pasteAct.setStatusTip("Paste the clipboard's contents into the current selection")
         pasteAct.triggered.connect(self._textEdit.paste)
         editMenu.addAction(pasteAct)
@@ -88,13 +88,14 @@ class TxtViewer(AbstractViewer):
     def openFile(self):
         type = "open"
         file_name = QDir.toNativeSeparators(self._file.fileName())
-        if not self._file.open(QFile.ReadOnly | QFile.Text):
+        if not self._file.open(QFile.OpenModeFlag.ReadOnly
+                               | QFile.OpenModeFlag.Text):
             err = self._file.errorString()
             self.statusMessage(f"Cannot read file {file_name}:\n{err}.", type)
             return
 
         in_str = QTextStream(self._file)
-        QGuiApplication.setOverrideCursor(Qt.WaitCursor)
+        QGuiApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         if self._textEdit.toPlainText():
             self._textEdit.clear()
             self.disablePrinting()
@@ -117,8 +118,8 @@ class TxtViewer(AbstractViewer):
     def saveFile(self, file):
         file_name = QDir.toNativeSeparators(self._file.fileName())
         errorMessage = ""
-        QGuiApplication.setOverrideCursor(Qt.WaitCursor)
-        if file.open(QFile.WriteOnly | QFile.Text):
+        QGuiApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        if file.open(QFile.OpenModeFlag.WriteOnly | QFile.OpenModeFlag.Text):
             out = QTextStream(file)
             out << self._textEdit.toPlainText()
         else:
@@ -136,8 +137,8 @@ class TxtViewer(AbstractViewer):
     def saveDocumentAs(self):
         dialog = QFileDialog(self.mainWindow())
         dialog.setWindowModality(Qt.WindowModal)
-        dialog.setAcceptMode(QFileDialog.AcceptSave)
-        if dialog.exec() != QDialog.Accepted:
+        dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+        if dialog.exec() != QDialog.DialogCode.Accepted:
             return False
 
         files = dialog.selectedFiles()

@@ -63,7 +63,7 @@ class MainWindow(QMainWindow):
         self.m_serial.setParity(s.parity)
         self.m_serial.setStopBits(s.stop_bits)
         self.m_serial.setFlowControl(s.flow_control)
-        if self.m_serial.open(QIODeviceBase.ReadWrite):
+        if self.m_serial.open(QIODeviceBase.OpenModeFlag.ReadWrite):
             self.m_console.setEnabled(True)
             self.m_console.set_local_echo_enabled(s.local_echo_enabled)
             self.m_ui.actionConnect.setEnabled(False)
@@ -99,7 +99,7 @@ class MainWindow(QMainWindow):
 
     @Slot(QSerialPort.SerialPortError)
     def handle_error(self, error):
-        if error == QSerialPort.ResourceError:
+        if error == QSerialPort.SerialPortError.ResourceError:
             QMessageBox.critical(self, "Critical Error",
                                  self.m_serial.errorString())
             self.close_serial_port()

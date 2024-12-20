@@ -48,9 +48,9 @@ class Squircle(QQuickItem):
     @Slot(QQuickWindow)
     def handleWindowChanged(self, win):
         if win:
-            win.beforeSynchronizing.connect(self.sync, type=Qt.DirectConnection)
-            win.sceneGraphInvalidated.connect(self.cleanup, type=Qt.DirectConnection)
-            win.setColor(Qt.black)
+            win.beforeSynchronizing.connect(self.sync, type=Qt.ConnectionType.DirectConnection)
+            win.sceneGraphInvalidated.connect(self.cleanup, type=Qt.ConnectionType.DirectConnection)
+            win.setColor(Qt.GlobalColor.black)
             self.sync()
 
     @Slot()
@@ -63,9 +63,9 @@ class Squircle(QQuickItem):
         window = self.window()
         if not self._renderer:
             self._renderer = SquircleRenderer()
-            window.beforeRendering.connect(self._renderer.init, Qt.DirectConnection)
+            window.beforeRendering.connect(self._renderer.init, Qt.ConnectionType.DirectConnection)
             window.beforeRenderPassRecording.connect(
-                self._renderer.paint, Qt.DirectConnection
+                self._renderer.paint, Qt.ConnectionType.DirectConnection
             )
         self._renderer.setViewportSize(window.size() * window.devicePixelRatio())
         self._renderer.setT(self._t)
@@ -73,7 +73,7 @@ class Squircle(QQuickItem):
 
     def releaseResources(self):
         self.window().scheduleRenderJob(
-            CleanupJob(self._renderer), QQuickWindow.BeforeSynchronizingStage
+            CleanupJob(self._renderer), QQuickWindow.RenderStage.BeforeSynchronizingStage
         )
         self._renderer = None
 

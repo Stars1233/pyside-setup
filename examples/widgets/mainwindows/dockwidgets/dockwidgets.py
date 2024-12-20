@@ -85,7 +85,7 @@ class MainWindow(QMainWindow):
         printer = QPrinter()
 
         dlg = QPrintDialog(printer, self)
-        if dlg.exec() != QDialog.Accepted:
+        if dlg.exec() != QDialog.DialogCode.Accepted:
             return
 
         document.print_(printer)
@@ -102,14 +102,14 @@ class MainWindow(QMainWindow):
 
         filename = dialog.selectedFiles()[0]
         file = QFile(filename)
-        if not file.open(QFile.WriteOnly | QFile.Text):
+        if not file.open(QFile.OpenModeFlag.WriteOnly | QFile.OpenModeFlag.Text):
             reason = file.errorString()
             QMessageBox.warning(self, "Dock Widgets",
                                 f"Cannot write file {filename}:\n{reason}.")
             return
 
         out = QTextStream(file)
-        with QApplication.setOverrideCursor(Qt.WaitCursor):
+        with QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor):
             out << self._text_edit.toHtml()
 
         self.statusBar().showMessage(f"Saved '{filename}'", 2000)
@@ -145,8 +145,8 @@ class MainWindow(QMainWindow):
         if cursor.isNull():
             return
         cursor.beginEditBlock()
-        cursor.movePosition(QTextCursor.PreviousBlock,
-                            QTextCursor.MoveAnchor, 2)
+        cursor.movePosition(QTextCursor.MoveOperation.PreviousBlock,
+                            QTextCursor.MoveMode.MoveAnchor, 2)
         cursor.insertBlock()
         cursor.insertText(paragraph)
         cursor.insertBlock()

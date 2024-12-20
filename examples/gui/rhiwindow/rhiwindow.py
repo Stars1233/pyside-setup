@@ -38,7 +38,7 @@ UBUF_SIZE = 68
 
 def getShader(name):
     f = QFile(name)
-    if f.open(QIODevice.ReadOnly):
+    if f.open(QIODevice.OpenModeFlag.ReadOnly):
         result = QShader.fromSerialized(f.readAll())
         f.close()
         return result
@@ -49,7 +49,7 @@ class RhiWindow(QWindow):
 
     def __init__(self, graphicsApi):
         super().__init__()
-        self.m_graphicsApi = QRhi.Null
+        self.m_graphicsApi = QRhi.Implementation.Null
         self.m_initialized = False
         self.m_notExposed = False
         self.m_newlyExposed = False
@@ -64,15 +64,15 @@ class RhiWindow(QWindow):
 
         self.m_graphicsApi = graphicsApi
 
-        if graphicsApi == QRhi.OpenGLES2:
+        if graphicsApi == QRhi.Implementation.OpenGLES2:
             self.setSurfaceType(QSurface.SurfaceType.OpenGLSurface)
-        elif graphicsApi == QRhi.Vulkan:
+        elif graphicsApi == QRhi.Implementation.Vulkan:
             self.setSurfaceType(QSurface.SurfaceType.VulkanSurface)
-        elif graphicsApi == QRhi.D3D11 or graphicsApi == QRhi.D3D12:
+        elif graphicsApi == QRhi.Implementation.D3D11 or graphicsApi == QRhi.Implementation.D3D12:
             self.setSurfaceType(QSurface.SurfaceType.Direct3DSurface)
-        elif graphicsApi == QRhi.Metal:
+        elif graphicsApi == QRhi.Implementation.Metal:
             self.setSurfaceType(QSurface.SurfaceType.MetalSurface)
-        elif graphicsApi == QRhi.Null:
+        elif graphicsApi == QRhi.Implementation.Null:
             pass  # RasterSurface
 
     def __del__(self):
@@ -92,17 +92,17 @@ class RhiWindow(QWindow):
             self.m_fallbackSurface = None
 
     def graphicsApiName(self):
-        if self.m_graphicsApi == QRhi.Null:
+        if self.m_graphicsApi == QRhi.Implementation.Null:
             return "Null (no output)"
-        if self.m_graphicsApi == QRhi.OpenGLES2:
+        if self.m_graphicsApi == QRhi.Implementation.OpenGLES2:
             return "OpenGL"
-        if self.m_graphicsApi == QRhi.Vulkan:
+        if self.m_graphicsApi == QRhi.Implementation.Vulkan:
             return "Vulkan"
-        if self.m_graphicsApi == QRhi.D3D11:
+        if self.m_graphicsApi == QRhi.Implementation.D3D11:
             return "Direct3D 11"
-        if self.m_graphicsApi == QRhi.D3D12:
+        if self.m_graphicsApi == QRhi.Implementation.D3D12:
             return "Direct3D 12"
-        if self.m_graphicsApi == QRhi.Metal:
+        if self.m_graphicsApi == QRhi.Implementation.Metal:
             return "Metal"
         return ""
 
@@ -141,51 +141,51 @@ class RhiWindow(QWindow):
             self.render()
 
     def event(self, e):
-        if e.type() == QEvent.UpdateRequest:
+        if e.type() == QEvent.Type.UpdateRequest:
             self.render()
-        elif e.type() == QEvent.PlatformSurface:
+        elif e.type() == QEvent.Type.PlatformSurface:
             # this is the proper time to tear down the swapchain (while
             # the native window and surface are still around)
-            if e.surfaceEventType() == QPlatformSurfaceEvent.SurfaceAboutToBeDestroyed:
+            if e.surfaceEventType() == QPlatformSurfaceEvent.SurfaceEventType.SurfaceAboutToBeDestroyed:  # noqa: E501
                 self.releaseSwapChain()
 
         return super().event(e)
 
     def init(self):
-        if self.m_graphicsApi == QRhi.Null:
+        if self.m_graphicsApi == QRhi.Implementation.Null:
             params = QRhiNullInitParams()
-            self.m_rhi = QRhi.create(QRhi.Null, params)
+            self.m_rhi = QRhi.create(QRhi.Implementation.Null, params)
 
-        if self.m_graphicsApi == QRhi.OpenGLES2:
+        if self.m_graphicsApi == QRhi.Implementation.OpenGLES2:
             self.m_fallbackSurface = QRhiGles2InitParams.newFallbackSurface()
             params = QRhiGles2InitParams()
             params.fallbackSurface = self.m_fallbackSurface
             params.window = self
-            self.m_rhi = QRhi.create(QRhi.OpenGLES2, params)
-        elif self.m_graphicsApi == QRhi.D3D11:
+            self.m_rhi = QRhi.create(QRhi.Implementation.OpenGLES2, params)
+        elif self.m_graphicsApi == QRhi.Implementation.D3D11:
             params = QRhiD3D11InitParams()
             # Enable the debug layer, if available. This is optional
             # and should be avoided in production builds.
             params.enableDebugLayer = True
-            self.m_rhi = QRhi.create(QRhi.D3D11, params)
-        elif self.m_graphicsApi == QRhi.D3D12:
+            self.m_rhi = QRhi.create(QRhi.Implementation.D3D11, params)
+        elif self.m_graphicsApi == QRhi.Implementation.D3D12:
             params = QRhiD3D12InitParams()
             # Enable the debug layer, if available. This is optional
             # and should be avoided in production builds.
             params.enableDebugLayer = True
-            self.m_rhi = QRhi.create(QRhi.D3D12, params)
-        elif self.m_graphicsApi == QRhi.Metal:
+            self.m_rhi = QRhi.create(QRhi.Implementation.D3D12, params)
+        elif self.m_graphicsApi == QRhi.Implementation.Metal:
             params = QRhiMetalInitParams()
-            self.m_rhi.reset(QRhi.create(QRhi.Metal, params))
+            self.m_rhi.reset(QRhi.create(QRhi.Implementation.Metal, params))
 
         if not self.m_rhi:
             qFatal("Failed to create RHI backend")
 
         self.m_sc = self.m_rhi.newSwapChain()
         # no need to set the size here, due to UsedWithSwapChainOnly
-        self.m_ds = self.m_rhi.newRenderBuffer(QRhiRenderBuffer.DepthStencil,
+        self.m_ds = self.m_rhi.newRenderBuffer(QRhiRenderBuffer.Type.DepthStencil,
                                                QSize(), 1,
-                                               QRhiRenderBuffer.UsedWithSwapChainOnly)
+                                               QRhiRenderBuffer.Flag.UsedWithSwapChainOnly)
         self.m_sc.setWindow(self)
         self.m_sc.setDepthStencil(self.m_ds)
         self.m_rp = self.m_sc.newCompatibleRenderPassDescriptor()
@@ -224,13 +224,13 @@ class RhiWindow(QWindow):
             self.m_newlyExposed = False
 
         result = self.m_rhi.beginFrame(self.m_sc)
-        if result == QRhi.FrameOpSwapChainOutOfDate:
+        if result == QRhi.FrameOpResult.FrameOpSwapChainOutOfDate:
             self.resizeSwapChain()
             if not self.m_hasSwapChain:
                 return
             result = self.m_rhi.beginFrame(self.m_sc)
 
-        if result != QRhi.FrameOpSuccess:
+        if result != QRhi.FrameOpResult.FrameOpSuccess:
             qWarning(f"beginFrame failed with {result}, will retry")
             self.requestUpdate()
             return
@@ -269,19 +269,19 @@ class HelloWindow(RhiWindow):
             return
 
         if not self.m_texture:
-            self.m_texture = self.m_rhi.newTexture(QRhiTexture.RGBA8, pixelSize)
+            self.m_texture = self.m_rhi.newTexture(QRhiTexture.Format.RGBA8, pixelSize)
         else:
             self.m_texture.setPixelSize(pixelSize)
         self.m_texture.create()
-        image = QImage(pixelSize, QImage.Format_RGBA8888_Premultiplied)
+        image = QImage(pixelSize, QImage.Format.Format_RGBA8888_Premultiplied)
         with QPainter(image) as painter:
             painter.fillRect(QRectF(QPointF(0, 0), pixelSize),
                              QColor.fromRgbF(0.4, 0.7, 0.0, 1.0))
-            painter.setPen(Qt.transparent)
-            painter.setBrush(QGradient(QGradient.DeepBlue))
+            painter.setPen(Qt.GlobalColor.transparent)
+            painter.setBrush(QGradient(QGradient.Preset.DeepBlue))
             painter.drawRoundedRect(QRectF(QPointF(20, 20), pixelSize - QSize(40, 40)),
                                     16, 16)
-            painter.setPen(Qt.black)
+            painter.setPen(Qt.GlobalColor.black)
             font = QFont()
             font.setPixelSize(0.05 * min(pixelSize.width(), pixelSize.height()))
             painter.setFont(font)
@@ -299,26 +299,29 @@ class HelloWindow(RhiWindow):
         self.m_initialUpdates = self.m_rhi.nextResourceUpdateBatch()
 
         vertex_size = 4 * VERTEX_DATA.size
-        self.m_vbuf = self.m_rhi.newBuffer(QRhiBuffer.Immutable, QRhiBuffer.VertexBuffer,
+        self.m_vbuf = self.m_rhi.newBuffer(QRhiBuffer.Type.Immutable,
+                                           QRhiBuffer.UsageFlag.VertexBuffer,
                                            vertex_size)
         self.m_vbuf.create()
         self.m_initialUpdates.uploadStaticBuffer(self.m_vbuf,
                                                  VoidPtr(VERTEX_DATA.tobytes(), vertex_size))
 
-        self.m_ubuf = self.m_rhi.newBuffer(QRhiBuffer.Dynamic,
-                                           QRhiBuffer.UniformBuffer, UBUF_SIZE)
+        self.m_ubuf = self.m_rhi.newBuffer(QRhiBuffer.Type.Dynamic,
+                                           QRhiBuffer.UsageFlag.UniformBuffer, UBUF_SIZE)
         self.m_ubuf.create()
 
         self.ensureFullscreenTexture(self.m_sc.surfacePixelSize(), self.m_initialUpdates)
 
-        self.m_sampler = self.m_rhi.newSampler(QRhiSampler.Linear, QRhiSampler.Linear,
-                                               QRhiSampler.None_,
-                                               QRhiSampler.ClampToEdge, QRhiSampler.ClampToEdge)
+        self.m_sampler = self.m_rhi.newSampler(QRhiSampler.Filter.Linear,
+                                               QRhiSampler.Filter.Linear,
+                                               QRhiSampler.Filter.None_,
+                                               QRhiSampler.AddressMode.ClampToEdge,
+                                               QRhiSampler.AddressMode.ClampToEdge)
         self.m_sampler.create()
 
         self.m_colorTriSrb = self.m_rhi.newShaderResourceBindings()
-        visibility = (QRhiShaderResourceBinding.VertexStage
-                      | QRhiShaderResourceBinding.FragmentStage)
+        visibility = (QRhiShaderResourceBinding.StageFlag.VertexStage
+                      | QRhiShaderResourceBinding.StageFlag.FragmentStage)
         bindings = [
             QRhiShaderResourceBinding.uniformBuffer(0, visibility, self.m_ubuf)
         ]
@@ -335,16 +338,17 @@ class HelloWindow(RhiWindow):
         premulAlphaBlend.enable = True
         self.m_colorPipeline.setTargetBlends([premulAlphaBlend])
         stages = [
-            QRhiShaderStage(QRhiShaderStage.Vertex, getShader(":/color.vert.qsb")),
-            QRhiShaderStage(QRhiShaderStage.Fragment, getShader(":/color.frag.qsb"))
+            QRhiShaderStage(QRhiShaderStage.Type.Vertex, getShader(":/color.vert.qsb")),
+            QRhiShaderStage(QRhiShaderStage.Type.Fragment, getShader(":/color.frag.qsb"))
         ]
         self.m_colorPipeline.setShaderStages(stages)
         inputLayout = QRhiVertexInputLayout()
         input_bindings = [QRhiVertexInputBinding(5 * 4)]  # sizeof(float)
         inputLayout.setBindings(input_bindings)
         attributes = [
-            QRhiVertexInputAttribute(0, 0, QRhiVertexInputAttribute.Float2, 0),
-            QRhiVertexInputAttribute(0, 1, QRhiVertexInputAttribute.Float3, 2 * 4)]  # sizeof(float)
+            QRhiVertexInputAttribute(0, 0, QRhiVertexInputAttribute.Format.Float2, 0),
+            # sizeof(float)
+            QRhiVertexInputAttribute(0, 1, QRhiVertexInputAttribute.Format.Float3, 2 * 4)]
         inputLayout.setAttributes(attributes)
         self.m_colorPipeline.setVertexInputLayout(inputLayout)
         self.m_colorPipeline.setShaderResourceBindings(self.m_colorTriSrb)
@@ -353,7 +357,7 @@ class HelloWindow(RhiWindow):
 
         self.m_fullscreenQuadSrb = self.m_rhi.newShaderResourceBindings()
         bindings = [
-            QRhiShaderResourceBinding.sampledTexture(0, QRhiShaderResourceBinding.FragmentStage,
+            QRhiShaderResourceBinding.sampledTexture(0, QRhiShaderResourceBinding.StageFlag.FragmentStage,  # noqa: E501
                                                      self.m_texture, self.m_sampler)
         ]
         self.m_fullscreenQuadSrb.setBindings(bindings)
@@ -361,8 +365,8 @@ class HelloWindow(RhiWindow):
 
         self.m_fullscreenQuadPipeline = self.m_rhi.newGraphicsPipeline()
         stages = [
-            QRhiShaderStage(QRhiShaderStage.Vertex, getShader(":/quad.vert.qsb")),
-            QRhiShaderStage(QRhiShaderStage.Fragment, getShader(":/quad.frag.qsb"))
+            QRhiShaderStage(QRhiShaderStage.Type.Vertex, getShader(":/quad.vert.qsb")),
+            QRhiShaderStage(QRhiShaderStage.Type.Fragment, getShader(":/quad.frag.qsb"))
         ]
         self.m_fullscreenQuadPipeline.setShaderStages(stages)
         layout = QRhiVertexInputLayout()
@@ -403,7 +407,7 @@ class HelloWindow(RhiWindow):
         self.ensureFullscreenTexture(outputSizeInPixels, resourceUpdates)
 
         cv = QRhiDepthStencilClearValue(1.0, 0)
-        cb.beginPass(self.m_sc.currentFrameRenderTarget(), Qt.black,
+        cb.beginPass(self.m_sc.currentFrameRenderTarget(), Qt.GlobalColor.black,
                      cv, resourceUpdates)
 
         cb.setGraphicsPipeline(self.m_fullscreenQuadPipeline)

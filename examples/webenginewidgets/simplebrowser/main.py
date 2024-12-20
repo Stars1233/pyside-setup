@@ -34,8 +34,8 @@ if __name__ == "__main__":
     QLoggingCategory.setFilterRules("qt.webenginecontext.debug=true")
 
     s = QWebEngineProfile.defaultProfile().settings()
-    s.setAttribute(QWebEngineSettings.PluginsEnabled, True)
-    s.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
+    s.setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, True)
+    s.setAttribute(QWebEngineSettings.WebAttribute.DnsPrefetchEnabled, True)
 
     browser = Browser()
     window = browser.create_hidden_window()

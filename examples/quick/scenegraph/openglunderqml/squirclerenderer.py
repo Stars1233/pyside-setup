@@ -57,11 +57,13 @@ class SquircleRenderer(QOpenGLFunctions):
     def init(self):
         if not self._program:
             rif = self._window.rendererInterface()
-            assert (rif.graphicsApi() == QSGRendererInterface.OpenGL)
+            assert (rif.graphicsApi() == QSGRendererInterface.GraphicsApi.OpenGL)
             self.initializeOpenGLFunctions()
             self._program = QOpenGLShaderProgram()
-            self._program.addCacheableShaderFromSourceCode(QOpenGLShader.Vertex, VERTEX_SHADER)
-            self._program.addCacheableShaderFromSourceCode(QOpenGLShader.Fragment, FRAGMENT_SHADER)
+            self._program.addCacheableShaderFromSourceCode(QOpenGLShader.ShaderTypeBit.Vertex,
+                                                           VERTEX_SHADER)
+            self._program.addCacheableShaderFromSourceCode(QOpenGLShader.ShaderTypeBit.Fragment,
+                                                           FRAGMENT_SHADER)
             self._program.bindAttributeLocation("vertices", 0)
             self._program.link()
 

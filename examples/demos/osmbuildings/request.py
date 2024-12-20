@@ -102,7 +102,7 @@ class OSMRequest(QObject):
         fileName = "data/" + tileKey(tile) + ".png"
         if QFileInfo.exists(fileName):
             file = QFile(fileName)
-            if file.open(QFile.ReadOnly):
+            if file.open(QFile.OpenModeFlag.ReadOnly):
                 data = file.readAll()
                 file.close()
                 self.mapsDataReady.emit(data, tile.TileX, tile.TileY, tile.ZoomLevel)
@@ -116,7 +116,7 @@ class OSMRequest(QObject):
     @Slot(OSMTileData)
     def _mapsDataReceived(self, reply, tile):
         reply.deleteLater()
-        if reply.error() == QNetworkReply.NoError:
+        if reply.error() == QNetworkReply.NetworkError.NoError:
             data = reply.readAll()
             self.mapsDataReady.emit(data, tile.TileX, tile.TileY, tile.ZoomLevel)
         else:

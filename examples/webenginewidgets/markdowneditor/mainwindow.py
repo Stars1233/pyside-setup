@@ -21,9 +21,9 @@ class MainWindow(QMainWindow):
         self.m_content = Document()
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
-        font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
+        font = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
         self._ui.editor.setFont(font)
-        self._ui.preview.setContextMenuPolicy(Qt.NoContextMenu)
+        self._ui.preview.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
         self._page = PreviewPage(self)
         self._ui.preview.setPage(self._page)
 
@@ -44,7 +44,7 @@ class MainWindow(QMainWindow):
         self._ui.editor.document().modificationChanged.connect(self._ui.actionSave.setEnabled)
 
         defaultTextFile = QFile(":/default.md")
-        defaultTextFile.open(QIODevice.ReadOnly)
+        defaultTextFile.open(QIODevice.OpenModeFlag.ReadOnly)
         data = defaultTextFile.readAll()
         self._ui.editor.setPlainText(data.data().decode('utf8'))
 
@@ -56,7 +56,7 @@ class MainWindow(QMainWindow):
     def openFile(self, path):
         f = QFile(path)
         name = QDir.toNativeSeparators(path)
-        if not f.open(QIODevice.ReadOnly):
+        if not f.open(QIODevice.OpenModeFlag.ReadOnly):
             error = f.errorString()
             QMessageBox.warning(self, self.windowTitle(),
                                 f"Could not open file {name}: {error}")
@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
         if self.isModified():
             m = "You have unsaved changes. Do you want to create a new document anyway?"
             button = QMessageBox.question(self, self.windowTitle(), m)
-            if button != QMessageBox.Yes:
+            if button != QMessageBox.StandardButton.Yes:
                 return
 
         self.m_file_path = ''
@@ -86,13 +86,13 @@ class MainWindow(QMainWindow):
         if self.isModified():
             m = "You have unsaved changes. Do you want to open a new document anyway?"
             button = QMessageBox.question(self, self.windowTitle(), m)
-            if button != QMessageBox.Yes:
+            if button != QMessageBox.StandardButton.Yes:
                 return
         dialog = QFileDialog(self)
         dialog.setWindowTitle("Open MarkDown File")
         dialog.setMimeTypeFilters(["text/markdown"])
-        dialog.setAcceptMode(QFileDialog.AcceptOpen)
-        if dialog.exec() == QDialog.Accepted:
+        dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
             self.openFile(dialog.selectedFiles()[0])
 
     @Slot()
@@ -104,7 +104,7 @@ class MainWindow(QMainWindow):
 
         f = QFile(self.m_file_path)
         name = QDir.toNativeSeparators(self.m_file_path)
-        if not f.open(QIODevice.WriteOnly | QIODevice.Text):
+        if not f.open(QIODevice.OpenModeFlag.WriteOnly | QIODevice.OpenModeFlag.Text):
             error = f.errorString()
             QMessageBox.warning(self, self.windowTitle(),
                                 f"Could not write to file {name}: {error}")
@@ -120,9 +120,9 @@ class MainWindow(QMainWindow):
         dialog = QFileDialog(self)
         dialog.setWindowTitle("Save MarkDown File")
         dialog.setMimeTypeFilters(["text/markdown"])
-        dialog.setAcceptMode(QFileDialog.AcceptSave)
+        dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
         dialog.setDefaultSuffix("md")
-        if dialog.exec() != QDialog.Accepted:
+        if dialog.exec() != QDialog.DialogCode.Accepted:
             return
         path = dialog.selectedFiles()[0]
         self.m_file_path = path
@@ -132,7 +132,7 @@ class MainWindow(QMainWindow):
         if self.isModified():
             m = "You have unsaved changes. Do you want to exit anyway?"
             button = QMessageBox.question(self, self.windowTitle(), m)
-            if button != QMessageBox.Yes:
+            if button != QMessageBox.StandardButton.Yes:
                 event.ignore()
             else:
                 event.accept()

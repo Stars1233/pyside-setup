@@ -7,7 +7,7 @@ from PySide6.QtCore import (QByteArray, QEvent, QObject, QPoint, Qt, QTimer,
 from PySide6.QtGui import QPalette
 from PySide6.QtNetwork import (QNetworkAccessManager, QNetworkReply,
                                QNetworkRequest)
-from PySide6.QtWidgets import QFrame, QTreeWidget, QTreeWidgetItem
+from PySide6.QtWidgets import QAbstractItemView, QFrame, QTreeWidget, QTreeWidgetItem
 
 
 class GSuggestCompletion(QObject):
@@ -15,18 +15,18 @@ class GSuggestCompletion(QObject):
         super().__init__(parent)
         self.editor = parent
         self.popup = QTreeWidget()
-        self.popup.setWindowFlags(Qt.Popup)
-        self.popup.setFocusPolicy(Qt.NoFocus)
+        self.popup.setWindowFlags(Qt.WindowType.Popup)
+        self.popup.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.popup.setFocusProxy(parent)
         self.popup.setMouseTracking(True)
 
         self.popup.setColumnCount(1)
         self.popup.setUniformRowHeights(True)
         self.popup.setRootIsDecorated(False)
-        self.popup.setEditTriggers(QTreeWidget.NoEditTriggers)
-        self.popup.setSelectionBehavior(QTreeWidget.SelectRows)
-        self.popup.setFrameStyle(QFrame.Box | QFrame.Plain)
-        self.popup.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.popup.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.popup.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.popup.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Plain)
+        self.popup.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.popup.header().hide()
 
         self.popup.installEventFilter(self)

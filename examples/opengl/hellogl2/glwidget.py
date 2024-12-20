@@ -82,7 +82,7 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
         QOpenGLWidget.__init__(self, parent)
         QOpenGLFunctions.__init__(self)
 
-        self._core = QSurfaceFormat.defaultFormat().profile() == QSurfaceFormat.CoreProfile
+        self._core = QSurfaceFormat.defaultFormat().profile() == QSurfaceFormat.OpenGLContextProfile.CoreProfile  # noqa: E501
 
         self._x_rot = 0
         self._y_rot = 0
@@ -180,9 +180,9 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
             self._vertex_shader = VERTEX_SHADER_SOURCE
             self._fragment_shader = FRAGMENT_SHADER_SOURCE
 
-        self.program.addShaderFromSourceCode(QOpenGLShader.Vertex,
+        self.program.addShaderFromSourceCode(QOpenGLShader.ShaderTypeBit.Vertex,
                                              self._vertex_shader)
-        self.program.addShaderFromSourceCode(QOpenGLShader.Fragment,
+        self.program.addShaderFromSourceCode(QOpenGLShader.ShaderTypeBit.Fragment,
                                              self._fragment_shader)
         self.program.bindAttributeLocation("vertex", 0)
         self.program.bindAttributeLocation("normal", 1)
@@ -263,7 +263,7 @@ class GLWidget(QOpenGLWidget, QOpenGLFunctions):
         dx = pos.x() - self._last_pos.x()
         dy = pos.y() - self._last_pos.y()
 
-        if event.buttons() & Qt.LeftButton:
+        if event.buttons() & Qt.MouseButton.LeftButton:
             self.set_xrotation(self._x_rot + 8 * dy)
             self.set_yrotation(self._y_rot + 8 * dx)
         elif event.buttons() & Qt.RightButton:

@@ -60,7 +60,7 @@ class ScatterDataModifier(QObject):
 
         self._graph.selectedElementChanged.connect(self.handleElementSelected)
         self._graph.dragged.connect(self.handleAxisDragging)
-        self._graph.setDragButton(Qt.LeftButton)
+        self._graph.setDragButton(Qt.MouseButton.LeftButton)
 
         self.addData()
 

@@ -20,11 +20,11 @@ class FinanceModel(QAbstractListModel):
 
     @QEnum
     class FinanceRole(IntEnum):
-        ItemNameRole = Qt.DisplayRole
-        CategoryRole = Qt.UserRole
-        CostRole = Qt.UserRole + 1
-        DateRole = Qt.UserRole + 2
-        MonthRole = Qt.UserRole + 3
+        ItemNameRole = Qt.ItemDataRole.DisplayRole
+        CategoryRole = Qt.ItemDataRole.UserRole
+        CostRole = Qt.ItemDataRole.UserRole + 1
+        DateRole = Qt.ItemDataRole.UserRole + 2
+        MonthRole = Qt.ItemDataRole.UserRole + 3
 
     @dataclass
     class Finance:

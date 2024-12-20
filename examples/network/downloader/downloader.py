@@ -36,8 +36,8 @@ class DownloaderWidget(QWidget):
         self.link_box.setPlaceholderText("Download Link ...")
 
         self._open_folder_action = self.dest_box.addAction(
-            qApp.style().standardIcon(QStyle.SP_DirOpenIcon),  # noqa: F821
-            QLineEdit.TrailingPosition
+            qApp.style().standardIcon(QStyle.StandardPixmap.SP_DirOpenIcon),  # noqa: F821
+            QLineEdit.ActionPosition.TrailingPosition
         )
         self._open_folder_action.triggered.connect(self.on_open_folder)
 
@@ -54,7 +54,7 @@ class DownloaderWidget(QWidget):
         #  Default destination dir
         self.dest_box.setText(
             QDir.fromNativeSeparators(
-                QStandardPaths.writableLocation(QStandardPaths.DownloadLocation)
+                QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DownloadLocation)
             )
         )
 
@@ -105,7 +105,7 @@ class DownloaderWidget(QWidget):
         # Create the file in write mode to append bytes
         self.file = QSaveFile(dest_file)
 
-        if self.file.open(QIODevice.WriteOnly):
+        if self.file.open(QIODevice.OpenModeFlag.WriteOnly):
 
             # Start a GET HTTP request
             self.reply = self.manager.get(QNetworkRequest(url_file))
@@ -133,7 +133,7 @@ class DownloaderWidget(QWidget):
     def on_ready_read(self):
         """ Get available bytes and store them into the file"""
         if self.reply:
-            if self.reply.error() == QNetworkReply.NoError:
+            if self.reply.error() == QNetworkReply.NetworkError.NoError:
                 self.file.write(self.reply.readAll())
 
     @Slot()
@@ -163,7 +163,7 @@ class DownloaderWidget(QWidget):
     def on_open_folder(self):
 
         dir_path = QFileDialog.getExistingDirectory(
-            self, "Open Directory", QDir.homePath(), QFileDialog.ShowDirsOnly
+            self, "Open Directory", QDir.homePath(), QFileDialog.Option.ShowDirsOnly
         )
 
         if dir_path:

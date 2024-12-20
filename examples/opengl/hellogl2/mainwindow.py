@@ -14,9 +14,9 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         menuWindow = self.menuBar().addMenu("Window")
-        menuWindow.addAction("Add new", QKeySequence(Qt.CTRL | Qt.Key_N),
+        menuWindow.addAction("Add new", QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_N),
                              self.onAddNew)
-        menuWindow.addAction("Quit", QKeySequence(Qt.CTRL | Qt.Key_Q),
+        menuWindow.addAction("Quit", QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_Q),
                              qApp.closeAllWindows)  # noqa: F821
 
         self.onAddNew()

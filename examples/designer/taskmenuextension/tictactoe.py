@@ -66,7 +66,7 @@ class TicTacToe(QWidget):
         with QPainter(self) as painter:
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-            painter.setPen(QPen(Qt.darkGreen, 1))
+            painter.setPen(QPen(Qt.GlobalColor.darkGreen, 1))
             painter.drawLine(self._cell_width(), 0,
                              self._cell_width(), self.height())
             painter.drawLine(2 * self._cell_width(), 0,
@@ -76,7 +76,7 @@ class TicTacToe(QWidget):
             painter.drawLine(0, 2 * self._cell_height(),
                              self.width(), 2 * self._cell_height())
 
-            painter.setPen(QPen(Qt.darkBlue, 2))
+            painter.setPen(QPen(Qt.GlobalColor.darkBlue, 2))
 
             for position in range(9):
                 cell = self._cell_rect(position)
@@ -86,7 +86,7 @@ class TicTacToe(QWidget):
                 elif self._state[position] == NOUGHT:
                     painter.drawEllipse(cell)
 
-            painter.setPen(QPen(Qt.yellow, 3))
+            painter.setPen(QPen(Qt.GlobalColor.yellow, 3))
 
             for position in range(0, 8, 3):
                 if (self._state[position] != EMPTY

@@ -31,8 +31,8 @@ class FortuneThread(QThread):
             return
 
         block = QByteArray()
-        outstr = QDataStream(block, QIODevice.WriteOnly)
-        outstr.setVersion(QDataStream.Qt_4_0)
+        outstr = QDataStream(block, QIODevice.OpenModeFlag.WriteOnly)
+        outstr.setVersion(QDataStream.Version.Qt_4_0)
         outstr.writeUInt16(0)
         outstr.writeQString(self.text)
         outstr.device().seek(0)
@@ -68,7 +68,7 @@ class Dialog(QDialog):
         self.server = FortuneServer()
 
         status_label = QLabel()
-        status_label.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        status_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
         status_label.setWordWrap(True)
         quit_button = QPushButton("Quit")
         quit_button.setAutoDefault(False)
@@ -81,10 +81,11 @@ class Dialog(QDialog):
             return
 
         for ip_address in QNetworkInterface.allAddresses():
-            if ip_address != QHostAddress.LocalHost and ip_address.toIPv4Address() != 0:
+            if (ip_address != QHostAddress.SpecialAddress.LocalHost
+                    and ip_address.toIPv4Address() != 0):
                 break
         else:
-            ip_address = QHostAddress(QHostAddress.LocalHost)
+            ip_address = QHostAddress(QHostAddress.SpecialAddress.LocalHost)
 
         ip_address = ip_address.toString()
         port = self.server.serverPort()

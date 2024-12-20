@@ -96,7 +96,7 @@ class RainfallData(QObject):
         # Read data from a data file into the data item list
         file_path = Path(__file__).resolve().parent / "data" / "raindata.txt"
         dataFile = QFile(file_path)
-        if dataFile.open(QIODevice.ReadOnly | QIODevice.Text):
+        if dataFile.open(QIODevice.OpenModeFlag.ReadOnly | QIODevice.OpenModeFlag.Text):
             data = dataFile.readAll().data().decode("utf8")
             for line in data.split("\n"):
                 if line and not line.startswith("#"):  # Ignore comments

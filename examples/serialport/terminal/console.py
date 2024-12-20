@@ -20,8 +20,8 @@ class Console(QPlainTextEdit):
         self.m_localEchoEnabled = False
         self.document().setMaximumBlockCount(100)
         p = self.palette()
-        p.setColor(QPalette.Base, Qt.black)
-        p.setColor(QPalette.Text, Qt.green)
+        p.setColor(QPalette.ColorRole.Base, Qt.GlobalColor.black)
+        p.setColor(QPalette.ColorRole.Text, Qt.GlobalColor.green)
         self.setPalette(p)
 
     @Slot(bytearray)

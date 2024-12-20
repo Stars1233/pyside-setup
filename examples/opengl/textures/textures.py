@@ -46,7 +46,7 @@ class GLWidget(QOpenGLWidget):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.clearColor = Qt.black
+        self.clearColor = Qt.GlobalColor.black
         self.xRot = 0
         self.yRot = 0
         self.zRot = 0
@@ -79,7 +79,7 @@ class GLWidget(QOpenGLWidget):
     def initializeGL(self):
         profile = QOpenGLVersionProfile()
         profile.setVersion(3, 2)
-        profile.setProfile(QSurfaceFormat.CompatibilityProfile)
+        profile.setProfile(QSurfaceFormat.OpenGLContextProfile.CompatibilityProfile)
         self.funcs = QOpenGLVersionFunctionsFactory.get(profile)
         self.funcs.initializeOpenGLFunctions()
 
@@ -125,7 +125,7 @@ class GLWidget(QOpenGLWidget):
         dx = pos.x() - self.lastPos.x()
         dy = pos.y() - self.lastPos.y()
 
-        if event.buttons() & Qt.LeftButton:
+        if event.buttons() & Qt.MouseButton.LeftButton:
             self.rotateBy(8 * dy, 8 * dx, 0)
         elif event.buttons() & Qt.RightButton:
             self.rotateBy(8 * dy, 0, 8 * dx)

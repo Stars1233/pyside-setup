@@ -189,14 +189,14 @@ class JsonViewer(AbstractViewer):
         zoomInIcon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomIn)
         a = menu.addAction(zoomInIcon, "&+Expand all", self._tree.expandAll)
         tb.addAction(a)
-        a.setPriority(QAction.LowPriority)
-        a.setShortcut(QKeySequence.New)
+        a.setPriority(QAction.Priority.LowPriority)
+        a.setShortcut(QKeySequence.StandardKey.New)
 
         zoomOutIcon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomOut)
         a = menu.addAction(zoomOutIcon, "&-Collapse all", self._tree.collapseAll)
         tb.addAction(a)
-        a.setPriority(QAction.LowPriority)
-        a.setShortcut(QKeySequence.New)
+        a.setPriority(QAction.Priority.LowPriority)
+        a.setShortcut(QKeySequence.StandardKey.New)
 
         if not self._searchKey:
             self._searchKey = QLineEdit(tb)
@@ -224,8 +224,8 @@ class JsonViewer(AbstractViewer):
 
         self._toplevel.setAcceptDrops(True)
         self._tree.setDragEnabled(True)
-        self._tree.setContextMenuPolicy(Qt.CustomContextMenu)
-        self._toplevel.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self._toplevel.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
 
         self._toplevel.itemClicked.connect(self.onTopLevelItemClicked)
         self._toplevel.itemDoubleClicked.connect(self.onTopLevelItemDoubleClicked)
@@ -260,7 +260,7 @@ class JsonViewer(AbstractViewer):
         self.disablePrinting()
         file_name = QDir.toNativeSeparators(self._file.fileName())
         type = "open"
-        self._file.open(QIODevice.ReadOnly)
+        self._file.open(QIODevice.OpenModeFlag.ReadOnly)
         self._text = self._file.readAll().data().decode("utf-8")
         self._file.close()
 
