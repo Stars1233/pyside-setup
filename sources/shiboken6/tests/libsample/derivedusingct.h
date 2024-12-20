@@ -13,5 +13,9 @@ public:
     using CtParam::CtParam;
 
     void foo();
+    int derivedValue() const;
+
+private:
+    int m_derivedValue = 37;
 };
 #endif // DERIVEDUSINGCT_H

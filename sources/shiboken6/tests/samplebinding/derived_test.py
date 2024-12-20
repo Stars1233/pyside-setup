@@ -131,6 +131,7 @@ class DerivedTest(unittest.TestCase):
         '''Test whether a constructor of the base class declared by using works'''
         obj = DerivedUsingCt(42)
         self.assertEqual(obj.value(), 42)
+        self.assertEqual(obj.derivedValue(), 37)
 
     def testVirtualWithOutParameter(self):
         d = Derived()

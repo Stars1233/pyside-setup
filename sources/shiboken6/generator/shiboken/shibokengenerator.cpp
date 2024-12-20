@@ -2066,6 +2066,60 @@ AbstractMetaFunctionCList
     return result;
 }
 
+// Check whether constructors are imported via "using" directive from a base class
+// (simple case of single inheritance)?
+static bool checkConstructorsFromUsingDirective(const AbstractMetaClassCPtr &scope)
+{
+    if (scope->baseClasses().size() != 1)
+        return false;
+    const auto base = scope->baseClass();
+    // base class name == constructors name
+    return scope->isUsingMember(base, base->name(), Access::Public);
+}
+
+// Clone base constructors imported via "using" directive for use in a derived class
+static AbstractMetaFunctionCList
+    cloneUsingConstructors(const AbstractMetaClassCPtr &scope,
+                           const AbstractMetaFunctionCList &baseCts)
+{
+    AbstractMetaFunctionCList result;
+    result.reserve(baseCts.size());
+    auto transform = [scope] (const AbstractMetaFunctionCPtr &baseCt) {
+        auto *clone = baseCt->copy();
+        clone->setOriginalName(scope->name());
+        clone->setName(scope->name());
+        clone->setOwnerClass(scope);
+        return AbstractMetaFunctionCPtr(clone);
+    };
+    std::transform(baseCts.cbegin(), baseCts.cend(),
+                   std::back_inserter(result), transform);
+    return result;
+}
+
+// Get constructors imported via "using" directive from a base class.
+static AbstractMetaFunctionCList
+    getConstructorsFromUsingDirective(const AbstractMetaClassCPtr &scope)
+{
+    static constexpr auto query = FunctionQueryOption::Constructors
+        | FunctionQueryOption::Visible | FunctionQueryOption::ClassImplements
+        | FunctionQueryOption::NotRemoved;
+    return cloneUsingConstructors(scope, scope->baseClass()->queryFunctions(query));
+}
+
+// Get wrapper constructors imported via "using" directive from a base class
+// (looser criterion).
+AbstractMetaFunctionCList
+    ShibokenGenerator::getWrapperConstructorsFromUsingDirective(const AbstractMetaClassCPtr &scope)
+{
+    AbstractMetaFunctionCList baseCts =
+        scope->baseClass()->queryFunctions(FunctionQueryOption::Constructors);
+    auto pred = [] (const AbstractMetaFunctionCPtr &c) {
+        return !ShibokenGenerator::functionGeneration(c).testFlag(FunctionGenerationFlag::WrapperConstructor);
+    };
+    baseCts.erase(std::remove_if(baseCts.begin(), baseCts.end(), pred), baseCts.end());
+    return cloneUsingConstructors(scope, baseCts);
+}
+
 const GeneratorClassInfoCacheEntry &
     ShibokenGenerator::getGeneratorClassInfo(const AbstractMetaClassCPtr &scope)
 {
@@ -2078,6 +2132,10 @@ const GeneratorClassInfoCacheEntry &
         const bool useWrapper = shouldGenerateCppWrapper(scope);
         if (useWrapper)
             entry.wrapperConstructors = wrapperConstructorsImpl(scope);
+        if (entry.constructors.isEmpty() && checkConstructorsFromUsingDirective(scope)) {
+            entry.constructors.append(getConstructorsFromUsingDirective(scope));
+            entry.wrapperConstructors.append(getWrapperConstructorsFromUsingDirective(scope));
+        }
         entry.attroCheck = checkAttroFunctionNeedsImpl(scope, entry.functionGroups);
         entry.numberProtocolOperators = getNumberProtocolOperators(scope);
         entry.boolCastFunctionO = getBoolCast(scope);

@@ -7,3 +7,8 @@ void DerivedUsingCt::foo()
 {
     delete new DerivedUsingCt(42);
 }
+
+int DerivedUsingCt::derivedValue() const
+{
+    return m_derivedValue;
+}

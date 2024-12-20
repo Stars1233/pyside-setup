@@ -379,6 +379,7 @@ private:
     static FunctionGroups getFunctionGroupsImpl(const AbstractMetaClassCPtr &scope,
                                                 AbstractMetaFunctionCList *constructors);
     static AbstractMetaFunctionCList wrapperConstructorsImpl(const AbstractMetaClassCPtr &scope);
+    static AbstractMetaFunctionCList getWrapperConstructorsFromUsingDirective(const AbstractMetaClassCPtr &scope);
     static QList<AbstractMetaFunctionCList>
         getNumberProtocolOperators(const AbstractMetaClassCPtr &metaClass);
     static BoolCastFunctionOptional getBoolCast(const AbstractMetaClassCPtr &metaClass);
