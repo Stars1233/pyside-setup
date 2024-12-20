@@ -106,6 +106,7 @@ struct GeneratorClassInfoCacheEntry
 {
     ShibokenGenerator::FunctionGroups functionGroups;
     AbstractMetaFunctionCList constructors;
+    AbstractMetaFunctionCList wrapperConstructors;
     QList<AbstractMetaFunctionCList> numberProtocolOperators;
     BoolCastFunctionOptional boolCastFunctionO;
     ShibokenGenerator::AttroCheck attroCheck;
@@ -2053,6 +2054,18 @@ ShibokenGenerator::FunctionGroups ShibokenGenerator::getGlobalFunctionGroups() c
     return results;
 }
 
+AbstractMetaFunctionCList
+   ShibokenGenerator::wrapperConstructorsImpl(const AbstractMetaClassCPtr &scope)
+{
+    auto pred = [](const AbstractMetaFunctionCPtr &f) {
+        return ShibokenGenerator::functionGeneration(f).testFlag(FunctionGenerationFlag::WrapperConstructor);
+    };
+    AbstractMetaFunctionCList result;
+    std::copy_if(scope->functions().cbegin(), scope->functions().cend(),
+                 std::back_inserter(result), pred);
+    return result;
+}
+
 const GeneratorClassInfoCacheEntry &
     ShibokenGenerator::getGeneratorClassInfo(const AbstractMetaClassCPtr &scope)
 {
@@ -2062,6 +2075,9 @@ const GeneratorClassInfoCacheEntry &
         it = cache->insert(scope, {});
         auto &entry = it.value();
         entry.functionGroups = getFunctionGroupsImpl(scope, &entry.constructors);
+        const bool useWrapper = shouldGenerateCppWrapper(scope);
+        if (useWrapper)
+            entry.wrapperConstructors = wrapperConstructorsImpl(scope);
         entry.attroCheck = checkAttroFunctionNeedsImpl(scope, entry.functionGroups);
         entry.numberProtocolOperators = getNumberProtocolOperators(scope);
         entry.boolCastFunctionO = getBoolCast(scope);
@@ -2081,6 +2097,12 @@ AbstractMetaFunctionCList
 {
     Q_ASSERT(scope);
     return getGeneratorClassInfo(scope).constructors;
+}
+
+AbstractMetaFunctionCList ShibokenGenerator::getWrapperConstructors(const AbstractMetaClassCPtr &scope)
+{
+    Q_ASSERT(scope);
+    return getGeneratorClassInfo(scope).wrapperConstructors;
 }
 
 QList<AbstractMetaFunctionCList>

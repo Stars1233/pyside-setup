@@ -96,7 +96,7 @@ QString HeaderGenerator::fileNameForContext(const GeneratorContext &context) con
 void HeaderGenerator::writeCopyCtor(TextStream &s,
                                     const AbstractMetaClassCPtr &metaClass)
 {
-    s << wrapperName(metaClass) << "(const " << metaClass->qualifiedCppName()
+    s << '\n' << wrapperName(metaClass) << "(const " << metaClass->qualifiedCppName()
       << "& self) : " << metaClass->qualifiedCppName() << "(self)\n{\n}\n\n";
 }
 
@@ -239,13 +239,27 @@ void HeaderGenerator::writeWrapperClassDeclaration(TextStream &s,
         s << '\n';
     }
 
+    const auto &wrapperConstructors = ShibokenGenerator::getWrapperConstructors(metaClass);
+    for (const auto &func : wrapperConstructors)
+        writeFunction(s, func, &inheritedOverloads, functionGeneration(func));
+
+    // Special inline copy CT (Wrapper from metaClass)
+    const auto &copyConstructors = metaClass->queryFunctions(FunctionQueryOption::CopyConstructor);
+    if (!copyConstructors.isEmpty()) {
+        auto generation = functionGeneration(copyConstructors.constFirst());
+        if (generation.testFlag(FunctionGenerationFlag::WrapperSpecialCopyConstructor))
+            writeCopyCtor(s, metaClass); // FIXME: Remove in writeFunction()?
+    }
+
     int maxOverrides = 0;
     for (const auto &func : metaClass->functions()) {
         const auto generation = functionGeneration(func);
-        writeFunction(s, func, &inheritedOverloads, generation);
-        // PYSIDE-803: Build a boolean cache for unused overrides.
-        if (generation.testFlag(FunctionGenerationFlag::VirtualMethod))
-            maxOverrides++;
+        if (!func->isConstructor()) {
+            writeFunction(s, func, &inheritedOverloads, generation);
+            // PYSIDE-803: Build a boolean cache for unused overrides.
+            if (generation.testFlag(FunctionGenerationFlag::VirtualMethod))
+                maxOverrides++;
+        }
     }
 
     //destructor
@@ -352,13 +366,6 @@ void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPt
                                     InheritedOverloadSet *inheritedOverloads,
                                     FunctionGeneration generation) const
 {
-
-    // do not write copy ctors here.
-    if (generation.testFlag(FunctionGenerationFlag::WrapperSpecialCopyConstructor)) {
-        writeCopyCtor(s, func->ownerClass());
-        return;
-    }
-
     if (generation.testFlag(FunctionGenerationFlag::ProtectedWrapper))
         writeMemberFunctionWrapper(s, func, u"_protected"_s);
 

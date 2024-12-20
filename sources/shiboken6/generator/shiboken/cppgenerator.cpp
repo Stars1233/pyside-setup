@@ -691,14 +691,16 @@ void CppGenerator::generateClass(TextStream &s,
             s << outdent << "}\n\n";
         }
 
-        int maxOverrides = 0;
+        const auto &wrapperConstructors = ShibokenGenerator::getWrapperConstructors(metaClass);
+
         if (useOverrideCaching(classContext.metaClass()))
             writeCacheResetNative(s, classContext);
+        for (const auto &func : wrapperConstructors)
+            writeConstructorNative(s, classContext, func);
+        int maxOverrides = 0;
         for (const auto &func : metaClass->functions()) {
             const auto generation = functionGeneration(func);
-            if (generation.testFlag(FunctionGenerationFlag::WrapperConstructor))
-                writeConstructorNative(s, classContext, func);
-            else if (generation.testFlag(FunctionGenerationFlag::VirtualMethod))
+            if (generation.testFlag(FunctionGenerationFlag::VirtualMethod))
                 writeVirtualMethodNative(s, func, maxOverrides++);
         }
 

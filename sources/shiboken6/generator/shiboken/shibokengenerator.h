@@ -112,6 +112,9 @@ protected:
     /// Returns the constructors for which bindings should be generated.
     /// \param scope Where to search for functions
     static AbstractMetaFunctionCList getConstructors(const AbstractMetaClassCPtr &scope);
+    /// Returns the constructors which should be added to wrapper class.
+    /// \param scope Where to search for functions
+    static AbstractMetaFunctionCList getWrapperConstructors(const AbstractMetaClassCPtr &scope);
 
     static QList<AbstractMetaFunctionCList>
         numberProtocolOperators(const AbstractMetaClassCPtr &scope);
@@ -375,6 +378,7 @@ private:
         getGeneratorClassInfo(const AbstractMetaClassCPtr &scope);
     static FunctionGroups getFunctionGroupsImpl(const AbstractMetaClassCPtr &scope,
                                                 AbstractMetaFunctionCList *constructors);
+    static AbstractMetaFunctionCList wrapperConstructorsImpl(const AbstractMetaClassCPtr &scope);
     static QList<AbstractMetaFunctionCList>
         getNumberProtocolOperators(const AbstractMetaClassCPtr &metaClass);
     static BoolCastFunctionOptional getBoolCast(const AbstractMetaClassCPtr &metaClass);
