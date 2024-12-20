@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
     # Parent widget.
     widget = QGraphicsWidget()
-    layout = QGraphicsLinearLayout(Qt.Vertical, widget)
+    layout = QGraphicsLinearLayout(Qt.Orientation.Vertical, widget)
     layout.addItem(edit_proxy)
     layout.addItem(button_proxy)
     widget.setLayout(layout)

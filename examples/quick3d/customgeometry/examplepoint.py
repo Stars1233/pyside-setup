@@ -48,5 +48,6 @@ class ExamplePointGeometry(QQuick3DGeometry):
         self.setPrimitiveType(QQuick3DGeometry.PrimitiveType.Points)
 
         self.addAttribute(
-            QQuick3DGeometry.Attribute.PositionSemantic, 0, QQuick3DGeometry.Attribute.F32Type
+            QQuick3DGeometry.Attribute.Semantic.PositionSemantic, 0,
+            QQuick3DGeometry.Attribute.ComponentType.F32Type
         )

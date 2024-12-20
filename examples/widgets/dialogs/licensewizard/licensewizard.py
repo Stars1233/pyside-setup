@@ -32,7 +32,8 @@ class IntroPage(QWizardPage):
 
         path = Path(__file__).resolve().parent
 
-        self.setPixmap(QWizard.WatermarkPixmap, QPixmap(path / "images" / "watermark.png"))
+        self.setPixmap(QWizard.WizardPixmap.WatermarkPixmap,
+                       QPixmap(path / "images" / "watermark.png"))
         self.top_label = QLabel(
             "This wizard will help you register your copy of "
             "<i>Super Product One</i>&trade; or start "
@@ -166,7 +167,8 @@ class ConclusionPage(QWizardPage):
         self.setTitle("Complete Your Registration")
 
         path = Path(__file__).resolve().parent
-        self.setPixmap(QWizard.WatermarkPixmap, QPixmap(path / "images" / "watermark.png"))
+        self.setPixmap(QWizard.WizardPixmap.WatermarkPixmap,
+                       QPixmap(path / "images" / "watermark.png"))
 
         self.bottom_label = QLabel()
         self.bottom_label.setWordWrap(True)
@@ -251,12 +253,12 @@ class LicenseWizard(QWizard):
         self.setStartId(Pages.Page_Intro)
 
         if sys.platform == 'darwin':
-            self.setWizardStyle(QWizard.ModernStyle)
+            self.setWizardStyle(QWizard.WizardStyle.ModernStyle)
 
-        self.setOption(QWizard.HaveHelpButton, True)
+        self.setOption(QWizard.WizardOption.HaveHelpButton, True)
 
         path = Path(__file__).resolve().parent
-        self.setPixmap(QWizard.LogoPixmap, QPixmap(path / "images" / "logo.png"))
+        self.setPixmap(QWizard.WizardPixmap.LogoPixmap, QPixmap(path / "images" / "logo.png"))
 
         self.helpRequested.connect(self.show_help)
         self.setWindowTitle("License Wizard")

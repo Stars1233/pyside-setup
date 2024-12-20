@@ -23,7 +23,7 @@ class AddressBook(QWidget):
         main_layout = QGridLayout()
         main_layout.addWidget(name_label, 0, 0)
         main_layout.addWidget(self._name_line, 0, 1)
-        main_layout.addWidget(address_label, 1, 0, Qt.AlignTop)
+        main_layout.addWidget(address_label, 1, 0, Qt.AlignmentFlag.AlignTop)
         main_layout.addWidget(self._address_text, 1, 1)
 
         self.setLayout(main_layout)

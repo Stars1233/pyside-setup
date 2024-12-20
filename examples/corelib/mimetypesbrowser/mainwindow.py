@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
         self.about_action = QAction(
             "About Qt",
             self,
-            shortcut=QKeySequence(QKeySequence.HelpContents),
+            shortcut=QKeySequence(QKeySequence.StandardKey.HelpContents),
             triggered=QApplication.aboutQt,
         )
 
@@ -64,7 +64,7 @@ class MainWindow(QMainWindow):
 
         self.items = self.m_model.findItems(
             "application/octet-stream",
-            Qt.MatchContains | Qt.MatchFixedString | Qt.MatchRecursive,
+            Qt.MatchFlag.MatchContains | Qt.MatchFlag.MatchFixedString | Qt.MatchFlag.MatchRecursive
         )
 
         if self.items:
@@ -107,7 +107,7 @@ class MainWindow(QMainWindow):
         input_dialog = QInputDialog(self)
         input_dialog.setWindowTitle("Find")
         input_dialog.setLabelText("Text")
-        if input_dialog.exec() != QDialog.Accepted:
+        if input_dialog.exec() != QDialog.DialogCode.Accepted:
             return
 
         value = input_dialog.textValue().strip()
@@ -116,9 +116,9 @@ class MainWindow(QMainWindow):
 
         self.m_find_matches.clear()
         self.m_find_index = 0
-        items = self.m_model.findItems(
-            value, Qt.MatchContains | Qt.MatchFixedString | Qt.MatchRecursive
-        )
+        flags = (Qt.MatchFlag.MatchContains | Qt.MatchFlag.MatchFixedString
+                 | Qt.MatchFlag.MatchRecursive)
+        items = self.m_model.findItems(value, flags)
 
         for item in items:
             self.m_find_matches.append(self.m_model.indexFromItem(item))
@@ -158,5 +158,5 @@ class MainWindow(QMainWindow):
         self.m_find_previous_action.setEnabled(self.find_next_previous_enabled)
 
     def _select_and_goto(self, index: QModelIndex):
-        self.m_tree_view.scrollTo(index, QAbstractItemView.PositionAtCenter)
+        self.m_tree_view.scrollTo(index, QAbstractItemView.ScrollHint.PositionAtCenter)
         self.m_tree_view.setCurrentIndex(index)

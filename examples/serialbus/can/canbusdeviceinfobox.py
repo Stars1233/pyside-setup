@@ -9,8 +9,8 @@ from ui_canbusdeviceinfobox import Ui_CanBusDeviceInfoBox
 
 
 def _set_readonly_and_compact(box):
-    box.setAttribute(Qt.WA_TransparentForMouseEvents)
-    box.setFocusPolicy(Qt.NoFocus)
+    box.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+    box.setFocusPolicy(Qt.FocusPolicy.NoFocus)
     box.setStyleSheet("margin-top:0; margin-bottom:0;")
 
 

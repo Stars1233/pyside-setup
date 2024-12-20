@@ -77,7 +77,7 @@ class GradientTexture(QQuick3DTextureData):
 
     def updateTexture(self):
         self.setSize(QSize(self._width, self._height))
-        self.setFormat(QQuick3DTextureData.RGBA8)
+        self.setFormat(QQuick3DTextureData.Format.RGBA8)
         self.setHasTransparency(False)
         self.setTextureData(self.generate_texture())
 

@@ -68,9 +68,9 @@ class AudioWidget(QWidget):
         form.addRow("Reflection gain (0-5):", self._reflection_gain)
 
         self._mode = QComboBox()
-        self._mode.addItem("Surround", QAudioEngine.Surround)
-        self._mode.addItem("Stereo", QAudioEngine.Stereo)
-        self._mode.addItem("Headphone", QAudioEngine.Headphone)
+        self._mode.addItem("Surround", QAudioEngine.OutputMode.Surround)
+        self._mode.addItem("Stereo", QAudioEngine.OutputMode.Stereo)
+        self._mode.addItem("Headphone", QAudioEngine.OutputMode.Headphone)
 
         form.addRow("Output mode:", self._mode)
 
@@ -93,12 +93,12 @@ class AudioWidget(QWidget):
 
         self._engine = QAudioEngine()
         self._room = QAudioRoom(self._engine)
-        self._room.setWallMaterial(QAudioRoom.BackWall, QAudioRoom.BrickBare)
-        self._room.setWallMaterial(QAudioRoom.FrontWall, QAudioRoom.BrickBare)
-        self._room.setWallMaterial(QAudioRoom.LeftWall, QAudioRoom.BrickBare)
-        self._room.setWallMaterial(QAudioRoom.RightWall, QAudioRoom.BrickBare)
-        self._room.setWallMaterial(QAudioRoom.Floor, QAudioRoom.Marble)
-        self._room.setWallMaterial(QAudioRoom.Ceiling, QAudioRoom.WoodCeiling)
+        self._room.setWallMaterial(QAudioRoom.Wall.BackWall, QAudioRoom.Material.BrickBare)
+        self._room.setWallMaterial(QAudioRoom.Wall.FrontWall, QAudioRoom.Material.BrickBare)
+        self._room.setWallMaterial(QAudioRoom.Wall.LeftWall, QAudioRoom.Material.BrickBare)
+        self._room.setWallMaterial(QAudioRoom.Wall.RightWall, QAudioRoom.Material.BrickBare)
+        self._room.setWallMaterial(QAudioRoom.Wall.Floor, QAudioRoom.Material.Marble)
+        self._room.setWallMaterial(QAudioRoom.Wall.Ceiling, QAudioRoom.Material.WoodCeiling)
         self.update_room()
 
         self._listener = QAudioListener(self._engine)
@@ -141,20 +141,20 @@ class AudioWidget(QWidget):
     def file_changed(self, file):
         self._sound.setSource(QUrl.fromLocalFile(file))
         self._sound.setSize(5)
-        self._sound.setLoops(QSpatialSound.Infinite)
+        self._sound.setLoops(QSpatialSound.Loops.Infinite)
 
     @Slot()
     def open_file_dialog(self):
         if not self._file_dialog:
-            directory = QStandardPaths.writableLocation(QStandardPaths.MusicLocation)
+            directory = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.MusicLocation)  # noqa: E501
             self._file_dialog = QFileDialog(self, "Open Audio File", directory)
-            self._file_dialog.setAcceptMode(QFileDialog.AcceptOpen)
+            self._file_dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
             mime_types = ["audio/mpeg", "audio/aac", "audio/x-ms-wma",
                           "audio/x-flac+ogg", "audio/x-wav"]
             self._file_dialog.setMimeTypeFilters(mime_types)
             self._file_dialog.selectMimeTypeFilter(mime_types[0])
 
-        if self._file_dialog.exec() == QDialog.Accepted:
+        if self._file_dialog.exec() == QDialog.DialogCode.Accepted:
             self._file_edit.setText(self._file_dialog.selectedFiles()[0])
 
     @Slot()

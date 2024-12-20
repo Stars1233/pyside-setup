@@ -42,10 +42,11 @@ class MainWindow(QMainWindow):
         vp = self.ui.writeValueTable.viewport()
         self._write_model.update_viewport.connect(vp.update)
 
-        self.ui.writeTable.addItem("Coils", QModbusDataUnit.Coils)
-        self.ui.writeTable.addItem("Discrete Inputs", QModbusDataUnit.DiscreteInputs)
-        self.ui.writeTable.addItem("Input Registers", QModbusDataUnit.InputRegisters)
-        self.ui.writeTable.addItem("Holding Registers", QModbusDataUnit.HoldingRegisters)
+        self.ui.writeTable.addItem("Coils", QModbusDataUnit.RegisterType.Coils)
+        self.ui.writeTable.addItem("Discrete Inputs", QModbusDataUnit.RegisterType.DiscreteInputs)
+        self.ui.writeTable.addItem("Input Registers", QModbusDataUnit.RegisterType.InputRegisters)
+        self.ui.writeTable.addItem("Holding Registers",
+                                   QModbusDataUnit.RegisterType.HoldingRegisters)
 
         self.ui.connectType.setCurrentIndex(0)
         self.onConnectTypeChanged(0)
@@ -132,24 +133,24 @@ class MainWindow(QMainWindow):
 
         self.statusBar().clearMessage()
         md = self._modbus_device
-        if md.state() != QModbusDevice.ConnectedState:
+        if md.state() != QModbusDevice.State.ConnectedState:
             settings = self._settings_dialog.settings()
             if self.ui.connectType.currentIndex() == ModbusConnection.SERIAL:
-                md.setConnectionParameter(QModbusDevice.SerialPortNameParameter,
+                md.setConnectionParameter(QModbusDevice.ConnectionParameter.SerialPortNameParameter,
                                           self.ui.portEdit.text())
-                md.setConnectionParameter(QModbusDevice.SerialParityParameter,
+                md.setConnectionParameter(QModbusDevice.ConnectionParameter.SerialParityParameter,
                                           settings.parity)
-                md.setConnectionParameter(QModbusDevice.SerialBaudRateParameter,
+                md.setConnectionParameter(QModbusDevice.ConnectionParameter.SerialBaudRateParameter,
                                           settings.baud)
-                md.setConnectionParameter(QModbusDevice.SerialDataBitsParameter,
+                md.setConnectionParameter(QModbusDevice.ConnectionParameter.SerialDataBitsParameter,
                                           settings.data_bits)
-                md.setConnectionParameter(QModbusDevice.SerialStopBitsParameter,
+                md.setConnectionParameter(QModbusDevice.ConnectionParameter.SerialStopBitsParameter,
                                           settings.stop_bits)
             else:
                 url = QUrl.fromUserInput(self.ui.portEdit.text())
-                md.setConnectionParameter(QModbusDevice.NetworkPortParameter,
+                md.setConnectionParameter(QModbusDevice.ConnectionParameter.NetworkPortParameter,
                                           url.port())
-                md.setConnectionParameter(QModbusDevice.NetworkAddressParameter,
+                md.setConnectionParameter(QModbusDevice.ConnectionParameter.NetworkAddressParameter,
                                           url.host())
 
             md.setTimeout(settings.response_time)
@@ -168,13 +169,13 @@ class MainWindow(QMainWindow):
 
     @Slot(int)
     def onModbusStateChanged(self, state):
-        connected = (state != QModbusDevice.UnconnectedState)
+        connected = (state != QModbusDevice.State.UnconnectedState)
         self.ui.actionConnect.setEnabled(not connected)
         self.ui.actionDisconnect.setEnabled(connected)
 
-        if state == QModbusDevice.UnconnectedState:
+        if state == QModbusDevice.State.UnconnectedState:
             self.ui.connectButton.setText("Connect")
-        elif state == QModbusDevice.ConnectedState:
+        elif state == QModbusDevice.State.ConnectedState:
             self.ui.connectButton.setText("Disconnect")
 
     @Slot()
@@ -236,7 +237,7 @@ class MainWindow(QMainWindow):
         table = write_unit.registerType()
         for i in range(0, total):
             addr = i + write_unit.startAddress()
-            if table == QModbusDataUnit.Coils:
+            if table == QModbusDataUnit.RegisterType.Coils:
                 write_unit.setValue(i, self._write_model.m_coils[addr])
             else:
                 write_unit.setValue(i, self._write_model.m_holdingRegisters[addr])

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'form.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.0
+## Created by: Qt User Interface Compiler version 6.8.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -35,10 +35,10 @@ class Ui_Form(object):
         sizePolicy.setHeightForWidth(self.easingCurvePicker.sizePolicy().hasHeightForWidth())
         self.easingCurvePicker.setSizePolicy(sizePolicy)
         self.easingCurvePicker.setMaximumSize(QSize(16777215, 120))
-        self.easingCurvePicker.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.easingCurvePicker.setMovement(QListView.Static)
+        self.easingCurvePicker.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.easingCurvePicker.setMovement(QListView.Movement.Static)
         self.easingCurvePicker.setProperty(u"isWrapping", False)
-        self.easingCurvePicker.setViewMode(QListView.IconMode)
+        self.easingCurvePicker.setViewMode(QListView.ViewMode.IconMode)
         self.easingCurvePicker.setSelectionRectVisible(False)
 
         self.gridLayout.addWidget(self.easingCurvePicker, 0, 0, 1, 2)
@@ -56,7 +56,7 @@ class Ui_Form(object):
         self.buttonGroup.addButton(self.lineRadio)
         self.lineRadio.setObjectName(u"lineRadio")
         self.lineRadio.setMaximumSize(QSize(16777215, 40))
-        self.lineRadio.setLayoutDirection(Qt.LeftToRight)
+        self.lineRadio.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.lineRadio.setChecked(True)
 
         self.gridLayout_2.addWidget(self.lineRadio, 0, 0, 1, 1)
@@ -80,7 +80,7 @@ class Ui_Form(object):
         self.groupBox.setSizePolicy(sizePolicy1)
         self.formLayout = QFormLayout(self.groupBox)
         self.formLayout.setObjectName(u"formLayout")
-        self.formLayout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        self.formLayout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         self.label = QLabel(self.groupBox)
         self.label.setObjectName(u"label")
         sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
@@ -90,7 +90,7 @@ class Ui_Form(object):
         self.label.setSizePolicy(sizePolicy2)
         self.label.setMinimumSize(QSize(0, 30))
 
-        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label)
+        self.formLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.label)
 
         self.periodSpinBox = QDoubleSpinBox(self.groupBox)
         self.periodSpinBox.setObjectName(u"periodSpinBox")
@@ -105,7 +105,7 @@ class Ui_Form(object):
         self.periodSpinBox.setSingleStep(0.100000000000000)
         self.periodSpinBox.setValue(-1.000000000000000)
 
-        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.periodSpinBox)
+        self.formLayout.setWidget(0, QFormLayout.ItemRole.FieldRole, self.periodSpinBox)
 
         self.amplitudeSpinBox = QDoubleSpinBox(self.groupBox)
         self.amplitudeSpinBox.setObjectName(u"amplitudeSpinBox")
@@ -115,13 +115,13 @@ class Ui_Form(object):
         self.amplitudeSpinBox.setSingleStep(0.100000000000000)
         self.amplitudeSpinBox.setValue(-1.000000000000000)
 
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.amplitudeSpinBox)
+        self.formLayout.setWidget(2, QFormLayout.ItemRole.FieldRole, self.amplitudeSpinBox)
 
         self.label_3 = QLabel(self.groupBox)
         self.label_3.setObjectName(u"label_3")
         self.label_3.setMinimumSize(QSize(0, 30))
 
-        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label_3)
+        self.formLayout.setWidget(4, QFormLayout.ItemRole.LabelRole, self.label_3)
 
         self.overshootSpinBox = QDoubleSpinBox(self.groupBox)
         self.overshootSpinBox.setObjectName(u"overshootSpinBox")
@@ -131,13 +131,13 @@ class Ui_Form(object):
         self.overshootSpinBox.setSingleStep(0.100000000000000)
         self.overshootSpinBox.setValue(-1.000000000000000)
 
-        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.overshootSpinBox)
+        self.formLayout.setWidget(4, QFormLayout.ItemRole.FieldRole, self.overshootSpinBox)
 
         self.label_2 = QLabel(self.groupBox)
         self.label_2.setObjectName(u"label_2")
         self.label_2.setMinimumSize(QSize(0, 30))
 
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_2)
+        self.formLayout.setWidget(2, QFormLayout.ItemRole.LabelRole, self.label_2)
 
 
         self.verticalLayout.addWidget(self.groupBox)

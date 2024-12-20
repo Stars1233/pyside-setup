@@ -37,7 +37,8 @@ class ApplicationWindow(QMainWindow):
         self.menu_file.addAction(exit)
 
         self.menu_about = self.menu.addMenu("&About")
-        about = QAction("About Qt", self, shortcut=QKeySequence(QKeySequence.HelpContents),
+        about = QAction("About Qt", self,
+                        shortcut=QKeySequence(QKeySequence.StandardKey.HelpContents),
                         triggered=qApp.aboutQt)  # noqa: F821
         self.menu_about.addAction(about)
 
@@ -64,7 +65,7 @@ class ApplicationWindow(QMainWindow):
         # Table (Right)
         self.table = QTableWidget()
         header = self.table.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.Stretch)
+        header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
         # ComboBox (Right)
         self.combo = QComboBox()

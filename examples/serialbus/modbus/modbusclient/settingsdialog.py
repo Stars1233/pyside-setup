@@ -11,10 +11,10 @@ from ui_settingsdialog import Ui_SettingsDialog
 
 class Settings:
     def __init__(self):
-        self.parity = QSerialPort.EvenParity
-        self.baud = QSerialPort.Baud19200
-        self.data_bits = QSerialPort.Data8
-        self.stop_bits = QSerialPort.OneStop
+        self.parity = QSerialPort.Parity.EvenParity
+        self.baud = QSerialPort.BaudRate.Baud19200
+        self.data_bits = QSerialPort.DataBits.Data8
+        self.stop_bits = QSerialPort.StopBits.OneStop
         self.response_time = 1000
         self.number_of_retries = 3
 

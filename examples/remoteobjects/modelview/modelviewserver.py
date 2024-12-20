@@ -21,13 +21,15 @@ class TimerHandler(QObject):
     def change_data(self):
         for i in range(10, 50):
             self._model.setData(self._model.index(i, 1),
-                                QColor(Qt.blue), Qt.ItemDataRole.BackgroundRole)
+                                QColor(Qt.GlobalColor.blue),
+                                Qt.ItemDataRole.BackgroundRole)
 
     def insert_data(self):
         self._model.insertRows(2, 9)
         for i in range(2, 11):
             self._model.setData(self._model.index(i, 1),
-                                QColor(Qt.green), Qt.ItemDataRole.BackgroundRole)
+                                QColor(Qt.GlobalColor.green),
+                                Qt.ItemDataRole.BackgroundRole)
             self._model.setData(self._model.index(i, 1),
                                 "InsertedRow", Qt.ItemDataRole.DisplayRole)
 
@@ -38,7 +40,7 @@ class TimerHandler(QObject):
         item = self._model.item(0, 0)
         item.setEnabled(False)
         item = item.child(0, 0)
-        item.setFlags(item.flags() & Qt.ItemIsSelectable)
+        item.setFlags(item.flags() & Qt.ItemFlag.ItemIsSelectable)
 
     def move_data(self):
         self._model.moveRows(QModelIndex(), 2, 4, QModelIndex(), 10)
@@ -70,7 +72,7 @@ if __name__ == '__main__':
             first_item.appendRow(add_child(2, 2))
         second_item = QStandardItem(f"FancyRow2TextNumber {i}")
         if i % 2 == 0:
-            first_item.setBackground(Qt.red)
+            first_item.setBackground(Qt.GlobalColor.red)
         row = [first_item, second_item]
         source_model.invisibleRootItem().appendRow(row)
         data_list.append(f"FancyTextNumber {i}")

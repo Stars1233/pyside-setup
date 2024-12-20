@@ -171,14 +171,15 @@ class ExampleTriangleGeometry(QQuick3DGeometry):
         self.setBounds(QVector3D(-1.0, -1.0, 0.0), QVector3D(+1.0, +1.0, 0.0))
         self.setPrimitiveType(QQuick3DGeometry.PrimitiveType.Triangles)
         self.addAttribute(
-            QQuick3DGeometry.Attribute.PositionSemantic, 0, QQuick3DGeometry.Attribute.F32Type
+            QQuick3DGeometry.Attribute.Semantic.PositionSemantic, 0,
+            QQuick3DGeometry.Attribute.ComponentType.F32Type
         )
 
         if self._hasNormals:
             self.addAttribute(
-                QQuick3DGeometry.Attribute.NormalSemantic,
+                QQuick3DGeometry.Attribute.Semantic.NormalSemantic,
                 3 * FLOAT_SIZE,
-                QQuick3DGeometry.Attribute.F32Type,
+                QQuick3DGeometry.Attribute.ComponentType.F32Type,
             )
 
         if self._hasUV:

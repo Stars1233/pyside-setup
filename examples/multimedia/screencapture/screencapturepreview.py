@@ -57,7 +57,7 @@ class ScreenCapturePreview(QWidget):
         update_action = QAction("Update windows List", self)
         update_action.triggered.connect(self._window_list_model.populate)
         self._window_list_view.addAction(update_action)
-        self._window_list_view.setContextMenuPolicy(Qt.ActionsContextMenu)
+        self._window_list_view.setContextMenuPolicy(Qt.ContextMenuPolicy.ActionsContextMenu)
 
         grid_layout = QGridLayout(self)
         grid_layout.addWidget(self._screen_label, 0, 0)
@@ -82,9 +82,9 @@ class ScreenCapturePreview(QWidget):
 
         self._start_stop_button.clicked.connect(self.on_start_stop_button_clicked)
         self._screen_capture.errorOccurred.connect(self.on_screen_capture_error_occured,
-                                                   Qt.QueuedConnection)
+                                                   Qt.ConnectionType.QueuedConnection)
         self._window_capture.errorOccurred.connect(self.on_window_capture_error_occured,
-                                                   Qt.QueuedConnection)
+                                                   Qt.ConnectionType.QueuedConnection)
         self.update_active(SourceType.Screen, True)
 
     @Slot(QItemSelection)

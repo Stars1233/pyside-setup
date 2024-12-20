@@ -150,7 +150,8 @@ class ConnectDialog(QDialog):
             if k == key:
                 result = v
                 break
-        if not result and (key == QCanBusDevice.LoopbackKey or key == QCanBusDevice.ReceiveOwnKey):
+        if (not result and (key == QCanBusDevice.ConfigurationKey.LoopbackKey
+                            or key == QCanBusDevice.ConfigurationKey.ReceiveOwnKey)):
             return "unspecified"
         return str(result)
 
@@ -163,22 +164,22 @@ class ConnectDialog(QDialog):
         self.m_ui.ringBufferLimitBox.setValue(self.m_currentSettings.model_ring_buffer_size)
         self.m_ui.autoscrollBox.setChecked(self.m_currentSettings.use_autoscroll)
 
-        value = self.configuration_value(QCanBusDevice.LoopbackKey)
+        value = self.configuration_value(QCanBusDevice.ConfigurationKey.LoopbackKey)
         self.m_ui.loopbackBox.setCurrentText(value)
 
-        value = self.configuration_value(QCanBusDevice.ReceiveOwnKey)
+        value = self.configuration_value(QCanBusDevice.ConfigurationKey.ReceiveOwnKey)
         self.m_ui.receiveOwnBox.setCurrentText(value)
 
-        value = self.configuration_value(QCanBusDevice.ErrorFilterKey)
+        value = self.configuration_value(QCanBusDevice.ConfigurationKey.ErrorFilterKey)
         self.m_ui.errorFilterEdit.setText(value)
 
-        value = self.configuration_value(QCanBusDevice.BitRateKey)
+        value = self.configuration_value(QCanBusDevice.ConfigurationKey.BitRateKey)
         self.m_ui.bitrateBox.setCurrentText(value)
 
-        value = self.configuration_value(QCanBusDevice.CanFdKey)
+        value = self.configuration_value(QCanBusDevice.ConfigurationKey.CanFdKey)
         self.m_ui.canFdBox.setCurrentText(value)
 
-        value = self.configuration_value(QCanBusDevice.DataBitRateKey)
+        value = self.configuration_value(QCanBusDevice.ConfigurationKey.DataBitRateKey)
         self.m_ui.dataBitrateBox.setCurrentText(value)
 
     def update_settings(self):

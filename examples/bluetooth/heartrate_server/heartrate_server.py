@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
 #! [Advertising Data]
     advertising_data = QLowEnergyAdvertisingData()
-    advertising_data.setDiscoverability(QLowEnergyAdvertisingData.DiscoverabilityGeneral)
+    advertising_data.setDiscoverability(QLowEnergyAdvertisingData.Discoverability.DiscoverabilityGeneral)  # noqa: E501
     advertising_data.setIncludePowerLevel(True)
     advertising_data.setLocalName("HeartRateServer")
     advertising_data.setServices([QBluetoothUuid.ServiceClassUuid.HeartRate])
@@ -39,13 +39,13 @@ if __name__ == '__main__':
     char_data = QLowEnergyCharacteristicData()
     char_data.setUuid(QBluetoothUuid.CharacteristicType.HeartRateMeasurement)
     char_data.setValue(QByteArray(2, 0))
-    char_data.setProperties(QLowEnergyCharacteristic.Notify)
+    char_data.setProperties(QLowEnergyCharacteristic.PropertyType.Notify)
     client_config = QLowEnergyDescriptorData(
         QBluetoothUuid.DescriptorType.ClientCharacteristicConfiguration, QByteArray(2, 0))
     char_data.addDescriptor(client_config)
 
     service_data = QLowEnergyServiceData()
-    service_data.setType(QLowEnergyServiceData.ServiceTypePrimary)
+    service_data.setType(QLowEnergyServiceData.ServiceType.ServiceTypePrimary)
     service_data.setUuid(QBluetoothUuid.ServiceClassUuid.HeartRate)
     service_data.addCharacteristic(char_data)
 #! [Service Data]

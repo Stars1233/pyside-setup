@@ -146,10 +146,10 @@ class Renderer(QObject, QOpenGLFunctions):
             QMetaObject.invokeMethod(self._glwidget, "update")
 
     def _init_gl(self):
-        vshader = QOpenGLShader(QOpenGLShader.Vertex, self)
+        vshader = QOpenGLShader(QOpenGLShader.ShaderTypeBit.Vertex, self)
         vshader.compileSourceCode(VERTEX_SHADER)
 
-        fshader = QOpenGLShader(QOpenGLShader.Fragment, self)
+        fshader = QOpenGLShader(QOpenGLShader.ShaderTypeBit.Fragment, self)
         fshader.compileSourceCode(FRAGMENT_SHADER)
 
         self._program.addShader(vshader)

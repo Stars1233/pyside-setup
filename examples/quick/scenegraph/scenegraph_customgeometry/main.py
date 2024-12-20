@@ -38,7 +38,7 @@ class BezierCurve(QQuickItem):
 
         self._node = None
         self._geometry = None
-        self.setFlag(QQuickItem.Flags.ItemHasContents, True)
+        self.setFlag(QQuickItem.Flag.ItemHasContents, True)
 
     def p1(self):
         return self._p1
@@ -100,11 +100,11 @@ class BezierCurve(QQuickItem):
 
             self._node = QSGGeometryNode()
             self._node.setGeometry(self._geometry)
-            self._node.setFlag(QSGNode.Flags.OwnsGeometry)
+            self._node.setFlag(QSGNode.Flag.OwnsGeometry)
             self._material = QSGFlatColorMaterial()
             self._material.setColor(QColor(255, 0, 0))
             self._node.setMaterial(self._material)
-            self._node.setFlag(QSGNode.Flags.OwnsMaterial)
+            self._node.setFlag(QSGNode.Flag.OwnsMaterial)
         else:
             self._geometry = self._node.geometry()
             self._geometry.allocate(self._segmentCount)
@@ -124,7 +124,7 @@ class BezierCurve(QQuickItem):
 
         self._geometry.setVertexDataAsPoint2D(vertices)
 
-        self._node.markDirty(QSGNode.DirtyGeometry)
+        self._node.markDirty(QSGNode.DirtyStateBit.DirtyGeometry)
         return self._node
 
     p1 = Property(QPointF, p1, setP1, notify=p1Changed)

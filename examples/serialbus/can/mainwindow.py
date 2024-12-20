@@ -136,11 +136,11 @@ class MainWindow(QMainWindow):
             self.m_ui.actionDisconnect.setEnabled(True)
             self.m_ui.actionDeviceInformation.setEnabled(True)
             self.m_ui.sendFrameBox.setEnabled(True)
-            config_bit_rate = self.m_can_device.configurationParameter(QCanBusDevice.BitRateKey)
+            config_bit_rate = self.m_can_device.configurationParameter(QCanBusDevice.ConfigurationKey.BitRateKey)  # noqa: E501
             if config_bit_rate is not None and config_bit_rate > 0:
-                is_can_fd = bool(self.m_can_device.configurationParameter(QCanBusDevice.CanFdKey))
+                is_can_fd = bool(self.m_can_device.configurationParameter(QCanBusDevice.ConfigurationKey.CanFdKey))  # noqa: E501
                 config_data_bit_rate = self.m_can_device.configurationParameter(
-                    QCanBusDevice.DataBitRateKey)
+                    QCanBusDevice.ConfigurationKey.DataBitRateKey)
                 bit_rate = config_bit_rate / 1000
                 if is_can_fd and config_data_bit_rate > 0:
                     data_bit_rate = config_data_bit_rate / 1000

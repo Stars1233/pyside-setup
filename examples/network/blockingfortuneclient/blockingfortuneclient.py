@@ -96,10 +96,11 @@ class BlockingClient(QWidget):
         port_label = QLabel("S&erver port:")
 
         for ip_address in QNetworkInterface.allAddresses():
-            if ip_address != QHostAddress.LocalHost and ip_address.toIPv4Address() != 0:
+            if (ip_address != QHostAddress.SpecialAddress.LocalHost
+                    and ip_address.toIPv4Address() != 0):
                 break
         else:
-            ip_address = QHostAddress(QHostAddress.LocalHost)
+            ip_address = QHostAddress(QHostAddress.SpecialAddress.LocalHost)
 
         ip_address = ip_address.toString()
 
@@ -121,8 +122,8 @@ class BlockingClient(QWidget):
         quit_button = QPushButton("Quit")
 
         button_box = QDialogButtonBox()
-        button_box.addButton(self._get_fortune_button, QDialogButtonBox.ActionRole)
-        button_box.addButton(quit_button, QDialogButtonBox.RejectRole)
+        button_box.addButton(self._get_fortune_button, QDialogButtonBox.ButtonRole.ActionRole)
+        button_box.addButton(quit_button, QDialogButtonBox.ButtonRole.RejectRole)
 
         self._get_fortune_button.clicked.connect(self.request_new_fortune)
         quit_button.clicked.connect(self.close)
@@ -158,11 +159,11 @@ class BlockingClient(QWidget):
         self._get_fortune_button.setEnabled(True)
 
     def display_error(self, socketError, message):
-        if socketError == QAbstractSocket.HostNotFoundError:
+        if socketError == QAbstractSocket.SocketError.HostNotFoundError:
             QMessageBox.information(self, "Blocking Fortune Client",
                                     "The host was not found. Please check the host and port "
                                     "settings.")
-        elif socketError == QAbstractSocket.ConnectionRefusedError:
+        elif socketError == QAbstractSocket.SocketError.ConnectionRefusedError:
             QMessageBox.information(self, "Blocking Fortune Client",
                                     "The connection was refused by the peer. Make sure the "
                                     "fortune server is running, and check that the host name "

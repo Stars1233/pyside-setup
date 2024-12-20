@@ -58,7 +58,7 @@ class DeviceHandler(BluetoothBaseClass):
         self.m_stop = QDateTime()
 
         self.m_measurements = []
-        self.m_addressType = QLowEnergyController.PublicAddress
+        self.m_addressType = QLowEnergyController.RemoteAddressType.PublicAddress
 
         self.m_demoTimer = QTimer()
 
@@ -71,16 +71,16 @@ class DeviceHandler(BluetoothBaseClass):
 
     @Property(int)
     def addressType(self):
-        if self.m_addressType == QLowEnergyController.RandomAddress:
+        if self.m_addressType == QLowEnergyController.RemoteAddressType.RandomAddress:
             return DeviceHandler.AddressType.RANDOM_ADDRESS
         return DeviceHandler.AddressType.PUBLIC_ADDRESS
 
     @addressType.setter
     def addressType(self, type):
         if type == DeviceHandler.AddressType.PUBLIC_ADDRESS:
-            self.m_addressType = QLowEnergyController.PublicAddress
+            self.m_addressType = QLowEnergyController.RemoteAddressType.PublicAddress
         elif type == DeviceHandler.AddressType.RANDOM_ADDRESS:
-            self.m_addressType = QLowEnergyController.RandomAddress
+            self.m_addressType = QLowEnergyController.RemoteAddressType.RandomAddress
 
     @Slot(QLowEnergyController.Error)
     def controllerErrorOccurred(self, device):

@@ -211,9 +211,9 @@ class Edge(QGraphicsItem):
                 QPen(
                     QColor(self._color),
                     self._tickness,
-                    Qt.SolidLine,
-                    Qt.RoundCap,
-                    Qt.RoundJoin,
+                    Qt.PenStyle.SolidLine,
+                    Qt.PenCapStyle.RoundCap,
+                    Qt.PenJoinStyle.RoundJoin,
                 )
             )
             painter.drawLine(self._line)
@@ -286,7 +286,7 @@ class GraphView(QGraphicsView):
                 animation = QPropertyAnimation(item, b"pos")
                 animation.setDuration(1000)
                 animation.setEndValue(QPointF(x, y))
-                animation.setEasingCurve(QEasingCurve.OutExpo)
+                animation.setEasingCurve(QEasingCurve.Type.OutExpo)
                 self.animations.addAnimation(animation)
 
             self.animations.start()

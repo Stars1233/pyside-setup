@@ -13,7 +13,7 @@ class ReceivedFramesView(QTableView):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self._context_menu)
 
     @Slot(QPoint)

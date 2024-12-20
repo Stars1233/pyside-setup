@@ -52,7 +52,7 @@ class Dialog(QDialog):
 
         # load into shared memory
         buffer = QBuffer()
-        buffer.open(QIODeviceBase.WriteOnly)
+        buffer.open(QIODeviceBase.OpenModeFlag.WriteOnly)
         out = QDataStream(buffer)
         out << image
         buffer.close()
@@ -79,7 +79,7 @@ class Dialog(QDialog):
         mv = memoryview(self._shared_memory.constData())
         buffer = QBuffer()
         buffer.setData(mv.tobytes())
-        buffer.open(QBuffer.ReadOnly)
+        buffer.open(QBuffer.OpenModeFlag.ReadOnly)
         _in = QDataStream(buffer)
         image = QImage()
         _in >> image

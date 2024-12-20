@@ -43,7 +43,7 @@ class WindowSingleThreaded(QWindow):
         self.m_quickReady = False
         self.m_dpr = 0
         self.m_status_conn_id = None
-        self.setSurfaceType(QSurface.OpenGLSurface)
+        self.setSurfaceType(QSurface.SurfaceType.OpenGLSurface)
 
         format = QSurfaceFormat()
         # Qt Quick may need a depth and stencil buffer. Always make sure these

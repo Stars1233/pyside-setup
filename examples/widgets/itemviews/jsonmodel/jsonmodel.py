@@ -271,7 +271,7 @@ class JsonModel(QAbstractItemModel):
         flags = super(JsonModel, self).flags(index)
 
         if index.column() == 1:
-            return Qt.ItemIsEditable | flags
+            return Qt.ItemFlag.ItemIsEditable | flags
         else:
             return flags
 
@@ -315,7 +315,7 @@ if __name__ == "__main__":
         model.load(document)
 
     view.show()
-    view.header().setSectionResizeMode(0, QHeaderView.Stretch)
+    view.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
     view.setAlternatingRowColors(True)
     view.resize(500, 300)
     app.exec()

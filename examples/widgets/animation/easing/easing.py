@@ -65,7 +65,7 @@ class Pixmap(QObject):
         super().__init__()
 
         self.pixmap_item = QGraphicsPixmapItem(pix)
-        self.pixmap_item.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
+        self.pixmap_item.setCacheMode(QGraphicsItem.CacheMode.DeviceCoordinateCache)
 
     def set_pos(self, pos):
         self.pixmap_item.setPos(pos)
@@ -110,7 +110,7 @@ class Window(QWidget):
         self._ui.graphicsView.setScene(self._scene)
 
         self._anim = Animation(self._item, b'pos')
-        self._anim.setEasingCurve(QEasingCurve.OutBounce)
+        self._anim.setEasingCurve(QEasingCurve.Type.OutBounce)
         self._ui.easingCurvePicker.setCurrentRow(0)
 
         self.start_animation()
@@ -140,15 +140,15 @@ class Window(QWidget):
 
                 curve_scale = self._iconSize.height() / 2.0
 
-                painter.setPen(Qt.NoPen)
+                painter.setPen(Qt.PenStyle.NoPen)
 
                 # Start point.
-                painter.setBrush(Qt.red)
+                painter.setBrush(Qt.GlobalColor.red)
                 start = QPoint(y_axis, x_axis - curve_scale * curve.valueForProgress(0))
                 painter.drawRect(start.x() - 1, start.y() - 1, 3, 3)
 
                 # End point.
-                painter.setBrush(Qt.blue)
+                painter.setBrush(Qt.GlobalColor.blue)
                 end = QPoint(y_axis + curve_scale,
                              x_axis - curve_scale * curve.valueForProgress(1))
                 painter.drawRect(end.x() - 1, end.y() - 1, 3, 3)
@@ -183,15 +183,16 @@ class Window(QWidget):
         self._anim.setEasingCurve(curve_type)
         self._anim.setCurrentTime(0)
 
-        is_elastic = (curve_type.value >= QEasingCurve.InElastic.value
-                      and curve_type.value <= QEasingCurve.OutInElastic.value)
-        is_bounce = (curve_type.value >= QEasingCurve.InBounce.value
-                     and curve_type.value <= QEasingCurve.OutInBounce.value)
+        is_elastic = (curve_type.value >= QEasingCurve.Type.InElastic.value
+                      and curve_type.value <= QEasingCurve.Type.OutInElastic.value)
+        is_bounce = (curve_type.value >= QEasingCurve.Type.InBounce.value
+                     and curve_type.value <= QEasingCurve.Type.OutInBounce.value)
 
         self._ui.periodSpinBox.setEnabled(is_elastic)
         self._ui.amplitudeSpinBox.setEnabled(is_elastic or is_bounce)
-        self._ui.overshootSpinBox.setEnabled(curve_type.value >= QEasingCurve.InBack.value
-                                             and curve_type.value <= QEasingCurve.OutInBack.value)
+        overshoot = (curve_type.value >= QEasingCurve.Type.InBack.value
+                     and curve_type.value <= QEasingCurve.Type.OutInBack.value)
+        self._ui.overshootSpinBox.setEnabled(overshoot)
 
     def path_changed(self, index):
         self._anim.set_path_type(index)

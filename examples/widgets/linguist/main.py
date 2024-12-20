@@ -25,7 +25,7 @@ class Window(QMainWindow):
         about_qt_action.triggered.connect(qApp.aboutQt)  # noqa: F821
 
         self._list_widget = QListWidget()
-        self._list_widget.setSelectionMode(QAbstractItemView.MultiSelection)
+        self._list_widget.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
         self._list_widget.selectionModel().selectionChanged.connect(self.selection_changed)
         self._list_widget.addItem("C++")
         self._list_widget.addItem("Java")

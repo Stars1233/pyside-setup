@@ -29,10 +29,10 @@ class AnalogClockWindow(QRasterWindow):
                                        QPoint(-1, -89), QPoint(1, -89)])
 
         palette = qApp.palette()  # noqa: F821
-        self._background_color = palette.color(QPalette.Window)
-        self._hour_color = palette.color(QPalette.Text)
-        self._minute_color = palette.color(QPalette.Text)
-        self._seconds_color = palette.color(QPalette.Accent)
+        self._background_color = palette.color(QPalette.ColorRole.Window)
+        self._hour_color = palette.color(QPalette.ColorRole.Text)
+        self._minute_color = palette.color(QPalette.ColorRole.Text)
+        self._seconds_color = palette.color(QPalette.ColorRole.Accent)
 
     def paintEvent(self, e):
         with QPainter(self) as painter:
@@ -51,7 +51,7 @@ class AnalogClockWindow(QRasterWindow):
 
         time = QTime.currentTime()
 
-        painter.setPen(Qt.NoPen)
+        painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(self._hour_color)
 
         painter.save()

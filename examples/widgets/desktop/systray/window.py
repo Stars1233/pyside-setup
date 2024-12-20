@@ -157,21 +157,21 @@ class Window(QDialog):
         self._type_label = QLabel("Type:")
 
         self._type_combo_box = QComboBox()
-        self._type_combo_box.addItem("None", QSystemTrayIcon.NoIcon)
+        self._type_combo_box.addItem("None", QSystemTrayIcon.MessageIcon.NoIcon)
         self._type_combo_box.addItem(
-            self.style().standardIcon(QStyle.SP_MessageBoxInformation),
+            self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation),
             "Information",
-            QSystemTrayIcon.Information,
+            QSystemTrayIcon.MessageIcon.Information,
         )
         self._type_combo_box.addItem(
-            self.style().standardIcon(QStyle.SP_MessageBoxWarning),
+            self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxWarning),
             "Warning",
-            QSystemTrayIcon.Warning,
+            QSystemTrayIcon.MessageIcon.Warning,
         )
         self._type_combo_box.addItem(
-            self.style().standardIcon(QStyle.SP_MessageBoxCritical),
+            self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxCritical),
             "Critical",
-            QSystemTrayIcon.Critical,
+            QSystemTrayIcon.MessageIcon.Critical,
         )
         self._type_combo_box.addItem(QIcon(), "Custom icon", -1)
         self._type_combo_box.setCurrentIndex(1)

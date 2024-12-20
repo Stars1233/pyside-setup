@@ -11,7 +11,7 @@ iconQueriedRole = Qt.ItemDataRole.UserRole + 2
 
 def createRow(t: QMimeType):
     name_item = QStandardItem(t.name())
-    flags = Qt.ItemIsSelectable | Qt.ItemIsEnabled
+    flags = Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled
     name_item.setData(t, mimeTypeRole)
     name_item.setData(False, iconQueriedRole)
     name_item.setFlags(flags)

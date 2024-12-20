@@ -68,7 +68,7 @@ class AddressBook(QWidget):
         self._cancel_button.clicked.connect(self.cancel)
 
         button_layout_1 = QVBoxLayout()
-        button_layout_1.addWidget(self._add_button, Qt.AlignTop)
+        button_layout_1.addWidget(self._add_button, Qt.AlignmentFlag.AlignTop)
         button_layout_1.addWidget(self._submit_button)
         button_layout_1.addWidget(self._cancel_button)
         button_layout_1.addStretch()
@@ -76,7 +76,7 @@ class AddressBook(QWidget):
         main_layout = QGridLayout()
         main_layout.addWidget(name_label, 0, 0)
         main_layout.addWidget(self._name_line, 0, 1)
-        main_layout.addWidget(address_label, 1, 0, Qt.AlignTop)
+        main_layout.addWidget(address_label, 1, 0, Qt.AlignmentFlag.AlignTop)
         main_layout.addWidget(self._address_text, 1, 1)
         main_layout.addLayout(button_layout_1, 1, 2)
 
@@ -91,7 +91,7 @@ class AddressBook(QWidget):
         self._address_text.clear()
 
         self._name_line.setReadOnly(False)
-        self._name_line.setFocus(Qt.OtherFocusReason)
+        self._name_line.setFocus(Qt.FocusReason.OtherFocusReason)
         self._address_text.setReadOnly(False)
 
         self._add_button.setEnabled(False)

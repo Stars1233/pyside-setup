@@ -45,7 +45,7 @@ class WriteRegisterModel(QAbstractTableModel):
             return f"{row}"
 
         if column == Column.COILS_COLUMN and role == Qt.ItemDataRole.CheckStateRole:  # coils
-            return Qt.Checked if self.m_coils[row] else Qt.Unchecked
+            return Qt.CheckState.Checked if self.m_coils[row] else Qt.CheckState.Unchecked
 
         # holding registers
         if column == Column.HOLDING_COLUMN and role == Qt.ItemDataRole.DisplayRole:
@@ -77,7 +77,7 @@ class WriteRegisterModel(QAbstractTableModel):
 
         if column == Column.COILS_COLUMN and role == Qt.ItemDataRole.CheckStateRole:  # coils
             s = Qt.CheckState(int(value))
-            if s == Qt.Checked:
+            if s == Qt.CheckState.Checked:
                 self.m_coils.setBit(row)
             else:
                 self.m_coils.clearBit(row)
@@ -101,12 +101,12 @@ class WriteRegisterModel(QAbstractTableModel):
             return flags
 
         if row < self.m_address or row >= (self.m_address + self.m_number):
-            flags &= ~Qt.ItemIsEnabled
+            flags &= ~Qt.ItemFlag.ItemIsEnabled
 
         if column == Column.COILS_COLUMN:  # coils
-            return flags | Qt.ItemIsUserCheckable
+            return flags | Qt.ItemFlag.ItemIsUserCheckable
         if column == Column.HOLDING_COLUMN:  # holding registers
-            return flags | Qt.ItemIsEditable
+            return flags | Qt.ItemFlag.ItemIsEditable
         return flags
 
     @Slot(int)

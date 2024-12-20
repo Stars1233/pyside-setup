@@ -103,9 +103,9 @@ class CubeRenderer():
                      w.height() * w.devicePixelRatio())
 
         self.m_program = QOpenGLShaderProgram()
-        self.m_program.addCacheableShaderFromSourceCode(QOpenGLShader.Vertex,
+        self.m_program.addCacheableShaderFromSourceCode(QOpenGLShader.ShaderTypeBit.Vertex,
                                                         VERTEXSHADER_SOURCE)
-        self.m_program.addCacheableShaderFromSourceCode(QOpenGLShader.Fragment,
+        self.m_program.addCacheableShaderFromSourceCode(QOpenGLShader.ShaderTypeBit.Fragment,
                                                         FRAGMENTSHADER_SOURCE)
         self.m_program.bindAttributeLocation("vertex", 0)
         self.m_program.bindAttributeLocation("coord", 1)
