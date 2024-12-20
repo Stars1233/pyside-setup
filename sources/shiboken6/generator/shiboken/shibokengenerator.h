@@ -109,6 +109,9 @@ protected:
      */
     FunctionGroups getGlobalFunctionGroups() const;
     static FunctionGroups getFunctionGroups(const AbstractMetaClassCPtr &scope);
+    /// Returns the constructors for which bindings should be generated.
+    /// \param scope Where to search for functions
+    static AbstractMetaFunctionCList getConstructors(const AbstractMetaClassCPtr &scope);
 
     static QList<AbstractMetaFunctionCList>
         numberProtocolOperators(const AbstractMetaClassCPtr &scope);
@@ -370,7 +373,8 @@ private:
 
     static const GeneratorClassInfoCacheEntry &
         getGeneratorClassInfo(const AbstractMetaClassCPtr &scope);
-    static FunctionGroups getFunctionGroupsImpl(const AbstractMetaClassCPtr &scope);
+    static FunctionGroups getFunctionGroupsImpl(const AbstractMetaClassCPtr &scope,
+                                                AbstractMetaFunctionCList *constructors);
     static QList<AbstractMetaFunctionCList>
         getNumberProtocolOperators(const AbstractMetaClassCPtr &metaClass);
     static BoolCastFunctionOptional getBoolCast(const AbstractMetaClassCPtr &metaClass);

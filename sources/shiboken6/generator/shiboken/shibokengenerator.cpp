@@ -105,6 +105,7 @@ struct ShibokenGeneratorOptions
 struct GeneratorClassInfoCacheEntry
 {
     ShibokenGenerator::FunctionGroups functionGroups;
+    AbstractMetaFunctionCList constructors;
     QList<AbstractMetaFunctionCList> numberProtocolOperators;
     BoolCastFunctionOptional boolCastFunctionO;
     ShibokenGenerator::AttroCheck attroCheck;
@@ -1937,7 +1938,7 @@ AbstractMetaFunctionCList
                 if (func->isAssignmentOperator() || func->isConversionOperator()
                     || func->isModifiedRemoved()
                     || func->isPrivate() || func->ownerClass() != func->implementingClass()
-                    || func->isConstructor() || func->isOperatorOverload())
+                    || func->isOperatorOverload())
                     continue;
                 overloads.append(func);
             }
@@ -2060,7 +2061,7 @@ const GeneratorClassInfoCacheEntry &
     if (it == cache->end()) {
         it = cache->insert(scope, {});
         auto &entry = it.value();
-        entry.functionGroups = getFunctionGroupsImpl(scope);
+        entry.functionGroups = getFunctionGroupsImpl(scope, &entry.constructors);
         entry.attroCheck = checkAttroFunctionNeedsImpl(scope, entry.functionGroups);
         entry.numberProtocolOperators = getNumberProtocolOperators(scope);
         entry.boolCastFunctionO = getBoolCast(scope);
@@ -2073,6 +2074,13 @@ ShibokenGenerator::FunctionGroups
 {
     Q_ASSERT(scope);
     return getGeneratorClassInfo(scope).functionGroups;
+}
+
+AbstractMetaFunctionCList
+   ShibokenGenerator::getConstructors(const AbstractMetaClassCPtr &scope)
+{
+    Q_ASSERT(scope);
+    return getGeneratorClassInfo(scope).constructors;
 }
 
 QList<AbstractMetaFunctionCList>
@@ -2113,7 +2121,8 @@ static void removeConstOverloads(AbstractMetaFunctionCList *overloads)
 }
 
 ShibokenGenerator::FunctionGroups
-    ShibokenGenerator::getFunctionGroupsImpl(const AbstractMetaClassCPtr &scope)
+    ShibokenGenerator::getFunctionGroupsImpl(const AbstractMetaClassCPtr &scope,
+                                            AbstractMetaFunctionCList *constructors)
 {
     AbstractMetaFunctionCList lst = scope->functions();
     scope->getFunctionsFromInvisibleNamespacesToBeGenerated(&lst);
@@ -2123,6 +2132,11 @@ ShibokenGenerator::FunctionGroups
         if (isGroupable(func)
             && func->ownerClass() == func->implementingClass()
             && func->generateBinding()) {
+            if (func->isConstructor()) {
+                if (func->functionType() != AbstractMetaFunction::MoveConstructorFunction)
+                    constructors->append(func);
+                continue;
+            }
             auto it = results.find(func->name());
             if (it == results.end()) {
                 it = results.insert(func->name(), AbstractMetaFunctionCList(1, func));

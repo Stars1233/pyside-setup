@@ -717,6 +717,14 @@ void CppGenerator::generateClass(TextStream &s,
 
     s << openTargetExternC;
 
+    const auto &constructors = getConstructors(metaClass);
+    if (!constructors.isEmpty()) {
+        OverloadData overloadData(constructors, api());
+        writeConstructorWrapper(s, overloadData, classContext);
+        // On constructors, we also generate the property initializers.
+        writeSignatureInfo(signatureStream, overloadData, true);
+    }
+
     const auto &functionGroups = getFunctionGroups(metaClass);
     for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
         if (contains(sequenceProtocols(), it.key()) || contains(mappingProtocols(), it.key()))
@@ -728,13 +736,8 @@ void CppGenerator::generateClass(TextStream &s,
         const auto &rfunc = overloads.constFirst();
         OverloadData overloadData(overloads, api());
 
-        if (rfunc->isConstructor()) {
-            writeConstructorWrapper(s, overloadData, classContext);
-            // On constructors, we also generate the property initializers.
-            writeSignatureInfo(signatureStream, overloadData, true);
-        }
         // call operators
-        else if (rfunc->name() == u"operator()") {
+        if (rfunc->name() == u"operator()") {
             writeMethodWrapper(s, overloadData, classContext);
             writeSignatureInfo(signatureStream, overloadData);
         }
@@ -3696,9 +3699,11 @@ QString CppGenerator::argumentNameFromIndex(const ApiExtractorResult &api,
     case 0:
         return PYTHON_RETURN_VAR;
     case 1: { // Single argument?
-        OverloadData data(getFunctionGroups(func->implementingClass()).value(func->name()), api);
-        if (!data.pythonFunctionWrapperUsesListOfArguments())
-            return PYTHON_ARG;
+        if (!func->isConstructor()) {
+            OverloadData data(getFunctionGroups(func->implementingClass()).value(func->name()), api);
+            if (!data.pythonFunctionWrapperUsesListOfArguments())
+                return PYTHON_ARG;
+        }
         break;
     }
     }
@@ -4493,14 +4498,6 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     QString tp_hash;
     QString tp_call;
     const QString className = chopType(cpythonTypeName(metaClass));
-    AbstractMetaFunctionCList ctors;
-    const auto &allCtors = metaClass->queryFunctions(FunctionQueryOption::AnyConstructor);
-    for (const auto &f : allCtors) {
-        if (!f->isPrivate() && !f->isModifiedRemoved()
-            && f->functionType() != AbstractMetaFunction::MoveConstructorFunction) {
-            ctors.append(f);
-        }
-    }
 
     bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
 
@@ -4518,7 +4515,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     } else {
         tp_dealloc = isQApp
             ? u"&SbkDeallocQAppWrapper"_s : u"&SbkDeallocWrapper"_s;
-        if (!onlyPrivCtor && !ctors.isEmpty())
+        if (!onlyPrivCtor && !getConstructors(metaClass).isEmpty())
             tp_init = cpythonConstructorName(metaClass);
     }
 
