@@ -60,6 +60,16 @@ void setInstantiateAbstractClassDisabledWrapper(const char *name)
                  name);
 }
 
+void setInstantiateNamespace(const char *name)
+{
+    PyErr_Format(PyExc_NotImplementedError, "Namespace '%s' cannot be instantiated.", name);
+}
+
+void setInstantiateNonConstructible(const char *name)
+{
+    PyErr_Format(PyExc_NotImplementedError, "Class '%s' cannot be instantiated.", name);
+}
+
 void setInvalidTypeDeletion(const char *name)
 {
     PyErr_Format(PyExc_TypeError, "'%s' may not be deleted", name);

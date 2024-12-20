@@ -39,6 +39,8 @@ LIBSHIBOKEN_API void setIndexOutOfBounds(Py_ssize_t value, Py_ssize_t minValue,
                                          Py_ssize_t maxValue);
 LIBSHIBOKEN_API void setInstantiateAbstractClass(const char *name);
 LIBSHIBOKEN_API void setInstantiateAbstractClassDisabledWrapper(const char *name);
+LIBSHIBOKEN_API void setInstantiateNamespace(const char *name);
+LIBSHIBOKEN_API void setInstantiateNonConstructible(const char *name);
 LIBSHIBOKEN_API void setInvalidTypeDeletion(const char *name);
 LIBSHIBOKEN_API void setOperatorNotImplemented();
 LIBSHIBOKEN_API void setPureVirtualMethodError(const char *name);

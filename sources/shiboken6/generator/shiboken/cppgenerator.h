@@ -145,6 +145,8 @@ private:
     void writeConstructorWrapper(TextStream &s,
                                  const OverloadData &overloadData,
                                  const GeneratorContext &classContext) const;
+    static void writeConstructorDummy(TextStream &s, const GeneratorContext &classContext,
+                                      const char *errorMessageFunc);
     void writeMethodWrapper(TextStream &s, const OverloadData &overloadData,
                             const GeneratorContext &classContext) const;
     void writeMethodWrapper(TextStream &s, TextStream &definitionStream,

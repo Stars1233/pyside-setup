@@ -720,7 +720,11 @@ void CppGenerator::generateClass(TextStream &s,
     s << openTargetExternC;
 
     const auto &constructors = getConstructors(metaClass);
-    if (!constructors.isEmpty()) {
+    if (constructors.isEmpty()) {
+        const char *errorFunc = classContext.metaClass()->isNamespace()
+            ? "setInstantiateNamespace" : "setInstantiateNonConstructible";
+        writeConstructorDummy(s, classContext, errorFunc);
+    } else {
         OverloadData overloadData(constructors, api());
         writeConstructorWrapper(s, overloadData, classContext);
         // On constructors, we also generate the property initializers.
@@ -2153,6 +2157,19 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
             writeArgumentsInitializer(s, overloadData, context, errorReturn);
         }
     }
+}
+
+// Non-constructible classes
+void CppGenerator::writeConstructorDummy(TextStream &s,
+                                         const GeneratorContext &classContext,
+                                         const char *errorMessageFunc)
+{
+    s << "static int " << cpythonConstructorName(classContext.metaClass())
+        << "(PyObject *, PyObject *, PyObject *)\n{\n" << indent
+        << "Shiboken::Errors::" << errorMessageFunc << "(\""
+        << classContext.metaClass()->name()
+        << "\");\nreturn -1;\n"
+        << outdent << "}\n\n";
 }
 
 void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &overloadData,
@@ -4494,7 +4511,6 @@ void CppGenerator::writeClassDefinition(TextStream &s,
                                         const AbstractMetaClassCPtr &metaClass,
                                         const GeneratorContext &classContext)
 {
-    QString tp_init;
     QString tp_new;
     QString tp_dealloc;
     QString tp_hash;
@@ -4513,12 +4529,9 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         tp_dealloc = metaClass->hasPrivateDestructor() ?
                      u"SbkDeallocWrapperWithPrivateDtor"_s :
                      u"Sbk_object_dealloc /* PYSIDE-832: Prevent replacement of \"0\" with subtype_dealloc. */"_s;
-        tp_init.clear();
     } else {
         tp_dealloc = isQApp
             ? u"&SbkDeallocQAppWrapper"_s : u"&SbkDeallocWrapper"_s;
-        if (!onlyPrivCtor && !getConstructors(metaClass).isEmpty())
-            tp_init = cpythonConstructorName(metaClass);
     }
 
     const AttroCheck attroCheck = checkAttroFunctionNeeds(metaClass);
@@ -4619,7 +4632,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         << pyTypeSlotEntry("Py_tp_iternext", m_tpFuncs.value(u"__next__"_s))
         << pyTypeSlotEntry("Py_tp_methods", className + u"_methods"_s)
         << pyTypeSlotEntry("Py_tp_getset", tp_getset)
-        << pyTypeSlotEntry("Py_tp_init", tp_init)
+        << pyTypeSlotEntry("Py_tp_init", cpythonConstructorName(metaClass))
         << pyTypeSlotEntry("Py_tp_new", tp_new);
     if (supportsSequenceProtocol(metaClass)) {
         s << "// type supports sequence protocol\n";
