@@ -2159,7 +2159,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     const auto metaClass = rfunc->ownerClass();
 
     s << "static int\n";
-    s << cpythonFunctionName(rfunc)
+    s << cpythonConstructorName(metaClass)
         << "(PyObject *self, PyObject *args, PyObject *kwds)\n{\n" << indent;
     if (overloadData.maxArgs() == 0 || metaClass->isAbstract())
         s << sbkUnusedVariableCast("args");
@@ -4519,7 +4519,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         tp_dealloc = isQApp
             ? u"&SbkDeallocQAppWrapper"_s : u"&SbkDeallocWrapper"_s;
         if (!onlyPrivCtor && !ctors.isEmpty())
-            tp_init = cpythonFunctionName(ctors.constFirst());
+            tp_init = cpythonConstructorName(metaClass);
     }
 
     const AttroCheck attroCheck = checkAttroFunctionNeeds(metaClass);

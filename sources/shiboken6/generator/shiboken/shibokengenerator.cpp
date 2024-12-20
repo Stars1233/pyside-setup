@@ -412,28 +412,28 @@ QString ShibokenGenerator::protectedEnumSurrogateName(const AbstractMetaEnum &me
     return result + u"_Surrogate"_s;
 }
 
+QString ShibokenGenerator::cpythonConstructorName(const AbstractMetaClassCPtr &metaClass)
+{
+    return cpythonBaseName(metaClass->typeEntry()) + u"_Init"_s;
+}
+
 QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunctionCPtr &func)
 {
-    QString result;
+    if (func->isConstructor())
+        return cpythonConstructorName(func->implementingClass());
 
+    QString result;
     // PYSIDE-331: For inherited functions, we need to find the same labels.
     // Therefore we use the implementing class.
     if (func->implementingClass()) {
-        result = cpythonBaseName(func->implementingClass()->typeEntry());
-        if (func->isConstructor()) {
-            result += u"_Init"_s;
-        } else {
-            result += u"Func_"_s;
-            if (func->isOperatorOverload())
-                result += ShibokenGenerator::pythonOperatorFunctionName(func);
-            else
-                result += func->name();
-        }
-    } else {
-        result = u"Sbk"_s + moduleName() + u"Module_"_s + func->name();
+        return cpythonBaseName(func->implementingClass()->typeEntry())
+            + u"Func_"_s
+            + (func->isOperatorOverload()
+               ? ShibokenGenerator::pythonOperatorFunctionName(func)
+               : func->name());
     }
 
-    return result;
+    return u"Sbk"_s + moduleName() + u"Module_"_s + func->name();
 }
 
 QString ShibokenGenerator::cpythonMethodDefinitionName(const AbstractMetaFunctionCPtr &func)

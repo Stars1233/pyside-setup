@@ -268,6 +268,7 @@ protected:
     static QString cpythonToPythonConversionFunction(const AbstractMetaClassCPtr &metaClass);
     static QString cpythonToPythonConversionFunction(const TypeEntryCPtr &type);
 
+    static QString cpythonConstructorName(const AbstractMetaClassCPtr &metaClass);
     static QString cpythonFunctionName(const AbstractMetaFunctionCPtr &func) ;
     static QString cpythonMethodDefinitionName(const AbstractMetaFunctionCPtr &func);
     static QString cpythonGettersSettersDefinitionName(const AbstractMetaClassCPtr &metaClass);
