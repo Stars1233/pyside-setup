@@ -195,7 +195,7 @@ class ExactEnumerator:
         #    class QCborTag(enum.IntEnum):
         #  or
         #    class BeginFrameFlag(enum.Flag):
-        if isinstance(klass, type(Enum)):
+        if issubclass(klass, Enum):
             init_signature = None
         # sort by class then enum value
         enums.sort(key=lambda tup: (tup[1], tup[2].value))
@@ -209,6 +209,9 @@ class ExactEnumerator:
                                   init_signature or signals or attributes)
 
         has_misc_error = class_name in self.mypy_misc_class_errors
+        if issubclass(klass, Enum) and not len(enums):
+            # PYSIDE-2846: We keep the empty enum and ignore the error.
+            has_misc_error = True
         with self.fmt.klass(class_name, class_str, has_misc_error):
             self.fmt.level += 1
             self.fmt.class_name = class_name
