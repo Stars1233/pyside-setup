@@ -203,11 +203,20 @@ General Applications
 
         Expenses administration tool
 
+    .. grid-item-card:: Deploying PySide6 Applications to Boot to Qt
+        :class-item: cover-img
+        :link: tutorial_boottoqt_raspberrypi
+        :link-type: ref
+        :img-top: embedded/boot2qt_launcher.png
+
+        Deploying PySide6 Applications to Boot to Qt OS on Raspberry Pi
+
 .. toctree::
     :hidden:
 
     datavisualize/index.rst
     expenses/expenses.rst
+    embedded/boot2qt.md
 
 Qt Overviews
 ------------
