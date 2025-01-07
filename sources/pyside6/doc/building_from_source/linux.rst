@@ -25,6 +25,17 @@ which arbitrary modules can be installed and which can be removed after use::
 
 will create and use a new virtual environment, which is indicated by the command prompt changing.
 
+Alternatively, you can use the `uv`_ tool, which is popular in the Python community for Python
+project management. The following command creates a virtual environment using `uv`_::
+
+    uv venv --python <python-version> testenv
+    source testenv/bin/activate
+
+.. note:: Since the Qt for Python project still uses `setup.py` and not `pyproject.toml`, currently
+          `uv` can only be used as a replacement for `pyenv` for building Qt for Python. If you
+          have already the `.python_version` file(used by .pyenv) in the project, make sure to
+          change the version to the `uv`_ Python you want to use.
+
 Setting up CLANG
 ~~~~~~~~~~~~~~~~
 
@@ -61,6 +72,8 @@ For building the documentation::
           Additionally, :command:`git checkout -b 6.8 --track origin/6.8` could be a better option
           in case you want to work on it.
 
+.. note:: With `uv`_, use `uv pip install ...`
+
 Building and Installing (setuptools)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -77,6 +90,10 @@ Build can take a few minutes, so it is recommended to use more than one CPU core
 To install on the current directory, just run::
 
     python setup.py install --qtpaths=/opt/Qt/6.8.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
+
+With `uv`_, these commands becomes::
+
+    uv run setup.py build/install --qtpaths=/opt/Qt/6.8.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
 Building and Installing (cmake)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -117,3 +134,4 @@ Remember to properly set the environment variables for Qt and PySide::
     python examples/widgets/widgets/tetrix/tetrix.py
 
 .. _`Qt for Linux/X11`: https://doc.qt.io/qt-6/linux.html
+.. _`uv`: https://docs.astral.sh/uv/

@@ -33,6 +33,17 @@ which arbitrary modules can be installed and which can be removed after use::
 
 will create and use a new virtual environment, which is indicated by the command prompt changing.
 
+Alternatively, you can use the `uv`_ tool, which is popular in the Python community for Python
+project management. The following command creates a virtual environment using `uv`_::
+
+    uv venv --python <python-version> testenv
+    call testenv\Scripts\activate
+
+.. note:: Since the Qt for Python project still uses `setup.py` and not `pyproject.toml`, currently
+          `uv` can only be used as a replacement for `pyenv` for building Qt for Python. If you
+          have already the `.python_version` file(used by .pyenv) in the project, make sure to
+          change the version to the `uv`_ Python you want to use.
+
 Setting up CLANG
 ~~~~~~~~~~~~~~~~
 
@@ -71,6 +82,8 @@ For building the documentation::
 
 .. note:: Keep in mind you need to use the same version as your Qt installation
 
+.. note:: With `uv`_, use `uv pip install ...`
+
 Building PySide
 ~~~~~~~~~~~~~~~
 
@@ -80,6 +93,11 @@ for example, ``C:\Qt\6.8.0\msvc2019_64\bin\qtpaths.exe``.
 Build can take a few minutes, so it is recommended to use more than one CPU core::
 
     python setup.py build --qtpaths=c:\path\to\qtpaths.exe --openssl=c:\path\to\openssl\bin --build-tests --ignore-git --parallel=8
+
+With `uv`_, this commands becomes::
+
+    uv run setup.py build --qtpaths=c:\path\to\qtpaths.exe --openssl=c:\path\to\openssl\bin --build-tests --ignore-git --parallel=8
+
 
 .. _creating_windows_debug_builds:
 
@@ -105,6 +123,10 @@ To install on the current directory, just run::
 
     python setup.py install --qtpaths=c:\path\to\qtpaths.exe  --openssl=c:\path\to\openssl\bin --build-tests --ignore-git --parallel=8
 
+With `uv`_, this command becomes::
+
+    uv run setup.py install --qtpaths=c:\path\to\qtpaths.exe  --openssl=c:\path\to\openssl\bin --build-tests --ignore-git --parallel=8
+
 Test installation
 ~~~~~~~~~~~~~~~~~
 
@@ -112,3 +134,5 @@ You can execute one of the examples to verify the process is properly working.
 Remember to properly set the environment variables for Qt and PySide::
 
     python examples/widgets/widgets/tetrix/tetrix.py
+
+.. _`uv`: https://docs.astral.sh/uv/
