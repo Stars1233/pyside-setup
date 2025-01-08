@@ -33,7 +33,7 @@ project management. The following command creates a virtual environment using `u
 
 .. note:: Since the Qt for Python project still uses `setup.py` and not `pyproject.toml`, currently
           `uv` can only be used as a replacement for `pyenv` for building Qt for Python. If you
-          have already the `.python_version` file(used by .pyenv) in the project, make sure to
+          have already the `.python-version` file (used by .pyenv) in the project, make sure to
           change the version to the `uv`_ Python you want to use.
 
 Setting up CLANG
@@ -43,7 +43,7 @@ If you don't have libclang already in your system, you can download from the Qt 
 
     wget https://download.qt.io/development_releases/prebuilt/libclang/libclang-release_18.1.5-based-linux-Rhel8.6-gcc10.3-x86_64.7z
 
-Extract the files, and leave it on any desired path, and set the environment
+Extract the files, and leave it in any desired path, and set the environment
 variable required::
 
     7z x libclang-release_18.1.5-based-linux-Rhel8.6-gcc10.3-x86_64.7z
@@ -77,8 +77,9 @@ For building the documentation::
 Building and Installing (setuptools)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``setuptools`` approach uses the ``setup.py`` file to execute the build,
-install, and packaging steps.
+The ``setuptools`` approach uses the ``setup.py`` file to execute the build step and further
+uses `create_wheels.py`_ to create the wheels. Once the wheels are created, you can install the
+wheels using the `pip` command.
 
 Check your Qt installation path, to specifically use that version of qtpaths to build PySide.
 for example, :command:`/opt/Qt/6.8.0/gcc_64/bin/qtpaths`.
@@ -87,13 +88,23 @@ Build can take a few minutes, so it is recommended to use more than one CPU core
 
     python setup.py build --qtpaths=/opt/Qt/6.8.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
-To install on the current directory, just run::
+With `uv`_, the build command becomes::
 
-    python setup.py install --qtpaths=/opt/Qt/6.8.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
+    uv run setup.py build --qtpaths=/opt/Qt/6.8.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
-With `uv`_, these commands becomes::
+To create the wheels, just run::
 
-    uv run setup.py build/install --qtpaths=/opt/Qt/6.8.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
+    python create_wheels.py --build-dir=/directory/where/pyside/is/built --no-examples
+
+On successful completion, the wheels will be created in the `dist` directory.
+
+.. note:: The `build-dir` typically looks like `build/<your_python_environment_name>`. The
+          requirement is that this `build-dir` should contain the `packages_for_wheel` directory.
+          If the `python setup.py` build command was successful, this directory should be present.
+
+Finally, to install the wheels, use the following command::
+
+    pip install dist/*.whl
 
 Building and Installing (cmake)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,7 +113,7 @@ The ``setuptools`` approach includes internal ``CMake`` calls when
 building and installing the project, but a CMake-only approach is only
 recommended for packaging the project for distribution builds.
 
-Assumming that Qt is in PATH, for example, the configure step can be done with::
+Assuming that Qt is in PATH, for example, the configure step can be done with::
 
     cmake -B /path/to/the/build/directory \
           -S /path/to/the/pyside-setup \
@@ -116,13 +127,13 @@ and then for building::
 
     cmake --build /path/to/the/build/directory --parallel X
 
-where `X` is the amount of processes you want to use.
+where `X` is the number of processes you want to use.
 Finally, the install step can be done with::
 
     cmake --install /path/to/the/build/directory
 
 .. note:: You can build only pyside6 or only shiboken6 by using
-   the diferent source directories with the option `-S`.
+   the different source directories with the option `-S`.
 
 
 Test installation
@@ -135,3 +146,4 @@ Remember to properly set the environment variables for Qt and PySide::
 
 .. _`Qt for Linux/X11`: https://doc.qt.io/qt-6/linux.html
 .. _`uv`: https://docs.astral.sh/uv/
+.. _`create_wheels.py`: https://code.qt.io/cgit/pyside/pyside-setup.git/tree/create_wheels.py

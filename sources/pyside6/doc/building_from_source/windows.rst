@@ -25,7 +25,7 @@ Building from source on Windows 10
 Creating a virtual environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``venv`` module allows you to create a local, user-writeable copy of a python environment into
+The ``venv`` module allows you to create a local, user-writable copy of a python environment into
 which arbitrary modules can be installed and which can be removed after use::
 
     python -m venv testenv
@@ -41,7 +41,7 @@ project management. The following command creates a virtual environment using `u
 
 .. note:: Since the Qt for Python project still uses `setup.py` and not `pyproject.toml`, currently
           `uv` can only be used as a replacement for `pyenv` for building Qt for Python. If you
-          have already the `.python_version` file(used by .pyenv) in the project, make sure to
+          have already the `.python_version` file (used by .pyenv) in the project, make sure to
           change the version to the `uv`_ Python you want to use.
 
 Setting up CLANG
@@ -94,7 +94,7 @@ Build can take a few minutes, so it is recommended to use more than one CPU core
 
     python setup.py build --qtpaths=c:\path\to\qtpaths.exe --openssl=c:\path\to\openssl\bin --build-tests --ignore-git --parallel=8
 
-With `uv`_, this commands becomes::
+With `uv`_, this command becomes::
 
     uv run setup.py build --qtpaths=c:\path\to\qtpaths.exe --openssl=c:\path\to\openssl\bin --build-tests --ignore-git --parallel=8
 
@@ -119,13 +119,20 @@ Creating Debug Builds
 Installing PySide
 ~~~~~~~~~~~~~~~~~
 
-To install on the current directory, just run::
+First, create the wheels using the `create_wheels.py`_ script::
 
-    python setup.py install --qtpaths=c:\path\to\qtpaths.exe  --openssl=c:\path\to\openssl\bin --build-tests --ignore-git --parallel=8
+    python create_wheels.py --build-dir=C:\directory\where\pyside\is\built --no-examples
 
-With `uv`_, this command becomes::
+On successful completion, the wheels will be created in the `dist` directory.
 
-    uv run setup.py install --qtpaths=c:\path\to\qtpaths.exe  --openssl=c:\path\to\openssl\bin --build-tests --ignore-git --parallel=8
+.. note:: The `build-dir` typically looks like `build\<your_python_environment_name>`. The
+          requirement is that this `build-dir` should contain the `packages_for_wheel` directory.
+          If the `python setup.py` build command was successful, this directory should be present.
+
+Finally, to install the wheels, use the following command::
+
+    pip install dist\*.whl
+
 
 Test installation
 ~~~~~~~~~~~~~~~~~
@@ -133,6 +140,6 @@ Test installation
 You can execute one of the examples to verify the process is properly working.
 Remember to properly set the environment variables for Qt and PySide::
 
-    python examples/widgets/widgets/tetrix/tetrix.py
+    python examples\widgets\widgets\tetrix\tetrix.py
 
 .. _`uv`: https://docs.astral.sh/uv/
