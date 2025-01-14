@@ -13,6 +13,7 @@ documentation. This node is a child of the :ref:`object-type`,
      <value-type>
          <inject-documentation mode="append | prepend | replace" format="native | target"
                                emphasis="none | language-note"
+                               target = "documentation | docstring"
                                file="[file]" snippet="[label]">
              // the documentation
          </inject-code>
@@ -35,6 +36,10 @@ The optional ``file`` attribute specifies the file name
 
 The optional ``snippet`` attribute specifies the snippet label
 (see :ref:`external-snippets`).
+
+The optional ``target`` attribute can be used to specify that the documentation snippet
+is meant to be used as a Python doc string during code generation instead of documentation.
+``mode="replace"`` must be used for this.
 
 At the moment the only supported backend is Sphinx.
 

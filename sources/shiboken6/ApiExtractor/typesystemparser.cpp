@@ -384,6 +384,14 @@ ENUM_LOOKUP_BEGIN(TypeSystem::DocModificationMode, Qt::CaseInsensitive,
     };
 ENUM_LOOKUP_LINEAR_SEARCH
 
+ENUM_LOOKUP_BEGIN(DocumentationTarget, Qt::CaseSensitive,
+                  docTargetFromAttribute)
+    {
+        {u"documentation", DocumentationTarget::Documentation},
+        {u"docstring", DocumentationTarget::DocString}
+    };
+ENUM_LOOKUP_LINEAR_SEARCH
+
 ENUM_LOOKUP_BEGIN(ContainerTypeEntry::ContainerKind, Qt::CaseSensitive,
                   containerTypeFromAttribute)
     {
@@ -2073,6 +2081,8 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
     TypeSystem::DocModificationMode mode = TypeSystem::DocModificationReplace;
     DocumentationFormat format = DocumentationFormat::Native;
     DocumentationEmphasis emphasis = DocumentationEmphasis::None;
+    DocumentationTarget target = DocumentationTarget::Documentation;
+
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"mode") {
@@ -2099,6 +2109,14 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
                 return false;
             }
             emphasis = emphasisOpt.value();
+        } else if (name == u"target") {
+            const auto attribute = attributes->takeAt(i);
+            const auto targetOpt = docTargetFromAttribute(attribute.value());
+            if (!targetOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
+                return false;
+            }
+            target = targetOpt.value();
         }
     }
 
@@ -2107,10 +2125,16 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
         return false;
     }
 
+    if (target == DocumentationTarget::DocString && mode != TypeSystem::DocModificationReplace) {
+        m_error = "Doc strings only support \"replace\""_L1;
+        return false;
+    }
+
     QString signature = isTypeEntry(topElement) ? QString() : m_currentSignature;
     DocModification mod(mode, signature);
     mod.setFormat(format);
     mod.setEmphasis(emphasis);
+    mod.setTarget(target);
     if (hasFileSnippetAttributes(attributes)) {
         const auto snippetOptional = readFileSnippet(attributes);
         if (!snippetOptional.has_value())

@@ -6,6 +6,12 @@
 
 #include <QtCore/QtTypes>
 
+enum class DocumentationTarget : uint8_t
+{
+    Documentation, // Documentation
+    DocString // Python doc string (binding code)
+};
+
 enum class DocumentationFormat : uint8_t
 {
     Native, // XML

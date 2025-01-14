@@ -780,7 +780,7 @@ bool QtDocGenerator::writeDocModifications(TextStream &s,
 {
     bool didSomething = false;
     for (const DocModification &mod : mods) {
-        if (mod.mode() == mode) {
+        if (mod.target() == DocumentationTarget::Documentation && mod.mode() == mode) {
             writeFormattedText(s, mod, scope, images);
             didSomething = true;
         }

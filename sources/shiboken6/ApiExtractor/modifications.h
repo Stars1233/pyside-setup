@@ -336,6 +336,9 @@ public:
     DocumentationEmphasis emphasis() const { return m_emphasis; }
     void setEmphasis(DocumentationEmphasis newEmphasis) { m_emphasis = newEmphasis; }
 
+    DocumentationTarget target() const { return m_target; }
+    void setTarget(DocumentationTarget newTarget) { m_target = newTarget; }
+
 private:
     QString m_code;
     QString m_xpath;
@@ -343,6 +346,7 @@ private:
     TypeSystem::DocModificationMode m_mode = TypeSystem::DocModificationXPathReplace;
     DocumentationFormat m_format = DocumentationFormat::Native;
     DocumentationEmphasis m_emphasis = DocumentationEmphasis::None;
+    DocumentationTarget m_target = DocumentationTarget::Documentation;
 };
 
 #endif // MODIFICATIONS_H

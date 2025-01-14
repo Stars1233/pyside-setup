@@ -4493,6 +4493,18 @@ TextStream &operator<<(TextStream &str, const pyTypeSlotEntry &e)
     return str;
 }
 
+static inline bool isDocString(const DocModification &d)
+{
+    return d.target() == DocumentationTarget::DocString;
+}
+
+static QString docString(const AbstractMetaClassCPtr &metaClass)
+{
+    const auto docModifs = metaClass->typeEntry()->docModifications();
+    auto it = std::find_if(docModifs.cbegin(), docModifs.cend(), isDocString);
+    return it != docModifs.cend() ? it->code().trimmed() : QString{};
+}
+
 void CppGenerator::writeClassDefinition(TextStream &s,
                                         const AbstractMetaClassCPtr &metaClass,
                                         const GeneratorContext &classContext)
@@ -4632,6 +4644,13 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         s << "// type supports number protocol\n";
         writeTypeAsNumberDefinition(s, metaClass);
     }
+
+    const QString ds = docString(metaClass);
+    if (!ds.isEmpty()) {
+        s << "{Py_tp_doc, " << outdent
+          << "const_cast<char *>(R\"DS(" << ds << ")DS\")" << indent << "},\n";
+    }
+
     s << "{0, " << NULL_PTR << "}\n" << outdent << "};\n";
 
     const auto packageLevel = packageName().count(u'.') + 1;
