@@ -761,6 +761,17 @@ void QtDocGenerator::writeDocSnips(TextStream &s,
     }
 }
 
+void QtDocGenerator::writeFormattedText(TextStream &s, const DocModification &mod,
+                                        const QString &scope, QtXmlToSphinxImages *images) const
+{
+    const bool note = mod.emphasis() == DocumentationEmphasis::LanguageNote;
+    if (note)
+        s << ".. admonition:: Python Language Note\n\n" << indent;
+    writeFormattedText(s, mod.code(), mod.format(), scope, images);
+    if (note)
+        s << outdent;
+}
+
 bool QtDocGenerator::writeDocModifications(TextStream &s,
                                            const DocModificationList &mods,
                                            TypeSystem::DocModificationMode mode,
@@ -770,18 +781,8 @@ bool QtDocGenerator::writeDocModifications(TextStream &s,
     bool didSomething = false;
     for (const DocModification &mod : mods) {
         if (mod.mode() == mode) {
-            switch (mod.format()) {
-            case DocumentationFormat::Native:
-                writeFormattedText(s, mod.code(), DocumentationFormat::Native, scope, images);
-                didSomething = true;
-                break;
-            case DocumentationFormat::Target:
-                writeFormattedText(s, mod.code(), DocumentationFormat::Target, scope, images);
-                didSomething = true;
-                break;
-            default:
-                break;
-            }
+            writeFormattedText(s, mod, scope, images);
+            didSomething = true;
         }
     }
     return didSomething;

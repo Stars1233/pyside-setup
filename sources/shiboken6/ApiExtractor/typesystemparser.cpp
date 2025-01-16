@@ -298,6 +298,13 @@ ENUM_LOOKUP_BEGIN(DocumentationFormat, Qt::CaseInsensitive,
     };
 ENUM_LOOKUP_LINEAR_SEARCH
 
+ENUM_LOOKUP_BEGIN(DocumentationEmphasis, Qt::CaseSensitive,
+                  documentationEmphasisFromAttribute)
+    {
+        {u"none", DocumentationEmphasis::None},
+        {u"language-note", DocumentationEmphasis::LanguageNote}
+    };
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(TypeSystem::Ownership, Qt::CaseInsensitive,
                    ownershipFromFromAttribute)
@@ -2043,6 +2050,7 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
 
     TypeSystem::DocModificationMode mode = TypeSystem::DocModificationReplace;
     DocumentationFormat format = DocumentationFormat::Native;
+    DocumentationEmphasis emphasis = DocumentationEmphasis::None;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"mode") {
@@ -2061,12 +2069,26 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
                 return false;
             }
             format = formatOpt.value();
+        } else if (name == u"emphasis") {
+            const auto attribute = attributes->takeAt(i);
+            const auto emphasisOpt = documentationEmphasisFromAttribute(attribute.value());
+            if (!emphasisOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
+                return false;
+            }
+            emphasis = emphasisOpt.value();
         }
+    }
+
+    if (emphasis != DocumentationEmphasis::None && mode == TypeSystem::DocModificationXPathReplace) {
+        m_error = "Emphasis is not supported for XPathReplace"_L1;
+        return false;
     }
 
     QString signature = isTypeEntry(topElement) ? QString() : m_currentSignature;
     DocModification mod(mode, signature);
     mod.setFormat(format);
+    mod.setEmphasis(emphasis);
     if (hasFileSnippetAttributes(attributes)) {
         const auto snippetOptional = readFileSnippet(attributes);
         if (!snippetOptional.has_value())

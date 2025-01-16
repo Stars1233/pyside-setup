@@ -12,6 +12,7 @@ documentation. This node is a child of the :ref:`object-type`,
 
      <value-type>
          <inject-documentation mode="append | prepend | replace" format="native | target"
+                               emphasis="none | language-note"
                                file="[file]" snippet="[label]">
              // the documentation
          </inject-code>
@@ -24,6 +25,10 @@ occur and it accepts the following values:
 
 * native: Before XML<->Backend transformation occur, so the injected code *must* be a valid XML.
 * target: After XML<->Backend transformation occur, so the injected code *must* be a valid backend format.
+
+The optional **emphasis** attribute enables emphasizing the documentation snippet.
+The value ``language-note`` encloses it in a custom Sphinx admonition entitled
+*Python Language Note*. The text should be a plain paragraph for this to work.
 
 The optional ``file`` attribute specifies the file name
 (see :ref:`external-snippets`).

@@ -12,6 +12,12 @@ enum class DocumentationFormat : uint8_t
     Target  // RST
 };
 
+enum class DocumentationEmphasis : uint8_t
+{
+    None,
+    LanguageNote
+};
+
 enum class DocumentationType : uint8_t
 {
     Detailed,

@@ -332,12 +332,16 @@ public:
     DocumentationFormat format() const { return m_format; }
     void setFormat(DocumentationFormat f) { m_format = f; }
 
+    DocumentationEmphasis emphasis() const { return m_emphasis; }
+    void setEmphasis(DocumentationEmphasis newEmphasis) { m_emphasis = newEmphasis; }
+
 private:
     QString m_code;
     QString m_xpath;
     QString m_signature;
     TypeSystem::DocModificationMode m_mode = TypeSystem::DocModificationXPathReplace;
     DocumentationFormat m_format = DocumentationFormat::Native;
+    DocumentationEmphasis m_emphasis = DocumentationEmphasis::None;
 };
 
 #endif // MODIFICATIONS_H
