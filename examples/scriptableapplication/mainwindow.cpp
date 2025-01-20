@@ -5,6 +5,7 @@
 #include "pythonutils.h"
 
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPlainTextEdit>
@@ -15,6 +16,7 @@
 #include <QtGui/QAction>
 #include <QtGui/QFontDatabase>
 #include <QtGui/QIcon>
+#include <QtGui/QTextCursor>
 
 #include <QtCore/QDebug>
 #include <QtCore/QTextStream>
@@ -69,6 +71,11 @@ MainWindow::MainWindow()
     m_scriptEdit->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     setCentralWidget(m_scriptEdit);
 
+    m_lineNumberLabel = new QLabel;
+    statusBar()->addPermanentWidget(m_lineNumberLabel, 0);
+    connect(m_scriptEdit, &QPlainTextEdit::cursorPositionChanged,
+            this, &MainWindow::slotCursorChanged);
+
     if (!PythonUtils::bindAppObject("__main__"_L1, "mainWindow"_L1,
                                     PythonUtils::MainWindowType, this)) {
        statusBar()->showMessage(tr("Error loading the application module"));
@@ -104,4 +111,11 @@ void MainWindow::testFunction1()
     QTextStream(&message) << __FUNCTION__ << " called #" << n++;
     qDebug().noquote() << message;
     statusBar()->showMessage(message);
+}
+
+void MainWindow::slotCursorChanged()
+{
+    auto cursor = m_scriptEdit->textCursor();
+    const int line = cursor.blockNumber() + 1;
+    m_lineNumberLabel->setText("Line: "_L1 + QString::number(line));
 }
