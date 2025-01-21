@@ -282,9 +282,7 @@ void setTypeConverter(PyTypeObject *type, SbkConverter *converter,
     priv->flagsConverter = flagsConverter;
 }
 
-static PyTypeObject *createEnumForPython(PyObject *scopeOrModule,
-                                         const char *fullName,
-                                         PyObject *pyEnumItems)
+static void setModuleAndQualnameOnType(PyObject *type, const char *fullName)
 {
     const char *colon = strchr(fullName, ':');
     assert(colon);
@@ -301,8 +299,17 @@ static PyTypeObject *createEnumForPython(PyObject *scopeOrModule,
     int mlen = qual - mod - 1;
     AutoDecRef module(Shiboken::String::fromCString(mod, mlen));
     AutoDecRef qualname(Shiboken::String::fromCString(qual));
-    const char *dot = strrchr(qual, '.');
-    AutoDecRef name(Shiboken::String::fromCString(dot ? dot + 1 : qual));
+
+    PyObject_SetAttr(type, Shiboken::PyMagicName::module(), module);
+    PyObject_SetAttr(type, Shiboken::PyMagicName::qualname(), qualname);
+}
+
+static PyTypeObject *createEnumForPython(PyObject *scopeOrModule,
+                                         const char *fullName,
+                                         PyObject *pyEnumItems)
+{
+    const char *dot = strrchr(fullName, '.');
+    AutoDecRef name(Shiboken::String::fromCString(dot ? dot + 1 : fullName));
 
     static PyObject *enumName = String::createStaticString("IntEnum");
     if (PyType_Check(scopeOrModule)) {
@@ -352,9 +359,7 @@ static PyTypeObject *createEnumForPython(PyObject *scopeOrModule,
         }
     }
 
-    auto *newType = reinterpret_cast<PyTypeObject *>(obNewType);
-    PyObject_SetAttr(obNewType, PyMagicName::qualname(), qualname);
-    PyObject_SetAttr(obNewType, PyMagicName::module(), module);
+    setModuleAndQualnameOnType(obNewType, fullName);
 
     // See if we should re-introduce shortcuts in the enclosing object.
     const bool useGlobalShortcut = (Enum::enumOption & Enum::ENOPT_GLOBAL_SHORTCUT) != 0;
@@ -374,7 +379,7 @@ static PyTypeObject *createEnumForPython(PyObject *scopeOrModule,
         }
     }
 
-    return newType;
+    return reinterpret_cast<PyTypeObject *>(obNewType);
 }
 
 template <typename IntT>
@@ -457,6 +462,27 @@ PyTypeObject *createPythonEnum(PyObject *module,
     const char *fullName, const char *enumItemStrings[], const uint8_t enumValues[])
 {
     return createPythonEnumHelper(module, fullName, enumItemStrings, enumValues);
+}
+
+PyTypeObject *createPythonEnum(const char *fullName, PyObject *pyEnumItems,
+                               const char *enumTypeName, PyObject *callDict)
+{
+    SBK_UNUSED(getPyEnumMeta());
+    AutoDecRef PyEnumTypeName(Shiboken::String::fromCString(enumTypeName));
+    AutoDecRef PyEnumType(PyObject_GetAttr(PyEnumModule, PyEnumTypeName));
+    if (!PyEnumType) {
+        PyErr_Format(PyExc_RuntimeError, "Failed to get enum type %s", enumTypeName);
+        return nullptr;
+    }
+
+    const char *dot = strrchr(fullName, '.');
+    AutoDecRef name(Shiboken::String::fromCString(dot ? dot + 1 : fullName));
+    AutoDecRef callArgs(Py_BuildValue("(OO)", name.object(), pyEnumItems));
+    auto newType = PyObject_Call(PyEnumType, callArgs, callDict);
+
+    setModuleAndQualnameOnType(newType, fullName);
+
+    return reinterpret_cast<PyTypeObject *>(newType);
 }
 
 } // namespace Shiboken::Enum

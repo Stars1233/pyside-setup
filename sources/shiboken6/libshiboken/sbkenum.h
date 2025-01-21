@@ -100,6 +100,22 @@ inline PyTypeObject *createPythonEnum(PyTypeObject *scope,
     return createPythonEnum(obScope, fullName, enumItemStrings, enumValues);
 }
 
+/**
+ * @brief Creates a Python enum type from a set of provided key/values pairs
+ *
+ * @param fullName     The full name (including module and package depth) to be used for the newly
+ *                     created enum type.
+ * @param pyEnumItems  The key/value pairs to be used for the enum.
+ * @param enumTypeName The name of the enum type to be used (i.e., "PyIntEnum", "PyFlag", etc)
+ *                     from Python's enum module.
+ * @param callDict     The dictionary to be used for the call, allowing for additional keyword
+ *                     arguments to be passed, such as "boundary=KEEP".
+ */
+LIBSHIBOKEN_API PyTypeObject *createPythonEnum(const char *fullName,
+                                               PyObject *pyEnumItems,
+                                               const char *enumTypeName = "Enum",
+                                               PyObject *callDict = nullptr);
+
 } // namespace Shiboken::Enum
 
 #endif // SKB_PYENUM_H
