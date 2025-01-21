@@ -10,7 +10,7 @@ project_dir =
 # Source file path
 input_file =
 
-# Directory where exec is stored
+# Directory where the executable output is generated
 exec_directory =
 
 # Path to .pyproject project file

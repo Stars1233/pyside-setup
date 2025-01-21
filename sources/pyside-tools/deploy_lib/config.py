@@ -33,6 +33,7 @@ PERMISSION_MAP = {"Bluetooth": "NSBluetoothAlwaysUsageDescription:BluetoothAcces
 class BaseConfig:
     """Wrapper class around any .spec file with function to read and set values for the .spec file
     """
+
     def __init__(self, config_file: Path, comment_prefixes: str = "/",
                  existing_config_file: bool = False) -> None:
         self.config_file = config_file
@@ -42,7 +43,7 @@ class BaseConfig:
         self.parser.read(self.config_file)
 
     def update_config(self):
-        logging.info(f"[DEPLOY] Creating {self.config_file}")
+        logging.info(f"[DEPLOY] Updating config file {self.config_file}")
 
         # This section of code is done to preserve the formatting of the original deploy.spec
         # file where there is blank line before the comments
@@ -56,7 +57,7 @@ class BaseConfig:
             previous_line = None
             for line in temp_file:
                 if (line.lstrip().startswith('#') and previous_line is not None
-                   and not previous_line.lstrip().startswith('#')):
+                        and not previous_line.lstrip().startswith('#')):
                     config_file.write('\n')
                 config_file.write(line)
                 previous_line = line
@@ -64,27 +65,31 @@ class BaseConfig:
         # Clean up the temporary file
         Path(temp_file_path).unlink()
 
-    def set_value(self, section: str, key: str, new_value: str, raise_warning: bool = True):
+    def set_value(self, section: str, key: str, new_value: str, raise_warning: bool = True) -> None:
         try:
             current_value = self.get_value(section, key, ignore_fail=True)
             if current_value != new_value:
                 self.parser.set(section, key, new_value)
         except configparser.NoOptionError:
-            if raise_warning:
-                logging.warning(f"[DEPLOY] Key {key} does not exist")
+            if not raise_warning:
+                return
+            logging.warning(f"[DEPLOY] Set key '{key}': Key does not exist in section '{section}'")
         except configparser.NoSectionError:
-            if raise_warning:
-                logging.warning(f"[DEPLOY] Section {section} does not exist")
+            if not raise_warning:
+                return
+            logging.warning(f"[DEPLOY] Section '{section}' does not exist")
 
-    def get_value(self, section: str, key: str, ignore_fail: bool = False):
+    def get_value(self, section: str, key: str, ignore_fail: bool = False) -> str | None:
         try:
             return self.parser.get(section, key)
         except configparser.NoOptionError:
-            if not ignore_fail:
-                logging.warning(f"[DEPLOY] Key {key} does not exist")
+            if ignore_fail:
+                return None
+            logging.warning(f"[DEPLOY] Get key '{key}': Key does not exist in section {section}")
         except configparser.NoSectionError:
-            if not ignore_fail:
-                logging.warning(f"[DEPLOY] Section {section} does not exist")
+            if ignore_fail:
+                return None
+            logging.warning(f"[DEPLOY] Section '{section}': does not exist")
 
 
 class Config(BaseConfig):
@@ -347,7 +352,7 @@ class Config(BaseConfig):
             project_dir = self.source_file.parent
         return project_dir
 
-    def _find_project_file(self) -> Path:
+    def _find_project_file(self) -> Path | None:
         if self.project_dir:
             files = list(self.project_dir.glob("*.pyproject"))
         else:
@@ -362,7 +367,7 @@ class Config(BaseConfig):
 
         return None
 
-    def _find_excluded_qml_plugins(self) -> set:
+    def _find_excluded_qml_plugins(self) -> list[str] | None:
         excluded_qml_plugins = None
         if self.qml_files:
             self.qml_modules = set(run_qmlimportscanner(project_dir=self.project_dir,
@@ -382,7 +387,7 @@ class Config(BaseConfig):
             exe_dir = self.project_dir
         return exe_dir
 
-    def _find_pysidemodules(self):
+    def _find_pysidemodules(self) -> list[str]:
         modules = find_pyside_modules(project_dir=self.project_dir,
                                       extra_ignore_dirs=self.extra_ignore_dirs,
                                       project_data=self.project_data)
@@ -390,7 +395,7 @@ class Config(BaseConfig):
                      f"the project {modules}")
         return modules
 
-    def _find_qtquick_modules(self):
+    def _find_qtquick_modules(self) -> list[str]:
         """Identify if QtQuick is used in QML files and add them as dependency
         """
         extra_modules = []
@@ -410,6 +415,7 @@ class Config(BaseConfig):
 class DesktopConfig(Config):
     """Wrapper class around pysidedeploy.spec, but specific to Desktop deployment
     """
+
     class NuitkaMode(Enum):
         ONEFILE = "onefile"
         STANDALONE = "standalone"
@@ -420,15 +426,15 @@ class DesktopConfig(Config):
         super().__init__(config_file, source_file, python_exe, dry_run, existing_config_file,
                          extra_ignore_dirs, name=name)
         self.dependency_reader = QtDependencyReader(dry_run=self.dry_run)
-        modls = self.get_value("qt", "modules")
-        if modls:
-            self._modules = modls.split(",")
+        modules = self.get_value("qt", "modules")
+        if modules:
+            self._modules = modules.split(",")
         else:
-            modls = self._find_pysidemodules()
-            modls += self._find_qtquick_modules()
-            modls += self._find_dependent_qt_modules(modules=modls)
+            modules = self._find_pysidemodules()
+            modules += self._find_qtquick_modules()
+            modules += self._find_dependent_qt_modules(modules=modules)
             # remove duplicates
-            self.modules = list(set(modls))
+            self.modules = list(set(modules))
 
         self._qt_plugins = []
         if self.get_value("qt", "plugins"):
@@ -486,8 +492,8 @@ class DesktopConfig(Config):
 
         if not self.dependency_reader.lib_reader:
             warnings.warn(f"[DEPLOY] Unable to find {self.dependency_reader.lib_reader_name}. This "
-                          "tool helps to find the Qt module dependencies of the application. "
-                          "Skipping checking for dependencies.", category=RuntimeWarning)
+                          f"tool helps to find the Qt module dependencies of the application. "
+                          f"Skipping checking for dependencies.", category=RuntimeWarning)
             return []
 
         for module_name in modules:
@@ -495,7 +501,7 @@ class DesktopConfig(Config):
 
         return list(all_modules)
 
-    def _find_permissions(self):
+    def _find_permissions(self) -> list[str]:
         """
         Finds and sets the usage description string required for each permission requested by the
         macOS application.

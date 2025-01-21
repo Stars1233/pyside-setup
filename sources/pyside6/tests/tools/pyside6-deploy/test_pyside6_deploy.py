@@ -15,6 +15,7 @@ from unittest import mock
 
 sys.path.append(os.fspath(Path(__file__).resolve().parents[2]))
 from init_paths import init_test_paths, _get_qt_lib_dir  # noqa: E402
+
 init_test_paths(False)
 
 
@@ -484,7 +485,7 @@ class TestLongCommand(DeployTestBase):
         # check if command_str ends with deploy_main.py
         self.assertTrue(command_str.endswith("deploy_main.py"))
 
-        # check if deploy_main.py startes with # nuitka-project:
+        # check if deploy_main.py starts with # nuitka-project:
         with open(self.temp_example_qml / "deploy_main.py", "r") as file:
             # check if 516 lines start with # nuitka-project:
             self.assertEqual(len([line for line in file.readlines()

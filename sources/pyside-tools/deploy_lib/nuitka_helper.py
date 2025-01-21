@@ -83,9 +83,8 @@ class Nuitka:
     def create_executable(self, source_file: Path, extra_args: str, qml_files: list[Path],
                           qt_plugins: list[str], excluded_qml_plugins: list[str], icon: str,
                           dry_run: bool, permissions: list[str],
-                          mode: DesktopConfig.NuitkaMode):
+                          mode: DesktopConfig.NuitkaMode) -> str:
         qt_plugins = [plugin for plugin in qt_plugins if plugin not in self.qt_plugins_to_ignore]
-
         extra_args = shlex.split(extra_args)
 
         # macOS uses the --standalone option by default to create an app bundle

@@ -64,7 +64,7 @@ HELP_MODE = dedent("""
 def main(main_file: Path = None, name: str = None, config_file: Path = None, init: bool = False,
          loglevel=logging.WARNING, dry_run: bool = False, keep_deployment_files: bool = False,
          force: bool = False, extra_ignore_dirs: str = None, extra_modules_grouped: str = None,
-         mode: bool = False):
+         mode: str = None):
 
     logging.basicConfig(level=loglevel)
 
@@ -121,9 +121,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
 
     config.modules += list(set(extra_modules).difference(set(config.modules)))
 
-    # writing config file
-    # in the case of --dry-run, we use default.spec as reference. Do not save the changes
-    # for --dry-run
+    # Do not save the config changes if --dry-run is specified
     if not dry_run:
         config.update_config()
 
@@ -163,8 +161,9 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
     except Exception:
         print(f"[DEPLOY] Exception occurred: {traceback.format_exc()}")
     finally:
-        if config.generated_files_path and config:
-            finalize(config=config)
+        if config.generated_files_path:
+            if not dry_run:
+                finalize(config=config)
             if not keep_deployment_files:
                 cleanup(config=config)
 

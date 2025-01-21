@@ -61,16 +61,15 @@ def create_config_file(main_file: Path, dry_run: bool = False):
     """
 
     config_file = main_file.parent / "pysidedeploy.spec"
-
     logging.info(f"[DEPLOY] Creating config file {config_file}")
-    if not dry_run:
-        shutil.copy(Path(__file__).parent / "default.spec", config_file)
 
+    default_config_file = Path(__file__).parent / "default.spec"
     # the config parser needs a reference to parse. So, in the case of --dry-run
     # use the default.spec file.
     if dry_run:
-        config_file = Path(__file__).parent / "default.spec"
+        return default_config_file
 
+    shutil.copy(default_config_file, config_file)
     return config_file
 
 
@@ -79,16 +78,29 @@ def finalize(config: DesktopConfig):
         Copy the executable into the final location
         For Android deployment, this is done through buildozer
     """
-    dist_format = EXE_FORMAT
+    exe_format = EXE_FORMAT
     if config.mode == DesktopConfig.NuitkaMode.STANDALONE and sys.platform != "darwin":
-        dist_format = ".dist"
+        exe_format = ".dist"
 
-    generated_exec_path = config.generated_files_path / (config.source_file.stem + dist_format)
-    if generated_exec_path.exists() and config.exe_dir:
-        if sys.platform == "darwin" or config.mode == DesktopConfig.NuitkaMode.STANDALONE:
-            shutil.copytree(generated_exec_path, config.exe_dir / (config.title + dist_format),
-                            dirs_exist_ok=True)
-        else:
-            shutil.copy(generated_exec_path, config.exe_dir / (config.title + dist_format))
-        print("[DEPLOY] Executed file created in "
-              f"{str(config.exe_dir / (config.title + dist_format))}")
+    generated_exec_path = config.generated_files_path / (config.source_file.stem + exe_format)
+    if not generated_exec_path.exists():
+        logging.error(f"[DEPLOY] Executable not found at {generated_exec_path.absolute()}")
+        return
+
+    logging.info(f"[DEPLOY] executable generated at {generated_exec_path.absolute()}")
+    if not config.exe_dir:
+        logging.info("[DEPLOY] Not copying output executable because no output directory specified")
+        return
+
+    output_path = config.exe_dir / (config.title + exe_format)
+
+    if sys.platform == "darwin" or config.mode == DesktopConfig.NuitkaMode.STANDALONE:
+        # Copy the folder that contains the executable
+        logging.info(f"[DEPLOY] copying generated folder to {output_path.absolute()}")
+        shutil.copytree(generated_exec_path, output_path, dirs_exist_ok=True)
+    else:
+        # Copy a single file
+        logging.info(f"[DEPLOY] copying generated file to {output_path.absolute()}")
+        shutil.copy(generated_exec_path, output_path)
+
+    print(f"[DEPLOY] Executed file created in {output_path.absolute()}")
