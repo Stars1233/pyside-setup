@@ -13,6 +13,7 @@
 #include "helper.h"
 #include "pyobjectholder.h"
 #include "sbkarrayconverter.h"
+#include "sbkbindingutils.h"
 #include "sbkconverter.h"
 #include "sbkenum.h"
 #include "sbkerrors.h"

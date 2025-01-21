@@ -3664,49 +3664,53 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s,
         return;
     }
 
+    Q_ASSERT(usePyArgs);
+
+    const auto count = args.size();
     // PySide-535: Allow for empty dict instead of nullptr in PyPy
-    s << "if (kwds && PyDict_Size(kwds) > 0) {\n" << indent;
-    if (!force)
-        s << "PyObject *value{};\n";
-    s << "Shiboken::AutoDecRef kwds_dup(PyDict_Copy(kwds));\n";
-    for (const AbstractMetaArgument &arg : args) {
-        const int pyArgIndex = arg.argumentIndex()
-            - OverloadData::numberOfRemovedArguments(func, arg.argumentIndex());
-        QString pyArgName = usePyArgs ? pythonArgsAt(pyArgIndex)
-                                      : PYTHON_ARG;
-        QString pyKeyName = u"key_"_s + arg.name();
-        s << "static PyObject *const " << pyKeyName
-            << " = Shiboken::String::createStaticString(\"" << arg.name() << "\");\n"
-            << "if (PyDict_Contains(kwds, " << pyKeyName << ") != 0) {\n" << indent
-            << "value = PyDict_GetItem(kwds, " << pyKeyName << ");\n"
-            << "if (value != nullptr && " << pyArgName << " != nullptr ) {\n"
-            << indent << "errInfo.reset(" << pyKeyName << ");\n"
-            << "Py_INCREF(errInfo.object());\n"
-            << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
-            << ";\n" << outdent << "}\nif (value != nullptr) {\n" << indent
-            << pyArgName << " = value;\nif (!";
-        const auto &type = arg.modifiedType();
-        writeTypeCheck(s, type, pyArgName, isNumber(type.typeEntry()), {});
-        s << ")\n" << indent
-            << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
-            << ";\n" << outdent << outdent
-            << "}\nPyDict_DelItem(kwds_dup, " << pyKeyName << ");\n"
-            << outdent << "}\n";
+    s << "if (kwds && PyDict_Size(kwds) > 0)"; //  {\n" << indent;
+    if (count == 0) {
+        s << indent << "\nerrInfo.reset(PyDict_Copy(kwds));\n" << outdent;
+        return;
     }
+    s << " {\n" << indent
+        << "static const Shiboken::ArgumentNameIndexMapping mapping[" << count << "] = {";
+    for (qsizetype i = 0; i < count; ++i) {
+        const auto &arg = args.at(i);
+        const int pyArgIndex = arg.argumentIndex()
+                - OverloadData::numberOfRemovedArguments(func, arg.argumentIndex());
+        if (i > 0)
+            s << ", ";
+        s << "{\"" << arg.name() << "\", " << pyArgIndex << '}';
+    }
+
+    s << "};\n";
+
+    const char *mappingFunc = func->isConstructor() && isQObject(func->ownerClass())
+        ? "parseConstructorKeywordArguments" : "parseKeywordArguments";
+    s << "if (!Shiboken::" << mappingFunc << "(kwds, mapping, "
+        << count << ", errInfo, " << PYTHON_ARGS << ')' << indent;
+    for (qsizetype i = 0; i < count; ++i) {
+        const auto &arg = args.at(i);
+        const int pyArgIndex = arg.argumentIndex()
+                - OverloadData::numberOfRemovedArguments(func, arg.argumentIndex());
+        const auto &type = arg.modifiedType();
+        const QString pyArgName = pythonArgsAt(pyArgIndex);
+        s << "\n|| ";
+        s << '(' << pyArgName << " != nullptr && !";
+        writeTypeCheck(s, type, pyArgName, isNumber(type.typeEntry()), {});
+        s << ')';
+    }
+    s << outdent << ") {\n" << indent
+        << "Py_INCREF(errInfo.object());\n"
+        << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
+        << ';' << outdent << "\n}\n";;
+
     // PYSIDE-1305: Handle keyword args correctly.
     // Normal functions handle their parameters immediately.
     // For constructors that are QObject, we need to delay that
     // until extra keyword signals and properties are handled.
-    s << "if (PyDict_Size(kwds_dup) > 0) {\n" << indent
-        << "errInfo.reset(kwds_dup.release());\n";
-    if (!(func->isConstructor() && isQObject(func->ownerClass()))) {
-        s << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
-            << ";\n";
-    } else {
-        s << "// fall through to handle extra keyword signals and properties\n";
-    }
-    s << outdent << "}\n"
-        << outdent << "}\n";
+    s << outdent << "}\n";
 }
 
 QString CppGenerator::argumentNameFromIndex(const ApiExtractorResult &api,
