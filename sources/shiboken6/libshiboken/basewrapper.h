@@ -210,7 +210,8 @@ enum WrapperFlags
 {
     InnerClass = 0x1,
     DeleteInMainThread = 0x2,
-    Value = 0x4
+    Value = 0x4,
+    InternalWrapper = 0x8
 };
 
 /**
