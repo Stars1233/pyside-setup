@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
-
 """
 Builds a '.pyproject' file
 
@@ -25,12 +24,12 @@ import os
 from pathlib import Path
 from argparse import ArgumentParser, RawTextHelpFormatter
 
-from project import (QmlProjectData, check_qml_decorators, is_python_file,
-                     QMLDIR_FILE, MOD_CMD, METATYPES_JSON_SUFFIX,
-                     SHADER_SUFFIXES, TRANSLATION_SUFFIX,
-                     requires_rebuild, run_command, remove_path,
-                     ProjectData, resolve_project_file, new_project,
-                     ProjectType, ClOptions)
+from project_lib import (QmlProjectData, check_qml_decorators, is_python_file,
+                         QMLDIR_FILE, MOD_CMD, METATYPES_JSON_SUFFIX,
+                         SHADER_SUFFIXES, TRANSLATION_SUFFIX,
+                         requires_rebuild, run_command, remove_path,
+                         ProjectData, resolve_project_file, new_project,
+                         ProjectType, ClOptions)
 
 MODE_HELP = """build    Builds the project
 run        Builds the project and runs the first file")
@@ -71,6 +70,7 @@ class Project:
     """
     Class to wrap the various operations on Project
     """
+
     def __init__(self, project_file: Path):
         self.project = ProjectData(project_file=project_file)
         self.cl_options = ClOptions()

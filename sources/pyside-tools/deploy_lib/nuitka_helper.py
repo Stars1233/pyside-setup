@@ -11,7 +11,7 @@ import shlex
 import sys
 from pathlib import Path
 
-from project import DesignStudioProject
+from project_lib import DesignStudioProject
 from . import MAJOR_VERSION, run_command, DEFAULT_IGNORE_DIRS, PLUGINS_TO_REMOVE
 from .config import DesktopConfig
 

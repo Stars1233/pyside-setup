@@ -11,7 +11,7 @@ from configparser import ConfigParser
 from pathlib import Path
 from enum import Enum
 
-from project import ProjectData, DesignStudioProject
+from project_lib import ProjectData, DesignStudioProject
 from . import (DEFAULT_APP_ICON, DEFAULT_IGNORE_DIRS, find_pyside_modules,
                find_permission_categories, QtDependencyReader, run_qmlimportscanner)
 

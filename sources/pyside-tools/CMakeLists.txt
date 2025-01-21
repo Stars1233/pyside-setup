@@ -29,7 +29,7 @@ else()
             ${CMAKE_CURRENT_SOURCE_DIR}/requirements-android.txt)
 
     set(directories ${CMAKE_CURRENT_SOURCE_DIR}/deploy_lib
-                    ${CMAKE_CURRENT_SOURCE_DIR}/project)
+                    ${CMAKE_CURRENT_SOURCE_DIR}/project_lib)
 
     if(NOT NO_QT_TOOLS STREQUAL "yes")
         set(TOOLS_PATH "${QT6_INSTALL_PREFIX}/${QT6_HOST_INFO_BINDIR}")

@@ -124,7 +124,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             scripts = ["pyside_tool.py", "metaobjectdump.py", "project.py", "qml.py",
                        "qtpy2cpp.py", "deploy.py"]
 
-            script_dirs = ["qtpy2cpp_lib", "deploy_lib", "project"]
+            script_dirs = ["qtpy2cpp_lib", "deploy_lib", "project_lib"]
 
             if sys.platform in ["linux", "darwin"]:
                 scripts.append("android_deploy.py")

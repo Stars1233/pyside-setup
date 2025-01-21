@@ -1,4 +1,4 @@
 {
-    "files": ["project.py", "project/__init__.py", "project/newproject.py",
-              "project/project_data.py", "project/utils.py"]
+    "files": ["project.py", "project_lib/__init__.py", "project_lib/design_studio_project.py",
+              "project_lib/newproject.py", "project_lib/project_data.py", "project_lib/utils.py"]
 }
