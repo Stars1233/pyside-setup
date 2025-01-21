@@ -29,7 +29,7 @@ from project_lib import (QmlProjectData, check_qml_decorators, is_python_file,
                          SHADER_SUFFIXES, TRANSLATION_SUFFIX,
                          requires_rebuild, run_command, remove_path,
                          ProjectData, resolve_project_file, new_project,
-                         ProjectType, ClOptions)
+                         ProjectType, ClOptions, DesignStudioProject)
 
 MODE_HELP = """build    Builds the project
 run        Builds the project and runs the first file")
@@ -113,20 +113,24 @@ class Project:
             print(f"{self.project.project_file.name}, {count} QML file(s),"
                   f" {self._qml_project_data}")
 
-    def _get_artifacts(self, file: Path) -> tuple[list[Path], list[str] | None]:
+    def _get_artifacts(self, file: Path, output_path: Path | None = None) -> \
+            tuple[list[Path], list[str] | None]:
         """Return path and command for a file's artifact"""
         if file.suffix == ".ui":  # Qt form files
             py_file = f"{file.parent}/ui_{file.stem}.py"
-            return ([Path(py_file)], [UIC_CMD, os.fspath(file), "--rc-prefix", "-o", py_file])
+            return [Path(py_file)], [UIC_CMD, os.fspath(file), "--rc-prefix", "-o", py_file]
         if file.suffix == ".qrc":  # Qt resources
-            py_file = f"{file.parent}/rc_{file.stem}.py"
-            return ([Path(py_file)], [RCC_CMD, os.fspath(file), "-o", py_file])
+            if not output_path:
+                py_file = f"{file.parent}/rc_{file.stem}.py"
+            else:
+                py_file = str(output_path.resolve())
+            return [Path(py_file)], [RCC_CMD, os.fspath(file), "-o", py_file]
         # generate .qmltypes from sources with Qml decorators
         if file.suffix == ".py" and file in self._qml_module_sources:
             assert self._qml_module_dir
             qml_module_dir = os.fspath(self._qml_module_dir)
             json_file = f"{qml_module_dir}/{file.stem}{METATYPES_JSON_SUFFIX}"
-            return ([Path(json_file)], [MOD_CMD, "-o", json_file, os.fspath(file)])
+            return [Path(json_file)], [MOD_CMD, "-o", json_file, os.fspath(file)]
         # Run qmltyperegistrar
         if file.name.endswith(METATYPES_JSON_SUFFIX):
             assert self._qml_module_dir
@@ -137,19 +141,19 @@ class Project:
                    os.fspath(qmltypes_file), "-o", os.fspath(cpp_file),
                    os.fspath(file)]
             cmd.extend(self._qml_project_data.registrar_options())
-            return ([qmltypes_file, cpp_file], cmd)
+            return [qmltypes_file, cpp_file], cmd
 
         if file.name.endswith(TRANSLATION_SUFFIX):
             qm_file = f"{file.parent}/{file.stem}.qm"
             cmd = [LRELEASE_CMD, os.fspath(file), "-qm", qm_file]
-            return ([Path(qm_file)], cmd)
+            return [Path(qm_file)], cmd
 
         if file.suffix in SHADER_SUFFIXES:
             qsb_file = f"{file.parent}/{file.stem}.qsb"
             cmd = [QSB_CMD, "-o", qsb_file, os.fspath(file)]
-            return ([Path(qsb_file)], cmd)
+            return [Path(qsb_file)], cmd
 
-        return ([], None)
+        return [], None
 
     def _regenerate_qmldir(self):
         """Regenerate the 'qmldir' file."""
@@ -161,22 +165,39 @@ class Project:
                 for f in self._qml_module_dir.glob("*.qmltypes"):
                     qf.write(f"typeinfo {f.name}\n")
 
-    def _build_file(self, source: Path):
-        """Build an artifact."""
-        artifacts, command = self._get_artifacts(source)
+    def _build_file(self, source: Path, output_path: Path | None = None):
+        """Build an artifact if necessary."""
+        artifacts, command = self._get_artifacts(source, output_path)
         for artifact in artifacts:
             if self.cl_options.force or requires_rebuild([source], artifact):
                 run_command(command, cwd=self.project.project_file.parent)
             self._build_file(artifact)  # Recurse for QML (json->qmltypes)
 
+    def build_design_studio_resources(self):
+        """
+        The resources that need to be compiled are defined in autogen/settings.py
+        """
+        ds_project = DesignStudioProject(self.project.main_file)
+        if (resources_file_path := ds_project.get_resource_file_path()) is None:
+            return
+
+        compiled_resources_file_path = ds_project.get_compiled_resources_file_path()
+        self._build_file(resources_file_path, compiled_resources_file_path)
+
     def build(self):
-        """Build."""
+        """Build the whole project"""
         for sub_project_file in self.project.sub_projects_files:
             Project(project_file=sub_project_file).build()
+
         if self._qml_module_dir:
             self._qml_module_dir.mkdir(exist_ok=True, parents=True)
+
         for file in _sort_sources(self.project.files):
             self._build_file(file)
+
+        if DesignStudioProject.is_ds_project(self.project.main_file):
+            self.build_design_studio_resources()
+
         self._regenerate_qmldir()
 
     def run(self):
@@ -206,6 +227,9 @@ class Project:
                 project_dir_parts = len(self.project.project_file.parent.parts)
                 first_module_dir = self._qml_module_dir.parts[project_dir_parts]
                 remove_path(self.project.project_file.parent / first_module_dir)
+
+        if DesignStudioProject.is_ds_project(self.project.main_file):
+            DesignStudioProject(self.project.main_file).clean()
 
     def _qmllint(self):
         """Helper for running qmllint on .qml files (non-recursive)."""
@@ -253,35 +277,21 @@ class Project:
                 run_command(cmd, cwd=project_dir)
 
 
-if __name__ == "__main__":
-    parser = ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
-    parser.add_argument("--quiet", "-q", action="store_true", help="Quiet")
-    parser.add_argument("--dry-run", "-n", action="store_true", help="Only print commands")
-    parser.add_argument("--force", "-f", action="store_true", help="Force rebuild")
-    parser.add_argument("--qml-module", "-Q", action="store_true",
-                        help="Perform check for QML module")
-    mode_choices = ["build", "run", "clean", "qmllint", "deploy", "lupdate"]
-    mode_choices.extend(NEW_PROJECT_TYPES.keys())
-    parser.add_argument("mode", choices=mode_choices, default="build",
-                        type=str, help=MODE_HELP)
-    parser.add_argument("file", help="Project file", nargs="?", type=str)
-
-    options = parser.parse_args()
-    cl_options = ClOptions(dry_run=options.dry_run, quiet=options.quiet, force=options.force,
-                           qml_module=options.qml_module)
-
-    mode = options.mode
+def main(mode: str = None, file: str = None, dry_run: bool = False, quiet: bool = False,
+         force: bool = False, qml_module: bool = None):
+    cl_options = ClOptions(dry_run=dry_run, quiet=quiet,  # noqa: F841
+                           force=force, qml_module=qml_module)
 
     new_project_type = NEW_PROJECT_TYPES.get(mode)
     if new_project_type:
-        if not options.file:
+        if not file:
             print(f"{mode} requires a directory name.", file=sys.stderr)
             sys.exit(1)
-        sys.exit(new_project(options.file, new_project_type))
+        sys.exit(new_project(file, new_project_type))
 
-    project_file = resolve_project_file(options.file)
+    project_file = resolve_project_file(file)
     if not project_file:
-        print(f"Cannot determine project_file {options.file}", file=sys.stderr)
+        print(f"Cannot determine project_file {file}", file=sys.stderr)
         sys.exit(1)
     project = Project(project_file)
     if mode == "build":
@@ -299,3 +309,23 @@ if __name__ == "__main__":
     else:
         print(f"Invalid mode {mode}", file=sys.stderr)
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
+    parser.add_argument("--quiet", "-q", action="store_true", help="Quiet")
+    parser.add_argument("--dry-run", "-n", action="store_true", help="Only print commands")
+    parser.add_argument("--force", "-f", action="store_true", help="Force rebuild")
+    parser.add_argument("--qml-module", "-Q", action="store_true",
+                        help="Perform check for QML module")
+    mode_choices = ["build", "run", "clean", "qmllint", "deploy", "lupdate"]
+    mode_choices.extend(NEW_PROJECT_TYPES.keys())
+    parser.add_argument("mode", choices=mode_choices, default="build",
+                        type=str, help=MODE_HELP)
+
+    # TODO: improve the command structure.
+    #  "File" argument is not correct when doing new-... project
+    parser.add_argument("file", help="Project file", nargs="?", type=str)
+
+    args = parser.parse_args()
+    main(args.mode, args.file, args.dry_run, args.quiet, args.force, args.qml_module)

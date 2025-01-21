@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 import subprocess
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 from . import QTPATHS_CMD, PROJECT_FILE_SUFFIX, ClOptions
 
@@ -20,13 +21,32 @@ def run_command(command: list[str], cwd: str = None, ignore_fail: bool = False):
             sys.exit(ex)
 
 
+def qrc_file_requires_rebuild(resources_file_path: Path, compiled_resources_path: Path) -> bool:
+    """Returns whether a compiled qrc file needs to be rebuilt based on the files that references"""
+    root_element = ET.parse(resources_file_path).getroot()
+    project_root = resources_file_path.parent
+
+    files = [project_root / file.text for file in root_element.findall(".//file")]
+
+    compiled_resources_time = compiled_resources_path.stat().st_mtime
+    # If any of the resource files has been modified after the compiled qrc file, the compiled qrc
+    # file needs to be rebuilt
+    if any(file.is_file() and file.stat().st_mtime > compiled_resources_time for file in files):
+        return True
+    return False
+
+
 def requires_rebuild(sources: list[Path], artifact: Path) -> bool:
     """Returns whether artifact needs to be rebuilt depending on sources"""
     if not artifact.is_file():
         return True
+
     artifact_mod_time = artifact.stat().st_mtime
     for source in sources:
         if source.stat().st_mtime > artifact_mod_time:
+            return True
+        # The .qrc file references other files that might have changed
+        if source.suffix == '.qrc' and qrc_file_requires_rebuild(source, artifact):
             return True
     return False
 

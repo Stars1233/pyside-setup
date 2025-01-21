@@ -115,7 +115,7 @@ class ProjectData:
 
         # __main__ not found
         print(
-            "Python file with main function not found. Add the file to" f" {self.project_file}",
+            f"Python file with main function not found. Add the file to {self.project_file}",
             file=sys.stderr,
         )
         sys.exit(1)
