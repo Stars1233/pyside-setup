@@ -20,5 +20,11 @@ if (emitter == nullptr || signature.isEmpty()) {
     PyErr_SetString(PyExc_ValueError, error.constData());
     return -1;
 }
+
+// PySide::Signal::getObject() increments the refcount for emitterPyObject,
+// but there is nothing that decrements the count when the spy goes out of
+// scope.  It doesn't seem like QSignalSpy should prevent the target object
+// from being garbage collected.  So we need to decrement the refcount here.
+Py_DECREF(emitterPyObject);
 %0 = new QSignalSpy(emitter, signature.constData());
 // @snippet qsignalspy-signal
