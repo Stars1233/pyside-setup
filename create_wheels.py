@@ -149,8 +149,8 @@ def get_platform_tag() -> str:
         # We know the CI builds universal2 wheels
         _tag = f"macosx_{target}_universal2"
     elif _os == "win32":
-        win_arch = platform.architecture()[0]
-        msvc_arch = "x86" if win_arch.startswith("32") else "amd64"
+        win_arch = platform.machine()
+        msvc_arch = "arm64" if win_arch.startswith("ARM64") else "amd64"
         _tag = f"win_{msvc_arch}"
 
     return _tag

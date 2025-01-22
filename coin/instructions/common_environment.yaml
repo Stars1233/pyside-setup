@@ -46,6 +46,33 @@ instructions:
           - condition: property
             property: host.os
             equals_value: Windows
+          - condition: property
+            property: host.arch
+            not_equals_value: AARCH64
+    - type: EnvironmentVariable
+      variableName: PYTHON3_PATH
+      variableValue: "{{ index .Env \"PYTHON3.11.9-64_PATH\"}}"
+      enable_if:
+        condition: and
+        conditions:
+          - condition: property
+            property: host.os
+            equals_value: Windows
+          - condition: property
+            property: host.arch
+            equals_value: AARCH64
+    - type: EnvironmentVariable
+      variableName: TARGET_ARCHITECTURE
+      variableValue: arm64
+      enable_if:
+        condition: and
+        conditions:
+          - condition: property
+            property: target.arch
+            equals_value: AARCH64
+          - condition: property
+            property: host.os
+            equals_value: Windows
     - type: EnvironmentVariable
       variableName: TARGET_ARCHITECTURE
       variableValue: amd64_x86

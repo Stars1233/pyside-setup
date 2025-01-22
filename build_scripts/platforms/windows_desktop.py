@@ -5,6 +5,7 @@ from __future__ import annotations
 import functools
 import os
 import tempfile
+import platform
 
 from pathlib import Path
 
@@ -252,6 +253,8 @@ def download_qt_dependency_dlls(_vars, destination_qt_dir, artifacts):
     with tempfile.TemporaryDirectory() as temp_path:
         redist_url = "https://download.qt.io/development_releases/prebuilt/vcredist/"
         zip_file = "pyside_qt_deps_681_64_2022.7z"
+        if platform.machine() == "ARM64":
+            zip_file = "pyside_qt_deps_690_arm_2022.7z"
         try:
             download_and_extract_7z(redist_url + zip_file, temp_path)
         except Exception as e:
@@ -444,5 +447,6 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
                  destination_qt_dir,
                  _vars=_vars)
 
-    if copy_clang:
+    if copy_clang or platform.machine() == "ARM64":
+        # Qt CI is using dynamic libclang with arm config.
         pyside_build.prepare_standalone_clang(is_win=True)

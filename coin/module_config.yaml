@@ -25,9 +25,6 @@ accept_configuration:
         - condition: property  # Windows on Arm
           property: target.arch
           not_equals_value: ARM64
-        - condition: property  # Windows on Arm host build
-          property: target.arch
-          not_equals_value: AARCH64
         - condition: property
           property: features
           not_contains_value: DebianPackaging

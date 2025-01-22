@@ -47,6 +47,18 @@ instructions:
         condition: property
         property: host.os
         equals_value: Windows
+  - type: EnvironmentVariable
+    variableName: PYSIDE_SIGNING_DIR
+    variableValue: "{{.AgentWorkingDir}}\\pyside\\{{.Env.TESTED_MODULE_COIN}}\\build\\qfpa-p3.11\\package_for_wheels"
+    enable_if:
+        condition: and
+        conditions:
+          - condition: property
+            property: host.os
+            equals_value: Windows
+          - condition: property
+            property: host.arch
+            equals_value: AARCH64
   - type: ExecuteCommand
     command: "{{.Env.interpreter}} -m pip install -r requirements-coin.txt --user"
     maxTimeInSeconds: 14400
@@ -83,7 +95,7 @@ instructions:
     userMessageOnFailure: >
          Failed to install requirements-coin.txt dependencies on Windows
   - type: ExecuteCommand
-    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=BUILD"
+    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch={{.Env.HOST_ARCH_COIN}}  --targetArch={{.Env.TARGET_ARCH_COIN}} --phase=BUILD"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 600
     enable_if:

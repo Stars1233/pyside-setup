@@ -144,7 +144,7 @@ def remove_variables(vars):
             del os.environ[env_var]
 
 
-def setup_virtualenv(python, exe, env, pip, log):
+def setup_virtualenv(python, exe, env, pip, log, ci):
     # Within Ubuntu 24.04 one can't install anything with pip to outside of
     # virtual env. Trust that we already have proper virtualenv installed.
     if os.environ.get("HOST_OSVERSION_COIN") != "ubuntu_24_04":
@@ -156,7 +156,10 @@ def setup_virtualenv(python, exe, env, pip, log):
     env_path = Path(str(site.USER_BASE)) / "bin"
     v_env = env_path / "virtualenv"
     if sys.platform == "win32":
-        env_path = os.path.join(site.USER_BASE, "Scripts")
+        if ci.TARGET_ARCH == "aarch64":
+            env_path = os.path.join(site.USER_BASE, "Python311-arm64", "Scripts")
+        else:
+            env_path = os.path.join(site.USER_BASE, "Scripts")
         v_env = os.path.join(env_path, "virtualenv.exe")
     try:
         run_instruction([str(v_env), "--version"], "Using default virtualenv")
@@ -191,7 +194,7 @@ def call_setup(python_ver, ci, phase, log, buildnro=0):
         python = Path(get_env_or_raise("PYTHON3_PATH")) / "python.exe"
 
     if phase == "BUILD":
-        setup_virtualenv(python, exe, env, pip, log)
+        setup_virtualenv(python, exe, env, pip, log, ci)
     elif phase == "TEST":
 
         if ci.HOST_OS == "MacOS" and ci.HOST_ARCH == "ARM64":
@@ -201,7 +204,7 @@ def call_setup(python_ver, ci, phase, log, buildnro=0):
                 [pip, "install", "-r", "requirements.txt"], "Failed to install dependencies"
             )
         else:
-            setup_virtualenv(python, exe, env, pip, log)
+            setup_virtualenv(python, exe, env, pip, log, ci)
             # Install distro to replace missing platform.linux_distribution() in python3.8
             run_instruction([pip, "install", "distro"], "Failed to install distro")
 
