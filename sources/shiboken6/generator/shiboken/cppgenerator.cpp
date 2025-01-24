@@ -947,8 +947,7 @@ void CppGenerator::writeCacheResetNative(TextStream &s, const GeneratorContext &
 void CppGenerator::writeConstructorNative(TextStream &s, const GeneratorContext &classContext,
                                           const AbstractMetaFunctionCPtr &func) const
 {
-    const QString qualifiedName = classContext.wrapperName() + u"::"_s;
-    s << functionSignature(func, qualifiedName, QString(),
+    s << functionSignature(func, classContext.wrapperName(), {},
                            OriginalTypeDescription | SkipDefaultValues);
     if (!func->arguments().isEmpty()) {
         s << " : ";
@@ -1261,9 +1260,9 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     const QString funcName = func->isOperatorOverload()
         ? pythonOperatorFunctionName(func) : func->definitionNames().constFirst();
 
-    QString prefix = wrapperName(func->ownerClass()) + u"::"_s;
-    s << functionSignature(func, prefix, QString(), Generator::SkipDefaultValues |
-                                                    Generator::OriginalTypeDescription)
+    QString className = wrapperName(func->ownerClass());
+    s << functionSignature(func, className, {}, Generator::SkipDefaultValues |
+                                                Generator::OriginalTypeDescription)
       << "\n{\n" << indent;
 
     const auto returnStatement = virtualMethodReturn(api(), func,
@@ -1293,7 +1292,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     if (wrapperDiagnostics()) {
         s << "std::cerr << ";
 #ifndef Q_CC_MSVC // g++ outputs __FUNCTION__ unqualified
-        s << '"' << prefix << R"(" << )";
+        s << '"' << className << R"(::" << )";
 #endif
         s  << R"(__FUNCTION__ << ' ' << this << " m_PyMethodCache[" << )"
            << cacheIndex << R"( << "]=" << m_PyMethodCache[)" << cacheIndex
@@ -1550,8 +1549,8 @@ void CppGenerator::writeUserAddedPythonOverride(TextStream &s,
     const CodeSnipList snips = func->hasInjectedCode()
         ? func->injectedCodeSnips() : CodeSnipList();
 
-    QString prefix = wrapperName(func->ownerClass()) + u"::"_s;
-    s << '\n' << functionSignature(func, prefix, QString(), Generator::SkipDefaultValues |
+    s << '\n' << functionSignature(func, wrapperName(func->ownerClass()), {},
+                                   Generator::SkipDefaultValues |
                                    Generator::OriginalTypeDescription)
       << "\n{\n" << indent << sbkUnusedVariableCast("gil");
 
