@@ -11,6 +11,7 @@
 #include "typesystem_typedefs.h"
 #include "typesystem_enums.h"
 
+#include <QtCore/QHash>
 #include <QtCore/QRegularExpression>
 
 #include <array>
@@ -82,6 +83,7 @@ public:
     };
     Q_DECLARE_FLAGS(AttroCheck, AttroCheckFlag);
 
+    using FunctionMapping = QHash<AbstractMetaFunctionCPtr, AbstractMetaFunctionCPtr>;
     using FunctionGroups = QMap<QString, AbstractMetaFunctionCList>; // Sorted
 
     ShibokenGenerator();
@@ -115,6 +117,9 @@ protected:
     /// Returns the constructors which should be added to wrapper class.
     /// \param scope Where to search for functions
     static AbstractMetaFunctionCList getWrapperConstructors(const AbstractMetaClassCPtr &scope);
+    /// Returns mapping of virtual functions whose override handling code can be re-used.
+    static const FunctionMapping &
+        getReusedOverridenFunctions(const AbstractMetaClassCPtr &scope);
 
     static QList<AbstractMetaFunctionCList>
         numberProtocolOperators(const AbstractMetaClassCPtr &scope);
@@ -387,6 +392,7 @@ private:
     static bool classNeedsGetattroOverloadFunctionImpl(const FunctionGroups &functionGroups);
     static AttroCheck checkAttroFunctionNeedsImpl(const AbstractMetaClassCPtr &metaClass,
                                                   const FunctionGroups &functionGroups);
+    static FunctionMapping getReusedOverridesImpl(const AbstractMetaClassCPtr &metaClass);
     static bool isVirtualOverride(const AbstractMetaFunctionCPtr &f);
 
     QString translateTypeForWrapperMethod(const AbstractMetaType &cType,

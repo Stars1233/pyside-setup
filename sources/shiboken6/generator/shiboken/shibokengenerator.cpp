@@ -16,6 +16,7 @@
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <abstractmetalang_helpers.h>
+#include "overridecacheentry.h"
 #include <usingmember.h>
 #include <exception.h>
 #include <messages.h>
@@ -44,6 +45,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QDebug>
 #include <QtCore/QRegularExpression>
+#include <QtCore/QSet>
 
 #include <algorithm>
 #include <limits>
@@ -75,6 +77,8 @@ QString CPP_ARG_REMOVED(int i)
 {
     return CPP_ARG_REMOVED_PREFIX + QString::number(i);
 }
+
+static QSet<OverrideCacheEntry> pythonOverrideCache;
 
 const char *const METHOD_DEF_SENTINEL = "{nullptr, nullptr, 0, nullptr} // Sentinel\n";
 const char *const PYTHON_TO_CPPCONVERSION_STRUCT = "Shiboken::Conversions::PythonToCppConversion";
@@ -110,6 +114,8 @@ struct GeneratorClassInfoCacheEntry
     QList<AbstractMetaFunctionCList> numberProtocolOperators;
     BoolCastFunctionOptional boolCastFunctionO;
     ShibokenGenerator::AttroCheck attroCheck;
+    // Maps a virtual function to an equivalent one for resuing the override implementation
+    ShibokenGenerator::FunctionMapping reusedOverrides;
 };
 
 using GeneratorClassInfoCache = QHash<AbstractMetaClassCPtr, GeneratorClassInfoCacheEntry>;
@@ -2147,6 +2153,8 @@ const GeneratorClassInfoCacheEntry &
         entry.attroCheck = checkAttroFunctionNeedsImpl(scope, entry.functionGroups);
         entry.numberProtocolOperators = getNumberProtocolOperators(scope);
         entry.boolCastFunctionO = getBoolCast(scope);
+        if (shouldGenerateCppWrapper(scope)) // Skip final classes
+            entry.reusedOverrides = getReusedOverridesImpl(scope);
     }
     return it.value();
 }
@@ -2169,6 +2177,13 @@ AbstractMetaFunctionCList ShibokenGenerator::getWrapperConstructors(const Abstra
 {
     Q_ASSERT(scope);
     return getGeneratorClassInfo(scope).wrapperConstructors;
+}
+
+const ShibokenGenerator::FunctionMapping &
+    ShibokenGenerator::getReusedOverridenFunctions(const AbstractMetaClassCPtr &scope)
+{
+    Q_ASSERT(scope);
+    return getGeneratorClassInfo(scope).reusedOverrides;
 }
 
 QList<AbstractMetaFunctionCList>
@@ -2244,6 +2259,24 @@ ShibokenGenerator::FunctionGroups
         }
     }
     return results;
+}
+
+ShibokenGenerator::FunctionMapping
+    ShibokenGenerator::getReusedOverridesImpl(const AbstractMetaClassCPtr &metaClass)
+{
+    ShibokenGenerator::FunctionMapping result;
+    for (const auto &func : metaClass->functions()) {
+        const auto generation = functionGeneration(func);
+        if (generation.testFlag(FunctionGenerationFlag::VirtualMethod)) {
+            OverrideCacheEntry fce(func);
+            auto it = pythonOverrideCache.constFind(fce);
+            if (it == pythonOverrideCache.cend())
+                pythonOverrideCache.insert(fce);
+            else
+                result.insert(func, it->function());
+        }
+    }
+    return result;
 }
 
 static bool removeNumberProtocolOperator(const AbstractMetaFunctionCPtr &f)

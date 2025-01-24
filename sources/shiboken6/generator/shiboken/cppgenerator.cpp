@@ -48,6 +48,7 @@
 #include <QtCore/QMetaObject>
 #include <QtCore/QMetaType>
 #include <QtCore/QRegularExpression>
+#include <QtCore/QSet>
 #include <QtCore/QTextStream>
 
 #include <algorithm>

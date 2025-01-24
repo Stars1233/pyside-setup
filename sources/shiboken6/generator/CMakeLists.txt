@@ -21,6 +21,7 @@ shiboken/cppgenerator.cpp shiboken/cppgenerator.h
 shiboken/cppgenerator_container.cpp
 shiboken/cppgenerator_smartpointer.cpp
 shiboken/ctypenames.h
+shiboken/overridecacheentry.h shiboken/overridecacheentry.cpp
 shiboken/generatorargument.cpp shiboken/generatorargument.h shiboken/generatorstrings.h
 shiboken/headergenerator.cpp shiboken/headergenerator.h
 shiboken/overloaddata.cpp shiboken/overloaddata.h
