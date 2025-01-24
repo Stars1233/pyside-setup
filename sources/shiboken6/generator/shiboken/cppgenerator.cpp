@@ -550,6 +550,16 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
     s << "\n// main header\n" << "#include \""
       << HeaderGenerator::headerFileNameForContext(classContext) << "\"\n";
 
+    // Wrappers from which overrides are re-used.
+    QSet<QString> wrapperIncludes;
+    for (const auto &f : getReusedOverridenFunctions(metaClass))
+        wrapperIncludes.insert(ShibokenGenerator::headerFileNameForClass(f->ownerClass()));
+    if (!wrapperIncludes.isEmpty()) {
+        s  << "\n// Wrappers providing overrides\n";
+        for (const auto &wrapperInclude : std::as_const(wrapperIncludes))
+            s << "#include \"" << wrapperInclude << "\"\n";
+    }
+
     if (!innerClasses.isEmpty()) {
         s  << "\n// inner classes\n";
         for (const auto &innerClass : innerClasses) {
@@ -1288,8 +1298,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
         ? pythonOperatorFunctionName(func) : func->definitionNames().constFirst();
 
     QString className = wrapperName(func->ownerClass());
-    s << functionSignature(func, className, {}, Generator::SkipDefaultValues |
-                                                Generator::OriginalTypeDescription)
+    const Options options = Generator::SkipDefaultValues | Generator::OriginalTypeDescription;
+    s << functionSignature(func, className, {}, options)
       << "\n{\n" << indent;
 
     const auto returnStatement = virtualMethodReturn(api(), func,
@@ -1339,6 +1349,35 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                        TypeSystem::ShellCode, func, false, lastArg);
     }
 
+    // Call the (static) Python override implementation
+    if (!func->isVoid())
+        s << "return ";
+
+    auto owner = func->ownerClass();
+    const auto &reusedFuncs = getReusedOverridenFunctions(owner);
+    auto rit = reusedFuncs.constFind(func);
+    const bool canReuse = rit != reusedFuncs.cend();
+    if (canReuse) {
+        s << wrapperName(rit.value()->ownerClass()) << "::"
+            << pythonOverrideImplName(rit.value());
+    } else {
+        s << pythonOverrideImplName(func);
+    }
+    s << "(\"" << owner->name()
+        << "\", funcName, gil, " << PYTHON_OVERRIDE_VAR;
+    for (const auto &arg : func->arguments())
+        s << ", " << (arg.type().useStdMove() ? stdMove(arg.name()) : arg.name());
+    s << ");\n" << outdent << "}\n\n";
+
+    if (canReuse)
+        return;
+    // Write Python override implementation definition
+    s << functionSignature(func, className, {}, options | PythonOverrideImplementation)
+        << "\n{\n" << indent
+        << sbkUnusedVariableCast("ownerClassName") << sbkUnusedVariableCast("funcName")
+        << sbkUnusedVariableCast("gil") << sbkUnusedVariableCast(PYTHON_OVERRIDE_VAR);
+    if (returnStatement.needsReference)
+        writeVirtualMethodStaticReturnVar(s, func);
     writeVirtualMethodPythonOverride(s, func, snips, returnStatement);
 }
 void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
@@ -1439,8 +1478,7 @@ void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
 
         s << "if (" << PYTHON_RETURN_VAR << ".isNull()) {\n" << indent
             << "// An error happened in python code!\n"
-            << "Shiboken::Errors::storePythonOverrideErrorOrPrint(\""
-            << func->ownerClass()->name() << "\", funcName);\n"
+            << "Shiboken::Errors::storePythonOverrideErrorOrPrint(ownerClassName, funcName);\n"
             << returnStatement.statement << "\n" << outdent
         << "}\n";
 
@@ -1464,8 +1502,7 @@ void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
                         << cpythonIsConvertibleFunction(func->type())
                         << PYTHON_RETURN_VAR << ");\n" << outdent
                     << "if (!" << PYTHON_TO_CPP_VAR << ") {\n" << indent
-                        << "Shiboken::Warnings::warnInvalidReturnValue(\""
-                        << func->ownerClass()->name() << "\", funcName, "
+                        << "Shiboken::Warnings::warnInvalidReturnValue(ownerClassName, funcName, "
                         << getVirtualFunctionReturnTypeName(func) << ", "
                         << "Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);\n"
                         << returnStatement.statement << '\n' << outdent
@@ -1486,8 +1523,7 @@ void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
                     if (func->type().isPointerToWrapperType())
                         s << " && " << PYTHON_RETURN_VAR << " != Py_None";
                     s << ") {\n" << indent
-                        << "Shiboken::Warnings::warnInvalidReturnValue(\""
-                        << func->ownerClass()->name() << "\", funcName, "
+                        << "Shiboken::Warnings::warnInvalidReturnValue(ownerClassName, funcName, "
                         << getVirtualFunctionReturnTypeName(func) << ", "
                         << "Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);\n"
                         << returnStatement.statement << '\n' << outdent
@@ -1564,7 +1600,7 @@ void CppGenerator::writeUserAddedPythonOverride(TextStream &s,
       << "\n{\n" << indent << sbkUnusedVariableCast("gil");
 
     writeFuncNameVar(s, func, funcName);
-
+    s << "const char ownerClassName[] = \"" << func->ownerClass()->name() << "\";\n";
     const auto returnStatement = virtualMethodReturn(api(), func,
                                                      func->modifications());
     writeVirtualMethodPythonOverride(s, func, snips, returnStatement);

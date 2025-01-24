@@ -414,6 +414,20 @@ QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunctionCPtr
     return funcName;
 }
 
+// Return name of the static function implementing a python override ("sbk_o_..")
+QString ShibokenGenerator::pythonOverrideImplName(const AbstractMetaFunctionCPtr &func)
+{
+    QString result = "sbk_o_"_L1;
+    if (func->isOperatorOverload()) {
+        QString name = pythonOperatorFunctionName(func);
+        name.remove(u'_');
+        result += "op_"_L1 + name;
+    } else {
+        result += func->originalName();
+    }
+    return result;
+}
+
 bool ShibokenGenerator::wrapperDiagnostics()
 {
     return m_options.wrapperDiagnostics;
@@ -1175,6 +1189,13 @@ void ShibokenGenerator::writeFunctionArguments(TextStream &s,
         s << "Shiboken::GilState &gil, PyObject *" << PYTHON_OVERRIDE_VAR;
         argUsed += 2;
     }
+
+    if (options.testFlag(PythonOverrideImplementation)) {
+        s << "const char *ownerClassName, const char *funcName, Shiboken::GilState &gil, const Shiboken::AutoDecRef &"
+            << PYTHON_OVERRIDE_VAR;
+        argUsed += 3;
+    }
+
     for (const auto &arg : func->arguments()) {
         if (options.testFlag(Generator::SkipRemovedArguments) && arg.isModifiedRemoved())
             continue;
@@ -1212,7 +1233,8 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunctionCPtr &fun
     StringStream s(TextStream::Language::Cpp);
     // The actual function
     const bool isDeclaration = !options.testFlag(Option::SkipDefaultValues);
-    if (isDeclaration && func->isStatic())
+    const bool isStaticOverride = options.testFlag(Option::PythonOverrideImplementation);
+    if (isDeclaration && (isStaticOverride || func->isStatic()))
         s << "static ";
     if (func->isEmptyFunction() || func->needsReturnType())
         s << functionReturnType(func, options) << ' ';
@@ -1220,7 +1242,7 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunctionCPtr &fun
         options |= Generator::SkipReturnType;
 
     // name
-    QString name(func->originalName());
+    QString name = isStaticOverride ? pythonOverrideImplName(func) : func->originalName();
     if (func->isConstructor())
         name = wrapperName(func->ownerClass());
 
@@ -1230,7 +1252,7 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunctionCPtr &fun
     writeFunctionArguments(s, func, options);
     s << ')';
 
-    if (func->isConstant())
+    if (func->isConstant() && !isStaticOverride)
         s << " const";
 
     if (func->exceptionSpecification() == ExceptionSpecification::NoExcept)

@@ -46,6 +46,8 @@ public:
         SkipRemovedArguments     = 0x00000100,
 
         SkipDefaultValues        = 0x00000200,
+        // Implementation of call to Python override
+        PythonOverrideImplementation = 0x0400,
     };
     Q_DECLARE_FLAGS(Options, Option)
 

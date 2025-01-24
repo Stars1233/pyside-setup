@@ -185,6 +185,8 @@ void HeaderGenerator::writeWrapperClass(TextStream &s,
             s << includeGroup;
     }
 
+    s << "namespace Shiboken { class AutoDecRef; class GilState; }\n\n";
+
     if (usePySideExtensions() && isQObject(metaClass))
         s << "namespace PySide { class DynamicQMetaObject; }\n\n";
 
@@ -413,8 +415,14 @@ void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPt
     if (!generation.testFlag(FunctionGenerationFlag::VirtualMethod))
         return;
 
-    s << functionSignature(func, {}, {}, Generator::OriginalTypeDescription)
+    const Options options = Generator::OriginalTypeDescription;
+    s << functionSignature(func, {}, {}, options)
         << " override;\n";
+
+    if (!getReusedOverridenFunctions(func->ownerClass()).contains(func)) {
+        s << functionSignature(func, {}, {}, options | Generator::PythonOverrideImplementation)
+            << ";\n";
+    }
 
     const auto &hiddenOverloads = getHiddenOverloads(func);
     if (!hiddenOverloads.isEmpty()) {

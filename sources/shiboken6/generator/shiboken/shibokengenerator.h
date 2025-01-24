@@ -231,6 +231,7 @@ protected:
     IncludeGroup baseWrapperIncludes(const GeneratorContext &classContext) const;
 
     static QString fullPythonFunctionName(const AbstractMetaFunctionCPtr &func, bool forceFunc);
+    static QString pythonOverrideImplName(const AbstractMetaFunctionCPtr &func);
 
     static bool wrapperDiagnostics();
 
