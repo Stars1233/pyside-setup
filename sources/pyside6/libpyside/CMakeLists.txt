@@ -3,6 +3,8 @@
 
 project(libpyside)
 
+find_package(Qt6 COMPONENTS Core CorePrivate)
+
 set(libpyside_libraries Qt::Core Qt::CorePrivate)
 
 set(CMAKE_AUTOMOC ON)
