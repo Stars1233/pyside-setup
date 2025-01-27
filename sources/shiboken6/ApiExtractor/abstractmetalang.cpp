@@ -1406,22 +1406,6 @@ static void addExtraIncludesForFunction(const AbstractMetaClassPtr &metaClass,
     }
 }
 
-static bool addSuperFunction(const AbstractMetaFunctionCPtr &f)
-{
-    switch (f->functionType()) {
-    case AbstractMetaFunction::ConstructorFunction:
-    case AbstractMetaFunction::CopyConstructorFunction:
-    case AbstractMetaFunction::MoveConstructorFunction:
-    case AbstractMetaFunction::AssignmentOperatorFunction:
-    case AbstractMetaFunction::MoveAssignmentOperatorFunction:
-    case AbstractMetaFunction::DestructorFunction:
-        return false;
-    default:
-        break;
-    }
-    return true;
-}
-
 // Add constructors imported via "using" from the base classes. This is not
 // needed for normal hidden inherited member functions since we generate a
 // cast to the base class to call them into binding code.
@@ -1497,6 +1481,10 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
         const auto virtuals = superClass->queryFunctions(FunctionQueryOption::VirtualInCppFunctions);
         superFuncs += virtuals;
 
+        // Loop over super functions, comparing them to the class functions to
+        // find cases of function hiding by name. Virtual super functions that
+        // are not reimplemented are cloned into the class for the Python
+        // override code to be generated.
         QSet<AbstractMetaFunctionCPtr> funcsToAdd;
         for (const auto &sf : std::as_const(superFuncs)) {
             if (sf->isModifiedRemoved())
@@ -1513,8 +1501,10 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
 
             // we generally don't care about private functions, but we have to get the ones that are
             // virtual in case they override abstract functions.
-            bool add = addSuperFunction(sf);
+            const bool superIsVirtual = sf->isVirtual();
+            bool add = superIsVirtual && !sf->isDestructor();
             for (const auto &cf : std::as_const(nonRemovedFuncs)) {
+                const bool isVirtual = cf->isVirtual();
                 AbstractMetaFunctionPtr f(std::const_pointer_cast<AbstractMetaFunction>(cf));
                 const AbstractMetaFunction::CompareResult cmp = cf->compareTo(sf.get());
 
@@ -1524,7 +1514,7 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
                         // Set "override" in case it was not spelled out (since it
                         // is then not detected by clang parsing).
                         const auto attributes = cf->cppAttributes();
-                        if (attributes.testFlag(FunctionAttribute::Virtual)
+                        if (superIsVirtual && isVirtual
                             && !attributes.testFlag(FunctionAttribute::Override)
                             && !attributes.testFlag(FunctionAttribute::Final)) {
                             f->setCppAttribute(FunctionAttribute::Override);
@@ -1549,7 +1539,8 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
                         }
 
                         // Set the class which first declares this function, afawk
-                        f->setDeclaringClass(sf->declaringClass());
+                        if (superIsVirtual == isVirtual)
+                            f->setDeclaringClass(sf->declaringClass());
                     }
 
                     if (cmp & AbstractMetaFunction::EqualDefaultValueOverload) {
