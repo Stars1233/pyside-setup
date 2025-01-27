@@ -80,6 +80,7 @@ public:
     AbstractMetaClassCPtr m_class;
     AbstractMetaClassCPtr m_implementingClass;
     AbstractMetaClassCPtr m_declaringClass;
+    AbstractMetaFunctionCPtr m_overridden; /// overridden base function of a virtual
     mutable ModificationCache m_modificationCache;
     int m_propertySpecIndex = -1;
     AbstractMetaArgumentList m_arguments;
@@ -436,6 +437,16 @@ bool AbstractMetaFunction::isConstOverloadOf(const AbstractMetaFunction *other) 
             return false;
     }
     return true;
+}
+
+AbstractMetaFunctionCPtr AbstractMetaFunction::overridden() const
+{
+    return d->m_overridden;
+}
+
+void AbstractMetaFunction::setOverriddden(const AbstractMetaFunctionCPtr &o)
+{
+    d->m_overridden = o;
 }
 
 AbstractMetaFunction *AbstractMetaFunction::copy() const

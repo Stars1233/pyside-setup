@@ -125,7 +125,8 @@ public:
         OperatorClassArgumentByValue = 0x4, // The removed class argument was passed by value
         InheritedFromTemplate = 0x8, // Inherited from a template in metabuilder
         HiddenFriend = 0x10,
-        PrivateSignal = 0x20 // Private Qt signal (cannot emit from client code)
+        PrivateSignal = 0x20, // Private Qt signal (cannot emit from client code)
+        CovariantReturn = 0x40 // Return type of virtual function differs (eg clone())
     };
     Q_DECLARE_FLAGS(Flags, Flag)
 
@@ -432,6 +433,10 @@ public:
 
     SourceLocation sourceLocation() const;
     void setSourceLocation(const SourceLocation &sourceLocation);
+
+    /// For virtual functions, return the overridden base class function
+    AbstractMetaFunctionCPtr overridden() const;
+    void setOverriddden(const AbstractMetaFunctionCPtr &o);
 
     static const char *pythonRichCompareOpCode(ComparisonOperatorType ct);
     static const char *cppComparisonOperator(ComparisonOperatorType ct);

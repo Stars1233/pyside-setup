@@ -1511,13 +1511,20 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
                 if (cmp & AbstractMetaFunction::EqualModifiedName) {
                     add = false;
                     if (cmp & AbstractMetaFunction::EqualArguments) {
-                        // Set "override" in case it was not spelled out (since it
-                        // is then not detected by clang parsing).
                         const auto attributes = cf->cppAttributes();
-                        if (superIsVirtual && isVirtual
-                            && !attributes.testFlag(FunctionAttribute::Override)
-                            && !attributes.testFlag(FunctionAttribute::Final)) {
-                            f->setCppAttribute(FunctionAttribute::Override);
+                        if (superIsVirtual && isVirtual) {
+                            f->setOverriddden(sf);
+                            auto flags = f->flags();
+                            if (!flags.testFlag(AbstractMetaFunction::Flag::CovariantReturn)
+                                && f->type() != sf->type()) {
+                                f->setFlags(flags | AbstractMetaFunction::Flag::CovariantReturn);
+                            }
+                            // Set "override" in case it was not spelled out (since it
+                            // is then not detected by clang parsing).
+                            if (!attributes.testFlag(FunctionAttribute::Override)
+                                && !attributes.testFlag(FunctionAttribute::Final)) {
+                                f->setCppAttribute(FunctionAttribute::Override);
+                            }
                         }
 
                         if (f->access() != sf->access()) {
@@ -1571,6 +1578,8 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
         for (const auto &f : std::as_const(funcsToAdd)) {
             AbstractMetaFunction *copy = f->copy();
             (*copy) += AbstractMetaFunction::AddedMethod;
+            if (f->isVirtual())
+                copy->setOverriddden(f);
             funcs.append(AbstractMetaFunctionCPtr(copy));
         }
     }
