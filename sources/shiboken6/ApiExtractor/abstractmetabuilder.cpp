@@ -1538,7 +1538,7 @@ QStringList AbstractMetaBuilder::definitionNames(const QString &name,
 void AbstractMetaBuilderPrivate::applyFunctionModifications(const AbstractMetaFunctionPtr &func)
 {
     AbstractMetaFunction& funcRef = *func;
-    for (const FunctionModification &mod : func->modifications(func->implementingClass())) {
+    for (const FunctionModification &mod : func->modifications()) {
         if (mod.isRenameModifier()) {
             func->setOriginalName(func->name());
             func->setName(mod.renamedToName());
@@ -1760,7 +1760,7 @@ AbstractMetaFunctionPtr
     }
 
     if (!metaArguments.isEmpty())
-        fixArgumentNames(metaFunction, metaFunction->modifications(metaClass));
+        fixArgumentNames(metaFunction, functionMods);
 
     return metaFunction;
 }
@@ -2212,7 +2212,7 @@ AbstractMetaFunctionPtr
     AbstractMetaArgumentList &metaArguments = metaFunction->arguments();
 
     const FunctionModificationList functionMods = currentClass
-        ? AbstractMetaFunction::findClassModifications(metaFunction.get(), currentClass)
+        ? AbstractMetaFunction::findMemberModifications(metaFunction.get(), currentClass)
         : AbstractMetaFunction::findGlobalModifications(metaFunction.get());
 
     applyCachedFunctionModifications(metaFunction, functionMods);

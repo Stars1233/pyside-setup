@@ -367,8 +367,9 @@ public:
 
     DocModificationList addedFunctionDocModifications() const;
 
-    static FunctionModificationList findClassModifications(const AbstractMetaFunction *f,
-                                                           AbstractMetaClassCPtr implementor);
+    // For AbstractMetaBuilder only.
+    static FunctionModificationList findMemberModifications(const AbstractMetaFunction *f,
+                                                            AbstractMetaClassCPtr implementor);
     static FunctionModificationList findGlobalModifications(const AbstractMetaFunction *f);
 
     /**

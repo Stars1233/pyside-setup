@@ -59,8 +59,9 @@ public:
     QString modifiedName(const AbstractMetaFunction *q) const;
     int overloadNumber(const AbstractMetaFunction *q) const;
 
-    const FunctionModificationList &modifications(const AbstractMetaFunction *q,
-                                                  const AbstractMetaClassCPtr &implementor) const;
+    const FunctionModificationList &globalModifications(const AbstractMetaFunction *q) const;
+    const FunctionModificationList &memberModifications(const AbstractMetaFunction *q,
+                                                        const AbstractMetaClassCPtr &implementor) const;
 
     bool applyTypeModification(const AbstractMetaFunction *q,
                                const QString &type, int number, QString *errorMessage);
@@ -1078,8 +1079,9 @@ QString AbstractMetaFunction::debugSignature() const
     return result;
 }
 
-FunctionModificationList AbstractMetaFunction::findClassModifications(const AbstractMetaFunction *f,
-                                                                      AbstractMetaClassCPtr implementor)
+FunctionModificationList
+    AbstractMetaFunction::findMemberModifications(const AbstractMetaFunction *f,
+                                                  AbstractMetaClassCPtr implementor)
 {
     const auto signatures = f->modificationSignatures();
     FunctionModificationList mods;
@@ -1101,19 +1103,28 @@ FunctionModificationList AbstractMetaFunction::findGlobalModifications(const Abs
 }
 
 const FunctionModificationList &
-    AbstractMetaFunctionPrivate::modifications(const AbstractMetaFunction *q,
-                                               const AbstractMetaClassCPtr &implementor) const
+    AbstractMetaFunctionPrivate::globalModifications(const AbstractMetaFunction *q) const
 {
+    if (m_addedFunction)
+        return m_addedFunction->modifications();
+    if (m_modificationCache.isEmpty())
+        m_modificationCache.append({{}, AbstractMetaFunction::findGlobalModifications(q)});
+    return m_modificationCache.constFirst().modifications;
+}
+
+const FunctionModificationList &
+    AbstractMetaFunctionPrivate::memberModifications(const AbstractMetaFunction *q,
+                                                     const AbstractMetaClassCPtr &implementor) const
+{
+    Q_ASSERT(implementor);
     if (m_addedFunction)
         return m_addedFunction->modifications();
     for (const auto &ce : m_modificationCache) {
         if (ce.klass == implementor)
             return ce.modifications;
     }
-    auto modifications = m_class == nullptr
-        ? AbstractMetaFunction::findGlobalModifications(q)
-        : AbstractMetaFunction::findClassModifications(q, implementor);
 
+    auto modifications = AbstractMetaFunction::findMemberModifications(q, implementor);
     m_modificationCache.append({implementor, modifications});
     return m_modificationCache.constLast().modifications;
 }
@@ -1121,9 +1132,13 @@ const FunctionModificationList &
 const FunctionModificationList &
     AbstractMetaFunction::modifications(AbstractMetaClassCPtr implementor) const
 {
-    if (!implementor)
-        implementor = d->m_class;
-    return d->modifications(this, implementor);
+    // Note: m_class might be null here in early stages of AbstractMetaBuilder.
+    // Fully rely on implementor, then.
+    if (implementor)
+        return d->memberModifications(this, implementor);
+    if (d->m_class)
+        return d->memberModifications(this, d->m_class);
+    return d->globalModifications(this);
 }
 
 void AbstractMetaFunction::clearModificationsCache()
