@@ -370,7 +370,7 @@ public:
 
     // For AbstractMetaBuilder only.
     static FunctionModificationList findMemberModifications(const AbstractMetaFunction *f,
-                                                            AbstractMetaClassCPtr implementor);
+                                                            const AbstractMetaClassCPtr &implementor);
     static FunctionModificationList findGlobalModifications(const AbstractMetaFunction *f);
 
     /**

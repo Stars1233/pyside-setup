@@ -410,6 +410,7 @@ public:
     QRegularExpression m_signaturePattern;
     int m_overloadNumber = TypeSystem::OverloadNumberUnset;
     bool removed = false;
+    bool inherited = false;
     TypeSystem::AllowThread m_allowThread = TypeSystem::AllowThread::Unspecified;
     TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
@@ -491,6 +492,17 @@ void FunctionModification::setRemoved(bool r)
 {
     if (d->removed != r)
         d->removed = r;
+}
+
+bool FunctionModification::isInherited() const
+{
+    return d->inherited;
+}
+
+void FunctionModification::setInherited(bool i)
+{
+    if (d->inherited != i)
+        d->inherited = i;
 }
 
 const QList<ArgumentModification> &FunctionModification::argument_mods() const

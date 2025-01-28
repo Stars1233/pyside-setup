@@ -1079,20 +1079,30 @@ QString AbstractMetaFunction::debugSignature() const
     return result;
 }
 
+static void findModificationRecursion(const QStringList &signatures,
+                                      const AbstractMetaClassCPtr &implementor,
+                                      const AbstractMetaClassCPtr &stopAt,
+                                      unsigned level, FunctionModificationList *result)
+{
+    auto mods = implementor->typeEntry()->functionModifications(signatures);
+    for (auto &mod : mods)
+        mod.setInherited(level != 0);
+    result->append(mods);
+    if (implementor->inheritanceDone() // AbstractMetaBuilder phase?
+        && (implementor != stopAt || mods.isEmpty())) {
+        level += 1;
+        for (const auto &base : implementor->baseClasses())
+            findModificationRecursion(signatures, base, stopAt, level, result);
+    }
+}
+
 FunctionModificationList
-    AbstractMetaFunction::findMemberModifications(const AbstractMetaFunction *f,
-                                                  AbstractMetaClassCPtr implementor)
+AbstractMetaFunction::findMemberModifications(const AbstractMetaFunction *f,
+                                              const AbstractMetaClassCPtr &implementor)
 {
     const auto signatures = f->modificationSignatures();
     FunctionModificationList mods;
-    while (implementor) {
-        mods += implementor->typeEntry()->functionModifications(signatures);
-        if ((implementor == implementor->baseClass()) ||
-            (implementor == f->implementingClass() && !mods.isEmpty())) {
-                break;
-        }
-        implementor = implementor->baseClass();
-    }
+    findModificationRecursion(signatures, implementor, f->implementingClass(), 0, &mods);
     return mods;
 }
 

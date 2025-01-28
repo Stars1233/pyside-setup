@@ -171,6 +171,9 @@ public:
     bool isRemoved() const;
     void setRemoved(bool r);
 
+    bool isInherited() const; // inherited from base class
+    void setInherited(bool i);
+
     bool isAccessModifier() const
     {
         return (modifiers() & AccessModifierMask) != 0;
@@ -211,8 +214,6 @@ public:
     }
 
     bool isRemoveModifier() const { return isRemoved(); }
-
-
 
     bool isCodeInjection() const
     {
