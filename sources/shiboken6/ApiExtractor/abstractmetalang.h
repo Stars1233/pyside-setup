@@ -82,6 +82,8 @@ public:
     AbstractMetaFunctionCPtr copyConstructor() const;
     bool hasCopyConstructor() const;
     bool hasPrivateCopyConstructor() const;
+    AbstractMetaFunctionCPtr moveConstructor() const;
+    bool hasPrivateMoveConstructor() const;
 
     static void addDefaultConstructor(const AbstractMetaClassPtr &klass);
     static void addDefaultCopyConstructor(const AbstractMetaClassPtr &klass);
@@ -97,6 +99,9 @@ public:
 
     bool hasDeletedCopyConstructor() const;
     void setHasDeletedCopyConstructor(bool value);
+
+    bool hasDeletedMoveConstructor() const;
+    void setHasDeletedMoveConstructor(bool value);
 
     bool hasPrivateDestructor() const;
     void setHasPrivateDestructor(bool value);

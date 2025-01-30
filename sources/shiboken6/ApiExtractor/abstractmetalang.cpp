@@ -45,6 +45,7 @@ public:
           m_hasPrivateConstructor(false),
           m_hasDeletedDefaultConstructor(false),
           m_hasDeletedCopyConstructor(false),
+          m_hasDeletedMoveConstructor(false),
           m_functionsFixed(false),
           m_inheritanceDone(false),
           m_hasPrivateDestructor(false),
@@ -82,6 +83,7 @@ public:
     uint m_hasPrivateConstructor : 1;
     uint m_hasDeletedDefaultConstructor : 1;
     uint m_hasDeletedCopyConstructor : 1;
+    uint m_hasDeletedMoveConstructor : 1;
     uint m_functionsFixed : 1;
     uint m_inheritanceDone : 1; // m_baseClasses has been populated from m_baseClassNames
     uint m_hasPrivateDestructor : 1;
@@ -801,11 +803,7 @@ bool AbstractMetaClass::hasConstructors() const
 
 AbstractMetaFunctionCPtr AbstractMetaClass::copyConstructor() const
 {
-    for (const auto &f : d->m_functions) {
-        if (f->functionType() == AbstractMetaFunction::CopyConstructorFunction)
-            return f;
-    }
-    return {};
+    return queryFirstFunction(d->m_functions, FunctionQueryOption::CopyConstructor);
 }
 
 bool AbstractMetaClass::hasCopyConstructor() const
@@ -817,6 +815,17 @@ bool AbstractMetaClass::hasPrivateCopyConstructor() const
 {
     const auto copyCt = copyConstructor();
     return copyCt && copyCt->isPrivate();
+}
+
+AbstractMetaFunctionCPtr AbstractMetaClass::moveConstructor() const
+{
+    return queryFirstFunction(d->m_functions, FunctionQueryOption::MoveConstructor);
+}
+
+bool AbstractMetaClass::hasPrivateMoveConstructor() const
+{
+    const auto moveCt = moveConstructor();
+    return moveCt && moveCt->isPrivate();
 }
 
 void AbstractMetaClassPrivate::addConstructor(AbstractMetaFunction::FunctionType t,
@@ -947,6 +956,16 @@ void AbstractMetaClass::setHasDeletedCopyConstructor(bool value)
     d->m_hasDeletedCopyConstructor = value;
 }
 
+bool AbstractMetaClass::hasDeletedMoveConstructor() const
+{
+    return d->m_hasDeletedMoveConstructor;
+}
+
+void AbstractMetaClass::setHasDeletedMoveConstructor(bool value)
+{
+    d->m_hasDeletedMoveConstructor = value;
+}
+
 bool AbstractMetaClass::hasPrivateDestructor() const
 {
     return d->m_hasPrivateDestructor;
@@ -1014,17 +1033,13 @@ bool AbstractMetaClass::isImplicitlyDefaultConstructible() const
                        });
 }
 
-static bool canAddDefaultConstructorHelper(const AbstractMetaClass *cls)
-{
-    return !cls->isNamespace()
-        && !cls->hasDeletedDefaultConstructor()
-        && !cls->attributes().testFlag(AbstractMetaClass::HasRejectedConstructor)
-        && !cls->hasPrivateDestructor();
-}
-
 bool AbstractMetaClass::canAddDefaultConstructor() const
 {
-    return canAddDefaultConstructorHelper(this) && !hasConstructors()
+    return !isNamespace()
+        && !hasDeletedDefaultConstructor()
+        && !attributes().testFlag(AbstractMetaClass::HasRejectedConstructor)
+        && !hasPrivateDestructor()
+        && !hasConstructors()
         && !hasPrivateConstructor() && isImplicitlyDefaultConstructible();
 }
 
@@ -1051,12 +1066,14 @@ bool AbstractMetaClass::isImplicitlyCopyConstructible() const
 
 bool AbstractMetaClass::canAddDefaultCopyConstructor() const
 {
-    if (!canAddDefaultConstructorHelper(this)
-        || !d->m_typeEntry->isValue() || isAbstract()
-        || hasPrivateCopyConstructor() || hasCopyConstructor()) {
-        return false;
-    }
-    return isImplicitlyCopyConstructible();
+    return d->m_typeEntry->isValue()
+        && !isNamespace()
+        && !hasDeletedCopyConstructor() && !hasPrivateCopyConstructor()
+        && !hasDeletedMoveConstructor() && !hasPrivateMoveConstructor()
+        && !hasPrivateDestructor()
+        && !isAbstract()
+        && !hasCopyConstructor()
+        && isImplicitlyCopyConstructible();
 }
 
 static bool classHasParentManagement(const AbstractMetaClassCPtr &c)
@@ -1208,6 +1225,12 @@ bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQue
 
     if (query.testFlag(FunctionQueryOption::CopyConstructor)
         && (!f->isCopyConstructor() || f->ownerClass() != f->implementingClass())) {
+        return false;
+    }
+
+    if (query.testFlag(FunctionQueryOption::MoveConstructor)
+        && (f->functionType() != AbstractMetaFunction::MoveConstructorFunction
+            || f->ownerClass() != f->implementingClass())) {
         return false;
     }
 

@@ -2016,6 +2016,8 @@ AbstractMetaFunctionPtr
         case CodeModel::CopyConstructor:
             currentClass->setHasDeletedCopyConstructor(true);
             break;
+        case CodeModel::MoveConstructor:
+            currentClass->setHasDeletedMoveConstructor(true);
         default:
             break;
         }

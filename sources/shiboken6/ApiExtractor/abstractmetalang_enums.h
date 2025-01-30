@@ -10,6 +10,7 @@ enum class FunctionQueryOption {
     AnyConstructor               = 0x0000001, // Any constructor (copy/move)
     Constructors                 = 0x0000002, // Constructors except copy/move
     CopyConstructor              = 0x0000004, // Only copy constructors
+    MoveConstructor              = 0x0000008, // Only move constructors
     //Destructors                  = 0x0000002, // Only destructors. Not included in class.
     ClassImplements              = 0x0000020, // Only functions implemented by the current class
     StaticFunctions              = 0x0000080, // Only static functions
