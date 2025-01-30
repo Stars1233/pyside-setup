@@ -481,7 +481,7 @@ static void writePyGetSetDefEntry(TextStream &s, const QString &name,
 
 static bool generateRichComparison(const GeneratorContext &c)
 {
-    const auto metaClass = c.metaClass();
+    const auto &metaClass = c.metaClass();
     if (c.forSmartPointer()) {
         auto te = std::static_pointer_cast<const SmartPointerTypeEntry>(metaClass->typeEntry());
         return te->smartPointerType() == TypeSystem::SmartPointerType::Shared;
@@ -494,7 +494,7 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
                                     const IncludeGroupList &includes,
                                     const AbstractMetaClassCList &innerClasses) const
 {
-    const auto metaClass = classContext.metaClass();
+    const auto &metaClass = classContext.metaClass();
 
     // write license comment
     s << licenseComment() << '\n';
@@ -626,7 +626,7 @@ void CppGenerator::generateClass(TextStream &s,
                                  QList<GeneratorContext> *)
 {
     s.setLanguage(TextStream::Language::Cpp);
-    AbstractMetaClassCPtr metaClass = classContext.metaClass();
+    const AbstractMetaClassCPtr &metaClass = classContext.metaClass();
     const auto typeEntry = metaClass->typeEntry();
 
     auto innerClasses = metaClass->innerClasses();
@@ -2524,7 +2524,7 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
         return;
     }
 
-    AbstractMetaClassCPtr metaClass = context.metaClass();
+    const AbstractMetaClassCPtr &metaClass = context.metaClass();
     const auto cppWrapper = context.metaClass()->cppWrapper();
     // In the Python method, use the wrapper to access the protected
     // functions.
@@ -2798,6 +2798,8 @@ static inline QString arrayHandleType(const AbstractMetaTypeList &nestedArrayTyp
             + ", "_L1
             + QString::number(nestedArrayTypes.constFirst().arrayElementCount())
             + u'>';
+    default:
+        break;
     }
     return {};
 }
@@ -3342,7 +3344,7 @@ QString CppGenerator::convertibleToCppFunctionName(const TargetToNativeConversio
 }
 
 void CppGenerator::writeCppToPythonFunction(TextStream &s, const QString &code, const QString &sourceTypeName,
-                                            QString targetTypeName) const
+                                            const QString &targetTypeName) const
 {
 
     QString prettyCode = code;
@@ -3720,14 +3722,15 @@ QString CppGenerator::argumentNameFromIndex(const ApiExtractorResult &api,
         return PYTHON_SELF_VAR;
     case 0:
         return PYTHON_RETURN_VAR;
-    case 1: { // Single argument?
+    case 1: // Single argument?
         if (!func->isConstructor()) {
             OverloadData data(getFunctionGroups(func->implementingClass()).value(func->name()), api);
             if (!data.pythonFunctionWrapperUsesListOfArguments())
                 return PYTHON_ARG;
         }
         break;
-    }
+    default:
+        break;
     }
     return pythonArgsAt(argIndex - 1);
 }
@@ -4651,7 +4654,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     }
     s << "{0, " << NULL_PTR << "}\n" << outdent << "};\n";
 
-    int packageLevel = packageName().count(u'.') + 1;
+    const auto packageLevel = packageName().count(u'.') + 1;
     s << "static PyType_Spec " << className << "_spec = {\n" << indent
         << '"' << packageLevel << ':' << getClassTargetFullName(metaClass) << "\",\n"
         << "sizeof(SbkObject),\n0,\n" << tp_flags << ",\n"
@@ -4870,7 +4873,7 @@ QString CppGenerator::writeCopyFunction(TextStream &s,
                                         TextStream &signatureStream,
                                         const GeneratorContext &context)
 {
-    const auto metaClass = context.metaClass();
+    const auto &metaClass = context.metaClass();
     const QString className = chopType(cpythonTypeName(metaClass));
     const QString funcName = className + u"__copy__"_s;
 
@@ -5109,7 +5112,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s, TextStream &t,
     const QList<AbstractMetaFunctionCList> &groupedFuncs =
         filterGroupedOperatorFunctions(metaClass, OperatorQueryOption::ComparisonOp);
     for (const AbstractMetaFunctionCList &overloads : groupedFuncs) {
-        const auto rfunc = overloads[0];
+        const auto &rfunc = overloads.constFirst();
 
         const auto op = rfunc->comparisonOperatorType().value();
         s << "case " << AbstractMetaFunction::pythonRichCompareOpCode(op)
@@ -5264,7 +5267,7 @@ QString CppGenerator::signatureParameter(const AbstractMetaArgument &arg, bool i
     QTextStream s(&result);
 
     auto metaType = arg.type();
-    if (auto viewOn = metaType.viewOn())
+    if (const auto *viewOn = metaType.viewOn())
         metaType = *viewOn;
     s << arg.name() << ':';
 
@@ -5347,7 +5350,7 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
                 } else {
                     text = typeEntry->qualifiedCppName();
                 }
-                auto &inst = spec.type().instantiations();
+                const auto &inst = spec.type().instantiations();
                 if (!inst.isEmpty()) {
                     text += u'[';
                     for (qsizetype i = 0, size = inst.size(); i < size; ++i) {
@@ -5805,9 +5808,9 @@ void CppGenerator::writeClassRegister(TextStream &s,
     // 8:wrapperflags
     QByteArrayList wrapperFlags;
     if (enc)
-        wrapperFlags.append(QByteArrayLiteral("Shiboken::ObjectType::WrapperFlags::InnerClass"));
+        wrapperFlags.append("Shiboken::ObjectType::WrapperFlags::InnerClass"_ba);
     if (metaClass->deleteInMainThread())
-        wrapperFlags.append(QByteArrayLiteral("Shiboken::ObjectType::WrapperFlags::DeleteInMainThread"));
+        wrapperFlags.append("Shiboken::ObjectType::WrapperFlags::DeleteInMainThread"_ba);
     if (classTypeEntry->isValue())
         wrapperFlags.append("Shiboken::ObjectType::WrapperFlags::Value"_ba);
     if (wrapperFlags.isEmpty())
@@ -6937,7 +6940,7 @@ void CppGenerator::writeHashFunction(TextStream &s, TextStream &t, const Generat
 void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
                                                const GeneratorContext &context) const
 {
-    const auto metaClass = context.metaClass();
+    const auto &metaClass = context.metaClass();
     ErrorReturn errorReturn = ErrorReturn::Zero;
 
     // __len__
@@ -7016,7 +7019,7 @@ QString CppGenerator::writeReprFunction(TextStream &s,
                                         const GeneratorContext &context,
                                         uint indirections)
 {
-    const auto metaClass = context.metaClass();
+    const auto &metaClass = context.metaClass();
     QString funcName = writeReprFunctionHeader(s, context);
     writeCppSelfDefinition(s, context);
     s << R"(QBuffer buffer;

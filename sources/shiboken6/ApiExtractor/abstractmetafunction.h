@@ -362,7 +362,8 @@ public:
     */
     bool hasSignatureModifications() const;
 
-    const FunctionModificationList &modifications(AbstractMetaClassCPtr implementor = {}) const;
+    const FunctionModificationList &
+        modifications(const AbstractMetaClassCPtr &implementor = {}) const;
     void clearModificationsCache();
 
     DocModificationList addedFunctionDocModifications() const;

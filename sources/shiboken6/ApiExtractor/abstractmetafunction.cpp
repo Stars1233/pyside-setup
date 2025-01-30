@@ -371,12 +371,12 @@ AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const Abstra
 
     if (cmp < 0)
         result |= NameLessThan;
-    else if (!cmp)
+    else if (cmp == 0)
         result |= EqualName;
 
     // compare name after modification...
     cmp = modifiedName().compare(other->modifiedName());
-    if (!cmp)
+    if (cmp == 0)
         result |= EqualModifiedName;
 
     // Compare arguments...
@@ -1130,7 +1130,7 @@ const FunctionModificationList &
 }
 
 const FunctionModificationList &
-    AbstractMetaFunction::modifications(AbstractMetaClassCPtr implementor) const
+    AbstractMetaFunction::modifications(const AbstractMetaClassCPtr &implementor) const
 {
     // Note: m_class might be null here in early stages of AbstractMetaBuilder.
     // Fully rely on implementor, then.
