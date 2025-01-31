@@ -47,8 +47,8 @@ public:
     /// Returns the pointer of the Python object being held.
     [[nodiscard]] PyObject *object() const { return m_pyObj; }
     [[nodiscard]] operator PyObject *() const { return m_pyObj; }
-    inline operator bool() const { return m_pyObj != nullptr; }
-    inline PyObject *operator->() { return m_pyObj; }
+    operator bool() const { return m_pyObj != nullptr; }
+    PyObject *operator->() { return m_pyObj; }
 
     template<typename T>
     [[deprecated]] T cast()

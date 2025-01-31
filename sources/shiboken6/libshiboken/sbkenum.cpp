@@ -314,7 +314,7 @@ static PyTypeObject *createEnumForPython(PyObject *scopeOrModule,
     static PyObject *enumName = String::createStaticString("IntEnum");
     if (PyType_Check(scopeOrModule)) {
         // For global objects, we have no good solution, yet where to put the int info.
-        auto type = reinterpret_cast<PyTypeObject *>(scopeOrModule);
+        auto *type = reinterpret_cast<PyTypeObject *>(scopeOrModule);
         auto *sotp = PepType_SOTP(type);
         if (!sotp->enumFlagsDict)
             initEnumFlagsDict(type);
@@ -478,7 +478,7 @@ PyTypeObject *createPythonEnum(const char *fullName, PyObject *pyEnumItems,
     const char *dot = strrchr(fullName, '.');
     AutoDecRef name(Shiboken::String::fromCString(dot ? dot + 1 : fullName));
     AutoDecRef callArgs(Py_BuildValue("(OO)", name.object(), pyEnumItems));
-    auto newType = PyObject_Call(PyEnumType, callArgs, callDict);
+    auto *newType = PyObject_Call(PyEnumType, callArgs, callDict);
 
     setModuleAndQualnameOnType(newType, fullName);
 
