@@ -123,13 +123,9 @@ public:
     bool hasVirtualDestructor() const;
     void setHasVirtualDestructor(bool value);
 
+    // Values detected by the code model (might be overridden by type system).
     bool isDefaultConstructible() const;
-    bool isImplicitlyDefaultConstructible() const;
-    bool canAddDefaultConstructor() const;
-
     bool isCopyConstructible() const;
-    bool isImplicitlyCopyConstructible() const;
-    bool canAddDefaultCopyConstructor() const;
 
     static void addSynthesizedComparisonOperators(const AbstractMetaClassPtr &c);
 
@@ -348,7 +344,7 @@ public:
     void setSourceLocation(const SourceLocation &sourceLocation);
 
     // For AbstractMetaBuilder
-    static void fixFunctions(const AbstractMetaClassPtr &klass);
+    static void fixFunctions(const AbstractMetaClassPtr &klass, bool avoidProtectedHack);
     bool needsInheritanceSetup() const;
     void setInheritanceDone(bool b);
     bool inheritanceDone() const;
@@ -357,6 +353,10 @@ public:
     void invisibleNamespaceRecursion(Function f) const;
 
 private:
+    bool canAddDefaultConstructor() const;
+    bool canAddDefaultCopyConstructor() const;
+    static void fixSpecialFunctions(const AbstractMetaClassPtr &klass, bool avoidProtectedHack);
+
 #ifndef QT_NO_DEBUG_STREAM
     void format(QDebug &d) const;
     void formatMembers(QDebug &d) const;

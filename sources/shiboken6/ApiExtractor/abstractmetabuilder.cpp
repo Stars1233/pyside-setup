@@ -585,15 +585,10 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     }
 
     ReportHandler::startProgress("Checked for inconsistencies in class model.");
+    const bool avoidProtectedHack = flags.testFlag(ApiExtractorFlag::AvoidProtectedHack);
     for (const auto &cls : std::as_const(m_metaClasses)) {
-        AbstractMetaClass::fixFunctions(cls);
+        AbstractMetaClass::fixFunctions(cls, avoidProtectedHack);
 
-        if (cls->canAddDefaultConstructor())
-            AbstractMetaClass::addDefaultConstructor(cls);
-        if (cls->canAddDefaultCopyConstructor())
-            AbstractMetaClass::addDefaultCopyConstructor(cls);
-
-        const bool avoidProtectedHack = flags.testFlag(ApiExtractorFlag::AvoidProtectedHack);
         const bool vco =
             AbstractMetaClass::determineValueTypeWithCopyConstructorOnly(cls, avoidProtectedHack);
         cls->setValueTypeWithCopyConstructorOnly(vco);

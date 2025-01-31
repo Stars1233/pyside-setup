@@ -25,6 +25,8 @@ private slots:
     void testClassInheritedDefaultConstructors();
     void testAbstractClassDefaultConstructors();
     void testObjectTypesMustNotHaveCopyConstructors();
+    void testValueConstructors_data();
+    void testValueConstructors();
     void testIsPolymorphic();
     void testClassTypedefedBaseClass();
     void testFreeOperators_data();

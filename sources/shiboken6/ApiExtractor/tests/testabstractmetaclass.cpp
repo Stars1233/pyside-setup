@@ -539,6 +539,89 @@ void TestAbstractMetaClass::testObjectTypesMustNotHaveCopyConstructors()
     QCOMPARE(ctors.constFirst()->minimalSignature(), u"A()");
 }
 
+void TestAbstractMetaClass::testValueConstructors_data()
+{
+    QTest::addColumn<QByteArray>("cppCode");
+    QTest::addColumn<bool>("expectedDefaultConstructible");
+    QTest::addColumn<bool>("expectedCopyConstructible");
+
+    QByteArray cppCode = R"(class A {};)";
+
+    QTest::newRow("implicit copy/default") << cppCode << true << true;
+
+    cppCode = R"(class A {
+private:
+    A();
+    A(const A &);
+public:
+};)";
+
+    QTest::newRow("old style - private copy/default") << cppCode << false << false;
+
+    cppCode = R"(class A {
+public:
+    A() = delete;
+    A(const A &) = delete;
+};)";
+
+    QTest::newRow("deleted copy/default") << cppCode << false << false;
+
+    cppCode = R"(class A {
+public:
+    A() = default;
+    A &operator=(const A &) = delete;
+};)";
+
+    QTest::newRow("default/deleted assignment") << cppCode << true << false;
+
+    cppCode = R"(class A {
+public:
+    A() = default;
+    A &operator=(A &&) = delete;
+};)";
+
+    QTest::newRow("default/deleted move assignment") << cppCode << true << false;
+
+    // An assignment from another type should not impact copy copy constructibility
+    cppCode = R"(class A {
+public:
+    A() = default;
+    A &operator=(int v);
+};)";
+
+    QTest::newRow("assignment from other type") << cppCode << true << true;
+
+    // Another constructor present, move deleted -> non default copy/default constructible
+    cppCode = R"(class A {
+public:
+    A(int x);
+    A(A &&) = delete;
+};)";
+
+    QTest::newRow("param-constructor, deleted move") << cppCode << false << false;
+}
+
+void TestAbstractMetaClass::testValueConstructors()
+{
+    QFETCH(QByteArray, cppCode);
+    QFETCH(bool, expectedDefaultConstructible);
+    QFETCH(bool, expectedCopyConstructible);
+
+    const char xmlCode[] = R"(<typesystem package='Foo'>
+    <value-type name='A'/>
+</typesystem>
+)";
+
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode.constData(), xmlCode));
+    QVERIFY(builder);
+    AbstractMetaClassList classes = builder->classes();
+    QCOMPARE(classes.size(), 1);
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
+    QVERIFY(classA);
+    QCOMPARE(classA->isDefaultConstructible(), expectedDefaultConstructible);
+    QCOMPARE(classA->isCopyConstructible(), expectedCopyConstructible);
+}
+
 void TestAbstractMetaClass::testIsPolymorphic()
 {
     const char cppCode[] = "\

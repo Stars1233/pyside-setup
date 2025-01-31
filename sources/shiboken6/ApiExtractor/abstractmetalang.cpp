@@ -48,6 +48,8 @@ public:
           m_hasDeletedMoveConstructor(false),
           m_hasDeletedAssigmentOperator(false),
           m_hasDeletedMoveAssigmentOperator(false),
+          m_isDefaultConstructible(false),
+          m_isCopyConstructible(false),
           m_functionsFixed(false),
           m_inheritanceDone(false),
           m_hasPrivateDestructor(false),
@@ -78,6 +80,9 @@ public:
     bool hasConstructors() const;
     qsizetype indexOfProperty(const QString &name) const;
 
+    bool isImplicitlyDefaultConstructible() const;
+    bool isImplicitlyCopyConstructible() const;
+
     uint m_hasVirtuals : 1;
     uint m_isPolymorphic : 1;
     uint m_hasNonpublic : 1;
@@ -88,6 +93,8 @@ public:
     uint m_hasDeletedMoveConstructor : 1;
     uint m_hasDeletedAssigmentOperator : 1;
     uint m_hasDeletedMoveAssigmentOperator : 1;
+    uint m_isDefaultConstructible : 1;
+    uint m_isCopyConstructible : 1;
     uint m_functionsFixed : 1;
     uint m_inheritanceDone : 1; // m_baseClasses has been populated from m_baseClassNames
     uint m_hasPrivateDestructor : 1;
@@ -1046,16 +1053,7 @@ void AbstractMetaClass::setHasVirtualDestructor(bool value)
 
 bool AbstractMetaClass::isDefaultConstructible() const
 {
-    // Private constructors are skipped by the builder.
-    if (hasDeletedDefaultConstructor() || hasPrivateConstructor())
-        return false;
-    const AbstractMetaFunctionCList ctors =
-        queryFunctions(FunctionQueryOption::Constructors);
-    for (const auto &ct : ctors) {
-        if (ct->isDefaultConstructor())
-            return ct->isPublic();
-    }
-    return ctors.isEmpty() && isImplicitlyDefaultConstructible();
+    return d->m_isDefaultConstructible;
 }
 
 // Non-comprehensive check for default constructible field
@@ -1069,11 +1067,11 @@ static bool defaultConstructibleField(const AbstractMetaField &f)
         && !(type.indirections() == 0 && type.isConstant()); // no const values
 }
 
-bool AbstractMetaClass::isImplicitlyDefaultConstructible() const
+bool AbstractMetaClassPrivate::isImplicitlyDefaultConstructible() const
 {
-    return std::all_of(d->m_fields.cbegin(), d->m_fields.cend(),
-                        defaultConstructibleField)
-        && std::all_of(d->m_baseClasses.cbegin(), d->m_baseClasses.cend(),
+    return std::all_of(m_fields.cbegin(), m_fields.cend(),
+                       defaultConstructibleField)
+        && std::all_of(m_baseClasses.cbegin(), m_baseClasses.cend(),
                        [] (const AbstractMetaClassCPtr &c) {
                            return c->isDefaultConstructible();
                        });
@@ -1086,25 +1084,18 @@ bool AbstractMetaClass::canAddDefaultConstructor() const
         && !attributes().testFlag(AbstractMetaClass::HasRejectedConstructor)
         && !hasPrivateDestructor()
         && !hasConstructors()
-        && !hasPrivateConstructor() && isImplicitlyDefaultConstructible();
+        && !hasPrivateConstructor() && d->isImplicitlyDefaultConstructible();
 }
 
 bool AbstractMetaClass::isCopyConstructible() const
 {
-    // Private constructors are skipped by the builder.
-    if (hasDeletedCopyConstructor() || hasPrivateCopyConstructor())
-        return false;
-    const AbstractMetaFunctionCList copyCtors =
-        queryFunctions(FunctionQueryOption::CopyConstructor);
-    return copyCtors.isEmpty()
-        ? isImplicitlyCopyConstructible()
-        : copyCtors.constFirst()->isPublic();
+    return d->m_isCopyConstructible;
 }
 
-bool AbstractMetaClass::isImplicitlyCopyConstructible() const
+bool AbstractMetaClassPrivate::isImplicitlyCopyConstructible() const
 {
     // Fields are currently not considered
-    return std::all_of(d->m_baseClasses.cbegin(), d->m_baseClasses.cend(),
+    return std::all_of(m_baseClasses.cbegin(), m_baseClasses.cend(),
                        [] (const AbstractMetaClassCPtr &c) {
                            return c->isCopyConstructible();
                        });
@@ -1120,7 +1111,7 @@ bool AbstractMetaClass::canAddDefaultCopyConstructor() const
         && !hasDeletedMoveAssignmentOperator() && !hasMoveAssignmentOperator()
         && !hasPrivateDestructor()
         && !isAbstract()
-        && isImplicitlyCopyConstructible();
+        && d->isImplicitlyCopyConstructible();
 }
 
 static bool classHasParentManagement(const AbstractMetaClassCPtr &c)
@@ -1267,6 +1258,13 @@ bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQue
     if (query.testFlag(FunctionQueryOption::Constructors)
          && (f->functionType() != AbstractMetaFunction::ConstructorFunction
              || f->ownerClass() != f->implementingClass())) {
+        return false;
+    }
+
+    if (query.testFlag(FunctionQueryOption::DefaultConstructor)
+        && (f->functionType() != AbstractMetaFunction::ConstructorFunction
+            || !f->isDefaultConstructor()
+            || f->ownerClass() != f->implementingClass())) {
         return false;
     }
 
@@ -1520,7 +1518,7 @@ static inline bool isSignal(const AbstractMetaFunctionCPtr &f)
     return f->isSignal();
 }
 
-void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
+void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass, bool avoidProtectedHack)
 {
     auto *d = klass->d.data();
     if (d->m_functionsFixed)
@@ -1550,7 +1548,7 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
         }
 
         auto superClass = std::const_pointer_cast<AbstractMetaClass>(superClassC);
-        AbstractMetaClass::fixFunctions(superClass);
+        AbstractMetaClass::fixFunctions(superClass, avoidProtectedHack);
         // Since we always traverse the complete hierarchy we are only
         // interrested in what each super class implements, not what
         // we may have propagated from their base classes again.
@@ -1696,12 +1694,56 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
         addExtraIncludesForFunction(klass, func);
     }
 
+    d->setFunctions(funcs, klass);
+
+    if (!klass->isNamespace())
+        fixSpecialFunctions(klass, avoidProtectedHack);
+
     if (hasPrivateConstructors && !hasPublicConstructors) {
         (*klass) += AbstractMetaClass::Abstract;
         (*klass) -= AbstractMetaClass::FinalInTargetLang;
     }
+}
 
-    d->setFunctions(funcs, klass);
+void AbstractMetaClass::fixSpecialFunctions(const AbstractMetaClassPtr &klass,
+                                            bool avoidProtectedHack)
+{
+    auto *d = klass->d.data();
+    auto typeEntry = klass->typeEntry();
+    // Add implicit default constructor/copy constructor since they
+    // are needed by the generators in the function overload lists.
+    auto ct = AbstractMetaClass::queryFirstFunction(klass->functions(),
+                                                    FunctionQueryOption::DefaultConstructor);
+    if (ct && ct->isPublic()) {
+        d->m_isDefaultConstructible = 1;
+    } else if (klass->canAddDefaultConstructor()) {
+        d->m_isDefaultConstructible = 1;
+        AbstractMetaClass::addDefaultConstructor(klass);
+    }
+
+    // Legacy: For the effective default constructibility of values, we apply a
+    // relaxed criterion: If a visible constructor is there, we assume
+    // minimalConstructorExpression() can guess default parameter values.
+    // FIXME PYSIDE 7: Remove protected handling?
+    bool typeSystemDefaultConstructible = d->m_isDefaultConstructible;
+    if (!typeSystemDefaultConstructible && typeEntry->isValue()) {
+        const auto flags = FunctionQueryOption::Constructors | FunctionQueryOption::Visible;
+        if (auto ct = AbstractMetaClass::queryFirstFunction(d->m_functions, flags)) {
+            typeSystemDefaultConstructible =
+                ct->isPublic() || (ct->isProtected() && !avoidProtectedHack);
+        }
+    }
+    typeEntry->setDefaultConstructibleDetected(typeSystemDefaultConstructible);
+
+    ct = AbstractMetaClass::queryFirstFunction(klass->functions(),
+                                               FunctionQueryOption::CopyConstructor);
+    if (ct && ct->isPublic()) {
+        d->m_isCopyConstructible = 1;
+    } else if (klass->canAddDefaultCopyConstructor()) {
+        d->m_isCopyConstructible = 1;
+        AbstractMetaClass::addDefaultCopyConstructor(klass);
+    }
+    typeEntry->setCopyableDetected(d->m_isCopyConstructible);
 }
 
 bool AbstractMetaClass::needsInheritanceSetup() const
@@ -1937,6 +1979,10 @@ void AbstractMetaClass::format(QDebug &debug) const
     if (attributes().testFlag(AbstractMetaClass::Deprecated))
         debug << " [deprecated]";
 
+    if (d->m_isDefaultConstructible)
+        debug << " [default constructible]";
+    if (d->m_isCopyConstructible)
+        debug << " [copy constructible]";
     if (d->m_hasPrivateConstructor)
         debug << " [private constructor]";
     if (d->m_hasDeletedDefaultConstructor)

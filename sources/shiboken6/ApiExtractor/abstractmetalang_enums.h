@@ -9,6 +9,7 @@
 enum class FunctionQueryOption {
     AnyConstructor               = 0x0000001, // Any constructor (copy/move)
     Constructors                 = 0x0000002, // Constructors except copy/move
+    DefaultConstructor           = 0x0000004, // Only Default constructors
     CopyConstructor              = 0x0000008, // Only copy constructors
     MoveConstructor              = 0x0000010, // Only move constructors
     AssignmentOperator           = 0x0000020, // Only assignment operator
