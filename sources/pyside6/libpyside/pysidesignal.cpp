@@ -567,9 +567,9 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
                                                        connectionType);
                     return Shiboken::Conversions::copyToPython(metaObjConnectionConverter(), &conn);
                 }
-                targetWalk = reinterpret_cast<PySideSignalInstance *>(targetWalk->d->next);
+                targetWalk = targetWalk->d->next;
             }
-            sourceWalk = reinterpret_cast<PySideSignalInstance *>(sourceWalk->d->next);
+            sourceWalk = sourceWalk->d->next;
         }
         return PyErr_Format(PyExc_RuntimeError, "Failed to connect signal %s.",
                             source->d->signature.constData());
