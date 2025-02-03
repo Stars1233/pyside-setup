@@ -47,6 +47,11 @@ void TestObject::emitFlagsSignal(Qt::Alignment alignment)
     emit flagsSignal(alignment);
 }
 
+void TestObject::emitObjectByConstRef()
+{
+    emit objectByConstRef(*this);
+}
+
 void TestObject::setQLatin1String(QLatin1String v)
 {
     m_qLatin1String = v;

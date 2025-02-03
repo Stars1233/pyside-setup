@@ -27,6 +27,11 @@ class Receiver(QObject):
     def __init__(self, p=None):
         super().__init__(p)
         self.received_handle = -1
+        self.received_name = ''
+
+    @Slot(QObject)
+    def slotObjectByConstRef(self, o):
+        self.received_name = o.objectName()
 
     @Slot(Connection)
     def connectionSlot(self, c):
@@ -37,7 +42,9 @@ class SignalEmissionFromPython(unittest.TestCase):
 
     def setUp(self):
         self.obj1 = TestObject(0)
+        self.obj1.setObjectName('obj1')
         self.obj2 = TestObject(0)
+        self.obj2.setObjectName('obj2')
         self.one_called = 0
         self.two_called = 0
 
@@ -113,6 +120,12 @@ class SignalEmissionFromPython(unittest.TestCase):
         self.obj2.emitSignalWithDefaultValue_void()
         self.assertEqual(self.one_called, 1)
         self.assertEqual(self.two_called, 2)
+
+    def testSignalObjectByConstRef(self):
+        receiver = Receiver()
+        self.obj1.objectByConstRef.connect(receiver.slotObjectByConstRef)
+        self.obj1.emitObjectByConstRef()
+        self.assertEqual(receiver.received_name, 'obj1')
 
 
 if __name__ == '__main__':

@@ -464,16 +464,21 @@ static int callPythonMetaMethodHelper(const QByteArrayList &paramTypes,
                                       const char *returnType /* = nullptr */,
                                       void **args, PyObject *pyCallable)
 {
+    using SpecificConverter = Shiboken::Conversions::SpecificConverter;
     const qsizetype argsSize = paramTypes.size();
     Shiboken::AutoDecRef preparedArgs(PyTuple_New(argsSize));
 
     for (qsizetype i = 0; i < argsSize; ++i) {
         void *data = args[i + 1];
-        auto param = paramTypes.at(i);
-        Shiboken::Conversions::SpecificConverter converter(param.constData());
+        const auto &param = paramTypes.at(i);
+        SpecificConverter converter(param.constData());
         if (!converter.isValid())
             return CallResult::CallArgumentError + int(i);
-        PyTuple_SetItem(preparedArgs, i, converter.toPython(data));
+        // Only pointer conversion available for const-ref - add indirection
+        const bool valueToPtr = converter.conversionType() == SpecificConverter::PointerConversion
+            && !param.endsWith('*') && param != "PyObject"_ba;
+        auto *src = valueToPtr ? &data : data;
+        PyTuple_SetItem(preparedArgs, i, converter.toPython(src));
     }
 
     QScopedPointer<Shiboken::Conversions::SpecificConverter> retConverter;
