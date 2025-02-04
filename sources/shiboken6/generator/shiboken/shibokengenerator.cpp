@@ -2030,6 +2030,7 @@ static bool isGroupable(const AbstractMetaFunctionCPtr &func)
     case AbstractMetaFunction::SetAttroFunction:
     case AbstractMetaFunction::ArrowOperator: // weird operator overloads
     case AbstractMetaFunction::SubscriptOperator:
+    case AbstractMetaFunction::OtherAssignmentOperatorFunction:
         return false;
     default:
         break;

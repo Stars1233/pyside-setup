@@ -1849,6 +1849,12 @@ static inline AbstractMetaFunction::FunctionType functionTypeFromCodeModel(CodeM
     case CodeModel::AssignmentOperator:
         result = AbstractMetaFunction::AssignmentOperatorFunction;
         break;
+    case CodeModel::MoveAssignmentOperator:
+        result = AbstractMetaFunction::MoveAssignmentOperatorFunction;
+        break;
+    case CodeModel::OtherAssignmentOperator:
+        result = AbstractMetaFunction::OtherAssignmentOperatorFunction;
+        break;
     case CodeModel::CallOperator:
         result = AbstractMetaFunction::CallOperator;
         break;
@@ -2018,6 +2024,13 @@ AbstractMetaFunctionPtr
             break;
         case CodeModel::MoveConstructor:
             currentClass->setHasDeletedMoveConstructor(true);
+            break;
+        case CodeModel::AssignmentOperator:
+            currentClass->setHasDeletedAssignmentOperator(true);
+            break;
+        case CodeModel::MoveAssignmentOperator:
+            currentClass->setHasDeletedMoveAssignmentOperator(true);
+            break;
         default:
             break;
         }

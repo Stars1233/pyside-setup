@@ -501,6 +501,7 @@ bool AbstractMetaFunction::generateBinding() const
     case AssignmentOperatorFunction:
     case MoveAssignmentOperatorFunction:
     case AbstractMetaFunction::MoveConstructorFunction:
+    case OtherAssignmentOperatorFunction:
         return false;
     default:
         if (!isWhiteListed())

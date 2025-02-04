@@ -43,6 +43,8 @@ public:
         Signal,
         Slot,
         AssignmentOperator,
+        MoveAssignmentOperator,
+        OtherAssignmentOperator, // Assign from some other type
         CallOperator,
         ConversionOperator,
         DereferenceOperator, // Iterator's operator *

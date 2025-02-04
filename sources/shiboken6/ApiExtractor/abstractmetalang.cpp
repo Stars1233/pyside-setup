@@ -46,6 +46,8 @@ public:
           m_hasDeletedDefaultConstructor(false),
           m_hasDeletedCopyConstructor(false),
           m_hasDeletedMoveConstructor(false),
+          m_hasDeletedAssigmentOperator(false),
+          m_hasDeletedMoveAssigmentOperator(false),
           m_functionsFixed(false),
           m_inheritanceDone(false),
           m_hasPrivateDestructor(false),
@@ -84,6 +86,8 @@ public:
     uint m_hasDeletedDefaultConstructor : 1;
     uint m_hasDeletedCopyConstructor : 1;
     uint m_hasDeletedMoveConstructor : 1;
+    uint m_hasDeletedAssigmentOperator : 1;
+    uint m_hasDeletedMoveAssigmentOperator : 1;
     uint m_functionsFixed : 1;
     uint m_inheritanceDone : 1; // m_baseClasses has been populated from m_baseClassNames
     uint m_hasPrivateDestructor : 1;
@@ -819,10 +823,35 @@ AbstractMetaFunctionCPtr AbstractMetaClass::moveConstructor() const
     return queryFirstFunction(d->m_functions, FunctionQueryOption::MoveConstructor);
 }
 
+bool AbstractMetaClass::hasMoveConstructor() const
+{
+    return moveConstructor() != nullptr;
+}
+
 bool AbstractMetaClass::hasPrivateMoveConstructor() const
 {
     const auto moveCt = moveConstructor();
     return moveCt && moveCt->isPrivate();
+}
+
+AbstractMetaFunctionCPtr AbstractMetaClass::assignmentOperator() const
+{
+    return queryFirstFunction(d->m_functions, FunctionQueryOption::AssignmentOperator);
+}
+
+bool AbstractMetaClass::hasAssignmentOperator() const
+{
+    return assignmentOperator() != nullptr;
+}
+
+AbstractMetaFunctionCPtr AbstractMetaClass::moveAssignmentOperator() const
+{
+     return queryFirstFunction(d->m_functions, FunctionQueryOption::MoveAssignmentOperator);
+}
+
+bool AbstractMetaClass::hasMoveAssignmentOperator() const
+{
+    return moveAssignmentOperator() != nullptr;
 }
 
 void AbstractMetaClassPrivate::addConstructor(AbstractMetaFunction::FunctionType t,
@@ -963,6 +992,26 @@ void AbstractMetaClass::setHasDeletedMoveConstructor(bool value)
     d->m_hasDeletedMoveConstructor = value;
 }
 
+bool AbstractMetaClass::hasDeletedAssignmentOperator() const
+{
+    return d->m_hasDeletedAssigmentOperator;
+}
+
+void AbstractMetaClass::setHasDeletedAssignmentOperator(bool value)
+{
+    d->m_hasDeletedAssigmentOperator = value;
+}
+
+bool AbstractMetaClass::hasDeletedMoveAssignmentOperator() const
+{
+    return d->m_hasDeletedMoveAssigmentOperator;
+}
+
+void AbstractMetaClass::setHasDeletedMoveAssignmentOperator(bool value)
+{
+    d->m_hasDeletedMoveAssigmentOperator = value;
+}
+
 bool AbstractMetaClass::hasPrivateDestructor() const
 {
     return d->m_hasPrivateDestructor;
@@ -1065,11 +1114,12 @@ bool AbstractMetaClass::canAddDefaultCopyConstructor() const
 {
     return d->m_typeEntry->isValue()
         && !isNamespace()
-        && !hasDeletedCopyConstructor() && !hasPrivateCopyConstructor()
-        && !hasDeletedMoveConstructor() && !hasPrivateMoveConstructor()
+        && !hasDeletedCopyConstructor() && !hasCopyConstructor()
+        && !hasDeletedAssignmentOperator() && !hasAssignmentOperator()
+        && !hasDeletedMoveConstructor() && !hasMoveConstructor()
+        && !hasDeletedMoveAssignmentOperator() && !hasMoveAssignmentOperator()
         && !hasPrivateDestructor()
         && !isAbstract()
-        && !hasCopyConstructor()
         && isImplicitlyCopyConstructible();
 }
 
@@ -1227,6 +1277,18 @@ bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQue
 
     if (query.testFlag(FunctionQueryOption::MoveConstructor)
         && (f->functionType() != AbstractMetaFunction::MoveConstructorFunction
+            || f->ownerClass() != f->implementingClass())) {
+        return false;
+    }
+
+    if (query.testFlag(FunctionQueryOption::AssignmentOperator)
+        && (f->functionType() != AbstractMetaFunction::AssignmentOperatorFunction
+            || f->ownerClass() != f->implementingClass())) {
+        return false;
+    }
+
+    if (query.testFlag(FunctionQueryOption::MoveAssignmentOperator)
+        && (f->functionType() != AbstractMetaFunction::MoveAssignmentOperatorFunction
             || f->ownerClass() != f->implementingClass())) {
         return false;
     }
@@ -1889,7 +1951,12 @@ void AbstractMetaClass::format(QDebug &debug) const
         debug << " [virtual destructor]";
     if (d->m_valueTypeWithCopyConstructorOnly)
         debug << " [value type with copy constructor only]";
-
+    if (d->m_hasDeletedMoveConstructor)
+        debug << " [deleted move constructor]";
+    if (d->m_hasDeletedAssigmentOperator)
+        debug << " [deleted assignment]";
+    if (d->m_hasDeletedMoveAssigmentOperator)
+        debug << " [deleted move assignment]";
     if (!d->m_baseClasses.isEmpty()) {
         debug << ", inherits ";
         for (const auto &b : d->m_baseClasses)

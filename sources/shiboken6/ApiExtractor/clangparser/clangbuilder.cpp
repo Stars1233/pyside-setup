@@ -369,6 +369,12 @@ static inline CodeModel::FunctionType functionTypeFromCursor(const CXCursor &cur
     case CXCursor_Destructor:
         result = CodeModel::Destructor;
         break;
+    case CXCursor_CXXMethod:
+        if (clang_CXXMethod_isCopyAssignmentOperator(cursor) != 0)
+            result = CodeModel::AssignmentOperator;
+        else if (clang_CXXMethod_isMoveAssignmentOperator(cursor) != 0)
+            result = CodeModel::MoveAssignmentOperator;
+        break;
     default:
         break;
     }

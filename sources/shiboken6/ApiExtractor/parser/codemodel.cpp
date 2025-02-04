@@ -1100,6 +1100,8 @@ CodeModel::FunctionType _FunctionModelItem::_determineTypeHelper() const
     case CodeModel::Constructor:
     case CodeModel::CopyConstructor:
     case CodeModel::MoveConstructor:
+    case CodeModel::AssignmentOperator:
+    case CodeModel::MoveAssignmentOperator:
     case CodeModel::Destructor:
     case CodeModel::Signal:
     case CodeModel::Slot:
@@ -1113,6 +1115,10 @@ CodeModel::FunctionType _FunctionModelItem::_determineTypeHelper() const
         return m_functionType;
 
     auto newType = newTypeOpt.value();
+    // If clang did not pre-detect AssignmentOperator for some operator=(),
+    // it is an assignment from another type which we are not interested in.
+    if (newType == CodeModel::AssignmentOperator)
+        return CodeModel::OtherAssignmentOperator;
     // It's some sort of dereference operator?!
     if (m_arguments.isEmpty()) {
         switch (newType) {

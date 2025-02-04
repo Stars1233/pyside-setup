@@ -40,6 +40,7 @@ public:
         MoveConstructorFunction,
         AssignmentOperatorFunction,
         MoveAssignmentOperatorFunction,
+        OtherAssignmentOperatorFunction, // Assign from some other type
         DestructorFunction,
         NormalFunction,
         SignalFunction,

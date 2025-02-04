@@ -9,14 +9,15 @@
 enum class FunctionQueryOption {
     AnyConstructor               = 0x0000001, // Any constructor (copy/move)
     Constructors                 = 0x0000002, // Constructors except copy/move
-    CopyConstructor              = 0x0000004, // Only copy constructors
-    MoveConstructor              = 0x0000008, // Only move constructors
-    //Destructors                  = 0x0000002, // Only destructors. Not included in class.
-    ClassImplements              = 0x0000020, // Only functions implemented by the current class
-    StaticFunctions              = 0x0000080, // Only static functions
-    Signals                      = 0x0000100, // Only signals
-    NormalFunctions              = 0x0000200, // Only functions that aren't signals
-    Visible                      = 0x0000400, // Only public and protected functions
+    CopyConstructor              = 0x0000008, // Only copy constructors
+    MoveConstructor              = 0x0000010, // Only move constructors
+    AssignmentOperator           = 0x0000020, // Only assignment operator
+    MoveAssignmentOperator       = 0x0000040, // Only move assignment operator
+    ClassImplements              = 0x0000080, // Only functions implemented by the current class
+    StaticFunctions              = 0x0000100, // Only static functions
+    Signals                      = 0x0000200, // Only signals
+    NormalFunctions              = 0x0000400, // Only functions that aren't signals
+    Visible                      = 0x0000800, // Only public and protected functions
     NonStaticFunctions           = 0x0004000, // No static functions
     Empty                        = 0x0008000, // Empty overrides of abstract functions
     Invisible                    = 0x0010000, // Only private functions
