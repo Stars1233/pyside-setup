@@ -4,7 +4,7 @@
 #ifndef PRIMITIVETYPEENTRY_H
 #define PRIMITIVETYPEENTRY_H
 
-#include "typesystem.h"
+#include "cpptypeentry.h"
 #include "customconversion_typedefs.h"
 
 class PrimitiveTypeEntryPrivate;
@@ -12,15 +12,11 @@ class PrimitiveTypeEntryPrivate;
 /// A PrimitiveTypeEntry is user-defined type with conversion rules, a C++
 /// primitive type for which a PrimitiveTypeConverter exists in libshiboken
 /// or a typedef to a C++ primitive type as determined by AbstractMetaBuilder.
-class PrimitiveTypeEntry : public TypeEntry
+class PrimitiveTypeEntry : public CppTypeEntry
 {
 public:
     explicit PrimitiveTypeEntry(const QString &entryName, const QVersionNumber &vr,
                                 const TypeEntryCPtr &parent);
-
-    QString defaultConstructor() const;
-    void setDefaultConstructor(const QString& defaultConstructor);
-    bool hasDefaultConstructor() const;
 
     /**
      *   The PrimitiveTypeEntry pointed by this type entry if it

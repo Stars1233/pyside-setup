@@ -1279,7 +1279,7 @@ bool TypeSystemParser::checkRootElement()
     return false;
 }
 
-static TypeEntryPtr findViewedType(const QString &name)
+static CppTypeEntryCPtr findViewedType(const QString &name)
 {
     const auto range = TypeDatabase::instance()->entries().equal_range(name);
     for (auto i = range.first; i != range.second; ++i) {
@@ -1288,7 +1288,7 @@ static TypeEntryPtr findViewedType(const QString &name)
         case TypeEntry::PrimitiveType:
         case TypeEntry::ContainerType:
         case TypeEntry::ObjectType:
-            return i.value();
+            return std::dynamic_pointer_cast<const CppTypeEntry>(i.value());
         default:
             break;
         }
@@ -1307,9 +1307,24 @@ bool TypeSystemParser::applyCommonAttributes(const ConditionalStreamReader &read
         const auto name = attributes->at(i).qualifiedName();
         if (name ==  u"revision") {
             type->setRevision(attributes->takeAt(i).value().toInt());
+        }
+    }
+    return true;
+}
+
+bool TypeSystemParser::applyCppAttributes(const ConditionalStreamReader &reader,
+                                          const CppTypeEntryPtr &type,
+                                          QXmlStreamAttributes *attributes)
+{
+    if (!applyCommonAttributes(reader, type, attributes))
+        return false;
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
+        const auto name = attributes->at(i).qualifiedName();
+        if (name == u"default-constructor") {
+            type->setDefaultConstructor(attributes->takeAt(i).value().toString());
         } else if (name == u"view-on") {
             const QString name = attributes->takeAt(i).value().toString();
-            TypeEntryPtr views = findViewedType(name);
+            auto views = findViewedType(name);
             if (!views) {
                 m_error = msgCannotFindView(name, type->name());
                 return false;
@@ -1358,7 +1373,7 @@ FlagsTypeEntryPtr
     }
 
     ftype->setOriginalName(flagName);
-    if (!applyCommonAttributes(reader, ftype, attributes))
+    if (!applyCppAttributes(reader, ftype, attributes))
         return nullptr;
 
     QStringList lst = flagName.split(u"::"_s);
@@ -1450,9 +1465,8 @@ SmartPointerTypeEntryPtr
     auto type = std::make_shared<SmartPointerTypeEntry>(name, getter, smartPointerType,
                                                         refCountMethodName, since,
                                                         currentParentTypeEntry());
-    if (!applyCommonAttributes(reader, type, attributes))
+    if (!applyComplexTypeAttributes(reader, type, attributes))
         return nullptr;
-    applyComplexTypeAttributes(reader, type, attributes);
     type->setNullCheckMethod(nullCheckMethod);
     type->setValueCheckMethod(valueCheckMethod);
     type->setResetMethod(resetMethod);
@@ -1469,7 +1483,7 @@ PrimitiveTypeEntryPtr
         return nullptr;
     auto type = std::make_shared<PrimitiveTypeEntry>(name, since, currentParentTypeEntry());
     QString targetLangApiName;
-    if (!applyCommonAttributes(reader, type, attributes))
+    if (!applyCppAttributes(reader, type, attributes))
         return nullptr;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
@@ -1484,8 +1498,6 @@ PrimitiveTypeEntryPtr
             const bool v = convertBoolean(attributes->takeAt(i).value(),
                                           preferredTargetLangTypeAttribute, true);
             type->setPreferredTargetLangType(v);
-        } else if (name == u"default-constructor") {
-             type->setDefaultConstructor(attributes->takeAt(i).value().toString());
         }
     }
 
@@ -1550,9 +1562,8 @@ ContainerTypeEntryPtr
     attributes->removeAt(typeIndex);
     auto type = std::make_shared<ContainerTypeEntry>(name, containerTypeOpt.value(),
                                                      since, currentParentTypeEntry());
-    if (!applyCommonAttributes(reader, type, attributes))
+    if (!applyComplexTypeAttributes(reader, type, attributes))
         return nullptr;
-    applyComplexTypeAttributes(reader, type, attributes);
 
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
@@ -1598,7 +1609,8 @@ EnumTypeEntryPtr
     if (!checkRootElement())
         return nullptr;
     auto entry = std::make_shared<EnumTypeEntry>(name, since, currentParentTypeEntry());
-    applyCommonAttributes(reader, entry, attributes);
+    if (!applyCppAttributes(reader, entry, attributes))
+        return nullptr;
     entry->setTargetLangPackage(m_defaultPackage);
 
     QString flagNames;
@@ -1653,7 +1665,6 @@ NamespaceTypeEntryPtr
         return nullptr;
     auto result = std::make_shared<NamespaceTypeEntry>(name, since, currentParentTypeEntry());
     auto visibility = TypeSystem::Visibility::Unspecified;
-    applyCommonAttributes(reader, result, attributes);
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto attributeName = attributes->at(i).qualifiedName();
         if (attributeName == u"files") {
@@ -1697,7 +1708,8 @@ NamespaceTypeEntryPtr
     if (visibility != TypeSystem::Visibility::Unspecified)
         result->setVisibility(visibility);
     // Handle legacy "generate" before the common handling
-    applyComplexTypeAttributes(reader, result, attributes);
+    if (!applyComplexTypeAttributes(reader, result, attributes))
+        return {};
 
     if (result->extends() && !result->hasPattern()) {
         m_error = msgExtendingNamespaceRequiresPattern(name);
@@ -1715,12 +1727,8 @@ ValueTypeEntryPtr
     if (!checkRootElement())
         return nullptr;
     auto typeEntry = std::make_shared<ValueTypeEntry>(name, since, currentParentTypeEntry());
-    if (!applyCommonAttributes(reader, typeEntry, attributes))
+    if (!applyComplexTypeAttributes(reader, typeEntry, attributes))
         return nullptr;
-    applyComplexTypeAttributes(reader, typeEntry, attributes);
-    const auto defaultCtIndex = indexOfAttribute(*attributes, u"default-constructor");
-    if (defaultCtIndex != -1)
-         typeEntry->setDefaultConstructor(attributes->takeAt(defaultCtIndex).value().toString());
     return typeEntry;
 }
 
@@ -1802,16 +1810,17 @@ TypedefEntryPtr
     const QString sourceType = attributes->takeAt(sourceIndex).value().toString();
     auto result = std::make_shared<TypedefEntry>(name, sourceType, since,
                                                  currentParentTypeEntry());
-    if (!applyCommonAttributes(reader, result, attributes))
+    if (!applyComplexTypeAttributes(reader, result, attributes))
         return nullptr;
-    applyComplexTypeAttributes(reader, result, attributes);
     return result;
 }
 
-void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader &reader,
-                                         const ComplexTypeEntryPtr &ctype,
-                                         QXmlStreamAttributes *attributes) const
+bool TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader &reader,
+                                                  const ComplexTypeEntryPtr &ctype,
+                                                  QXmlStreamAttributes *attributes)
 {
+    if (!applyCppAttributes(reader, ctype, attributes))
+        return false;
     bool generate = true;
     ctype->setCopyable(ComplexTypeEntry::Unknown);
     auto exceptionHandling = m_exceptionHandling;
@@ -1960,6 +1969,7 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
         ctype->setCodeGeneration(m_generate);
     else
         ctype->setCodeGeneration(TypeEntry::GenerationDisabled);
+    return true;
 }
 
 bool TypeSystemParser::parseConfiguration(StackElement topElement,
@@ -3464,8 +3474,8 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                 return false;
             auto ce = std::make_shared<ObjectTypeEntry>(name, versionRange.since, currentParentTypeEntry());
             top->entry = ce;
-            applyCommonAttributes(reader, top->entry, &attributes);
-            applyComplexTypeAttributes(reader, ce, &attributes);
+            if (!applyComplexTypeAttributes(reader, ce, &attributes))
+                return false;
         }
             break;
         case StackElement::FunctionTypeEntry:

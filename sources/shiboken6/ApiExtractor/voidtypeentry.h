@@ -4,9 +4,9 @@
 #ifndef VOIDTYPEENTRY_H
 #define VOIDTYPEENTRY_H
 
-#include "typesystem.h"
+#include "cpptypeentry.h"
 
-class VoidTypeEntry : public TypeEntry
+class VoidTypeEntry : public CppTypeEntry
 {
 public:
     VoidTypeEntry();
@@ -14,7 +14,7 @@ public:
     TypeEntry *clone() const override;
 
 protected:
-    explicit VoidTypeEntry(TypeEntryPrivate *d);
+    explicit VoidTypeEntry(CppTypeEntryPrivate *d);
 };
 
 #endif // VOIDTYPEENTRY_H

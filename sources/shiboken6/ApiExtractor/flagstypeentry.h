@@ -4,13 +4,13 @@
 #ifndef FLAGSTYPEENTRY_H
 #define FLAGSTYPEENTRY_H
 
-#include "typesystem.h"
+#include "cpptypeentry.h"
 
 class EnumTypeEntry;
 class FlagsTypeEntryPrivate;
 
 // FlagsTypeEntry is configurable for global flags only
-class FlagsTypeEntry : public TypeEntry
+class FlagsTypeEntry : public CppTypeEntry
 {
 public:
     explicit FlagsTypeEntry(const QString &entryName, const QVersionNumber &vr,

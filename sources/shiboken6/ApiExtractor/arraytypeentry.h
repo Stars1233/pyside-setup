@@ -4,11 +4,11 @@
 #ifndef ARRAYTYPEENTRY_H
 #define ARRAYTYPEENTRY_H
 
-#include "typesystem.h"
+#include "cpptypeentry.h"
 
 class ArrayTypeEntryPrivate;
 
-class ArrayTypeEntry : public TypeEntry
+class ArrayTypeEntry : public CppTypeEntry
 {
 public:
     explicit ArrayTypeEntry(const TypeEntryCPtr &nested_type, const QVersionNumber &vr,

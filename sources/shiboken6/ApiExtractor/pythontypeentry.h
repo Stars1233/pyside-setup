@@ -23,7 +23,7 @@ public:
 #endif
 
 protected:
-    explicit PythonTypeEntry(TypeEntryPrivate *d);
+    explicit PythonTypeEntry(CustomTypeEntryPrivate *d);
 };
 
 #endif // PYTHONTYPEENTRY_H

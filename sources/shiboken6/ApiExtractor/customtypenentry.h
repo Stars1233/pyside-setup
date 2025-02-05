@@ -4,9 +4,11 @@
 #ifndef CUSTOMTYPENENTRY_H
 #define CUSTOMTYPENENTRY_H
 
-#include "typesystem.h"
+#include "cpptypeentry.h"
 
-class CustomTypeEntry : public TypeEntry
+class CustomTypeEntryPrivate;
+
+class CustomTypeEntry : public CppTypeEntry
 {
 public:
     explicit CustomTypeEntry(const QString &entryName, const QVersionNumber &vr,
@@ -23,7 +25,7 @@ public:
 #endif
 
 protected:
-    explicit CustomTypeEntry(TypeEntryPrivate *d);
+    explicit CustomTypeEntry(CustomTypeEntryPrivate *d);
 };
 
 

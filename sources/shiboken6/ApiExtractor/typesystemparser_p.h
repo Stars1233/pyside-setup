@@ -172,6 +172,9 @@ private:
     bool applyCommonAttributes(const ConditionalStreamReader &reader,
                                const TypeEntryPtr &type,
                                QXmlStreamAttributes *attributes);
+    bool applyCppAttributes(const ConditionalStreamReader &reader,
+                            const CppTypeEntryPtr &type,
+                            QXmlStreamAttributes *attributes);
     PrimitiveTypeEntryPtr
         parsePrimitiveTypeEntry(const ConditionalStreamReader &, const QString &name,
                                 const QVersionNumber &since, QXmlStreamAttributes *);
@@ -206,8 +209,8 @@ private:
         parseTypedefEntry(const ConditionalStreamReader &, const QString &name,
                           StackElement topElement,
                           const QVersionNumber &since, QXmlStreamAttributes *);
-    void applyComplexTypeAttributes(const ConditionalStreamReader &, const ComplexTypeEntryPtr &ctype,
-                                    QXmlStreamAttributes *) const;
+    bool applyComplexTypeAttributes(const ConditionalStreamReader &, const ComplexTypeEntryPtr &ctype,
+                                    QXmlStreamAttributes *);
     bool parseConfiguration(StackElement topElement,
                             QXmlStreamAttributes *attributes);
     bool parseRenameFunction(const ConditionalStreamReader &, QString *name,

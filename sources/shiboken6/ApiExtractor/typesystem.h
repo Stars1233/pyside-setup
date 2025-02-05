@@ -158,12 +158,6 @@ public:
 
     QVersionNumber version() const;
 
-    // View on: Type to use for function argument conversion, fex
-    // std::string_view -> std::string for foo(std::string_view).
-    // cf AbstractMetaType::viewOn()
-    TypeEntryPtr viewOn() const;
-    void setViewOn(const TypeEntryPtr &v);
-
     virtual TypeEntry *clone() const;
 
     void useAsTypedef(const TypeEntryCPtr &source);

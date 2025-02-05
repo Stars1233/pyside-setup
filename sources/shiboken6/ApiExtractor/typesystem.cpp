@@ -4,6 +4,7 @@
 #include "typesystem.h"
 #include "arraytypeentry.h"
 #include "codesnip.h"
+#include "cpptypeentry.h"
 #include "complextypeentry.h"
 #include "configurabletypeentry.h"
 #include "constantvaluetypeentry.h"
@@ -75,7 +76,6 @@ public:
     QVersionNumber m_version;
     SourceLocation m_sourceLocation; // XML file
     TypeEntry::CodeGeneration m_codeGeneration = TypeEntry::GenerateCode;
-    TypeEntryPtr m_viewOn;
     CustomTypeEntryPtr m_targetLangApiType;
     int m_revision = 0;
     int m_sbkIndex = 0;
@@ -544,16 +544,6 @@ bool TypeEntry::isComplex() const
     return false;
 }
 
-TypeEntryPtr TypeEntry::viewOn() const
-{
-    return m_d->m_viewOn;
-}
-
-void TypeEntry::setViewOn(const TypeEntryPtr &v)
-{
-    m_d->m_viewOn = v;
-}
-
 TypeEntry *TypeEntry::clone() const
 {
     return new TypeEntry(new TypeEntryPrivate(*m_d.data()));
@@ -573,23 +563,76 @@ void TypeEntry::useAsTypedef(const TypeEntryCPtr &source)
     m_d->m_version = source->m_d->m_version;
 }
 
-// ----------------- CustomTypeEntry
-class  CustomTypeEntryPrivate : public TypeEntryPrivate
+// ----------------- CppTypeEntry
+
+class CppTypeEntryPrivate : public TypeEntryPrivate
 {
 public:
     using TypeEntryPrivate::TypeEntryPrivate;
+
+    CppTypeEntryCPtr m_viewOn;
+    QString m_defaultConstructor;
+};
+
+CppTypeEntry::CppTypeEntry(const QString &entryName, Type t,
+                           const QVersionNumber &vr,
+                           const TypeEntryCPtr &parent) :
+    TypeEntry(new CppTypeEntryPrivate(entryName, t, vr, parent))
+{
+}
+
+CppTypeEntry::CppTypeEntry(CppTypeEntryPrivate *d) :
+    TypeEntry(d)
+{
+}
+
+const QString &CppTypeEntry::defaultConstructor() const
+{
+    S_D(const CppTypeEntry);
+    return d->m_defaultConstructor;
+}
+
+void CppTypeEntry::setDefaultConstructor(const QString& defaultConstructor)
+{
+    S_D(CppTypeEntry);
+    d->m_defaultConstructor = defaultConstructor;
+}
+
+CppTypeEntryCPtr CppTypeEntry::viewOn() const
+{
+    S_D(const CppTypeEntry);
+    return d->m_viewOn;
+}
+
+void CppTypeEntry::setViewOn(const CppTypeEntryCPtr &v)
+{
+    S_D(CppTypeEntry);
+    d->m_viewOn = v;
+}
+
+TypeEntry *CppTypeEntry::clone() const
+{
+    S_D(const CppTypeEntry);
+    return new CppTypeEntry(new CppTypeEntryPrivate(*d));
+}
+
+// ----------------- CustomTypeEntry
+class CustomTypeEntryPrivate : public CppTypeEntryPrivate
+{
+public:
+    using CppTypeEntryPrivate::CppTypeEntryPrivate;
 
     QString m_checkFunction;
 };
 
 CustomTypeEntry::CustomTypeEntry(const QString &entryName, const QVersionNumber &vr,
                                  const TypeEntryCPtr &parent) :
-    TypeEntry(new CustomTypeEntryPrivate(entryName, CustomType, vr, parent))
+    CppTypeEntry(new CustomTypeEntryPrivate(entryName, CustomType, vr, parent))
 {
 }
 
-CustomTypeEntry::CustomTypeEntry(TypeEntryPrivate *d) :
-    TypeEntry(d)
+CustomTypeEntry::CustomTypeEntry(CustomTypeEntryPrivate *d) :
+    CppTypeEntry(d)
 {
 }
 
@@ -653,7 +696,7 @@ TypeSystem::CPythonType PythonTypeEntry::cPythonType() const
     return d->m_cPythonType;
 }
 
-PythonTypeEntry::PythonTypeEntry(TypeEntryPrivate *d) :
+PythonTypeEntry::PythonTypeEntry(CustomTypeEntryPrivate *d) :
     CustomTypeEntry(d)
 {
 }
@@ -788,18 +831,19 @@ void TypeSystemTypeEntry::setSnakeCase(TypeSystem::SnakeCase sc)
 
 // ----------------- VoidTypeEntry
 VoidTypeEntry::VoidTypeEntry() :
-    TypeEntry(u"void"_s, VoidType, QVersionNumber(0, 0), nullptr)
+    CppTypeEntry(u"void"_s, VoidType, QVersionNumber(0, 0), nullptr)
 {
 }
 
-VoidTypeEntry::VoidTypeEntry(TypeEntryPrivate *d) :
-    TypeEntry(d)
+VoidTypeEntry::VoidTypeEntry(CppTypeEntryPrivate *d) :
+    CppTypeEntry(d)
 {
 }
 
 TypeEntry *VoidTypeEntry::clone() const
 {
-    return new VoidTypeEntry(new TypeEntryPrivate(*d_func()));
+    S_D(const CppTypeEntry);
+    return new VoidTypeEntry(new CppTypeEntryPrivate(*d));
 }
 
 VarargsTypeEntry::VarargsTypeEntry() :
@@ -857,12 +901,12 @@ TemplateArgumentEntry::TemplateArgumentEntry(TemplateArgumentEntryPrivate *d) :
 }
 
 // ----------------- ArrayTypeEntry
-class ArrayTypeEntryPrivate : public TypeEntryPrivate
+class ArrayTypeEntryPrivate : public CppTypeEntryPrivate
 {
 public:
     explicit ArrayTypeEntryPrivate(const TypeEntryCPtr &nested_type, const QVersionNumber &vr,
                                    const TypeEntryCPtr &parent) :
-        TypeEntryPrivate(u"Array"_s, TypeEntry::ArrayType, vr, parent),
+        CppTypeEntryPrivate(u"Array"_s, TypeEntry::ArrayType, vr, parent),
         m_nestedType(nested_type)
     {
     }
@@ -872,7 +916,7 @@ public:
 
 ArrayTypeEntry::ArrayTypeEntry(const TypeEntryCPtr &nested_type, const QVersionNumber &vr,
                                const TypeEntryCPtr &parent) :
-    TypeEntry(new ArrayTypeEntryPrivate(nested_type, vr, parent))
+    CppTypeEntry(new ArrayTypeEntryPrivate(nested_type, vr, parent))
 {
     Q_ASSERT(nested_type);
 }
@@ -902,22 +946,21 @@ TypeEntry *ArrayTypeEntry::clone() const
 }
 
 ArrayTypeEntry::ArrayTypeEntry(ArrayTypeEntryPrivate *d) :
-    TypeEntry(d)
+    CppTypeEntry(d)
 {
 }
 
 // ----------------- PrimitiveTypeEntry
-class PrimitiveTypeEntryPrivate : public TypeEntryPrivate
+class PrimitiveTypeEntryPrivate : public CppTypeEntryPrivate
 {
 public:
     PrimitiveTypeEntryPrivate(const QString &entryName, const QVersionNumber &vr,
                               const TypeEntryCPtr &parent) :
-        TypeEntryPrivate(entryName, TypeEntry::PrimitiveType, vr, parent),
+        CppTypeEntryPrivate(entryName, TypeEntry::PrimitiveType, vr, parent),
         m_preferredTargetLangType(true)
     {
     }
 
-    QString m_defaultConstructor;
     CustomConversionPtr m_customConversion;
     PrimitiveTypeEntryPtr m_referencedTypeEntry;
     uint m_preferredTargetLangType : 1;
@@ -925,26 +968,8 @@ public:
 
 PrimitiveTypeEntry::PrimitiveTypeEntry(const QString &entryName, const QVersionNumber &vr,
                                        const TypeEntryCPtr &parent) :
-    TypeEntry(new PrimitiveTypeEntryPrivate(entryName, vr, parent))
+    CppTypeEntry(new PrimitiveTypeEntryPrivate(entryName, vr, parent))
 {
-}
-
-QString PrimitiveTypeEntry::defaultConstructor() const
-{
-    S_D(const PrimitiveTypeEntry);
-    return d->m_defaultConstructor;
-}
-
-void PrimitiveTypeEntry::setDefaultConstructor(const QString &defaultConstructor)
-{
-    S_D(PrimitiveTypeEntry);
-    d->m_defaultConstructor = defaultConstructor;
-}
-
-bool PrimitiveTypeEntry::hasDefaultConstructor() const
-{
-    S_D(const PrimitiveTypeEntry);
-    return !d->m_defaultConstructor.isEmpty();
 }
 
 PrimitiveTypeEntryPtr PrimitiveTypeEntry::referencedTypeEntry() const
@@ -1026,16 +1051,16 @@ TypeEntry *PrimitiveTypeEntry::clone() const
 }
 
 PrimitiveTypeEntry::PrimitiveTypeEntry(PrimitiveTypeEntryPrivate *d)
-    : TypeEntry(d)
+    : CppTypeEntry(d)
 {
 }
 
 // ----------------- ConfigurableTypeEntry
 
-class ConfigurableTypeEntryPrivate : public TypeEntryPrivate
+class ConfigurableTypeEntryPrivate : public CppTypeEntryPrivate
 {
 public:
-    using TypeEntryPrivate::TypeEntryPrivate;
+    using CppTypeEntryPrivate::CppTypeEntryPrivate;
 
     QString m_configCondition;
 };
@@ -1043,12 +1068,12 @@ public:
 ConfigurableTypeEntry::ConfigurableTypeEntry(const QString &entryName, Type t,
                                              const QVersionNumber &vr,
                                              const TypeEntryCPtr &parent) :
-    TypeEntry(new ConfigurableTypeEntryPrivate(entryName, t, vr, parent))
+    CppTypeEntry(new ConfigurableTypeEntryPrivate(entryName, t, vr, parent))
 {
 }
 
 ConfigurableTypeEntry::ConfigurableTypeEntry(ConfigurableTypeEntryPrivate *d) :
-    TypeEntry(d)
+    CppTypeEntry(d)
 {
 }
 
@@ -1256,10 +1281,10 @@ EnumValueTypeEntry::EnumValueTypeEntry(EnumValueTypeEntryPrivate *d) :
 }
 
 // ----------------- FlagsTypeEntry
-class FlagsTypeEntryPrivate : public TypeEntryPrivate
+class FlagsTypeEntryPrivate : public CppTypeEntryPrivate
 {
 public:
-    using TypeEntryPrivate::TypeEntryPrivate;
+    using CppTypeEntryPrivate::CppTypeEntryPrivate;
 
     QString m_originalName;
     QString m_flagsName;
@@ -1268,7 +1293,7 @@ public:
 
 FlagsTypeEntry::FlagsTypeEntry(const QString &entryName, const QVersionNumber &vr,
                                const TypeEntryCPtr &parent) :
-    TypeEntry(new FlagsTypeEntryPrivate(entryName, FlagsType, vr, parent))
+    CppTypeEntry(new FlagsTypeEntryPrivate(entryName, FlagsType, vr, parent))
 {
 }
 
@@ -1281,7 +1306,7 @@ QString FlagsTypeEntry::buildTargetLangName() const
 }
 
 FlagsTypeEntry::FlagsTypeEntry(FlagsTypeEntryPrivate *d) :
-    TypeEntry(d)
+    CppTypeEntry(d)
 {
 }
 
@@ -1364,7 +1389,6 @@ public:
     FieldModificationList m_fieldMods;
     QList<TypeSystemProperty> m_properties;
     QList<TypeSystemPyMethodDefEntry> m_PyMethodDefEntrys;
-    QString m_defaultConstructor;
     QString m_defaultSuperclass;
     QString m_qualifiedCppName;
     QString m_docFile;
@@ -1756,24 +1780,6 @@ void ComplexTypeEntry::setAllowThread(TypeSystem::AllowThread allowThread)
 {
     S_D(ComplexTypeEntry);
     d->m_allowThread = allowThread;
-}
-
-void ComplexTypeEntry::setDefaultConstructor(const QString& defaultConstructor)
-{
-    S_D(ComplexTypeEntry);
-    d->m_defaultConstructor = defaultConstructor;
-}
-
-QString ComplexTypeEntry::defaultConstructor() const
-{
-    S_D(const ComplexTypeEntry);
-    return d->m_defaultConstructor;
-}
-
-bool ComplexTypeEntry::hasDefaultConstructor() const
-{
-    S_D(const ComplexTypeEntry);
-    return !d->m_defaultConstructor.isEmpty();
 }
 
 TypeSystem::SnakeCase ComplexTypeEntry::snakeCase() const
@@ -2512,8 +2518,6 @@ void TypeEntry::formatDebug(QDebug &debug) const
     FORMAT_NONEMPTY_STRING("package", m_d->m_targetLangPackage)
     FORMAT_BOOL("stream", m_d->m_stream)
     FORMAT_BOOL("built-in", m_d->m_builtin)
-    if (m_d->m_viewOn)
-       debug << ", views=" << m_d->m_viewOn->name();
     if (!m_d->m_version.isNull() && m_d->m_version > QVersionNumber(0, 0))
         debug << ", version=" << m_d->m_version;
     if (m_d->m_revision)
@@ -2525,6 +2529,13 @@ void TypeEntry::formatDebug(QDebug &debug) const
     if (m_d->m_private)
         debug << ", [private]";
     formatList(debug, "extraIncludes", m_d->m_extraIncludes, ", ");
+}
+
+void CppTypeEntry::formatDebug(QDebug &debug) const
+{
+    S_D(const CppTypeEntry);
+    if (d->m_viewOn)
+        debug << ", views=" << d->m_viewOn->name();
 }
 
 void PrimitiveTypeEntry::formatDebug(QDebug &debug) const

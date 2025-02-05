@@ -148,10 +148,6 @@ public:
     TypeSystem::AllowThread allowThread() const;
     void setAllowThread(TypeSystem::AllowThread allowThread);
 
-    QString defaultConstructor() const;
-    void setDefaultConstructor(const QString& defaultConstructor);
-    bool hasDefaultConstructor() const;
-
     TypeEntry *clone() const override;
 
     void useAsTypedef(const ComplexTypeEntryCPtr &source);

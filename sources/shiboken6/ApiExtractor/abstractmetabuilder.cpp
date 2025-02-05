@@ -1946,7 +1946,7 @@ static bool applyArrayArgumentModifications(const FunctionModificationList &func
 
 // Create the meta type for a view (std::string_view -> std::string)
 static AbstractMetaType createViewOnType(const AbstractMetaType &metaType,
-                                         const TypeEntryCPtr &viewOnTypeEntry)
+                                         const CppTypeEntryCPtr &viewOnTypeEntry)
 {
     auto result = metaType;
     result.setTypeEntry(viewOnTypeEntry);
@@ -2210,7 +2210,9 @@ AbstractMetaFunctionPtr
         auto metaType = metaTypeO.value();
         // Add view substitution for simple view types of function arguments
         // std::string_view -> std::string for foo(std::string_view)
-        auto viewOnTypeEntry = metaType.typeEntry()->viewOn();
+        CppTypeEntryCPtr viewOnTypeEntry;
+        if (auto type = std::dynamic_pointer_cast<const CppTypeEntry>(metaType.typeEntry()))
+            viewOnTypeEntry = type->viewOn();
         if (viewOnTypeEntry != nullptr && metaType.indirections() == 0
             && metaType.arrayElementType() == nullptr
             && (!metaType.hasInstantiations() || metaType.isContainer())) {

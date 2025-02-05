@@ -4,11 +4,11 @@
 #ifndef CONFIGURABLETYPEENTRY_H
 #define CONFIGURABLETYPEENTRY_H
 
-#include "typesystem.h"
+#include "cpptypeentry.h"
 
 class ConfigurableTypeEntryPrivate;
 
-class ConfigurableTypeEntry : public TypeEntry
+class ConfigurableTypeEntry : public CppTypeEntry
 {
 public:
     explicit ConfigurableTypeEntry(const QString &entryName, Type t,
