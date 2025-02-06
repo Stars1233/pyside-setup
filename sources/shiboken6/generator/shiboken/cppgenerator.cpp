@@ -1712,6 +1712,13 @@ const char *typeName = )";
         << cpythonType << ", const_cast<void *>(cppIn), false, typeName);\n";
 }
 
+// Either copy or generate a special converter using std::move for std::unique_ptr
+static bool hasCopyConverter(const AbstractMetaClassCPtr &metaClass)
+{
+    const auto &te = metaClass->typeEntry();
+    return !te->isObject() && (te->isCopyable() || te->isMovable());
+}
+
 void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClassCPtr &metaClass,
                                            const GeneratorContext &classContext) const
 {
@@ -1763,7 +1770,7 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
     writeCppToPythonFunction(s, c.toString(), sourceTypeName, targetTypeName);
 
     // The conversions for an Object Type end here.
-    if (!typeEntry->isValue() && !typeEntry->isSmartPointer()) {
+    if (!hasCopyConverter(metaClass)) {
         s << '\n';
         return;
     }
@@ -1776,10 +1783,8 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
 
     c.clear();
 
-    const bool isUniquePointer = classContext.forSmartPointer()
-        && typeEntry->isUniquePointer();
-
-    if (isUniquePointer) {
+    const bool needsMove =  metaClass->typeEntry()->isMoveOnlyType();
+    if (needsMove) {
         c << "auto *source = reinterpret_cast<" << typeName
             << " *>(const_cast<void *>(cppIn));\n";
     } else {
@@ -1787,7 +1792,7 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
     }
     c << "return Shiboken::Object::newObject(" << cpythonType
         << ", new " << globalScopePrefix(classContext) << classContext.effectiveClassName() << '('
-        << (isUniquePointer ? "std::move(*source)" : "*source")
+        << (needsMove ? "std::move(*source)" : "*source")
         << "), true, true);";
     writeCppToPythonFunction(s, c.toString(), sourceTypeName, targetTypeName);
     s << '\n';
@@ -1815,7 +1820,7 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
             c << "ptr->" << resetMethod << "();\n";
         const QString value = u'*' + cpythonWrapperCPtr(classContext.preciseType(), pyInVariable);
         c << outdent << "else\n" << indent
-            << "*ptr = " << (isUniquePointer ? stdMove(value) : value) << ';';
+            << "*ptr = " << (needsMove ? stdMove(value) : value) << ';';
     }
 
     writePythonToCppFunction(s, c.toString(), sourceTypeName, targetTypeName);
@@ -1931,7 +1936,8 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
         << convertibleToCppFunctionName(sourceTypeName, targetTypeName) << ',' << '\n';
     std::swap(targetTypeName, sourceTypeName);
     s << cppToPythonFunctionName(sourceTypeName, targetTypeName);
-    if (typeEntry->isValue() || typeEntry->isSmartPointer()) {
+
+    if (hasCopyConverter(metaClass)) {
         s << ',' << '\n';
         sourceTypeName = metaClass->name() + u"_COPY"_s;
         s << cppToPythonFunctionName(sourceTypeName, targetTypeName);
@@ -1970,7 +1976,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
                                    registerConverterName::TypeId);
     }
 
-    if (!typeEntry->isValue() && !typeEntry->isSmartPointer())
+    if (!hasCopyConverter(metaClass))
         return;
 
     // Python to C++ copy (value, not pointer neither reference) conversion.
