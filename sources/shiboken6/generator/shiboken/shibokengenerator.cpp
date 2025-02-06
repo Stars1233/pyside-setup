@@ -987,11 +987,8 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntryCPtr &typ
 {
     if (type->isWrapperType()) {
         QString result = u"Shiboken::Conversions::"_s;
-        bool isValue = false;
-        if (type->isValue()) {
-            const auto cte = std::static_pointer_cast<const ComplexTypeEntry>(type);
-            isValue = !cte->isValueTypeWithCopyConstructorOnly();
-        }
+        const bool isValue = type->isValue()
+            && std::static_pointer_cast<const CppTypeEntry>(type)->isDefaultConstructible();
         result += isValue ? u"isPythonToCppValueConvertible"_s
                           : u"isPythonToCppPointerConvertible"_s;
         result += u"("_s + cpythonTypeNameExt(type) + u", "_s;

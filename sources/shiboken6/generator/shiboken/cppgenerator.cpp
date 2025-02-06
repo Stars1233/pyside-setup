@@ -3114,7 +3114,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
                     AbstractMetaClassCPtr ownerClass = func->ownerClass();
                     ComplexTypeEntryCPtr baseContainerType = ownerClass->typeEntry()->baseContainerType();
                     if (baseContainerType && baseContainerType == func->arguments().constFirst().type().typeEntry()
-                        && ownerClass->isCopyable()) {
+                        && ownerClass->typeEntry()->isCopyable()) {
                         tck << '!' << cpythonCheckFunction(ownerClass->typeEntry())
                             << pyArgName << ")\n" << indent << "&& " << outdent;
                     }

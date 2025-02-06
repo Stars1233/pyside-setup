@@ -948,9 +948,9 @@ bool AbstractMetaType::isExtendedCppPrimitive() const
 bool AbstractMetaType::isValueTypeWithCopyConstructorOnly() const
 {
     bool result = false;
-    if (d->m_typeEntry->isComplex()) {
-        const auto cte = std::static_pointer_cast<const ComplexTypeEntry>(d->m_typeEntry);
-        result = cte->isValueTypeWithCopyConstructorOnly();
+    if (isValue()) {
+        auto cppTe = std::static_pointer_cast<const CppTypeEntry>(d->m_typeEntry);
+        result = !cppTe->isDefaultConstructible() && cppTe->isCopyable();
     }
     return result;
 }

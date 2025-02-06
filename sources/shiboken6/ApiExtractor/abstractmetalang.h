@@ -321,11 +321,6 @@ public:
 
     // Query functions for generators
     bool isObjectType() const;
-    bool isCopyable() const;
-    bool isValueTypeWithCopyConstructorOnly() const;
-    void setValueTypeWithCopyConstructorOnly(bool v);
-    static bool determineValueTypeWithCopyConstructorOnly(const AbstractMetaClassCPtr &c,
-                                                          bool avoidProtectedHack);
 
     static AbstractMetaClassPtr findClass(const AbstractMetaClassList &classes,
                                           QAnyStringView name);

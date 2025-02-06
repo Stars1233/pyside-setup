@@ -143,10 +143,6 @@ public:
     TypeSystem::SnakeCase snakeCase() const;
     void setSnakeCase(TypeSystem::SnakeCase sc);
 
-    // Determined by AbstractMetaBuilder from the code model.
-    bool isValueTypeWithCopyConstructorOnly() const;
-    void setValueTypeWithCopyConstructorOnly(bool v);
-
     QString docFile() const;
     void setDocFile(const QString &docFile);
 

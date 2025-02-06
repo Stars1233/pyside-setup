@@ -57,7 +57,6 @@ public:
           m_hasVirtualDestructor(false),
           m_isTypeDef(false),
           m_hasToStringCapability(false),
-          m_valueTypeWithCopyConstructorOnly(false),
           m_hasCachedWrapper(false)
     {
     }
@@ -102,7 +101,6 @@ public:
     uint m_hasVirtualDestructor : 1;
     uint m_isTypeDef : 1;
     uint m_hasToStringCapability : 1;
-    uint m_valueTypeWithCopyConstructorOnly : 1;
     mutable uint m_hasCachedWrapper : 1;
 
     Documentation m_doc;
@@ -1911,54 +1909,6 @@ bool AbstractMetaClass::isObjectType() const
     return d->m_typeEntry->isObject();
 }
 
-bool AbstractMetaClass::isCopyable() const
-{
-    if (isNamespace() || d->m_typeEntry->isObject())
-        return false;
-    auto copyable = d->m_typeEntry->copyableFlag();
-    return copyable == TypeSystem::CopyableFlag::Enabled
-        || (copyable == TypeSystem::CopyableFlag::Unspecified && isCopyConstructible());
-}
-
-bool AbstractMetaClass::isValueTypeWithCopyConstructorOnly() const
-{
-    return d->m_valueTypeWithCopyConstructorOnly;
-}
-
-void AbstractMetaClass::setValueTypeWithCopyConstructorOnly(bool v)
-{
-    d->m_valueTypeWithCopyConstructorOnly = v;
-}
-
-bool AbstractMetaClass::determineValueTypeWithCopyConstructorOnly(const AbstractMetaClassCPtr &c,
-                                                                  bool avoidProtectedHack)
-{
-
-    if (!c->typeEntry()->isValue())
-        return false;
-    if (c->attributes().testFlag(AbstractMetaClass::HasRejectedDefaultConstructor))
-        return false;
-    const auto ctors = c->queryFunctions(FunctionQueryOption::AnyConstructor);
-    bool copyConstructorFound = false;
-    for (const auto &ctor : ctors) {
-        switch (ctor->functionType()) {
-        case AbstractMetaFunction::ConstructorFunction:
-            if (!ctor->isPrivate() && (ctor->isPublic() || !avoidProtectedHack))
-                return false;
-            break;
-        case AbstractMetaFunction::CopyConstructorFunction:
-            copyConstructorFound = true;
-            break;
-        case AbstractMetaFunction::MoveConstructorFunction:
-            break;
-        default:
-            Q_ASSERT(false);
-            break;
-        }
-    }
-    return copyConstructorFound;
-}
-
 #ifndef QT_NO_DEBUG_STREAM
 
 void AbstractMetaClass::format(QDebug &debug) const
@@ -1995,8 +1945,6 @@ void AbstractMetaClass::format(QDebug &debug) const
         debug << " [protected destructor]";
     if (d->m_hasVirtualDestructor)
         debug << " [virtual destructor]";
-    if (d->m_valueTypeWithCopyConstructorOnly)
-        debug << " [value type with copy constructor only]";
     if (d->m_hasDeletedMoveConstructor)
         debug << " [deleted move constructor]";
     if (d->m_hasDeletedAssigmentOperator)
