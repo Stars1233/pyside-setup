@@ -617,6 +617,31 @@ static void writeAddedTypeSignatures(TextStream &s, const ComplexTypeEntryCPtr &
     }
 }
 
+// Print diagnostics/warnings about special types
+static void warnAboutTypes(const AbstractMetaClassCPtr &metaClass)
+{
+    const auto typeEntry = metaClass->typeEntry();
+    if (typeEntry->isValue()) {
+        // Warn about special value types.
+        if (!typeEntry->isDefaultConstructible()
+            && typeEntry->defaultConstructibleFlag() == TypeSystem::DefaultConstructibleFlag::Unspecified) {
+            qCWarning(lcShiboken, "Value type \"%s\" is not default constructible.",
+                      qPrintable(typeEntry->qualifiedCppName()));
+        }
+        if (!typeEntry->isCopyable()
+            && typeEntry->copyableFlag() == TypeSystem::CopyableFlag::Unspecified) {
+            qCWarning(lcShiboken, "Value type \"%s\" is not copyable, std::move() will be used.",
+                      qPrintable(typeEntry->qualifiedCppName()));
+        }
+    } else if (typeEntry->isObject())
+        if (metaClass->isDefaultConstructible()
+            && metaClass->isCopyConstructible() && !metaClass->isPolymorphic()
+            && metaClass->baseClass() == nullptr) {
+        qCWarning(lcShiboken, "Object type \"%s\" has default and copy constructors; consider using value-type.",
+                  qPrintable(typeEntry->qualifiedCppName()));
+    }
+}
+
 /// Function used to write the class generated binding code on the buffer
 /// \param s the output buffer
 /// \param classContext the pointer to metaclass information
@@ -628,6 +653,8 @@ void CppGenerator::generateClass(TextStream &s,
     s.setLanguage(TextStream::Language::Cpp);
     const AbstractMetaClassCPtr &metaClass = classContext.metaClass();
     const auto typeEntry = metaClass->typeEntry();
+
+    warnAboutTypes(metaClass);
 
     auto innerClasses = metaClass->innerClasses();
     for (auto it = innerClasses.begin(); it != innerClasses.end(); ) {
