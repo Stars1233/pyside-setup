@@ -25,6 +25,24 @@ public:
     CppTypeEntryCPtr viewOn() const;
     void setViewOn(const CppTypeEntryCPtr &v);
 
+    // Typesystem specification, potentially overriding the code model detection
+    bool isDefaultConstructible() const;
+    bool isCopyable() const;
+    bool isMovable() const;
+    bool isMoveOnlyType() const { return !isCopyable() && isMovable(); }
+
+    // Parser/code model interface
+    TypeSystem::DefaultConstructibleFlag defaultConstructibleFlag() const;
+    void setDefaultConstructibleFlag(TypeSystem::DefaultConstructibleFlag flag);
+    void setDefaultConstructibleDetected(bool c); // set value detected by code model
+
+    TypeSystem::CopyableFlag copyableFlag() const;
+    void setCopyableFlag(TypeSystem::CopyableFlag flag);
+    void setCopyableDetected(bool c); // set value detected by code model
+
+    TypeSystem::MovableFlag movableFlag() const;
+    void setMovableFlag(TypeSystem::MovableFlag flag);
+
     TypeEntry *clone() const override;
 
 #ifndef QT_NO_DEBUG_STREAM

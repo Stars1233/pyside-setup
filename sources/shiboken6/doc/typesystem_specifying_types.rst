@@ -379,7 +379,9 @@ node or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethod
 
     <typesystem>
         <value-type name="..." since="..."
+         default-constructible="yes | no"
          copyable="yes | no"
+         movable="yes | no"
          allow-thread="..."
          disable-wrapper="yes | no"
          exception-handling="..."
@@ -397,15 +399,11 @@ node or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethod
     </typesystem>
 
 The **name** attribute is the fully qualified C++ class name, such as
-"QMatrix" or "QPainterPath::Element". The **copyable** attribute is used to
-force or not specify if this type is copyable. The *optional* **hash-function**
+"QMatrix" or "QPainterPath::Element". The *optional* **hash-function**
 attribute informs the function name of a hash function for the type.
 
-The *optional* attribute **stream** specifies whether this type will be able to
-use externally defined operators, like QDataStream << and >>. If equals to **yes**,
-these operators will be called as normal methods within the current class.
-
-The *optional* **since** value is used to specify the API version of this type.
+The *optional* **default-constructible** attribute is used to override the
+built-in detection of the default constructor.
 
 The *optional* **default-constructor** specifies the minimal constructor
 call to build one instance of the value-type. This is not needed when the
@@ -413,6 +411,19 @@ value-type may be built with a default constructor (the one without arguments).
 Usually a code generator may guess a minimal constructor for a value-type based
 on its constructor signatures, thus **default-constructor** is used only in
 very odd cases.
+
+The *optional* **copyable** attribute is used to override the built-in
+detection of the copy constructor. This also implies the type has an assignment
+operator; which is important for the copy conversion.
+
+The *optional* **movable** attribute is used to specify whether the type has a
+move constructor. The default is "yes"; there is no auto-detection.
+
+The *optional* attribute **stream** specifies whether this type will be able to
+use externally defined operators, like QDataStream << and >>. If equals to **yes**,
+these operators will be called as normal methods within the current class.
+
+The *optional* **since** value is used to specify the API version of this type.
 
 For the *optional* **disable-wrapper** and **generate-functions**
 attributes, see :ref:`object-type`.

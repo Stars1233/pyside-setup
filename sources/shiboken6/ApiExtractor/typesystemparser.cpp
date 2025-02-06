@@ -49,7 +49,9 @@ using namespace Qt::StringLiterals;
 
 constexpr auto allowThreadAttribute = "allow-thread"_L1;
 constexpr auto checkFunctionAttribute = "check-function"_L1;
+constexpr auto defaultConstructibleAttribute = "default-constructible"_L1;
 constexpr auto copyableAttribute = "copyable"_L1;
+constexpr auto movableAttribute = "movable"_L1;
 constexpr auto accessAttribute = "access"_L1;
 constexpr auto actionAttribute = "action"_L1;
 constexpr auto quoteAfterLineAttribute = "quote-after-line"_L1;
@@ -1330,6 +1332,21 @@ bool TypeSystemParser::applyCppAttributes(const ConditionalStreamReader &reader,
                 return false;
             }
             type->setViewOn(views);
+        } else if (name == defaultConstructibleAttribute) {
+            const bool v = convertBoolean(attributes->takeAt(i).value(),
+                                          defaultConstructibleAttribute, false);
+            type->setDefaultConstructibleFlag(v ? TypeSystem::DefaultConstructibleFlag::Enabled
+                                                : TypeSystem::DefaultConstructibleFlag::Disabled);
+        } else if (name == copyableAttribute) {
+            const bool v = convertBoolean(attributes->takeAt(i).value(),
+                                          copyableAttribute, false);
+            type->setCopyableFlag(v ? TypeSystem::CopyableFlag::Enabled
+                                    : TypeSystem::CopyableFlag::Disabled);
+        } else if (name == movableAttribute) {
+            const bool v = convertBoolean(attributes->takeAt(i).value(),
+                                          movableAttribute, false);
+            type->setMovableFlag(v ? TypeSystem::MovableFlag::Enabled
+                                   : TypeSystem::MovableFlag::Disabled);
         }
     }
     return true;
@@ -1822,7 +1839,6 @@ bool TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
     if (!applyCppAttributes(reader, ctype, attributes))
         return false;
     bool generate = true;
-    ctype->setCopyable(ComplexTypeEntry::Unknown);
     auto exceptionHandling = m_exceptionHandling;
     auto allowThread = m_allowThread;
 
@@ -1856,10 +1872,6 @@ bool TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
             ctype->setPolymorphicNameFunction(attributes->takeAt(i).value().toString());
         } else if (name == u"polymorphic-id-expression") {
             ctype->setPolymorphicIdValue(attributes->takeAt(i).value().toString());
-        } else if (name == copyableAttribute) {
-            const bool v = convertBoolean(attributes->takeAt(i).value(),
-                                          copyableAttribute, false);
-            ctype->setCopyable(v ? ComplexTypeEntry::CopyableSet : ComplexTypeEntry::NonCopyableSet);
         } else if (name == exceptionHandlingAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto exceptionOpt = exceptionHandlingFromAttribute(attribute.value());

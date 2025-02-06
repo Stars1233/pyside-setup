@@ -9,6 +9,7 @@
 #include "containertypeentry.h"
 #include "enumtypeentry.h"
 #include "flagstypeentry.h"
+#include "cpptypeentry.h"
 
 #include "qtcompat.h"
 #include "typeinfo.h"
@@ -743,6 +744,24 @@ void AbstractMetaType::setVolatile(bool v)
         d->m_volatile = v;
         d->m_signaturesDirty = true;\
     }
+}
+
+bool AbstractMetaType::isDefaultConstructible() const
+{
+    auto cppTe = std::dynamic_pointer_cast<const CppTypeEntry>(d->m_typeEntry);
+    return cppTe != nullptr && cppTe->isDefaultConstructible();
+}
+
+bool AbstractMetaType::isCopyable() const
+{
+    auto cppTe = std::dynamic_pointer_cast<const CppTypeEntry>(d->m_typeEntry);
+    return cppTe != nullptr && cppTe->isCopyable();
+}
+
+bool AbstractMetaType::isMovable() const
+{
+    auto cppTe = std::dynamic_pointer_cast<const CppTypeEntry>(d->m_typeEntry);
+    return cppTe != nullptr && cppTe->isMovable();
 }
 
 static bool equalsCPtr(const AbstractMetaTypeCPtr &t1, const AbstractMetaTypeCPtr &t2)

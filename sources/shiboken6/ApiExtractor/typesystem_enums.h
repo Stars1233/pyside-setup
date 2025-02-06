@@ -111,6 +111,24 @@ enum class PythonEnumType {
     IntFlag
 };
 
+enum class DefaultConstructibleFlag : unsigned char {
+    Unspecified,
+    Enabled,
+    Disabled
+};
+
+enum class CopyableFlag : unsigned char {
+    Unspecified,
+    Enabled,
+    Disabled
+};
+
+enum class MovableFlag : unsigned char {
+    Unspecified,
+    Enabled,
+    Disabled
+};
+
 enum : int { OverloadNumberUnset = -1, OverloadNumberDefault = 99999 };
 
 } // namespace TypeSystem

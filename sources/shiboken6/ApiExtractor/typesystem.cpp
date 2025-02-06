@@ -572,6 +572,12 @@ public:
 
     CppTypeEntryCPtr m_viewOn;
     QString m_defaultConstructor;
+    TypeSystem::CopyableFlag m_copyableFlag = TypeSystem::CopyableFlag::Unspecified;
+    bool m_copyableDetected = true;
+    TypeSystem::DefaultConstructibleFlag m_defaultConstructibleFlag = TypeSystem::DefaultConstructibleFlag::Unspecified;
+    bool m_defaultConstructibleDetected = true;
+    TypeSystem::MovableFlag m_movableFlag = TypeSystem::MovableFlag::Unspecified;
+    bool m_movableDetected = true;
 };
 
 CppTypeEntry::CppTypeEntry(const QString &entryName, Type t,
@@ -608,6 +614,97 @@ void CppTypeEntry::setViewOn(const CppTypeEntryCPtr &v)
 {
     S_D(CppTypeEntry);
     d->m_viewOn = v;
+}
+
+TypeSystem::DefaultConstructibleFlag CppTypeEntry::defaultConstructibleFlag() const
+{
+    S_D(const CppTypeEntry);
+    return d->m_defaultConstructibleFlag;
+}
+
+void CppTypeEntry::setDefaultConstructibleFlag(TypeSystem::DefaultConstructibleFlag flag)
+{
+    S_D(CppTypeEntry);
+    d->m_defaultConstructibleFlag = flag;
+}
+
+bool CppTypeEntry::isDefaultConstructible() const
+{
+    S_D(const CppTypeEntry);
+    switch (d->m_defaultConstructibleFlag) {
+    case TypeSystem::DefaultConstructibleFlag::Enabled:
+        return true;
+    case TypeSystem::DefaultConstructibleFlag::Disabled:
+         return false;
+    case TypeSystem::DefaultConstructibleFlag::Unspecified:
+        break;
+    }
+    return d->m_defaultConstructibleDetected || !d->m_defaultConstructor.isEmpty();
+}
+
+void CppTypeEntry::setDefaultConstructibleDetected(bool c)
+{
+    S_D(CppTypeEntry);
+    d->m_defaultConstructibleDetected = c;
+}
+
+TypeSystem::CopyableFlag CppTypeEntry::copyableFlag() const
+{
+    S_D(const CppTypeEntry);
+    return d->m_copyableFlag;
+}
+
+void CppTypeEntry::setCopyableFlag(TypeSystem::CopyableFlag flag)
+{
+    S_D(CppTypeEntry);
+    d->m_copyableFlag = flag;
+}
+
+bool CppTypeEntry::isCopyable() const
+{
+    S_D(const CppTypeEntry);
+    switch (d->m_copyableFlag) {
+    case TypeSystem::CopyableFlag::Enabled:
+        return true;
+    case TypeSystem::CopyableFlag::Disabled:
+        return false;
+    case TypeSystem::CopyableFlag::Unspecified:
+        break;
+    }
+    return d->m_copyableDetected;
+}
+
+void CppTypeEntry::setCopyableDetected(bool c)
+{
+    S_D(CppTypeEntry);
+    d->m_copyableDetected = c;
+}
+
+// Movable has no detection logic in the code model (yet). It is turned off for namespaces
+TypeSystem::MovableFlag CppTypeEntry::movableFlag() const
+{
+    S_D(const CppTypeEntry);
+    return d->m_movableFlag;
+}
+
+void CppTypeEntry::setMovableFlag(TypeSystem::MovableFlag flag)
+{
+    S_D(CppTypeEntry);
+    d->m_movableFlag = flag;
+}
+
+bool CppTypeEntry::isMovable() const
+{
+    S_D(const CppTypeEntry);
+    switch (d->m_movableFlag) {
+    case TypeSystem::MovableFlag::Enabled:
+        return true;
+    case TypeSystem::MovableFlag::Disabled:
+        return false;
+    case TypeSystem::MovableFlag::Unspecified:
+        break;
+    }
+    return d->m_movableDetected;
 }
 
 TypeEntry *CppTypeEntry::clone() const
@@ -1401,7 +1498,6 @@ public:
     QString m_polymorphicNameFunction;
     QString m_targetType;
     ComplexTypeEntry::TypeFlags m_typeFlags;
-    ComplexTypeEntry::CopyableFlag m_copyableFlag = ComplexTypeEntry::Unknown;
     QString m_hashFunction;
 
     ComplexTypeEntryCPtr m_baseContainerType;
@@ -1708,18 +1804,6 @@ void ComplexTypeEntry::setDeleteInMainThread(bool dmt)
 {
     S_D(ComplexTypeEntry);
     d->m_deleteInMainThread = dmt;
-}
-
-ComplexTypeEntry::CopyableFlag ComplexTypeEntry::copyable() const
-{
-    S_D(const ComplexTypeEntry);
-    return d->m_copyableFlag;
-}
-
-void ComplexTypeEntry::setCopyable(ComplexTypeEntry::CopyableFlag flag)
-{
-    S_D(ComplexTypeEntry);
-    d->m_copyableFlag = flag;
 }
 
 TypeSystem::QtMetaTypeRegistration ComplexTypeEntry::qtMetaTypeRegistration() const
@@ -2102,6 +2186,11 @@ SmartPointerTypeEntry::SmartPointerTypeEntry(const QString &entryName,
     ComplexTypeEntry(new SmartPointerTypeEntryPrivate(entryName, getterName, smartPointerType,
                                                       refCountMethodName, vr, parent))
 {
+    S_D(SmartPointerTypeEntry);
+    // Pre-set detection values which is not done by the code model since
+    // the clang parser might not see all system library includes.
+    d->m_defaultConstructibleDetected = smartPointerType != TypeSystem::SmartPointerType::Handle;
+    d->m_copyableDetected = smartPointerType != TypeSystem::SmartPointerType::Unique;
 }
 
 TypeSystem::SmartPointerType SmartPointerTypeEntry::smartPointerType() const
@@ -2233,6 +2322,8 @@ NamespaceTypeEntry::NamespaceTypeEntry(const QString &entryName, const QVersionN
                                        const TypeEntryCPtr &parent) :
     ComplexTypeEntry(new NamespaceTypeEntryPrivate(entryName, NamespaceType, vr, parent))
 {
+    S_D(NamespaceTypeEntry);
+    d->m_copyableDetected = d->m_defaultConstructibleDetected = d->m_movableDetected = false;
 }
 
 TypeEntry *NamespaceTypeEntry::clone() const
@@ -2477,6 +2568,8 @@ ObjectTypeEntry::ObjectTypeEntry(const QString &entryName, const QVersionNumber 
                                  const TypeEntryCPtr &parent)
     : ComplexTypeEntry(entryName, ObjectType, vr, parent)
 {
+    S_D(ComplexTypeEntry);
+    d->m_defaultConstructibleDetected = d->m_copyableDetected = false;
 }
 
 TypeEntry *ObjectTypeEntry::clone() const
@@ -2536,6 +2629,12 @@ void CppTypeEntry::formatDebug(QDebug &debug) const
     S_D(const CppTypeEntry);
     if (d->m_viewOn)
         debug << ", views=" << d->m_viewOn->name();
+    if (isDefaultConstructible())
+        debug << ", [default constructible]";
+    if (isCopyable())
+        debug << ", [copyable]";
+    if (isMovable())
+        debug << ", [movable]";
 }
 
 void PrimitiveTypeEntry::formatDebug(QDebug &debug) const
@@ -2558,8 +2657,7 @@ void ComplexTypeEntry::formatDebug(QDebug &debug) const
     FORMAT_BOOL("deleteInMainThread", d->m_deleteInMainThread)
     if (d->m_typeFlags != 0)
         debug << ", typeFlags=" << d->m_typeFlags;
-    debug << ", copyableFlag=" << d->m_copyableFlag
-        << ", except=" << int(d->m_exceptionHandling)
+    debug << ", except=" << int(d->m_exceptionHandling)
         << ", snakeCase=" << int(d->m_snakeCase);
     FORMAT_NONEMPTY_STRING("defaultSuperclass", d->m_defaultSuperclass)
     FORMAT_NONEMPTY_STRING("polymorphicIdValue", d->m_polymorphicIdValue)

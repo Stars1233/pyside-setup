@@ -48,12 +48,6 @@ public:
     };
     Q_DECLARE_FLAGS(TypeFlags, TypeFlag)
 
-    enum CopyableFlag {
-        CopyableSet,
-        NonCopyableSet,
-        Unknown
-    };
-
     explicit ComplexTypeEntry(const QString &entryName, Type t, const QVersionNumber &vr,
                               const TypeEntryCPtr &parent);
 
@@ -128,9 +122,6 @@ public:
 
     bool deleteInMainThread() const;
     void setDeleteInMainThread(bool d);
-
-    CopyableFlag copyable() const;
-    void setCopyable(CopyableFlag flag);
 
     TypeSystem::QtMetaTypeRegistration qtMetaTypeRegistration() const;
     void setQtMetaTypeRegistration(TypeSystem::QtMetaTypeRegistration r);

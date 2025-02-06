@@ -1873,9 +1873,9 @@ bool AbstractMetaClass::isCopyable() const
 {
     if (isNamespace() || d->m_typeEntry->isObject())
         return false;
-    auto copyable = d->m_typeEntry->copyable();
-    return copyable == ComplexTypeEntry::CopyableSet
-        || (copyable == ComplexTypeEntry::Unknown && isCopyConstructible());
+    auto copyable = d->m_typeEntry->copyableFlag();
+    return copyable == TypeSystem::CopyableFlag::Enabled
+        || (copyable == TypeSystem::CopyableFlag::Unspecified && isCopyConstructible());
 }
 
 bool AbstractMetaClass::isValueTypeWithCopyConstructorOnly() const

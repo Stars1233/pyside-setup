@@ -119,6 +119,13 @@ public:
     bool isVolatile() const;
     void setVolatile(bool v);
 
+    // Typesystem specification, potentially overriding the code model detection
+    bool isDefaultConstructible() const;
+    bool isCopyable() const;
+    bool isMovable() const;
+
+    bool isMoveOnlyType() const { return !isCopyable() && isMovable(); }
+
     bool passByConstRef() const;
     bool passByValue() const;
     bool useStdMove() const;
