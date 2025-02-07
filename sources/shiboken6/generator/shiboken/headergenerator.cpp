@@ -357,7 +357,7 @@ void HeaderGenerator::writeMemberFunctionWrapper(TextStream &s,
             enumTypeEntry = type.typeEntry();
         if (enumTypeEntry) {
             s << type.cppSignature() << '(' << arg.name() << ')';
-        } else if (type.passByValue() && type.isUniquePointer()) {
+        } else if (type.useStdMove()) {
             s << stdMove(arg.name());
         } else {
             s << arg.name();

@@ -31,6 +31,7 @@ mapuser.cpp mapuser.h
 modelindex.h
 modifications.cpp modifications.h
 modified_constructor.cpp modified_constructor.h
+moveonly.h
 multiple_derived.cpp multiple_derived.h
 noimplicitconversion.h
 nondefaultctor.h

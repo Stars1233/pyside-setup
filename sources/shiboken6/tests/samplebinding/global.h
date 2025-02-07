@@ -27,6 +27,7 @@
 #include "modelindex.h"
 #include "modifications.h"
 #include "modified_constructor.h"
+#include "moveonly.h"
 #include "multiple_derived.h"
 #include "noimplicitconversion.h"
 #include "nondefaultctor.h"

@@ -136,6 +136,9 @@
         </conversion-rule>
     </primitive-type>
 
+    <value-type name="MoveOnly"/>
+    <object-type name="MoveOnlyHandler"/>
+
     <!-- As of Qt 6, there is a trend of hiding bool returns of comparison
          operators of container classes behind some template expression using
          SFINAE depending on their value's traits, like:

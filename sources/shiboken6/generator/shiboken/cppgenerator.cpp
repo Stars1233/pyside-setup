@@ -1807,8 +1807,8 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
     QString pyInVariable = u"pyIn"_s;
     const QString outPtr = u"reinterpret_cast<"_s + typeName + u" *>(cppOut)"_s;
     if (!classContext.forSmartPointer()) {
-        c << '*' << outPtr << " = *"
-            << cpythonWrapperCPtr(typeEntry, pyInVariable) << ';';
+        QString value = u'*' + cpythonWrapperCPtr(typeEntry, pyInVariable);
+        c << '*' << outPtr << " = " << (needsMove ? stdMove(value) : value) << ';';
     } else {
         auto ste = std::static_pointer_cast<const SmartPointerTypeEntry>(typeEntry);
         const QString resetMethod = ste->resetMethod();
@@ -3468,7 +3468,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
         : getFullTypeName(targetType.typeEntry());
     c << "*reinterpret_cast<" << fullTypeName << " *>(cppOut) = "
         << fullTypeName << '('
-        << (sourceType.isUniquePointer() ? stdMove(conversion) : conversion)
+        << (sourceType.useStdMove() ? stdMove(conversion) : conversion)
         << ");";
     QString sourceTypeName = fixedCppTypeName(sourceType);
     QString targetTypeName = fixedCppTypeName(targetType);

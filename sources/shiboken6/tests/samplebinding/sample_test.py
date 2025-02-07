@@ -72,6 +72,13 @@ class ModuleTest(unittest.TestCase):
         # o should be moved from, name is now empty
         self.assertEqual(len(o.objectName()), 0)
 
+    def testMoveOnlyTypes(self):
+        """Pass a move only type (convert using std::move())."""
+        v = 42
+        mo = sample.MoveOnly(v)
+        mo2 = sample.MoveOnlyHandler.passMoveOnly(mo)
+        self.assertEqual(mo2.value(), v)
+
 
 if __name__ == '__main__':
     unittest.main()

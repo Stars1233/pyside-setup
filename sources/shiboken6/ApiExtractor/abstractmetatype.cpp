@@ -370,7 +370,7 @@ bool AbstractMetaType::passByValue() const
 
 bool AbstractMetaType::useStdMove() const
 {
-    return (isUniquePointer() && d->passByValue())
+    return (isMoveOnlyType() && d->passByValue())
         || d->m_referenceType == RValueReference;
 }
 
@@ -882,11 +882,6 @@ bool AbstractMetaType::stripDereference(QString *type)
 bool AbstractMetaType::isObjectType() const
 {
     return d->m_typeEntry->isObject();
-}
-
-bool AbstractMetaType::isUniquePointer() const
-{
-    return isSmartPointer() && d->m_typeEntry->isUniquePointer();
 }
 
 bool AbstractMetaType::isPointer() const

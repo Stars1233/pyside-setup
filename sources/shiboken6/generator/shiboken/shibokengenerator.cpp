@@ -1240,7 +1240,7 @@ void ShibokenGenerator::writeArgumentNames(TextStream &s,
         if (argCount > 0)
             s << ", ";
         const bool isVirtualCall = options.testFlag(Option::VirtualCall);
-        const bool useStdMove = isVirtualCall && type.isUniquePointer() && type.passByValue();
+        const bool useStdMove = isVirtualCall && type.useStdMove();
         s << (useStdMove ? stdMove(argument.name()) : argument.name());
 
         if (!isVirtualCall
