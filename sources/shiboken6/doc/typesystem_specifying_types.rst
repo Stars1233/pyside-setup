@@ -366,9 +366,12 @@ values, some of which are typically obsolete.
 value-type
 ^^^^^^^^^^
 
-The ``value-type`` node indicates that the given C++ type is mapped onto the target
-language as a value type. This means that it is an object passed by value on C++,
-i.e. it is stored in the function call stack. It is a child of the :ref:`typesystem_details`
+The ``value-type`` node indicates that the given C++ type is mapped onto the
+target language as a value type (see :ref:`objects-values`). This means that it
+is an object passed by value on C++, i.e. it is stored in the function call
+stack.
+
+It is a child of the :ref:`typesystem_details`
 node or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethoddef`,
 :ref:`configuration-element`, :ref:`declare-function`, :ref:`conversion-rule`,
 :ref:`enum-type`, :ref:`extra-includes`, :ref:`include-element`, :ref:`modify-function`,
@@ -460,10 +463,12 @@ file where documentation of the class is to be found (``qdoc`` only).
 object-type
 ^^^^^^^^^^^
 
-The object-type node indicates that the given C++ type is mapped onto the target
-language as an object type. This means that it is an object passed by pointer on
-C++ and it is stored on the heap. It is a child of the :ref:`typesystem_details` node
-or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethoddef`,
+The object-type node indicates that the given C++ type is mapped onto the
+target language as an object type (see :ref:`objects-values`). This means that
+it is an object passed by pointer on C++ and it is stored on the heap.
+
+It is a child of the :ref:`typesystem_details` node or other type nodes and may
+contain :ref:`add-function`, :ref:`add-pymethoddef`,
 :ref:`configuration-element`, :ref:`declare-function`, :ref:`enum-type`,
 :ref:`extra-includes`, :ref:`include-element`, :ref:`modify-function`,
 ``object-type``, :ref:`smart-pointer-type`, :ref:`typedef-type` or

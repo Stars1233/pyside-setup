@@ -1,7 +1,7 @@
-.. _special-functions:
+.. _special-python-functions:
 
-Special functions
------------------
+Special Python functions
+------------------------
 
 .. _sequence-protocol:
 

@@ -55,6 +55,7 @@ Object ownership
    :maxdepth: 1
 
    typesystem_ownership.rst
+   typesystem_objectvalue.rst
 
 Extra options and Python caveats
 --------------------------------
