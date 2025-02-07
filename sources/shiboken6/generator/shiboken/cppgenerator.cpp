@@ -2646,7 +2646,9 @@ void CppGenerator::writeTypeCheck(TextStream &s, const AbstractMetaType &argType
     if (!argType.typeEntry()->isCustom()) {
         typeCheck = u'(' + pythonToCppConverterForArgumentName(argumentName)
                     + u" = "_s + typeCheck + u"))"_s;
-        if (!isNumber && isCppPrimitive(argType.typeEntry())) {
+        if (!isNumber
+            && argType.typeUsagePattern() == AbstractMetaType::PrimitivePattern // no array
+            && isCppPrimitive(argType.typeEntry())) {
             typeCheck.prepend(cpythonCheckFunction(argType) + u'('
                               + argumentName + u") && "_s);
         }
