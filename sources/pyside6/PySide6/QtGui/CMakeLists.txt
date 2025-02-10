@@ -19,6 +19,7 @@ set_property(SOURCE ${QtGui_SRC_UNITY_EXCLUDED_SRC}
 
 set(QtGui_SRC_RHI
 ${QtGui_GEN_DIR}/qrhi_wrapper.cpp
+${QtGui_GEN_DIR}/qrhiadapter_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhibuffer_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhicolorattachment_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhicommandbuffer_wrapper.cpp
@@ -84,6 +85,7 @@ ${QtGui_GEN_DIR}/qabstractfileiconprovider_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_paintcontext_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_selection_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibilityhints_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessible_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleactioninterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleannouncementevent_wrapper.cpp

@@ -20,6 +20,7 @@
     </extra-includes>
   </namespace-type>
 
+  <value-type name="QSqlDatabaseDefaultConnectionName" generate="no"/>
   <value-type name="QSqlDatabase">
     <extra-includes>
         <include file-name="QSqlQuery" location="global"/>
@@ -29,6 +30,26 @@
         <include file-name="QStringList" location="global"/>
         <include file-name="QSize" location="global"/>
     </extra-includes>
+    <modify-function signature="addDatabase(QString,QString)">
+        <modify-argument index="2">
+            <replace-default-expression with="QSqlDatabase::defaultConnectionName()"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="addDatabase(QSqlDriver*,QString)">
+        <modify-argument index="2">
+            <replace-default-expression with="QSqlDatabase::defaultConnectionName()"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="contains(QString)">
+        <modify-argument index="1">
+            <replace-default-expression with="QSqlDatabase::defaultConnectionName()"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="database(QString,bool)">
+        <modify-argument index="1">
+            <replace-default-expression with="QSqlDatabase::defaultConnectionName()"/>
+        </modify-argument>
+    </modify-function>
     <modify-function signature="exec(QString)const" allow-thread="yes"/>
     <add-function signature="exec_(QString @query@ = QString())const" return-type="QSqlQuery">
         <inject-code file="../glue/qtsql.cpp" snippet="qsqldatabase-exec"/>

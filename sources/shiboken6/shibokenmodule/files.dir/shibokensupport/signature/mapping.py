@@ -266,6 +266,7 @@ type_map.update({
     "QSet": typing.Set,
     "QString": str,
     "QLatin1String": str,
+    "QAnyStringView": str,
     "QStringView": str,
     "QStringList": StringList,
     "quint16": int,
@@ -542,6 +543,8 @@ def init_PySide6_QtCore():
         "QVariant.Type": type,  # not so sure here...
         "QVariantMap": typing.Dict[str, Variant],
         "std.chrono.seconds{5}" : ellipsis,
+        "Internal.defaultTryTimeout": 5000,
+        "static_cast<int>(Internal.defaultTryTimeout.count())": 5000
     })
     from shibokensupport.signature.parser import using_snake_case
     if using_snake_case():
@@ -624,7 +627,7 @@ def init_PySide6_QtWidgets():
 def init_PySide6_QtSql():
     from PySide6.QtSql import QSqlDatabase
     type_map.update({
-        "QLatin1StringView(QSqlDatabase.defaultConnection)": QSqlDatabase.defaultConnection,
+        "QSqlDatabase.defaultConnectionName()": "",
         "QVariant.Invalid": Invalid("Variant"),  # not sure what I should create, here...
     })
     return locals()

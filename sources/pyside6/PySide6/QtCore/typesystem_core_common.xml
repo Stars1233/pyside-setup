@@ -621,6 +621,7 @@
     <enum-type name="ConnectionType"/>
     <enum-type name="ContextMenuPolicy"/>
     <enum-type name="ContextMenuTrigger" since="6.8"/>
+    <enum-type name="ContrastPreference" since="6.10"/>
     <enum-type name="CoordinateSystem"/>
     <enum-type name="Corner"/>
     <enum-type name="CursorShape"/>
@@ -969,6 +970,14 @@
   <value-type name="QDir">
     <enum-type name="Filter" flags="Filters"/>
     <enum-type name="SortFlag" flags="SortFlags"/>
+
+    <declare-function signature="mkdir(QString)const" return-type="bool"/>
+    <declare-function signature="mkdir(QString,QFileDevice::Permissions)const" return-type="bool"/>
+    <modify-function signature="mkdir(QString,std::optional&lt;QFileDevice::Permissions&gt;)const" remove="all"/>
+
+    <declare-function signature="mkpath(QString)const" return-type="bool"/>
+    <declare-function signature="mkpath(QString,QFileDevice::Permissions)const" return-type="bool"/>
+    <modify-function signature="mkpath(QString,std::optional&lt;QFileDevice::Permissions&gt;)const" remove="all"/>
 
     <!-- PYSIDE-1499: Replace QString by pathlib.Path (qdir.h) -->
     <modify-function signature="QDir(const QString &amp;)">
@@ -1770,6 +1779,7 @@
       <include file-name="QStringList" location="global"/>
       <include file-name="QSize" location="global"/>
     </extra-includes>
+    <enum-type name="Direction" flags="Directions" since="6.10"/>
     <modify-function signature="setSourceModel(QAbstractItemModel*)">
       <modify-argument index="1">
         <reference-count action="set"/>
@@ -3147,6 +3157,7 @@
     <enum-type name="ReadElementTextBehaviour"/>
   </object-type>
   <object-type name="QXmlStreamWriter">
+    <enum-type name="Error" since="6.10"/>
     <!-- Removed because it expect QString to be mutable -->
     <modify-function signature="QXmlStreamWriter(QString*)" remove="all"/>
   </object-type>
@@ -3168,6 +3179,7 @@
       <configuration condition="QT_CONFIG(future)"/>
       <enum-type name="State"/>
       <enum-type name="CancelMode" since="6.3"/>
+      <enum-type name="ContinuationType" since="6.10"/>
   </object-type>
   <value-type name="QFuture" generate="no">
       <include file-name="QtCore/qfuture.h" location="global"/>

@@ -10,6 +10,11 @@
   <load-typesystem name="templates/gui_common.xml" generate="no"/>
 
   <rejection class="^Q.*$" argument-type="^QPlatform.*$"/>
+
+  <extra-includes>
+      <include file-name="QtGui/qquaternion.h" location="global"/> <!-- for qFuzzyCompare -->
+  </extra-includes>
+
   <function signature="qAlpha(uint)"/>
   <function signature="qBlue(uint)"/>
   <function signature="qGray(int,int,int)"/>
@@ -120,6 +125,7 @@
       </add-function>
   </value-type>
 
+  <object-type name="QAccessibilityHints" since="6.10"/>
   <object-type name="QAccessibleActionInterface"/>
   <object-type name="QAccessibleAttributesInterface" since="6.8"/>
   <object-type name="QAccessibleEditableTextInterface"/>

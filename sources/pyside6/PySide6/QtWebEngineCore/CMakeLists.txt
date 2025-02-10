@@ -20,6 +20,8 @@ ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_filterrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginedesktopmediarequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginedownloadrequest_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebengineextensioninfo_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebengineextensionmanager_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefilesystemaccessrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefindtextresult_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineframe_wrapper.cpp
