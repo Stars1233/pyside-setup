@@ -112,6 +112,7 @@ public:
     AbstractMetaTypeData(const TypeEntryCPtr &t);
 
     int actualIndirections() const;
+    bool passByRef() const;
     bool passByConstRef() const;
     bool passByValue() const;
     AbstractMetaType::TypeUsagePattern determineUsagePattern() const;
@@ -337,9 +338,19 @@ AbstractMetaTypeList AbstractMetaType::nestedArrayTypes() const
     return result;
 }
 
+bool AbstractMetaTypeData::passByRef() const
+{
+    return m_referenceType == LValueReference && m_indirections.isEmpty();
+}
+
 bool AbstractMetaTypeData::passByConstRef() const
 {
-    return m_constant && m_referenceType == LValueReference && m_indirections.isEmpty();
+    return m_constant && passByRef();
+}
+
+bool AbstractMetaType::passByRef() const
+{
+    return d->passByRef();
 }
 
 bool AbstractMetaType::passByConstRef() const
@@ -957,7 +968,7 @@ bool AbstractMetaType::isValueTypeWithCopyConstructorOnly() const
 
 bool AbstractMetaType::valueTypeWithCopyConstructorOnlyPassed() const
 {
-    return (passByValue() || passByConstRef())
+    return (passByValue() || passByRef())
            && isValueTypeWithCopyConstructorOnly();
 }
 

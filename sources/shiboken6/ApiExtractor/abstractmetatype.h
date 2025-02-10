@@ -126,6 +126,7 @@ public:
 
     bool isMoveOnlyType() const { return !isCopyable() && isMovable(); }
 
+    bool passByRef() const;
     bool passByConstRef() const;
     bool passByValue() const;
     bool useStdMove() const;
