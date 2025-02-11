@@ -1,0 +1,98 @@
+Qt for Python 6.9.0 is a minor release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - The usage of macros from CPython (limited API) has been reduced in favor
+   of calling functions directly.
+ - Support for std::chrono::milliseconds has been added.
+ - Windows ARM64 was added as a new supported platform (technical preview)
+ - [PYSIDE-862]   Support for QtRemoteObjects has been extended.
+ - [PYSIDE-1057]  A memory leak connecting to signals has been fixed.
+ - [PYSIDE-1277]  A bug connecting signals by QMetaMethod has been fixed.
+ - [PYSIDE-1735]  Most enumerations are now fully qualified in documentation
+                  and translated code snippets. Enum values automatically
+                  converted to "None_" are also correctly documented.
+ - [PYSIDE-2714]  Qt Creator 17.x+ and PySide tools now support projects that
+                  have a pyproject.toml instead of a *.pyproject
+ - [PYSIDE-2846]  The type annotation of the Slot() decorator has been fixed.
+ - [PYSIDE-2966]  A bug making it possible to instantiate non-constructible
+                  classes and namespaces has been fixed.
+ - [PYSIDE-2891]  A bug in signature handling affecting 32bit builds
+                  has been fixed.
+ - [PYSIDE-2958]  Building against unsupported python versions has been
+                  enabled.
+ - [PYSIDE-2997]  Type hints: The signature of QMessageBox.information()
+                  has been fixed.
+ - [PYSIDE-3001]  QtAsyncio: The error messages printed on an exceptions
+                  in tasks have been improved.
+ - [PYSIDE-3002]  QPaintEngine's virtual functions taking a
+                  C-style array of geometry primitives have been fixed.
+ - [PYSIDE-3003]  Type hints: A bug causing overloads to be omitted has
+                  been fixed.
+ - [PYSIDE-3004]  A crash in slots when receiving an object-type parameter
+                  passed by const-ref has been fixed.
+ - [PYSIDE-3005]  A bug affecting
+                  QOpenGLShaderProgram.setUniformValueArray(int,float*,int,int)
+                  has been fixed.
+ - [PYSIDE-3012]  Type hints: Since using Callable, Iterable and Sequence from
+                  typing is deprecated, they are imported from collections.abc.
+ - [PYSIDE-3012]  Type hints: Object inheritance has been removed from classes.
+ - [PYSIDE-3013]  QFont.Tag(str), QFont.Tag.fromString(), QFont.Tag.fromValue()
+                  have been added.
+ - [PYSIDE-3014]  QAbstractSpinBox.fixup() has been fixed.
+ - [PYSIDE-3017]  The overloads of QCanDbcFileParser.parse() have been fixed.
+ - [PYSIDE-3020]  A bug disconnecting a string-based connection by passing a
+                  callable has been fixed.
+ - [QTBUG-72968]  The type of the "result" parameter of the native event
+                  filters has been changed to "qintptr" for Qt 6.
+ - [QTBUG-108199] PySide has been adapted to the deprecation of Qt::TimeSpec
+                  in Qt.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - Helper class AutoArrayPointer has been renamed to ArrayPointer. A
+   convenience typedef is provided.
+ - It is now possible to use file snippets for XML template content.
+ - Warnings about rejected functions/fields have been removed or redirected
+   to log files to reduce clutter.
+ - An additional log file, mjb_shiboken.log has been introduced which
+   contains informational messages about the types encountered.
+ - [PYSIDE-454]   It is now possible to exclude smart pointer instantiations
+                  from underlying base modules to prevent symbol clashes.
+ - [PYSIDE-2701]  The size of the generated modules has been reduced by
+                  applying several optimizations to the code generated for
+                  virtual functions.
+ - [PYSIDE-2701]  Function modifications are now correctly inherited also in
+                  case of multiple inheritance.
+ - [PYSIDE-2986]  shiboken6 can now generate doc strings for classes from
+                  injected documentation snippets.
+ - [PYSIDE-3004]  The detection of copy constructibility of value type
+                  classes has been improved using functionality from Clang.
+                  New typesystem attributes have been introduced to enable
+                  overriding the detection.
+ - [PYSIDE-3004]  The handling of move only value types has been improved.
+ - [PYSIDE-3004]  A documentation page about value versus objects has been
+                  added.
+ - [PYSIDE-3004]  Non-default constructible value types can now be
+                  passed by non-const reference.
+ - [PYSIDE-3004]  Warnings about special types are now printed, particularly
+                  about object types that could be value types.
+ - [QTBUG-133704] It is now possible to specify in the type system whether
+                  Qt meta type registration code should be generated for enums.
