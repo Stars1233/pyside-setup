@@ -187,6 +187,9 @@ public:
         noNullPointers(false), resetAfterUse(false), array(false)
     {}
 
+    bool equals(const ArgumentModificationData &rhs) const noexcept;
+    size_t hash(size_t seed) const noexcept;
+
     QList<ReferenceCount> referenceCounts;
     QString modified_type;
     QString pyiType;
@@ -203,6 +206,33 @@ public:
     uint resetAfterUse : 1;
     uint array : 1;
 };
+
+bool ArgumentModificationData::equals(const ArgumentModificationData &rhs) const noexcept
+{
+    return referenceCounts == rhs.referenceCounts
+        && modified_type == rhs.modified_type
+        && pyiType == rhs.pyiType
+        && replacedDefaultExpression == rhs.replacedDefaultExpression
+        && m_targetOwnerShip == rhs.m_targetOwnerShip
+        && m_nativeOwnerShip == rhs.m_nativeOwnerShip
+        && conversion_rules == rhs.conversion_rules
+        && owner == rhs.owner
+        && renamed_to == rhs.renamed_to
+        && index == rhs.index
+        && removedDefaultExpression == rhs.removedDefaultExpression
+        && removed == rhs.removedDefaultExpression
+        && noNullPointers == rhs.noNullPointers
+        && resetAfterUse == rhs.resetAfterUse
+        && array == rhs.array;
+}
+
+size_t ArgumentModificationData::hash(size_t seed) const noexcept
+{
+    return qHashMulti(seed, referenceCounts, modified_type, pyiType,replacedDefaultExpression,
+                      m_targetOwnerShip, m_nativeOwnerShip, conversion_rules, owner,
+                      renamed_to, index, removedDefaultExpression, removed, noNullPointers,
+                      resetAfterUse, array);
+}
 
 ArgumentModification::ArgumentModification() : d(new ArgumentModificationData)
 {
@@ -385,9 +415,22 @@ void ArgumentModification::addReferenceCount(const ReferenceCount &value)
     d->referenceCounts.append(value);
 }
 
+bool ArgumentModification::equals(const ArgumentModification &rhs) const noexcept
+{
+    return d.constData() == rhs.d.constData() || d->equals(*rhs.d);
+}
+
+size_t ArgumentModification::hash(size_t seed) const noexcept
+{
+    return d->hash(seed);
+}
+
 class FunctionModificationData : public QSharedData
 {
 public:
+    bool equals(const FunctionModificationData &rhs) const noexcept;
+    size_t hash(size_t seed) const noexcept;
+
     QString renamedToName;
     FunctionModification::Modifiers modifiers;
     CodeSnipList m_snips;
@@ -403,6 +446,30 @@ public:
     TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
 };
 
+bool FunctionModificationData::equals(const FunctionModificationData &rhs) const noexcept
+{
+    return renamedToName == rhs.renamedToName
+        && modifiers == rhs.modifiers
+        && m_snips == rhs.m_snips
+        && m_argument_mods == rhs.m_argument_mods
+        && m_signature == rhs.m_signature
+        && m_originalSignature == rhs.m_originalSignature
+        && m_signaturePattern == rhs.m_signaturePattern
+        && m_overloadNumber == rhs.m_overloadNumber
+        && removed == rhs.removed
+        && inherited == rhs.inherited
+        && m_allowThread == rhs.m_allowThread
+        && m_exceptionHandling == rhs.m_exceptionHandling
+        && snakeCase == rhs.snakeCase;
+}
+
+size_t FunctionModificationData::hash(size_t seed) const noexcept
+{
+    return qHashMulti(seed, renamedToName, modifiers, m_snips, m_argument_mods, m_signature,
+                      m_originalSignature, m_signaturePattern, m_overloadNumber, removed,
+                      inherited, m_allowThread, m_exceptionHandling, snakeCase);
+}
+
 FunctionModification::FunctionModification() : d(new FunctionModificationData)
 {
 }
@@ -412,6 +479,16 @@ FunctionModification &FunctionModification::operator=(const FunctionModification
 FunctionModification::FunctionModification(FunctionModification &&) noexcept = default;
 FunctionModification &FunctionModification::operator=(FunctionModification &&) noexcept = default;
 FunctionModification::~FunctionModification() = default;
+
+bool FunctionModification::equals(const FunctionModification &rhs) const noexcept
+{
+    return d.constData() == rhs.d.constData() || d->equals(*rhs.d);
+}
+
+size_t FunctionModification::hash(size_t seed) const noexcept
+{
+    return d->hash(seed);
+}
 
 void FunctionModification::formatDebug(QDebug &debug) const
 {

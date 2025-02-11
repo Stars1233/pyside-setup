@@ -38,6 +38,13 @@ struct ReferenceCount
 
     QString varName;
     Action action;
+
+    Q_DECLARE_EQUALITY_COMPARABLE(ReferenceCount)
+
+    friend bool comparesEqual(const ReferenceCount &lhs, const ReferenceCount &rhs) noexcept
+    {  return lhs.action == rhs.action && lhs.varName == rhs.varName; }
+    friend size_t qHash(const ReferenceCount &r, size_t seed = 0) noexcept
+    { return qHashMulti(seed, r.action, r.varName); }
 };
 
 struct ArgumentOwner
@@ -56,6 +63,13 @@ struct ArgumentOwner
 
     Action action = Invalid;
     int index = InvalidIndex;
+
+    Q_DECLARE_EQUALITY_COMPARABLE(ArgumentOwner)
+
+    friend bool comparesEqual(const ArgumentOwner &lhs, const ArgumentOwner &rhs) noexcept
+    {  return lhs.action == rhs.action && lhs.index == rhs.index; }
+    friend size_t qHash(const ArgumentOwner &a, size_t seed = 0) noexcept
+    { return qHashMulti(seed, a.action, a.index); }
 };
 
 class ArgumentModification
@@ -124,6 +138,16 @@ public:
     void setArray(bool value);
 
 private:
+    bool equals(const ArgumentModification &rhs) const noexcept;
+    size_t hash(size_t seed) const noexcept;
+
+    Q_DECLARE_EQUALITY_COMPARABLE(ArgumentModification)
+
+    friend bool comparesEqual(const ArgumentModification &lhs, const ArgumentModification &rhs) noexcept
+    {  return lhs.equals(rhs); }
+    friend size_t qHash(const ArgumentModification &a, size_t seed = 0) noexcept
+    { return a.hash(seed); }
+
     QSharedDataPointer<ArgumentModificationData> d;
 };
 
@@ -254,6 +278,16 @@ public:
 #endif
 
 private:
+    bool equals(const FunctionModification &rhs) const noexcept;
+    size_t hash(size_t seed) const noexcept;
+
+    Q_DECLARE_EQUALITY_COMPARABLE(FunctionModification)
+
+    friend bool comparesEqual(const FunctionModification &lhs, const FunctionModification &rhs) noexcept
+    {  return lhs.equals(rhs); }
+    friend size_t qHash(const FunctionModification &f, size_t seed = 0) noexcept
+    { return f.hash(seed); }
+
     QSharedDataPointer<FunctionModificationData> d;
 };
 

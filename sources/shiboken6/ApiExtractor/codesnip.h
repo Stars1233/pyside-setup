@@ -33,11 +33,19 @@ public:
     }
 
 private:
+    Q_DECLARE_EQUALITY_COMPARABLE(TemplateInstance)
+
+    friend bool comparesEqual(const TemplateInstance &lhs, const TemplateInstance &rhs) noexcept;
+    friend size_t qHash(const TemplateInstance &t, size_t seed = 0) noexcept
+    { return qHashMulti(seed, t.m_name, t.replaceRules); }
+
     QString m_name;
     QHash<QString, QString> replaceRules;
 };
 
 using CodeSnipFragment = std::variant<QString, TemplateInstance>;
+
+size_t qHash(const CodeSnipFragment &codeFrag, size_t seed = 0) noexcept;
 
 QDebug operator<<(QDebug d, const CodeSnipFragment &codeFrag);
 
@@ -89,6 +97,12 @@ public:
 
     TypeSystem::Language language = TypeSystem::TargetLangCode;
     TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionAny;
+
+    Q_DECLARE_EQUALITY_COMPARABLE(CodeSnip)
+
+    friend bool comparesEqual(const CodeSnip &lhs, const CodeSnip &rhs) noexcept;
+    friend size_t qHash(const CodeSnip &s, size_t seed = 0) noexcept
+    { return qHashMulti(seed, s.position, s.language, s.codeList()); }
 };
 
 /// Purge empty fragments and snippets caused by new line characters in

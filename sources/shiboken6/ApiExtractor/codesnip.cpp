@@ -33,6 +33,11 @@ QString TemplateInstance::expandCode() const
     return result;
 }
 
+bool comparesEqual(const TemplateInstance &lhs, const TemplateInstance &rhs) noexcept
+{
+    return lhs.m_name == rhs.m_name && lhs.replaceRules == rhs.replaceRules;
+}
+
 // ---------------------- CodeSnipFragment
 
 static QString fragmentToCodeHelper(const QString &c)
@@ -63,6 +68,21 @@ static bool isEmptyFragmentHelper(const TemplateInstance &)
 static bool isEmptyFragment(const CodeSnipFragment &codeFrag)
 {
     return std::visit([](auto f) { return isEmptyFragmentHelper(f); }, codeFrag);
+}
+
+static size_t hashHelper(const QString &c, size_t seed) noexcept
+{
+    return qHash(c, seed);
+}
+
+static size_t hashHelper(const TemplateInstance &t, size_t seed) noexcept
+{
+    return qHash(t, seed);
+}
+
+size_t qHash(const CodeSnipFragment &codeFrag, size_t seed) noexcept
+{
+    return std::visit([seed](auto f) { return hashHelper(f, seed); }, codeFrag);
 }
 
 static void formatDebugHelper(QDebug &d, const QString &code)
@@ -113,6 +133,12 @@ void CodeSnipAbstract::purgeEmptyFragments()
 QRegularExpression CodeSnipAbstract::placeHolderRegex(int index)
 {
     return QRegularExpression(u'%' + QString::number(index) + "\\b"_L1);
+}
+
+bool comparesEqual(const CodeSnip &lhs, const CodeSnip &rhs) noexcept
+{
+    return lhs.language == rhs.language && lhs.position == rhs.position
+        && lhs.codeList() == rhs.codeList();
 }
 
 void purgeEmptyCodeSnips(QList<CodeSnip> *list)
