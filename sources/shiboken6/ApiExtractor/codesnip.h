@@ -11,16 +11,18 @@
 #include <QtCore/QHash>
 #include <QtCore/QString>
 
-#include <memory>
+#include <variant>
+
+QT_FORWARD_DECLARE_CLASS(QDebug)
 
 class TemplateInstance
 {
 public:
-    explicit TemplateInstance(const QString &name) : m_name(name) {}
+    explicit TemplateInstance(QString name) : m_name(std::move(name)) {}
 
     void addReplaceRule(const QString &name, const QString &value)
     {
-        replaceRules[name] = value;
+        replaceRules.insert(name, value);
     }
 
     QString expandCode() const;
@@ -31,49 +33,38 @@ public:
     }
 
 private:
-    const QString m_name;
+    QString m_name;
     QHash<QString, QString> replaceRules;
 };
 
-using TemplateInstancePtr = std::shared_ptr<TemplateInstance>;
+using CodeSnipFragment = std::variant<QString, TemplateInstance>;
 
-class CodeSnipFragment
-{
-public:
-    CodeSnipFragment() = default;
-    explicit CodeSnipFragment(const QString &code) : m_code(code) {}
-    explicit CodeSnipFragment(const TemplateInstancePtr &instance) : m_instance(instance) {}
-
-    bool isEmpty() const { return m_code.isEmpty() && !m_instance; }
-
-    QString code() const;
-
-    TemplateInstancePtr instance() const { return m_instance; }
-
-private:
-    QString m_code;
-    std::shared_ptr<TemplateInstance> m_instance;
-};
+QDebug operator<<(QDebug d, const CodeSnipFragment &codeFrag);
 
 class CodeSnipAbstract : public CodeSnipHelpers
 {
 public:
+    using CodeSnipFragments = QList<CodeSnipFragment>;
+
     QString code() const;
 
     void addCode(const QString &code);
     void addCode(QStringView code) { addCode(code.toString()); }
 
-    void addTemplateInstance(const TemplateInstancePtr &ti)
+    void addTemplateInstance(const TemplateInstance &ti)
     {
-        codeList.append(CodeSnipFragment(ti));
+        m_codeList.emplace_back(CodeSnipFragment{ti});
     }
 
-    bool isEmpty() const { return codeList.isEmpty(); }
+    bool isEmpty() const { return m_codeList.empty(); }
     void purgeEmptyFragments();
 
-    QList<CodeSnipFragment> codeList;
+    const CodeSnipFragments &codeList() const { return m_codeList; }
 
     static QRegularExpression placeHolderRegex(int index);
+
+private:
+    CodeSnipFragments m_codeList;
 };
 
 class TemplateEntry : public CodeSnipAbstract

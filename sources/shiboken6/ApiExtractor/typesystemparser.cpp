@@ -999,8 +999,10 @@ bool TypeSystemParser::endElement(StackElement element)
         m_templateEntry = nullptr;
         break;
     case StackElement::InsertTemplate:
-        if (auto *snip = injectCodeTarget(1))
-            snip->addTemplateInstance(m_templateInstance);
+        if (auto *snip = injectCodeTarget(1)) {
+            Q_ASSERT(m_templateInstance.has_value());
+            snip->addTemplateInstance(m_templateInstance.value());
+        }
         m_templateInstance.reset();
         break;
 
@@ -3209,7 +3211,7 @@ bool TypeSystemParser::parseSystemInclude(const ConditionalStreamReader &,
     return true;
 }
 
-TemplateInstance *
+std::optional<TemplateInstance>
     TypeSystemParser::parseInsertTemplate(const ConditionalStreamReader &,
                                           StackElement topElement,
                                           QXmlStreamAttributes *attributes)
@@ -3221,14 +3223,14 @@ TemplateInstance *
         (topElement != StackElement::ConversionRule)) {
         m_error = u"Can only insert templates into code snippets, templates, "\
                    "conversion-rule, native-to-target or add-conversion tags."_s;
-        return nullptr;
+        return std::nullopt;
     }
     const auto nameIndex = indexOfAttribute(*attributes, nameAttribute);
     if (nameIndex == -1) {
         m_error = msgMissingAttribute(nameAttribute);
-        return nullptr;
+        return std::nullopt;
     }
-    return new TemplateInstance(attributes->takeAt(nameIndex).value().toString());
+    return TemplateInstance(attributes->takeAt(nameIndex).value().toString());
 }
 
 bool TypeSystemParser::parseReplace(const ConditionalStreamReader &,
@@ -3676,8 +3678,8 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
         }
             break;
         case StackElement::InsertTemplate:
-            m_templateInstance.reset(parseInsertTemplate(reader, topElement, &attributes));
-            if (!m_templateInstance)
+            m_templateInstance = parseInsertTemplate(reader, topElement, &attributes);
+            if (!m_templateInstance.has_value())
                 return false;
             break;
         case StackElement::Replace:

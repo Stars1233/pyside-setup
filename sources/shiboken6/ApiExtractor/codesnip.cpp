@@ -34,31 +34,80 @@ QString TemplateInstance::expandCode() const
 }
 
 // ---------------------- CodeSnipFragment
-QString CodeSnipFragment::code() const
+
+static QString fragmentToCodeHelper(const QString &c)
 {
-    return m_instance ? m_instance->expandCode() : m_code;
+    return c;
+}
+
+static QString fragmentToCodeHelper(const TemplateInstance &p)
+{
+    return p.expandCode();
+}
+
+static QString fragmentToCode(const CodeSnipFragment &codeFrag)
+{
+    return std::visit([](auto f) { return fragmentToCodeHelper(f); }, codeFrag);
+}
+
+static bool isEmptyFragmentHelper(const QString &c)
+{
+    return c.isEmpty();
+}
+
+static bool isEmptyFragmentHelper(const TemplateInstance &)
+{
+    return false;
+}
+
+static bool isEmptyFragment(const CodeSnipFragment &codeFrag)
+{
+    return std::visit([](auto f) { return isEmptyFragmentHelper(f); }, codeFrag);
+}
+
+static void formatDebugHelper(QDebug &d, const QString &code)
+{
+    const auto lines = QStringView{code}.split(u'\n');
+    for (qsizetype i = 0, size = lines.size(); i < size; ++i) {
+        if (i)
+            d << "\\n";
+        d << lines.at(i).trimmed();
+    }
+}
+
+static void formatDebugHelper(QDebug &d, const TemplateInstance &t)
+{
+     d << "template=\"" << t.name() << '"';
+}
+
+QDebug operator<<(QDebug d, const CodeSnipFragment &codeFrag)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    std::visit([&d](auto f) { formatDebugHelper(d, f); }, codeFrag);
+    return d;
 }
 
 // ---------------------- CodeSnipAbstract
-QString CodeSnipAbstract::code() const
-{
-    QString res;
-    for (const CodeSnipFragment &codeFrag : codeList)
-        res.append(codeFrag.code());
-
-    return res;
-}
 
 void CodeSnipAbstract::addCode(const QString &code)
 {
-    codeList.append(CodeSnipFragment(fixSpaces(code)));
+    m_codeList.emplace_back(CodeSnipFragment(fixSpaces(code)));
+}
+
+QString CodeSnipAbstract::code() const
+{
+    QString res;
+    for (const auto &codeFrag : m_codeList)
+        res.append(fragmentToCode(codeFrag));
+    return res;
 }
 
 void CodeSnipAbstract::purgeEmptyFragments()
 {
-    auto end = std::remove_if(codeList.begin(), codeList.end(),
-                              [](const CodeSnipFragment &f) { return f.isEmpty(); });
-    codeList.erase(end, codeList.end());
+    auto end = std::remove_if(m_codeList.begin(), m_codeList.end(), isEmptyFragment);
+    m_codeList.erase(end, m_codeList.end());
 }
 
 QRegularExpression CodeSnipAbstract::placeHolderRegex(int index)

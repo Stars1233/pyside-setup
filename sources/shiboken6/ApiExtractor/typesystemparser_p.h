@@ -262,9 +262,9 @@ private:
      bool parseInclude(const ConditionalStreamReader &, StackElement topElement,
                        const TypeEntryPtr &entry, QXmlStreamAttributes *);
      bool parseSystemInclude(const ConditionalStreamReader &, QXmlStreamAttributes *);
-     TemplateInstance
-         *parseInsertTemplate(const ConditionalStreamReader &, StackElement topElement,
-                              QXmlStreamAttributes *);
+     std::optional<TemplateInstance>
+         parseInsertTemplate(const ConditionalStreamReader &, StackElement topElement,
+                             QXmlStreamAttributes *);
      bool parseReplace(const ConditionalStreamReader &, StackElement topElement,
                        QXmlStreamAttributes *);
      bool checkDuplicatedTypeEntry(const ConditionalStreamReader &reader,
@@ -284,7 +284,7 @@ private:
     const TypeEntry::CodeGeneration m_generate;
 
     EnumTypeEntryPtr m_currentEnum;
-    TemplateInstancePtr m_templateInstance;
+    std::optional<TemplateInstance> m_templateInstance;
     TemplateEntryPtr m_templateEntry;
     ContextStack m_contextStack;
 

@@ -166,27 +166,14 @@ QDebug operator<<(QDebug d, const CodeSnip &s)
     QDebugStateSaver saver(d);
     d.noquote();
     d.nospace();
-    const auto size = s.codeList.size();
+    const auto &fragments = s.codeList();
+    const auto size = fragments.size();
     d << "CodeSnip(language=" << s.language << ", position=" << s.position
         << ", fragments[" << size << "]=";
     for (qsizetype i = 0; i < size; ++i) {
-        const auto &f = s.codeList.at(i);
         if (i)
             d << ", ";
-        d << '#' << i << ' ';
-        if (!f.instance()) {
-            d << '"';
-            const QString &code = f.code();
-            const auto lines = QStringView{code}.split(u'\n');
-            for (qsizetype i = 0, size = lines.size(); i < size; ++i) {
-                if (i)
-                    d << "\\n";
-                d << lines.at(i).trimmed();
-            }
-            d << '"';
-        } else {
-            d << "template=\"" << f.instance()->name() << '"';
-        }
+        d << '#' << i << ' ' << fragments.at(i);
     }
     d << ')';
     return d;
