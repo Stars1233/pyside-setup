@@ -123,9 +123,6 @@ public:
     bool deleteInMainThread() const;
     void setDeleteInMainThread(bool d);
 
-    TypeSystem::QtMetaTypeRegistration qtMetaTypeRegistration() const;
-    void setQtMetaTypeRegistration(TypeSystem::QtMetaTypeRegistration r);
-
     QString hashFunction() const;
     void setHashFunction(const QString &hashFunction);
 

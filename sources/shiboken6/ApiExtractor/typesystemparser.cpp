@@ -1355,6 +1355,15 @@ bool TypeSystemParser::applyCppAttributes(const ConditionalStreamReader &reader,
                                           movableAttribute, false);
             type->setMovableFlag(v ? TypeSystem::MovableFlag::Enabled
                                    : TypeSystem::MovableFlag::Disabled);
+        } else if (name == qtMetaTypeAttribute) {
+            const auto attribute = attributes->takeAt(i);
+            const auto qtMetaTypeOpt = qtMetaTypeFromAttribute(attribute.value());
+            if (qtMetaTypeOpt.has_value()) {
+                type->setQtMetaTypeRegistration(qtMetaTypeOpt.value());
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
         }
     }
     return true;
@@ -1953,15 +1962,6 @@ bool TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
             const auto boolCastOpt = boolCastFromAttribute(attribute.value());
             if (boolCastOpt.has_value()) {
                 ctype->setOperatorBoolMode(boolCastOpt.value());
-            } else {
-                qCWarning(lcShiboken, "%s",
-                          qPrintable(msgInvalidAttributeValue(attribute)));
-            }
-        } else if (name == qtMetaTypeAttribute) {
-            const auto attribute = attributes->takeAt(i);
-            const auto qtMetaTypeOpt = qtMetaTypeFromAttribute(attribute.value());
-            if (qtMetaTypeOpt.has_value()) {
-                ctype->setQtMetaTypeRegistration(qtMetaTypeOpt.value());
             } else {
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));

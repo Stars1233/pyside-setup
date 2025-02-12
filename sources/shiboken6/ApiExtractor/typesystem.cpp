@@ -578,6 +578,8 @@ public:
     bool m_defaultConstructibleDetected = true;
     TypeSystem::MovableFlag m_movableFlag = TypeSystem::MovableFlag::Unspecified;
     bool m_movableDetected = true;
+    TypeSystem::QtMetaTypeRegistration m_qtMetaTypeRegistration =
+        TypeSystem::QtMetaTypeRegistration::Unspecified;
 };
 
 CppTypeEntry::CppTypeEntry(const QString &entryName, Type t,
@@ -705,6 +707,18 @@ bool CppTypeEntry::isMovable() const
         break;
     }
     return d->m_movableDetected;
+}
+
+TypeSystem::QtMetaTypeRegistration CppTypeEntry::qtMetaTypeRegistration() const
+{
+    S_D(const CppTypeEntry);
+    return d->m_qtMetaTypeRegistration;
+}
+
+void CppTypeEntry::setQtMetaTypeRegistration(TypeSystem::QtMetaTypeRegistration r)
+{
+    S_D(CppTypeEntry);
+    d->m_qtMetaTypeRegistration = r;
 }
 
 TypeEntry *CppTypeEntry::clone() const
@@ -1507,8 +1521,6 @@ public:
     TypeSystem::SnakeCase m_snakeCase = TypeSystem::SnakeCase::Unspecified;
     TypeSystem::BoolCast m_operatorBoolMode = TypeSystem::BoolCast::Unspecified;
     TypeSystem::BoolCast m_isNullMode = TypeSystem::BoolCast::Unspecified;
-    TypeSystem::QtMetaTypeRegistration m_qtMetaTypeRegistration =
-        TypeSystem::QtMetaTypeRegistration::Unspecified;
     // Determined by AbstractMetaBuilder from the code model.
     bool m_isValueTypeWithCopyConstructorOnly = false;
 };
@@ -1804,18 +1816,6 @@ void ComplexTypeEntry::setDeleteInMainThread(bool dmt)
 {
     S_D(ComplexTypeEntry);
     d->m_deleteInMainThread = dmt;
-}
-
-TypeSystem::QtMetaTypeRegistration ComplexTypeEntry::qtMetaTypeRegistration() const
-{
-    S_D(const ComplexTypeEntry);
-    return d->m_qtMetaTypeRegistration;
-}
-
-void ComplexTypeEntry::setQtMetaTypeRegistration(TypeSystem::QtMetaTypeRegistration r)
-{
-    S_D(ComplexTypeEntry);
-    d->m_qtMetaTypeRegistration = r;
 }
 
 QString ComplexTypeEntry::hashFunction() const

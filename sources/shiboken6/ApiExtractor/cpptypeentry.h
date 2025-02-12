@@ -43,6 +43,9 @@ public:
     TypeSystem::MovableFlag movableFlag() const;
     void setMovableFlag(TypeSystem::MovableFlag flag);
 
+    TypeSystem::QtMetaTypeRegistration qtMetaTypeRegistration() const;
+    void setQtMetaTypeRegistration(TypeSystem::QtMetaTypeRegistration r);
+
     TypeEntry *clone() const override;
 
 #ifndef QT_NO_DEBUG_STREAM

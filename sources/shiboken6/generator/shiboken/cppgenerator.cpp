@@ -6026,7 +6026,8 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
     }
 
     for (const AbstractMetaEnum &metaEnum : metaClass->enums()) {
-        if (!metaEnum.isPrivate() && !metaEnum.isAnonymous()) {
+        if (!metaEnum.isPrivate() && !metaEnum.isAnonymous()
+            && metaEnum.typeEntry()->qtMetaTypeRegistration() != TypeSystem::QtMetaTypeRegistration::Disabled) {
             for (const QString &name : std::as_const(nameVariants)) {
                 s << "qRegisterMetaType< " << m_gsp
                     << metaEnum.typeEntry()->qualifiedCppName() << " >(\""
