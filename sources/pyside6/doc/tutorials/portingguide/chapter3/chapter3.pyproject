@@ -1,0 +1,3 @@
+{
+    "files": ["main.py", "bookdelegate.py", "books.qrc", "bookwindow.py", "bookwindow.ui", "createdb.py"]
+}

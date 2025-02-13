@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
 
-import copy
 from PySide6.QtSql import QSqlRelationalDelegate
 from PySide6.QtWidgets import QSpinBox, QStyle
 from PySide6.QtGui import QPixmap, QPalette
@@ -13,7 +12,7 @@ class BookDelegate(QSqlRelationalDelegate):
     """Books delegate to rate the books"""
 
     def __init__(self, star_png, parent=None):
-        QSqlRelationalDelegate.__init__(self, parent)
+        super().__init__(parent)
         self.star = QPixmap(":/images/star.png")
 
     def paint(self, painter, option, index):
@@ -29,9 +28,7 @@ class BookDelegate(QSqlRelationalDelegate):
         """
         if index.column() != 5:
             # Since we draw the grid ourselves:
-            opt = copy.copy(option)
-            opt.rect = option.rect.adjusted(0, 0, -1, -1)
-            QSqlRelationalDelegate.paint(self, painter, opt, index)
+            QSqlRelationalDelegate.paint(self, painter, option, index)
         else:
             model = index.model()
             if option.state & QStyle.State_Enabled:
@@ -53,9 +50,6 @@ class BookDelegate(QSqlRelationalDelegate):
             for i in range(rating):
                 painter.drawPixmap(x, y, self.star)
                 x += width
-
-            # Since we draw the grid ourselves:
-            self.drawFocus(painter, option, option.rect.adjusted(0, 0, -1, -1))
 
         pen = painter.pen()
         painter.setPen(option.palette.color(QPalette.Mid))
