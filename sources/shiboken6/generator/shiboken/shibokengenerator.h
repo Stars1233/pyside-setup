@@ -221,6 +221,7 @@ protected:
 
     static QString fullPythonClassName(const AbstractMetaClassCPtr &metaClass);
 
+    static QString headerFileNameForClass(const AbstractMetaClassCPtr &metaClass);
     static QString headerFileNameForContext(const GeneratorContext &context);
     IncludeGroup baseWrapperIncludes(const GeneratorContext &classContext) const;
 

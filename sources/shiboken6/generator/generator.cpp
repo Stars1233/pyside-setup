@@ -158,22 +158,28 @@ std::shared_ptr<OptionsParser> Generator::createOptionsParser()
     return std::make_shared<GeneratorOptionsParser>(&GeneratorPrivate::m_options);
 }
 
+QString Generator::fileNameForClassHelper(const AbstractMetaClassCPtr &metaClass,
+                                          const QString &suffix,
+                                          FileNameFlags flags)
+{
+    QString fileNameBase = flags.testFlag(FileNameFlag::UnqualifiedName)
+        ? metaClass->name() : metaClass->qualifiedCppName();
+    if (!flags.testFlag(FileNameFlag::KeepCase))
+        fileNameBase = fileNameBase.toLower();
+    fileNameBase.replace(u"::"_s, u"_"_s);
+    return fileNameBase + suffix;
+}
+
 QString Generator::fileNameForContextHelper(const GeneratorContext &context,
                                             const QString &suffix,
                                             FileNameFlags flags)
 
 {
-    if (!context.forSmartPointer()) {
-        const auto &metaClass = context.metaClass();
-        QString fileNameBase = flags.testFlag(FileNameFlag::UnqualifiedName)
-            ? metaClass->name() : metaClass->qualifiedCppName();
-        if (!flags.testFlag(FileNameFlag::KeepCase))
-            fileNameBase = fileNameBase.toLower();
-        fileNameBase.replace(u"::"_s, u"_"_s);
-        return fileNameBase + suffix;
-    }
+    if (!context.forSmartPointer())
+        return fileNameForClassHelper(context.metaClass(), suffix, flags);
 
-    // FIXME: PYSIDE7: Use the above code path for all types. Note the file
+    // FIXME: PYSIDE7: Use the above code path for all types and change
+    // parameter type to AbstractMetaClassCPtr. Note the file
     // names will then change to reflect the namespaces of the pointee
     // (smart/integer2).
     const AbstractMetaType &smartPointerType = context.preciseType();

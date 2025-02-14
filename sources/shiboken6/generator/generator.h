@@ -129,6 +129,9 @@ protected:
     static QString fileNameForContextHelper(const GeneratorContext &context,
                                             const QString &suffix,
                                             FileNameFlags flags = {});
+    static QString fileNameForClassHelper(const AbstractMetaClassCPtr &metaClass,
+                                          const QString &suffix,
+                                          FileNameFlags flags = {});
 
     /// Returns all primitive types found by APIExtractor
     static PrimitiveTypeEntryCList primitiveTypes();

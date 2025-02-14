@@ -341,6 +341,13 @@ QString ShibokenGenerator::fullPythonClassName(const AbstractMetaClassCPtr &meta
     return fullClassName;
 }
 
+// Non-smartpointer classes only (see comment at fileNameForContextHelper)
+QString ShibokenGenerator::headerFileNameForClass(const AbstractMetaClassCPtr &metaClass)
+{
+    Q_ASSERT(!metaClass->typeEntry()->isSmartPointer());
+    return fileNameForClassHelper(metaClass, u"_wrapper.h"_s);
+}
+
 QString ShibokenGenerator::headerFileNameForContext(const GeneratorContext &context)
 {
     return fileNameForContextHelper(context, u"_wrapper.h"_s);
