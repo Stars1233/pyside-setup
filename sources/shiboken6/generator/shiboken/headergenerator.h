@@ -36,7 +36,6 @@ protected:
     bool finishGeneration() override;
 
 private:
-    using InheritedOverloadSet = QSet<AbstractMetaFunctionCPtr>;
     using IndexValues = QList<IndexValue>;
 
     static QString headerGuard(const QString &className);
@@ -45,9 +44,8 @@ private:
     IndexValues collectConverterIndexes() const;
 
     static void writeCopyCtor(TextStream &s, const AbstractMetaClassCPtr &metaClass);
-    void writeFunction(TextStream &s,
-                       const AbstractMetaFunctionCPtr &func,
-                       InheritedOverloadSet *inheritedOverloads,
+    void writeConstructor(TextStream &s, const AbstractMetaFunctionCPtr &func) const;
+    void writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
                        FunctionGeneration generation) const;
     static void writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum);
     static void writeSbkTypeFunction(TextStream &s, const AbstractMetaClassCPtr &cppClass);

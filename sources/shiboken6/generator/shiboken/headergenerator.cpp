@@ -39,12 +39,29 @@
 
 using namespace Qt::StringLiterals;
 
+using FunctionSet = QSet<AbstractMetaFunctionCPtr>;
+
 struct IndexValue
 {
     QString name; // "SBK_..."
     int value;
     QString comment;
 };
+
+// Returns the methods hidden from base classes
+static FunctionSet getHiddenOverloads(const AbstractMetaFunctionCPtr &func)
+{
+    FunctionSet result;
+    // Check if this method hide other methods in base classes
+    auto hiddenBy = [&func](const AbstractMetaFunctionCPtr &f) {
+        return f != func && !f->isConstructor() && !f->isPrivate() && !f->isVirtual()
+        && !f->isAbstract() && !f->isStatic() && f->name() == func->name();
+    };
+    const auto &functions = func->ownerClass()->functions();
+    std::copy_if(functions.cbegin(), functions.cend(),
+                 std::inserter(result, result.end()), hiddenBy);
+    return result;
+}
 
 TextStream &operator<<(TextStream &s, const IndexValue &iv)
 {
@@ -214,7 +231,6 @@ void HeaderGenerator::writeWrapperClassDeclaration(TextStream &s,
 {
     const AbstractMetaClassCPtr &metaClass = classContext.metaClass();
     const auto typeEntry = metaClass->typeEntry();
-    InheritedOverloadSet inheritedOverloads;
 
     // Class
     s << "class " << wrapperName
@@ -245,25 +261,23 @@ void HeaderGenerator::writeWrapperClassDeclaration(TextStream &s,
 
     const auto &wrapperConstructors = ShibokenGenerator::getWrapperConstructors(metaClass);
     for (const auto &func : wrapperConstructors)
-        writeFunction(s, func, &inheritedOverloads, functionGeneration(func));
+        writeConstructor(s, func);
 
     // Special inline copy CT (Wrapper from metaClass)
     const auto &copyConstructors = metaClass->queryFunctions(FunctionQueryOption::CopyConstructor);
     if (!copyConstructors.isEmpty()) {
         auto generation = functionGeneration(copyConstructors.constFirst());
         if (generation.testFlag(FunctionGenerationFlag::WrapperSpecialCopyConstructor))
-            writeCopyCtor(s, metaClass); // FIXME: Remove in writeFunction()?
+            writeCopyCtor(s, metaClass);
     }
 
     int maxOverrides = 0;
     for (const auto &func : metaClass->functions()) {
         const auto generation = functionGeneration(func);
-        if (!func->isConstructor()) {
-            writeFunction(s, func, &inheritedOverloads, generation);
-            // PYSIDE-803: Build a boolean cache for unused overrides.
-            if (generation.testFlag(FunctionGenerationFlag::VirtualMethod))
-                maxOverrides++;
-        }
+        writeFunction(s, func, generation);
+        // PYSIDE-803: Build a boolean cache for unused overrides.
+        if (generation.testFlag(FunctionGenerationFlag::VirtualMethod))
+            maxOverrides++;
     }
 
     //destructor
@@ -289,12 +303,6 @@ const ::QMetaObject * metaObject() const override;
 int qt_metacall(QMetaObject::Call call, int id, void **args) override;
 void *qt_metacast(const char *_clname) override;
 )";
-    }
-
-    if (!inheritedOverloads.isEmpty()) {
-        s << "// Inherited overloads, because the using keyword sux\n";
-        for (const auto &func : std::as_const(inheritedOverloads))
-            writeMemberFunctionWrapper(s, func);
     }
 
     if (usePySideExtensions())
@@ -366,44 +374,35 @@ void HeaderGenerator::writeMemberFunctionWrapper(TextStream &s,
     s << "); }\n";
 }
 
+void HeaderGenerator::writeConstructor(TextStream &s, const AbstractMetaFunctionCPtr &func) const
+{
+    Options option = func->hasSignatureModifications()
+    ? Generator::OriginalTypeDescription : Generator::NoOption;
+    s << functionSignature(func, {}, {}, option) << ";\n";
+}
+
 void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                                    InheritedOverloadSet *inheritedOverloads,
                                     FunctionGeneration generation) const
 {
     if (generation.testFlag(FunctionGenerationFlag::ProtectedWrapper))
         writeMemberFunctionWrapper(s, func, u"_protected"_s);
 
-    if (generation.testFlag(FunctionGenerationFlag::WrapperConstructor)) {
-        Options option =  func->hasSignatureModifications()
-            ? Generator::OriginalTypeDescription : Generator::NoOption;
-        s << functionSignature(func, {}, {}, option) << ";\n";
+    if (!generation.testFlag(FunctionGenerationFlag::VirtualMethod))
         return;
+
+    s << functionSignature(func, {}, {}, Generator::OriginalTypeDescription)
+        << " override;\n";
+
+    const auto &hiddenOverloads = getHiddenOverloads(func);
+    if (!hiddenOverloads.isEmpty()) {
+        s << "// Inherited overloads, because the using keyword sux\n";
+        for (const auto &func : hiddenOverloads)
+            writeMemberFunctionWrapper(s, func);
+        s << '\n';
     }
 
-    const bool isVirtual = generation.testFlag(FunctionGenerationFlag::VirtualMethod);
-    if (isVirtual) {
-        s << functionSignature(func, {}, {}, Generator::OriginalTypeDescription)
-            << " override;\n";
-    }
-
-    // Check if this method hide other methods in base classes
-    if (isVirtual) {
-        for (const auto &f : func->ownerClass()->functions()) {
-            if (f != func
-                && !f->isConstructor()
-                && !f->isPrivate()
-                && !f->isVirtual()
-                && !f->isAbstract()
-                && !f->isStatic()
-                && f->name() == func->name()) {
-                inheritedOverloads->insert(f);
-            }
-        }
-
-        // TODO: when modified an abstract method ceases to be virtual but stays abstract
-        //if (func->isModifiedRemoved() && func->isAbstract()) {
-        //}
-    }
+    // TODO: when modified an abstract method ceases to be virtual but stays abstract
+    //if (func->isModifiedRemoved() && func->isAbstract()) {
 }
 
 // Find equivalent typedefs "using Foo=QList<int>", "using Bar=QList<int>"
