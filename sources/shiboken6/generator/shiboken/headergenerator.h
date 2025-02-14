@@ -67,6 +67,12 @@ private:
     void writeWrapperClassDeclaration(TextStream &s,
                                       const QString &wrapperName,
                                       const GeneratorContext &classContext) const;
+    static void writeProtectedEnums(TextStream &s, const GeneratorContext &classContext);
+    void writeSpecialFunctions(TextStream &s, const QString &wrapperName,
+                               const GeneratorContext &classContext) const;
+    static void writeProtectedFields(TextStream &s,
+                                     const GeneratorContext &classContext);
+
     void writeWrapperClass(TextStream &s, const QString &wrapperName, const GeneratorContext &classContext) const;
     void writeInheritedWrapperClassDeclaration(TextStream &s,
                                                const GeneratorContext &classContext) const;

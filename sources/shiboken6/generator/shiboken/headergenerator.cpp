@@ -113,11 +113,11 @@ QString HeaderGenerator::fileNameForContext(const GeneratorContext &context) con
 void HeaderGenerator::writeCopyCtor(TextStream &s,
                                     const AbstractMetaClassCPtr &metaClass)
 {
-    s << '\n' << wrapperName(metaClass) << "(const " << metaClass->qualifiedCppName()
-      << "& self) : " << metaClass->qualifiedCppName() << "(self)\n{\n}\n\n";
+    s << wrapperName(metaClass) << "(const " << metaClass->qualifiedCppName()
+      << "& self) : " << metaClass->qualifiedCppName() << "(self)\n{\n}\n";
 }
 
-static void writeProtectedEnums(TextStream &s, const AbstractMetaClassCPtr &metaClass)
+static void writeProtectedEnumsHelper(TextStream &s, const AbstractMetaClassCPtr &metaClass)
 {
     const QString name = metaClass->qualifiedCppName();
     for (const auto &e : metaClass->enums()) {
@@ -235,41 +235,10 @@ void HeaderGenerator::writeWrapperClassDeclaration(TextStream &s,
     // Class
     s << "class " << wrapperName
       << " : public " << metaClass->qualifiedCppName()
-      << "\n{\npublic:\n" << indent
-      << wrapperName << "(const " << wrapperName << " &) = delete;\n"
-      << wrapperName << "& operator=(const " << wrapperName << " &) = delete;\n"
-      << wrapperName << '(' << wrapperName << " &&) = delete;\n"
-      << wrapperName << "& operator=(" << wrapperName << " &&) = delete;\n\n";
+      << "\n{\npublic:\n" << indent;
 
-    // Make protected enums accessible
-    if (avoidProtectedHack()) {
-        recurseClassHierarchy(metaClass, [&s] (const AbstractMetaClassCPtr &metaClass) {
-            writeProtectedEnums(s, metaClass);
-            return false;
-        });
-    }
-
-    if (avoidProtectedHack() && metaClass->hasProtectedFields()) {
-        s << "\n// Make protected fields accessible\n";
-        const QString name = metaClass->qualifiedCppName();
-        for (const auto &f : metaClass->fields()) {
-            if (f.isProtected())
-                s << "using " << name << "::"  << f.originalName() << ";\n";
-        }
-        s << '\n';
-    }
-
-    const auto &wrapperConstructors = ShibokenGenerator::getWrapperConstructors(metaClass);
-    for (const auto &func : wrapperConstructors)
-        writeConstructor(s, func);
-
-    // Special inline copy CT (Wrapper from metaClass)
-    const auto &copyConstructors = metaClass->queryFunctions(FunctionQueryOption::CopyConstructor);
-    if (!copyConstructors.isEmpty()) {
-        auto generation = functionGeneration(copyConstructors.constFirst());
-        if (generation.testFlag(FunctionGenerationFlag::WrapperSpecialCopyConstructor))
-            writeCopyCtor(s, metaClass);
-    }
+    writeProtectedEnums(s, classContext);
+    writeSpecialFunctions(s, wrapperName, classContext);
 
     int maxOverrides = 0;
     for (const auto &func : metaClass->functions()) {
@@ -278,19 +247,6 @@ void HeaderGenerator::writeWrapperClassDeclaration(TextStream &s,
         // PYSIDE-803: Build a boolean cache for unused overrides.
         if (generation.testFlag(FunctionGenerationFlag::VirtualMethod))
             maxOverrides++;
-    }
-
-    //destructor
-    // PYSIDE-504: When C++ 11 is used, then the destructor must always be declared.
-    if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor()
-        || alwaysGenerateDestructorDeclaration()) {
-        if (avoidProtectedHack() && metaClass->hasPrivateDestructor())
-            s << "// C++11: need to declare (unimplemented) destructor because "
-                 "the base class destructor is private.\n";
-        s << '~' << wrapperName << "()";
-        if (metaClass->hasVirtualDestructor())
-            s << " override";
-        s << ";\n";
     }
 
     writeClassCodeSnips(s, typeEntry->codeSnips(),
@@ -312,9 +268,11 @@ void *qt_metacast(const char *_clname) override;
     Q_ASSERT(maxOverrides > 0 || !needsMethodCache);
 
     if (needsMethodCache)
-        s << "void resetPyMethodCache();\n";
+        s << "\nvoid resetPyMethodCache();\n";
 
-    s << outdent << "private:\n" << indent;
+    writeProtectedFields(s, classContext);
+
+    s << outdent << "\nprivate:\n" << indent;
 
     if (!metaClass->userAddedPythonOverrides().isEmpty()) {
         for (const auto &f : metaClass->userAddedPythonOverrides())
@@ -330,6 +288,71 @@ void *qt_metacast(const char *_clname) override;
     }
 
     s << outdent << "};\n\n";
+}
+
+void HeaderGenerator::writeSpecialFunctions(TextStream &s, const QString &wrapperName,
+                                            const GeneratorContext &classContext) const
+{
+    const AbstractMetaClassCPtr &metaClass = classContext.metaClass();
+
+    const auto &wrapperConstructors = ShibokenGenerator::getWrapperConstructors(metaClass);
+    for (const auto &func : wrapperConstructors)
+        writeConstructor(s, func);
+    s << wrapperName << "(const " << wrapperName << " &) = delete;\n";
+    // Special inline copy CT (Wrapper from metaClass)
+    const auto &copyConstructors = metaClass->queryFunctions(FunctionQueryOption::CopyConstructor);
+    if (!copyConstructors.isEmpty()) {
+        auto generation = functionGeneration(copyConstructors.constFirst());
+        if (generation.testFlag(FunctionGenerationFlag::WrapperSpecialCopyConstructor))
+            writeCopyCtor(s, metaClass);
+    }
+    s << wrapperName << "& operator=(const " << wrapperName << " &) = delete;\n"
+      << wrapperName << '(' << wrapperName << " &&) = delete;\n"
+      << wrapperName << "& operator=(" << wrapperName << " &&) = delete;\n";
+
+    // destructor
+    // PYSIDE-504: When C++ 11 is used, then the destructor must always be declared.
+    if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor()
+        || alwaysGenerateDestructorDeclaration()) {
+        if (avoidProtectedHack() && metaClass->hasPrivateDestructor())
+            s << "// C++11: need to declare (unimplemented) destructor because "
+                 "the base class destructor is private.\n";
+        s << '~' << wrapperName << "()";
+        if (metaClass->hasVirtualDestructor())
+            s << " override";
+        s << ";\n\n";
+    }
+}
+
+void HeaderGenerator::writeProtectedEnums(TextStream &s,
+                                          const GeneratorContext &classContext)
+{
+    // Make protected enums accessible
+    auto lastPos = s.pos();
+    if (avoidProtectedHack()) {
+        auto lastPos = s.pos();
+        const AbstractMetaClassCPtr &metaClass = classContext.metaClass();
+        recurseClassHierarchy(metaClass, [&s] (const AbstractMetaClassCPtr &metaClass) {
+            writeProtectedEnumsHelper(s, metaClass);
+            return false;
+        });
+        if (s.pos() != lastPos)
+            s << '\n';
+    }
+}
+
+void HeaderGenerator::writeProtectedFields(TextStream &s,
+                                           const GeneratorContext &classContext)
+{
+    const AbstractMetaClassCPtr &metaClass = classContext.metaClass();
+    if (avoidProtectedHack() && metaClass->hasProtectedFields()) {
+        s << "\n// Make protected fields accessible\n";
+        const QString name = metaClass->qualifiedCppName();
+        for (const auto &f : metaClass->fields()) {
+            if (f.isProtected())
+                s << "using " << name << "::"  << f.originalName() << ";\n";
+        }
+    }
 }
 
 // Write an inline wrapper around a function
