@@ -55,7 +55,8 @@ static FunctionSet getHiddenOverloads(const AbstractMetaFunctionCPtr &func)
     // Check if this method hide other methods in base classes
     auto hiddenBy = [&func](const AbstractMetaFunctionCPtr &f) {
         return f != func && !f->isConstructor() && !f->isPrivate() && !f->isVirtual()
-        && !f->isAbstract() && !f->isStatic() && f->name() == func->name();
+               && !f->isUserAdded() && !f->isAbstract() && !f->isStatic()
+               && f->name() == func->name();
     };
     const auto &functions = func->ownerClass()->functions();
     std::copy_if(functions.cbegin(), functions.cend(),
