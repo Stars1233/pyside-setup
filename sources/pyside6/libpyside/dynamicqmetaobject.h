@@ -17,7 +17,7 @@ class MetaObjectBuilderPrivate;
 namespace PySide
 {
 
-class MetaObjectBuilder
+class PYSIDE_API MetaObjectBuilder
 {
     Q_DISABLE_COPY_MOVE(MetaObjectBuilder)
 public:
@@ -44,7 +44,7 @@ public:
 
     const QMetaObject *update();
 
-    PYSIDE_API static QString formatMetaObject(const QMetaObject *metaObject);
+    static QString formatMetaObject(const QMetaObject *metaObject);
 
 private:
     MetaObjectBuilderPrivate *m_d;
