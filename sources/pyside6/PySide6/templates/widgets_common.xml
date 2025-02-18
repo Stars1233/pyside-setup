@@ -5,15 +5,8 @@
 -->
 <typesystem>
 
-    <template name="replace_child">
-        $CHILD_TYPE* oldChild = %CPPSELF.$FUNCTION_GET_OLD();
-        if (oldChild &amp;&amp; (oldChild != $CPPARG)) {
-            Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[$CHILD_TYPE*](oldChild));
-            Shiboken::Object::setParent(nullptr, pyChild);
-            Shiboken::Object::releaseOwnership(pyChild);
-        }
-        Shiboken::Object::setParent(%PYSELF, $PYARG);
-    </template>
+    <template name="replace_child"
+              file="../glue/qtwidgets.cpp" snippet="replace-widget-child"/>
 
     <!-- Do pointer conversion here since QStyleOptionGraphicsItem is an "object-type". -->
     <template name="qstyleoptiongraphicsitem_pyobject">

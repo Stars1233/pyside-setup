@@ -15,10 +15,15 @@ duplicate code when extending the generated code, and it is a child of the
 .. code-block:: xml
 
     <typesystem>
-        <template name="my_template">
+        <template name="my_template" file="[file]" snippet="[label]"/>
             // the code
         </template>
     </typesystem>
+
+Code may either be specified as element text (note that entities need to be
+used for special characters like '<'), or fetched from an external code snippet
+by specifying the ``file`` and ``snippet`` attributes (see
+:ref:`external-snippets`).
 
 Use the ``insert-template`` node to insert the template code (identified
 by the template's ``name`` attribute) into the generated code base.

@@ -265,6 +265,7 @@ private:
      bool parseInclude(const ConditionalStreamReader &, StackElement topElement,
                        const TypeEntryPtr &entry, QXmlStreamAttributes *);
      bool parseSystemInclude(const ConditionalStreamReader &, QXmlStreamAttributes *);
+     TemplateEntryPtr parseTemplate(QXmlStreamAttributes *attributes);
      std::optional<TemplateInstance>
          parseInsertTemplate(const ConditionalStreamReader &, StackElement topElement,
                              QXmlStreamAttributes *);

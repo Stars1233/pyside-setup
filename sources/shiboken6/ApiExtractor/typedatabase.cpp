@@ -854,7 +854,8 @@ void TypeDatabase::addTemplate(const TemplateEntryPtr &t)
 
 void TypeDatabase::addTemplate(const QString &name, const QString &code)
 {
-    auto te = std::make_shared<TemplateEntry>(name);
+    auto te = std::make_shared<TemplateEntry>();
+    te->setName(name);
     te->addCode(code);
     addTemplate(te);
 }

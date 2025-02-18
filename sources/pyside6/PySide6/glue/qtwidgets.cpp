@@ -815,6 +815,16 @@ if (!PySide::callConnect(%PYSELF, SIGNAL(accepted()), %PYARG_1))
 %CPPSELF.%FUNCTION_NAME();
 // @snippet qmessagebox-open-connect-accept
 
+// @snippet replace-widget-child
+$CHILD_TYPE* oldChild = %CPPSELF.$FUNCTION_GET_OLD();
+if (oldChild != nullptr && oldChild != $CPPARG) {
+    Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[$CHILD_TYPE*](oldChild));
+    Shiboken::Object::setParent(nullptr, pyChild);
+    Shiboken::Object::releaseOwnership(pyChild);
+}
+Shiboken::Object::setParent(%PYSELF, $PYARG);
+// @snippet replace-widget-child
+
 /*********************************************************************
  * CONVERSIONS
  ********************************************************************/

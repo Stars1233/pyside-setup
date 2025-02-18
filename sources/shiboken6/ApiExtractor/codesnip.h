@@ -78,12 +78,8 @@ private:
 class TemplateEntry : public CodeSnipAbstract
 {
 public:
-    explicit TemplateEntry(const QString &name) : m_name(name) {}
-
-    QString name() const
-    {
-        return m_name;
-    }
+    const QString &name() const { return m_name; }
+    void setName(const QString &n) { m_name = n ;}
 
 private:
     QString m_name;

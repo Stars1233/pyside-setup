@@ -129,27 +129,6 @@
         <insert-template name="tuple_abcd_same_type"/>
     </template>
 
-    <template name="fix_native_return_number*,number*,number*,number*">
-        PyObject* _obj = %PYARG_0.object();
-        Shiboken::AutoDecRef _obj0(PySequence_GetItem(_obj, 0));
-        Shiboken::AutoDecRef _obj1(PySequence_GetItem(_obj, 1));
-        Shiboken::AutoDecRef _obj2(PySequence_GetItem(_obj, 2));
-        Shiboken::AutoDecRef _obj3(PySequence_GetItem(_obj, 3));
-        if (!PySequence_Check(_obj)
-            || PySequence_Size(_obj) != 4
-            || !PyNumber_Check(_obj0)
-            || !PyNumber_Check(_obj1)
-            || !PyNumber_Check(_obj2)
-            || !PyNumber_Check(_obj3)) {
-            PyErr_SetString(PyExc_TypeError, "Sequence of 4 numbers expected");
-        } else {
-            *%1 = %CONVERTTOCPP[$TYPE](_obj0);
-            *%2 = %CONVERTTOCPP[$TYPE](_obj1);
-            *%3 = %CONVERTTOCPP[$TYPE](_obj2);
-            *%4 = %CONVERTTOCPP[$TYPE](_obj3);
-        }
-    </template>
-
     <template name="fix_number*,number*,number*,number*,number*">
         $TYPE a, b, c, d, e;
         %CPPSELF.%FUNCTION_NAME(&amp;a, &amp;b, &amp;c, &amp;d, &amp;e);
@@ -208,17 +187,8 @@
         qintptr resultVar{0};
         qintptr *%out = &amp;resultVar;
     </template>
-    <template name="return_native_eventfilter_conversion">
-        %RETURN_TYPE %out = false;
-        if (PySequence_Check(%PYARG_0) &amp;&amp; (PySequence_Size(%PYARG_0) == 2)) {
-            Shiboken::AutoDecRef pyItem(PySequence_GetItem(%PYARG_0, 0));
-            %out = %CONVERTTOCPP[bool](pyItem);
-            if (result) {
-                Shiboken::AutoDecRef pyResultItem(PySequence_GetItem(pyResult, 1));
-                *result = %CONVERTTOCPP[qintptr](pyResultItem);
-            }
-        }
-    </template>
+    <template name="return_native_eventfilter_conversion"
+              file="../glue/qtcore.cpp" snippet="return-native-eventfilter-conversion"/>
 
     <template name="return_native_eventfilter">
         %PYARG_0 = PyTuple_New(2);

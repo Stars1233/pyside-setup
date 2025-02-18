@@ -3257,6 +3257,27 @@ bool TypeSystemParser::parseSystemInclude(const ConditionalStreamReader &,
     return true;
 }
 
+TemplateEntryPtr TypeSystemParser::parseTemplate(QXmlStreamAttributes *attributes)
+{
+    auto result = std::make_shared<TemplateEntry>();
+    if (hasFileSnippetAttributes(attributes)) {
+        const auto snippetOptional = readFileSnippet(attributes);
+        if (!snippetOptional.has_value())
+            return {};
+        result->addCode(snippetOptional.value().content);
+    }
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
+        const auto name = attributes->at(i).qualifiedName();
+        if (name == nameAttribute)
+            result->setName(attributes->takeAt(i).value().toString());
+    }
+    if (result->name().isEmpty()) {
+        m_error = msgMissingAttribute(nameAttribute);
+        return {};
+    }
+    return result;
+}
+
 std::optional<TemplateInstance>
     TypeSystemParser::parseInsertTemplate(const ConditionalStreamReader &,
                                           StackElement topElement,
@@ -3714,14 +3735,10 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
             if (!parseSystemInclude(reader, &attributes))
                 return false;
             break;
-        case StackElement::Template: {
-            const auto nameIndex = indexOfAttribute(attributes, nameAttribute);
-            if (nameIndex == -1) {
-                m_error = msgMissingAttribute(nameAttribute);
+        case StackElement::Template:
+            m_templateEntry = parseTemplate(&attributes);
+            if (m_templateEntry == nullptr)
                 return false;
-            }
-            m_templateEntry = std::make_shared<TemplateEntry>(attributes.takeAt(nameIndex).value().toString());
-        }
             break;
         case StackElement::InsertTemplate:
             m_templateInstance = parseInsertTemplate(reader, topElement, &attributes);

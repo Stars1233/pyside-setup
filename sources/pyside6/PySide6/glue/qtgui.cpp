@@ -384,6 +384,12 @@ const auto path = PySide::pyPathToQString(%PYARG_1);
 %CPPSELF->setImage(QImage(path));
 // @snippet qclipboard-setimage
 
+// @snippet qimage-buffer-constructor
+Py_INCREF(%PYARG_1);
+auto *ptr = reinterpret_cast<uchar *>(Shiboken::Buffer::getPointer(%PYARG_1));
+%0 = new %TYPE(ptr, %ARGS, imageDecrefDataHandler, %PYARG_1);
+// @snippet qimage-buffer-constructor
+
 // @snippet qimage-decref-image-data
 static void imageDecrefDataHandler(void *data)
 {
@@ -975,6 +981,118 @@ return %CONVERTTOPYTHON[QRect](cppResult);
 // @snippet qpainterstateguard-restore
 %CPPSELF.restore();
 // @snippet qpainterstateguard-restore
+
+// @snippet qmatrix-repr-code
+QByteArray format(Py_TYPE(%PYSELF)->tp_name);
+format += QByteArrayLiteral("((");
+%MATRIX_TYPE data[%MATRIX_SIZE];
+%CPPSELF.copyDataTo(data);
+for (int i = 0; i < %MATRIX_SIZE; ++i) {
+    if (i > 0)
+        format += ", ";
+    format += QByteArray::number(data[i]);
+}
+format += "))";
+
+%PYARG_0 = Shiboken::String::fromStringAndSize(format, format.size());
+// @snippet qmatrix-repr-code
+
+// @snippet qmatrix-reduce-code
+%MATRIX_TYPE data[%MATRIX_SIZE];
+%CPPSELF.copyDataTo(data);
+QList<%MATRIX_TYPE> cppArgs(data, data + %MATRIX_SIZE);
+PyObject *type = PyObject_Type(%PYSELF);
+PyObject *args = Py_BuildValue("(N)",
+                               %CONVERTTOPYTHON[QList<%MATRIX_TYPE>](cppArgs));
+%PYARG_0 = Py_BuildValue("(NN)", type, args);
+// @snippet qmatrix-reduce-code
+
+// @snippet qmatrix-data-function
+PyObject *pyData = PyTuple_New(%MATRIX_SIZE);
+if (const float *data = %CPPSELF.constData()) {
+    for (int i = 0; i < %MATRIX_SIZE; ++i)
+        PyTuple_SetItem(pyData, i, %CONVERTTOPYTHON[float](data[i]));
+}
+return pyData;
+// @snippet qmatrix-data-function
+
+// @snippet qmatrix-constructor
+// PYSIDE-795: All PySequences can be made iterable with PySequence_Fast.
+Shiboken::AutoDecRef seq(PySequence_Fast(%PYARG_1, "Can't turn into sequence"));
+if (PySequence_Size(seq) == %SIZE) {
+    Shiboken::AutoDecRef fast(PySequence_Fast(seq,
+                                              "Failed to parse sequence on %TYPE constructor."));
+    float values[%SIZE];
+    for (int i = 0; i < %SIZE; ++i) {
+        Shiboken::AutoDecRef pv(PySequence_GetItem(fast.object(), i));
+        values[i] = %CONVERTTOCPP[float](pv);
+    }
+    %0 = new %TYPE(values);
+}
+// @snippet qmatrix-constructor
+
+// @snippet validator-conversionrule
+QValidator::State %out;
+
+if (PySequence_Check(%PYARG_0)) {
+    Shiboken::AutoDecRef seq(PySequence_Fast(%PYARG_0, 0));
+    const Py_ssize_t size = PySequence_Size(seq.object());
+
+    if (size > 1) {
+        Shiboken::AutoDecRef _obj1(PySequence_GetItem(seq.object(), 1));
+        if (%ISCONVERTIBLE[QString](_obj1))
+            %1 = %CONVERTTOCPP[QString](_obj1);
+        else
+            qWarning("%TYPE::%FUNCTION_NAME: Second tuple element is not convertible to unicode.");
+    }
+
+    if (size > 2) {
+        Shiboken::AutoDecRef _obj2(PySequence_GetItem(seq.object(), 2));
+        if (%ISCONVERTIBLE[int](_obj2))
+            %2 = %CONVERTTOCPP[int](_obj2);
+        else
+            qWarning("%TYPE::%FUNCTION_NAME: Second tuple element is not convertible to int.");
+    }
+    Shiboken::AutoDecRef _sobj(PySequence_GetItem(seq.object(), 0));
+
+    %PYARG_0.reset(_sobj);
+    Py_INCREF(%PYARG_0); // we need to incref, because "%PYARG_0 = ..." will decref the tuple and the tuple will be decrefed again at the end of this scope.
+}
+
+// check return value
+if (%ISCONVERTIBLE[QValidator::State](%PYARG_0)) {
+    %out = %CONVERTTOCPP[QValidator::State](%PYARG_0);
+} else {
+    PyErr_Format(PyExc_TypeError, "Invalid return value in function %s, expected %s, got %s.",
+                 "QValidator.validate",
+                 "PySide6.QtGui.QValidator.State, (PySide6.QtGui.QValidator.State,), (PySide6.QtGui.QValidator.State, unicode) or (PySide6.QtGui.QValidator.State, unicode, int)",
+                 Py_TYPE(pyResult)->tp_name);
+    return QValidator::State();
+}
+// @snippet validator-conversionrule
+
+// @snippet fix_margins_return
+PyObject *obj = %PYARG_0.object();
+bool ok = false;
+if (PySequence_Check(obj) != 0 && PySequence_Size(obj) == 4) {
+    Shiboken::AutoDecRef m0(PySequence_GetItem(obj, 0));
+    Shiboken::AutoDecRef m1(PySequence_GetItem(obj, 1));
+    Shiboken::AutoDecRef m2(PySequence_GetItem(obj, 2));
+    Shiboken::AutoDecRef m3(PySequence_GetItem(obj, 3));
+    ok = PyNumber_Check(m0) != 0 && PyNumber_Check(m1) != 0
+         && PyNumber_Check(m2) && PyNumber_Check(m3) != 0;
+    if (ok) {
+        *%1 = %CONVERTTOCPP[$TYPE](m0);
+        *%2 = %CONVERTTOCPP[$TYPE](m1);
+        *%3 = %CONVERTTOCPP[$TYPE](m2);
+        *%4 = %CONVERTTOCPP[$TYPE](m3);
+    }
+}
+if (!ok) {
+    PyErr_SetString(PyExc_TypeError, "Sequence of 4 numbers expected");
+    %1 = %2 = %3 = %4 = 0;
+}
+// @snippet fix_margins_return
 
 /*********************************************************************
  * CONVERSIONS
