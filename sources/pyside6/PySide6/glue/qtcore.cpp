@@ -2179,3 +2179,9 @@ if (PySequence_Check(%PYARG_0) != 0 && PySequence_Size(%PYARG_0) == 2) {
     }
 }
 // @snippet return-native-eventfilter-conversion
+
+// @snippet return-native-eventfilter
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[qintptr](*result_out));
+// @snippet return-native-eventfilter
