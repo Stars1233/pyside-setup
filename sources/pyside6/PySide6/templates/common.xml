@@ -38,10 +38,10 @@
         PyObject *%out = object.object();
     </template>
 
-    <!-- Convert a PySequence to an indexable C-style arrray %TYPE[] via AutoArrayPointer -->
+    <!-- Convert a PySequence to an indexable C-style arrray %TYPE[] via ArrayPointer -->
     <template name="pysequence-to-c-array">
         const Py_ssize_t count = PySequence_Size(%PYARG_1);
-        Shiboken::AutoArrayPointer&lt;%TYPE&gt; %out(count);
+        Shiboken::ArrayPointer&lt;%TYPE&gt; %out(count);
         for (Py_ssize_t i = 0; i &lt; count; ++i) {
             Shiboken::AutoDecRef a(PySequence_GetItem(%PYARG_1, i));
             %out[i] = %CONVERTTOCPP[%TYPE](a);

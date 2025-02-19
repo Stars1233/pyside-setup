@@ -27,7 +27,7 @@
 
     <template name="pysequence_qstyleoptiongraphicsitem">
         const Py_ssize_t numOptions = PySequence_Size(%PYARG_2);
-        Shiboken::AutoArrayPointer&lt;QStyleOptionGraphicsItem&gt; %out(numOptions);
+        Shiboken::ArrayPointer&lt;QStyleOptionGraphicsItem&gt; %out(numOptions);
         for (Py_ssize_t i=0; i &lt; numOptions; ++i) {
             Shiboken::AutoDecRef _arg1(PySequence_GetItem(%PYARG_1, i));
             %out[i] = %CONVERTTOCPP[QStyleOptionGraphicsItem](_arg1);

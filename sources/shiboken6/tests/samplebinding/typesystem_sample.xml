@@ -1131,7 +1131,7 @@
             <modify-argument index="2">
                 <replace-type modified-type="PySequence" />
                 <conversion-rule class="native">
-                Shiboken::AutoArrayPointer&lt;Point&gt; %out(%1);
+                Shiboken::ArrayPointer&lt;Point&gt; %out(%1);
                 for (Py_ssize_t i = 0; i &lt; %1; ++i) {
                     Shiboken::AutoDecRef _obj(PySequence_GetItem(%PYARG_1, i));
                     %out[i] = %CONVERTTOCPP[Point](_obj);
@@ -1593,7 +1593,7 @@
                 <replace-type modified-type="PySequence"/>
                 <conversion-rule class="native">
                 const Py_ssize_t numItems = PySequence_Size(%PYARG_1);
-                Shiboken::AutoArrayPointer&lt;int&gt; %out(numItems);
+                Shiboken::ArrayPointer&lt;int&gt; %out(numItems);
                 for (Py_ssize_t i = 0; i &lt; numItems; ++i) {
                     Shiboken::AutoDecRef _obj(PySequence_GetItem(%PYARG_1, i));
                     if (%CHECKTYPE[int](_obj))

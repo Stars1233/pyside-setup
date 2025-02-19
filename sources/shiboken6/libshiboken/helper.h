@@ -44,22 +44,25 @@ LIBSHIBOKEN_API const char *typeNameOf(const char *typeIdName);
  *  Creates and automatically deallocates C++ arrays.
  */
 template<class T>
-class AutoArrayPointer
+class ArrayPointer
 {
     public:
-        AutoArrayPointer(const AutoArrayPointer &) = delete;
-        AutoArrayPointer(AutoArrayPointer &&) = delete;
-        AutoArrayPointer &operator=(const AutoArrayPointer &) = delete;
-        AutoArrayPointer &operator=(AutoArrayPointer &&) = delete;
+        ArrayPointer(const ArrayPointer &) = delete;
+        ArrayPointer(ArrayPointer &&) = delete;
+        ArrayPointer &operator=(const ArrayPointer &) = delete;
+        ArrayPointer &operator=(ArrayPointer &&) = delete;
 
 
-        explicit AutoArrayPointer(Py_ssize_t size) { data = new T[size]; }
+        explicit ArrayPointer(Py_ssize_t size) { data = new T[size]; }
         T &operator[](Py_ssize_t pos) { return data[pos]; }
         operator T *() const { return data; }
-        ~AutoArrayPointer() { delete[] data; }
+        ~ArrayPointer() { delete[] data; }
     private:
         T *data;
 };
+
+template <class T>
+using AutoArrayPointer = ArrayPointer<T>; // deprecated
 
 using ThreadId = unsigned long long;
 LIBSHIBOKEN_API ThreadId currentThreadId();

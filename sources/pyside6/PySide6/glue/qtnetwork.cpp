@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 // @snippet qudpsocket-readdatagram
-Shiboken::AutoArrayPointer<char> data(%ARGUMENT_NAMES);
+Shiboken::ArrayPointer<char> data(%ARGUMENT_NAMES);
 QHostAddress ha;
 quint16 port;
 %BEGIN_ALLOW_THREADS
