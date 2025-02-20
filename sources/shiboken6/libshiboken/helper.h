@@ -28,6 +28,9 @@ namespace Shiboken
 */
 LIBSHIBOKEN_API bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, const char *defaultAppName = nullptr);
 
+/// Delete a a list of arguments created by listToArgcArgv()
+LIBSHIBOKEN_API void deleteArgv(int argc, char **argv);
+
 /**
  * Convert a python sequence into a heap-allocated array of ints.
  *

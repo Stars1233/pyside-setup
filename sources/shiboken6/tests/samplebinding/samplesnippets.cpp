@@ -244,9 +244,7 @@ if (!Shiboken::listToArgcArgv(%PYARG_1, &argc, &argv)) {
 }
 %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(argc, argv);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
-for (int i = 0; i < argc; ++i)
-    free(argv[i]);
-delete [] argv;
+Shiboken::deleteArgv(argc, argv);
 // @snippet test-argc-argv
 
 // @snippet sum2d

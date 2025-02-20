@@ -468,52 +468,63 @@ static char *toWindowsConsoleEncoding(PyObject *unicode)
 }
 #endif // _WIN32
 
-// PySide-510: Changed from PySequence to PyList, which is correct.
-bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, const char *defaultAppName)
+static char *strDup(const char *s) // strdup() using new[] for symmetry with the Windows code
 {
+    auto len = std::strlen(s);
+    auto *result = new char[1 + len];
+    std::strncpy(result, s, len);
+    result[len] = '\0';
+    return result;
+}
+
+// PySide-510: Changed from PySequence to PyList, which is correct.
+bool listToArgcArgv(PyObject *argList, int *argcIn, char ***argvIn, const char *defaultAppName)
+{
+    *argcIn = 0;
+    *argvIn = nullptr;
     if (!PyList_Check(argList))
         return false;
 
-    if (!defaultAppName)
-        defaultAppName = "PySideApplication";
-
-    // Check all items
     Shiboken::AutoDecRef args(PySequence_Fast(argList, nullptr));
-    Py_ssize_t numArgs = PySequence_Size(argList);
-    for (Py_ssize_t i = 0; i < numArgs; ++i) {
-        PyObject *item = PyList_GetItem(args.object(), i);
-        if (!PyBytes_Check(item) && !PyUnicode_Check(item))
-            return false;
+    const Py_ssize_t numArgs = PySequence_Size(argList);
+    if (numArgs == 0) { // Try to get the script name
+        auto *argv = new char *[1];
+        *argvIn = argv;
+        *argcIn = 1;
+        if (PyObject *appName = PyDict_GetItem(PyEval_GetGlobals(), Shiboken::PyMagicName::file()))
+            argv[0] = strDup(Shiboken::String::toCString(appName));
+        else
+            argv[0] = strDup(defaultAppName ? defaultAppName : "PySideApplication");
+        return true;
     }
 
-    bool hasEmptyArgList = numArgs == 0;
-    if (hasEmptyArgList)
-        numArgs = 1;
+    auto *argv = new char *[numArgs];
+    std::fill(argv, argv + numArgs, nullptr);
 
-    *argc = numArgs;
-    *argv = new char *[*argc];
-
-    if (hasEmptyArgList) {
-        // Try to get the script name
-        PyObject *globals = PyEval_GetGlobals();
-        PyObject *appName = PyDict_GetItem(globals, Shiboken::PyMagicName::file());
-        (*argv)[0] = strdup(appName ? Shiboken::String::toCString(appName) : defaultAppName);
-    } else {
-        for (Py_ssize_t i = 0; i < numArgs; ++i) {
-            PyObject *item = PyList_GetItem(args.object(), i);
-            char *string = nullptr;
-            if (Shiboken::String::check(item)) {
+    for (Py_ssize_t i = 0; i < numArgs; ++i) {
+        PyObject *item = PyList_GetItem(args.object(), i);
+        if (Shiboken::String::check(item)) {
 #ifdef _WIN32
-                string = toWindowsConsoleEncoding(item);
+            argv[i] = toWindowsConsoleEncoding(item);
 #else
-                string = strdup(Shiboken::String::toCString(item));
+            argv[i] = strDup(Shiboken::String::toCString(item));
 #endif
-            }
-            (*argv)[i] = string;
+        } else {
+            deleteArgv(int(i), argv);
+            return false;
         }
     }
 
+    *argcIn = int(numArgs);
+    *argvIn = argv;
     return true;
+}
+
+void deleteArgv(int argc, char **argv)
+{
+    for (int a = 0; a < argc; ++a)
+        delete [] argv[a];
+    delete [] argv;
 }
 
 int *sequenceToIntArray(PyObject *obj, bool zeroTerminated)
