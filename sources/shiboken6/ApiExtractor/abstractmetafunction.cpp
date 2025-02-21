@@ -340,11 +340,11 @@ void AbstractMetaFunction::setOwnerClass(const AbstractMetaClassCPtr &cls)
     d->m_class = cls;
 }
 
-bool AbstractMetaFunction::operator<(const AbstractMetaFunction &other) const
+static bool equalArgument(const AbstractMetaArgument &a1,
+                          const AbstractMetaArgument &a2)
 {
-    return compareTo(&other) & NameLessThan;
+    return a1.type() == a2.type();
 }
-
 
 /*!
     Returns a mask of CompareResult describing how this function is
@@ -354,64 +354,26 @@ AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const Abstra
 {
     CompareResult result;
 
-    // Enclosing class...
-    if (ownerClass() == other->ownerClass())
-        result |= EqualImplementor;
-
-    // Attributes
-    if (attributes() == other->attributes() && cppAttributes() == other->cppAttributes())
-        result |= EqualAttributes;
-
     // Compare types
-    if (type().name() == other->type().name())
-        result |= EqualReturnType;
+    if (type() == other->type())
+        result.setFlag(EqualReturnType);
 
     // Compare names
-    int cmp = originalName().compare(other->originalName());
-
-    if (cmp < 0)
-        result |= NameLessThan;
-    else if (cmp == 0)
-        result |= EqualName;
+    if (originalName() == other->originalName())
+        result.setFlag(EqualName);
 
     // compare name after modification...
-    cmp = modifiedName().compare(other->modifiedName());
-    if (cmp == 0)
-        result |= EqualModifiedName;
+    if (modifiedName() == other->modifiedName())
+        result.setFlag(EqualModifiedName);
 
     // Compare arguments...
-    AbstractMetaArgumentList minArguments;
-    AbstractMetaArgumentList maxArguments;
-    if (arguments().size() < other->arguments().size()) {
-        minArguments = arguments();
-        maxArguments = other->arguments();
-    } else {
-        minArguments = other->arguments();
-        maxArguments = arguments();
-    }
-
-    const auto minCount = minArguments.size();
-    const auto maxCount = maxArguments.size();
-    bool same = true;
-    for (qsizetype i = 0; i < maxCount; ++i) {
-        if (i < minCount) {
-            const AbstractMetaArgument &min_arg = minArguments.at(i);
-            const AbstractMetaArgument &max_arg = maxArguments.at(i);
-            if (min_arg.type().name() != max_arg.type().name()
-                && (min_arg.defaultValueExpression().isEmpty() || max_arg.defaultValueExpression().isEmpty())) {
-                same = false;
-                break;
-            }
-        } else {
-            if (maxArguments.at(i).defaultValueExpression().isEmpty()) {
-                same = false;
-                break;
-            }
+    if (d->m_arguments.size() == other->arguments().size()) {
+        result.setFlag(EqualArgumentCount);
+        if (std::equal(d->m_arguments.cbegin(), d->m_arguments.cend(),
+                       other->arguments().cbegin(), equalArgument)) {
+            result.setFlag(EqualArguments);
         }
     }
-
-    if (same)
-        result |= minCount == maxCount ? EqualArguments : EqualDefaultValueOverload;
 
     return result;
 }

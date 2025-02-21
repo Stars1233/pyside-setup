@@ -1628,18 +1628,6 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass, bool avo
                             f->setDeclaringClass(sf->declaringClass());
                     }
 
-                    if (cmp & AbstractMetaFunction::EqualDefaultValueOverload) {
-                        AbstractMetaArgumentList arguments;
-                        if (f->arguments().size() < sf->arguments().size())
-                            arguments = sf->arguments();
-                        else
-                            arguments = f->arguments();
-                        //TODO: fix this
-                        //for (int i=0; i<arguments.size(); ++i)
-                        //    arguments[i]->setDefaultValueExpression("<#>" + QString());
-                    }
-
-
                     // Otherwise we have function shadowing and we can
                     // skip the thing...
                 } else if (cmp & AbstractMetaFunction::EqualName && !sf->isSignal()) {

@@ -74,18 +74,10 @@ public:
 
     enum CompareResultFlag {
         EqualName                   = 0x00000001,
-        EqualArguments              = 0x00000002,
-        EqualAttributes             = 0x00000004,
-        EqualImplementor            = 0x00000008,
+        EqualArgumentCount          = 0x00000002,
+        EqualArguments              = 0x00000004,
         EqualReturnType             = 0x00000010,
-        EqualDefaultValueOverload   = 0x00000020,
         EqualModifiedName           = 0x00000040,
-
-        NameLessThan                = 0x00001000,
-
-        PrettySimilar               = EqualName | EqualArguments,
-        Equal                       = 0x0000001f,
-        NotEqual                    = 0x00001000
     };
     Q_DECLARE_FLAGS(CompareResult, CompareResultFlag)
     Q_FLAG(CompareResultFlag)
@@ -310,8 +302,6 @@ public:
 
     CompareResult compareTo(const AbstractMetaFunction *other) const;
     bool isConstOverloadOf(const AbstractMetaFunction *other) const;
-
-    bool operator <(const AbstractMetaFunction &a) const;
 
     AbstractMetaFunction *copy() const;
 
