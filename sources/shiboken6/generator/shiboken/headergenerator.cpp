@@ -331,9 +331,8 @@ void HeaderGenerator::writeProtectedEnums(TextStream &s,
                                           const GeneratorContext &classContext)
 {
     // Make protected enums accessible
-    auto lastPos = s.pos();
     if (avoidProtectedHack()) {
-        auto lastPos = s.pos();
+        const auto lastPos = s.pos();
         const AbstractMetaClassCPtr &metaClass = classContext.metaClass();
         recurseClassHierarchy(metaClass, [&s] (const AbstractMetaClassCPtr &metaClass) {
             writeProtectedEnumsHelper(s, metaClass);
