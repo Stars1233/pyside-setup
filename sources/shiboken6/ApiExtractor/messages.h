@@ -278,4 +278,7 @@ QString msgCannotFindQDocFile(const AbstractMetaClassCPtr &metaClass,
 QString msgCannotCall(const AbstractMetaFunctionCPtr &func,
                       int arg, bool injectCodeCallsFunc, bool hasConversionRule);
 
+QString msgRemoveRedundantOverload(const AbstractMetaFunctionCPtr &func,
+                                   const QString &type);
+
 #endif // MESSAGES_H

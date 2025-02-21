@@ -60,6 +60,15 @@ struct TypeRejection
 QDebug operator<<(QDebug d, const TypeRejection &r);
 #endif
 
+// Rule for removing overloads that differ in one type
+struct OverloadRemovalRule
+{
+    QString type;
+    QStringList redundantTypes;
+};
+
+using OverloadRemovalRules = QList<OverloadRemovalRule>;
+
 class TypeDatabase
 {
     TypeDatabase();
@@ -160,6 +169,9 @@ public:
 
     FunctionModificationList
         globalFunctionModifications(const QStringList &signatures) const;
+
+    const OverloadRemovalRules &overloadRemovalRules() const;
+    void addOverloadRemovalRule(const OverloadRemovalRule &r);
 
     bool addSuppressedWarning(const QString &warning, bool generate, QString *errorMessage);
 

@@ -480,6 +480,7 @@ static const StackElementHash &stackElementHash()
         {u"no-null-pointer", StackElement::NoNullPointers},
         {u"object-type", StackElement::ObjectTypeEntry},
         {u"opaque-container", StackElement::OpaqueContainer},
+        {u"overload-removal", StackElement::OverloadRemoval},
         {u"parent", StackElement::ParentOwner},
         {u"primitive-type", StackElement::PrimitiveTypeEntry},
         {u"property", StackElement::Property},
@@ -1996,6 +1997,30 @@ bool TypeSystemParser::parseConfiguration(StackElement topElement,
     const auto configurableEntry = std::dynamic_pointer_cast<ConfigurableTypeEntry>(topEntry);
     Q_ASSERT(configurableEntry);
     configurableEntry->setConfigCondition(condition);
+    return true;
+}
+
+bool TypeSystemParser::parseOverloadRemoval(StackElement topElement,
+                                            QXmlStreamAttributes *attributes)
+{
+    if (topElement != StackElement::Root) {
+        m_error = u"<overload-removal> can only appear under the root element."_s;
+        return false;
+    }
+    OverloadRemovalRule rule;
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
+        const auto name = attributes->at(i).qualifiedName();
+        if (name == u"type") {
+            rule.type = attributes->takeAt(i).value().toString();
+        } else if (name == u"replaces") {
+            rule.redundantTypes = attributes->takeAt(i).value().toString().split(u';');
+        }
+    }
+    if (rule.type.isEmpty() || rule.redundantTypes.isEmpty()) {
+        m_error = u"<overload-removal> requires \"type\" and \"replaces\" attributes."_s;
+        return false;
+    }
+    TypeDatabase::instance()->addOverloadRemovalRule(rule);
     return true;
 }
 
@@ -3551,7 +3576,8 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                         || element == StackElement::AddFunction
                         || element == StackElement::DeclareFunction
                         || element == StackElement::Template
-                        || element == StackElement::OpaqueContainer;
+                        || element == StackElement::OpaqueContainer
+                        || element == StackElement::OverloadRemoval;
 
         if (!topLevel && m_stack.at(m_stack.size() - 2) == StackElement::Root) {
             m_error = u"Tag requires parent: '"_s + tagName.toString() + u'\'';
@@ -3726,6 +3752,10 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
             if (!parseOpaqueContainerElement(&attributes))
         case StackElement::Configuration:
             if (!parseConfiguration(topElement, &attributes))
+                return false;
+            break;
+        case StackElement::OverloadRemoval:
+            if (!parseOverloadRemoval(topElement, &attributes))
                 return false;
             break;
         default:

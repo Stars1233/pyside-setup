@@ -274,6 +274,7 @@ struct TypeDatabasePrivate : public TypeDatabaseOptions
 
     AddedFunctionList m_globalUserFunctions;
     FunctionModificationList m_functionMods;
+    OverloadRemovalRules m_overloadRemovalRules;
 
     QStringList m_requiredTargetImports;
 
@@ -900,6 +901,16 @@ FunctionModificationList
     }
 
     return lst;
+}
+
+const OverloadRemovalRules &TypeDatabase::overloadRemovalRules() const
+{
+    return d->m_overloadRemovalRules;
+}
+
+void TypeDatabase::addOverloadRemovalRule(const OverloadRemovalRule &r)
+{
+    d->m_overloadRemovalRules.append(r);
 }
 
 bool TypeDatabase::addSuppressedWarning(const QString &warning, bool generate,

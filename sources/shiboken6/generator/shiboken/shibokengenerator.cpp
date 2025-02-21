@@ -2245,15 +2245,121 @@ static void removeConstOverloads(AbstractMetaFunctionCList *overloads)
     }
 }
 
+// For a list of overloads of the same argument count, return a list of functions
+// that can be removed by the type system overload removal rules.
+static AbstractMetaFunctionCList filterFunctions(const OverloadRemovalRules &removalRules,
+                                                 const AbstractMetaFunctionCList &overloads)
+{
+    const auto size = overloads.size();
+    Q_ASSERT(size > 1);
+    AbstractMetaFunctionCList result;
+
+    // Basic parameters that need to be equivalent
+    static constexpr AbstractMetaFunction::CompareResult expected =
+        AbstractMetaFunction::EqualName | AbstractMetaFunction::EqualVirtual
+        | AbstractMetaFunction::EqualConst | AbstractMetaFunction::EqualStatic
+        | AbstractMetaFunction::EqualReturnType;
+
+
+    // Find the varying argument and check if otherwise equivalent
+    AbstractMetaFunction::CompareResult differingArgMask{};
+    for (qsizetype a = 1; a < size; ++a) {
+        auto cr = overloads.constFirst()->compareTo(overloads.at(a).get());
+        if ((cr & expected) != expected)
+            return result;
+        auto argMask = cr & AbstractMetaFunction::Differ4ArgumentsMask;
+        if (a == 1)
+            differingArgMask = argMask;
+        else if (differingArgMask != argMask)
+            return result;
+    }
+
+    // Turn bit mask into argument number and check if only one argument differs
+    qsizetype argNo = -1;
+    if (differingArgMask == AbstractMetaFunction::DifferArgument1)
+        argNo = 0;
+    else if (differingArgMask == AbstractMetaFunction::DifferArgument2)
+        argNo = 1;
+    else if (differingArgMask == AbstractMetaFunction::DifferArgument3)
+        argNo = 2;
+    else if (differingArgMask == AbstractMetaFunction::DifferArgument4)
+        argNo = 3;
+    if (argNo < 0) // Several arguments differ
+        return result;
+
+    // Retrieve list of types of the varying argument
+    // FIXME PYSIDE-7: Refactor using C++ 20 views
+    QStringList types;
+    types.reserve(size);
+    for (const auto &f : overloads) {
+        auto amt = f->arguments().at(argNo).type();
+        if (!amt.passByValue() && !amt.passByConstRef()) // Only simple types so far
+            return result;
+        types.append(amt.isPrimitive()
+                     ? basicReferencedTypeEntry(amt.typeEntry())->name() : amt.name());
+    }
+
+    // Apply rules and compile list of redundant functions
+    for (const auto &rule : removalRules) {
+        if (const auto index = types.indexOf(rule.type); index != -1) {
+            for (const auto &redundantType : rule.redundantTypes) {
+                if (const auto index2 = types.indexOf(redundantType); index2 != -1) {
+                    auto redundant = overloads.at(index2);
+                    if (!result.contains(redundant)) { // nested long->int->short rule?
+                        ReportHandler::addGeneralMessage(msgRemoveRedundantOverload(redundant, rule.type));
+                        result.append(redundant);
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
+
+static bool argCountLessThan(const AbstractMetaFunctionCPtr &f1, const AbstractMetaFunctionCPtr &f2)
+{
+    return f1->arguments().size() < f2->arguments().size();
+}
+
+// For a list of overloads of the same name, remove functions with redundant arguments.
+// as defined by the type system overload removal rules. It is important that the order
+// is preserved, else topological sorting in OverloadData will go haywire.
+static void filterAllFunctions(const OverloadRemovalRules &removalRules,
+                               AbstractMetaFunctionCList *overloads)
+{
+    if (overloads->size() < 2)
+        return;
+    const auto maxArgsIt = std::max_element(overloads->cbegin(), overloads->cend(), argCountLessThan);
+    const auto maxArgs = (*maxArgsIt)->arguments().size();
+    if (maxArgs == 0)
+        return;
+
+    // FIXME PYSIDE-7: Refactor using C++ 20 views
+    for (qsizetype ac = 0; ac <= maxArgs; ++ac) {
+        // Check on lists of the same argument count.
+        AbstractMetaFunctionCList list;
+        auto sameArgumentCount = [ac](const AbstractMetaFunctionCPtr &f) {
+            return f->arguments().size() == ac; };
+        std::copy_if(overloads->cbegin(), overloads->cend(), std::back_inserter(list),
+                     sameArgumentCount);
+        if (list.size() > 1) {
+            const auto redundant = filterFunctions(removalRules, list);
+            for (const auto &r : redundant)
+                overloads->removeAll(r);
+        }
+    }
+}
+
 ShibokenGenerator::FunctionGroups
     ShibokenGenerator::getFunctionGroupsImpl(const AbstractMetaClassCPtr &scope,
                                             AbstractMetaFunctionCList *constructors)
 {
     AbstractMetaFunctionCList lst = scope->functions();
     scope->getFunctionsFromInvisibleNamespacesToBeGenerated(&lst);
+    const OverloadRemovalRules &removalRules = TypeDatabase::instance()->overloadRemovalRules();
 
     FunctionGroups results;
-    for (const auto &func : lst) {
+    for (const auto &func : std::as_const(lst)) {
         if (isGroupable(func)
             && func->ownerClass() == func->implementingClass()
             && func->generateBinding()) {
@@ -2278,6 +2384,8 @@ ShibokenGenerator::FunctionGroups
             }
             getInheritedOverloads(scope, &it.value());
             removeConstOverloads(&it.value());
+            if (!removalRules.isEmpty())
+                filterAllFunctions(removalRules, &it.value());
         }
     }
     return results;

@@ -340,12 +340,6 @@ void AbstractMetaFunction::setOwnerClass(const AbstractMetaClassCPtr &cls)
     d->m_class = cls;
 }
 
-static bool equalArgument(const AbstractMetaArgument &a1,
-                          const AbstractMetaArgument &a2)
-{
-    return a1.type() == a2.type();
-}
-
 /*!
     Returns a mask of CompareResult describing how this function is
     compares to another function
@@ -362,17 +356,34 @@ AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const Abstra
     if (originalName() == other->originalName())
         result.setFlag(EqualName);
 
+    if (isStatic() == other->isStatic())
+        result.setFlag(EqualStatic);
+
+    if (isConstant() == other->isConstant())
+        result.setFlag(EqualConst);
+
+    if (isVirtual()  == other->isVirtual())
+        result.setFlag(EqualVirtual);
+
     // compare name after modification...
     if (modifiedName() == other->modifiedName())
         result.setFlag(EqualModifiedName);
 
     // Compare arguments...
-    if (d->m_arguments.size() == other->arguments().size()) {
+    const auto argumentCount = d->m_arguments.size();
+    const auto &otherArguments = other->arguments();
+    if (argumentCount == otherArguments.size()) {
         result.setFlag(EqualArgumentCount);
-        if (std::equal(d->m_arguments.cbegin(), d->m_arguments.cend(),
-                       other->arguments().cbegin(), equalArgument)) {
-            result.setFlag(EqualArguments);
+        bool equals = true;
+        for (qsizetype a = 0; a < argumentCount; ++a) {
+            if ((d->m_arguments.at(a).type() != otherArguments.at(a).type())) {
+                equals = false;
+                if (a < 4)
+                    result.setFlag(CompareResultFlag(DifferArgument1 << a));
+            }
         }
+        if (equals)
+            result.setFlag(EqualArguments);
     }
 
     return result;

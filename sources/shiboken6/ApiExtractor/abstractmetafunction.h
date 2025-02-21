@@ -73,11 +73,20 @@ public:
     Q_ENUM(ComparisonOperatorType)
 
     enum CompareResultFlag {
-        EqualName                   = 0x00000001,
-        EqualArgumentCount          = 0x00000002,
-        EqualArguments              = 0x00000004,
-        EqualReturnType             = 0x00000010,
-        EqualModifiedName           = 0x00000040,
+        EqualName            = 0x0001,
+        EqualModifiedName    = 0x0002,
+        EqualVirtual         = 0x0004,
+        EqualStatic          = 0x0008,
+        EqualConst           = 0x0010,
+        EqualReturnType      = 0x0020,
+        EqualArgumentCount   = 0x0040,
+        EqualArguments       = 0x0080,
+        DifferArgument1      = 0x0100, // Argument 1 is different
+        DifferArgument2      = 0x0200,
+        DifferArgument3      = 0x0400,
+        DifferArgument4      = 0x0800,
+        Differ4ArgumentsMask = 0x0f00,
+        EqualAll             = 0xffff
     };
     Q_DECLARE_FLAGS(CompareResult, CompareResultFlag)
     Q_FLAG(CompareResultFlag)

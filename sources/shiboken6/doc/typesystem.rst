@@ -39,6 +39,7 @@ Modifying types
    :maxdepth: 1
 
    Function argument modifications <typesystem_arguments.rst>
+   typesystem_overloads.rst
    typesystem_codeinjection.rst
    typesystem_converters.rst
    typesystem_containers.rst

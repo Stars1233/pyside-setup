@@ -21,6 +21,16 @@
         <include file-name="qtcorehelper.h" location="local"/>
     </extra-includes>
 
+    <overload-removal type="QString" replaces="QStringView"/>
+    <overload-removal type="double" replaces="float"/>
+    <overload-removal type="unsigned int" replaces="unsigned short"/> <!-- Order is important here -->
+    <overload-removal type="unsigned long" replaces="unsigned short"/>
+    <overload-removal type="unsigned" replaces="unsigned short"/>
+    <overload-removal type="unsigned long long" replaces="unsigned;unsigned int;unsigned long"/>
+    <overload-removal type="int" replaces="short;std::chrono::milliseconds"/>
+    <overload-removal type="long" replaces="short"/>
+    <overload-removal type="long long" replaces="long;int"/>
+
     <function signature="qFastCos(qreal)" since="4.6"/>
     <function signature="qFastSin(qreal)" since="4.6"/>
     <function signature="qFuzzyCompare(double,double)"/>

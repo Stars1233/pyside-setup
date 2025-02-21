@@ -1061,3 +1061,11 @@ QString msgCannotCall(const AbstractMetaFunctionCPtr &func,
         str << " There is no conversion rule.";
     return result;
 }
+
+QString msgRemoveRedundantOverload(const AbstractMetaFunctionCPtr &func,
+                                   const QString &type)
+{
+    return "Removing \""_L1 + func->classQualifiedSignature()
+           + "\" due to presence of an overload taking a \""_L1
+           + type + "\" parameter."_L1;
+}

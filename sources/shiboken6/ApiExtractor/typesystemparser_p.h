@@ -106,6 +106,7 @@ enum class StackElement {
             ImportFile,
             OpaqueContainer,
             Configuration,
+            OverloadRemoval,
             Unimplemented
 };
 
@@ -213,6 +214,7 @@ private:
                                     QXmlStreamAttributes *);
     bool parseConfiguration(StackElement topElement,
                             QXmlStreamAttributes *attributes);
+    bool parseOverloadRemoval(StackElement topElement, QXmlStreamAttributes *attributes);
     bool parseRenameFunction(const ConditionalStreamReader &, QString *name,
                              QXmlStreamAttributes *);
     bool parseInjectDocumentation(const ConditionalStreamReader &, StackElement topElement,
