@@ -132,6 +132,22 @@ For *Qt Creator* to load and handle Python based projects, a special file is
 needed, because C++ based projects could be handle from ``.qmake`` or
 ``CMakeLists.txt`` file, which are not used with Python-based projects.
 
+The deprecated ``*.pyproject`` project files use JSON format.
+Here is an example of such file:
+
+.. code-block:: javascript
+
+    {
+        "files": ["library/server.py", "library/client.py", "logger.py"]
+    }
+
+*Qt Creator* 16.0 added support for the pyproject.toml file format, which
+is the modern standard for Python projects. PySide6 6.9.0 introduced support
+for this format, and it is recommended to use it. In order to migrate a
+.pyproject file, see `Migrating from *.pyproject to pyproject.toml`
+<https://doc.qt.io/qtforpython-6/tools/pyside6-project.html
+#migrating_from_pyproject_to_pyproject_toml>`_
+
 Old versions of *Qt Creator*, provided a simple format with the ``.pyqtc``
 extension, which were plain-text files with one-file-per-line::
 
@@ -139,14 +155,3 @@ extension, which were plain-text files with one-file-per-line::
     library/client.py
     logger.py
     ...
-
-There were limitations to this format, and further options that might be
-added that would not be supported, which was the motivation to create a
-``.pyproject`` file, which is a JSON-based file where more options could
-be added. Here is an example of such file:
-
-.. code-block:: javascript
-
-    {
-        "files": ["library/server.py", "library/client.py", "logger.py", ...]
-    }
