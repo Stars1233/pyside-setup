@@ -7,9 +7,10 @@ from dataclasses import dataclass
 QTPATHS_CMD = "qtpaths6"
 MOD_CMD = "pyside6-metaobjectdump"
 
+PYPROJECT_TOML_PATTERN = "pyproject.toml"
 PYPROJECT_JSON_PATTERN = "*.pyproject"
 # Note that the order is important, as the first pattern that matches is used
-PYPROJECT_FILE_PATTERNS = [PYPROJECT_JSON_PATTERN]
+PYPROJECT_FILE_PATTERNS = [PYPROJECT_TOML_PATTERN, PYPROJECT_JSON_PATTERN]
 QMLDIR_FILE = "qmldir"
 
 QML_IMPORT_NAME = "QML_IMPORT_NAME"
@@ -48,4 +49,5 @@ from .project_data import (is_python_file, ProjectData, QmlProjectData,
                            check_qml_decorators)
 from .newproject import new_project, NewProjectTypes
 from .design_studio_project import DesignStudioProject
+from .pyproject_toml import parse_pyproject_toml, write_pyproject_toml, migrate_pyproject
 from .pyproject_json import parse_pyproject_json

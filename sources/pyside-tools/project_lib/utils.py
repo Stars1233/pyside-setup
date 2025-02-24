@@ -7,7 +7,9 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from . import QTPATHS_CMD, PYPROJECT_JSON_PATTERN, PYPROJECT_FILE_PATTERNS, ClOptions
+from . import (QTPATHS_CMD, PYPROJECT_JSON_PATTERN, PYPROJECT_TOML_PATTERN, PYPROJECT_FILE_PATTERNS,
+               ClOptions)
+from .pyproject_toml import parse_pyproject_toml
 from .pyproject_json import parse_pyproject_json
 
 
@@ -138,16 +140,19 @@ def resolve_valid_project_file(
     If the provided file name is a valid project file, return it. Otherwise, search for a known
     project file in the current working directory with the given patterns.
 
-    Raises a ValueError if no project file is found or multiple project files are found in the same
-    directory.
+    Raises a ValueError if no project file is found, multiple project files are found in the same
+    directory or the provided path is not a valid project file or folder.
 
-    :param project_path_input: The command-line argument specifying a project file path.
+    :param project_path_input: The command-line argument specifying a project file or folder path.
     :param project_file_patterns: The list of project file patterns to search for.
 
-    :return: The resolved project file path if found, otherwise None.
+    :return: The resolved project file path
     """
     if project_path_input and (project_file := Path(project_path_input).resolve()).is_file():
-        if project_file.match(PYPROJECT_JSON_PATTERN):
+        if project_file.match(PYPROJECT_TOML_PATTERN):
+            if bool(parse_pyproject_toml(project_file).errors):
+                raise ValueError(f"Invalid project file: {project_file}")
+        elif project_file.match(PYPROJECT_JSON_PATTERN):
             pyproject_json_result = parse_pyproject_json(project_file)
             if errors := '\n'.join(str(e) for e in pyproject_json_result.errors):
                 raise ValueError(f"Invalid project file: {project_file}\n{errors}")
@@ -163,8 +168,7 @@ def resolve_valid_project_file(
 
     # Search a project file in the project folder using the provided patterns
     for pattern in project_file_patterns:
-        matches = list(project_folder.glob(pattern))
-        if not matches:
+        if not (matches := list(project_folder.glob(pattern))):
             # No project files found with the specified pattern
             continue
 
@@ -174,7 +178,12 @@ def resolve_valid_project_file(
 
         project_file = matches[0]
 
-        if pattern == PYPROJECT_JSON_PATTERN:
+        if pattern == PYPROJECT_TOML_PATTERN:
+            if parse_pyproject_toml(project_file).errors:
+                # Invalid file, but a .pyproject file may exist
+                # We can not raise an error due to ensuring backward compatibility
+                continue
+        elif pattern == PYPROJECT_JSON_PATTERN:
             pyproject_json_result = parse_pyproject_json(project_file)
             if errors := '\n'.join(str(e) for e in pyproject_json_result.errors):
                 raise ValueError(f"Invalid project file: {project_file}\n{errors}")

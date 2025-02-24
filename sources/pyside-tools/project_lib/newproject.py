@@ -2,13 +2,14 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
-import json
 import os
 import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Callable
+
+from .pyproject_toml import write_pyproject_toml
+from .pyproject_json import write_pyproject_json
 
 """New project generation code."""
 
@@ -19,22 +20,18 @@ _WIDGET_MAIN = """if __name__ == '__main__':
     sys.exit(app.exec())
 """
 
-
 _WIDGET_IMPORTS = """import sys
 from PySide6.QtWidgets import QApplication, QMainWindow
 """
-
 
 _WIDGET_CLASS_DEFINITION = """class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 """
 
-
 _WIDGET_SETUP_UI_CODE = """        self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
 """
-
 
 _MAINWINDOW_FORM = """<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
@@ -67,7 +64,6 @@ _MAINWINDOW_FORM = """<?xml version="1.0" encoding="UTF-8"?>
 </ui>
 """
 
-
 _QUICK_FORM = """import QtQuick
 import QtQuick.Controls
 
@@ -99,18 +95,17 @@ if __name__ == "__main__":
     sys.exit(exit_code)
 """
 
+NewProjectFiles = list[tuple[str, str]]  # tuple of (filename, contents).
+
 
 @dataclass(frozen=True)
 class NewProjectType:
     command: str
     description: str
-    get_files: Callable
+    files: NewProjectFiles
 
 
-NewProjectFiles = list[tuple[str, str]]  # tuple of (filename, contents).
-
-
-def _write_project(directory: Path, files: NewProjectFiles):
+def _write_project(directory: Path, files: NewProjectFiles, legacy_pyproject: bool):
     """
     Create the project files in the specified directory.
 
@@ -123,9 +118,12 @@ def _write_project(directory: Path, files: NewProjectFiles):
         print(f"Wrote {directory.name}{os.sep}{file_name}.")
         file_names.append(file_name)
 
-    pyproject = {"files": files}
-    pyproject_file = f"{directory}.pyproject"
-    (directory / pyproject_file).write_text(json.dumps(pyproject))
+    if legacy_pyproject:
+        pyproject_file = directory / f"{directory.name}.pyproject"
+        write_pyproject_json(pyproject_file, file_names)
+    else:
+        pyproject_file = directory / "pyproject.toml"
+        write_pyproject_toml(pyproject_file, directory.name, file_names)
     print(f"Wrote {pyproject_file}.")
 
 
@@ -153,16 +151,19 @@ def _qml_project() -> NewProjectFiles:
 
 
 class NewProjectTypes(Enum):
-    QUICK = NewProjectType("new-quick", "Create a new Qt Quick project", _qml_project)
-    WIDGET_FORM = NewProjectType("new-ui", "Create a new Qt Widgets Form project", _ui_form_project)
-    WIDGET = NewProjectType("new-widget", "Create a new Qt Widgets project", _widget_project)
+    QUICK = NewProjectType("new-quick", "Create a new Qt Quick project", _qml_project())
+    WIDGET_FORM = NewProjectType("new-ui", "Create a new Qt Widgets Form project",
+                                 _ui_form_project())
+    WIDGET = NewProjectType("new-widget", "Create a new Qt Widgets project", _widget_project())
 
     @staticmethod
     def find_by_command(command: str) -> NewProjectType | None:
         return next((pt.value for pt in NewProjectTypes if pt.value.command == command), None)
 
 
-def new_project(project_dir: Path, project_type: NewProjectType) -> int:
+def new_project(
+    project_dir: Path, project_type: NewProjectType, legacy_pyproject: bool
+) -> int:
     """
     Create a new project at the specified project_dir directory.
 
@@ -176,15 +177,13 @@ def new_project(project_dir: Path, project_type: NewProjectType) -> int:
         return 1
     project_dir.mkdir(parents=True, exist_ok=True)
 
-    files = project_type.get_files()
-
     try:
-        _write_project(project_dir, files)
+        _write_project(project_dir, project_type.files, legacy_pyproject)
     except Exception as e:
         print(f"Error creating project file: {str(e)}", file=sys.stderr)
         return 1
 
     if project_type == NewProjectTypes.WIDGET_FORM:
         print(f'Run "pyside6-project build {project_dir}" to build the project')
-    print(f'Run "pyside6-project run {project_dir}{os.sep}main.py" to run the project')
+    print(f'Run "pyside6-project run {project_dir / "main.py"}" to run the project')
     return 0

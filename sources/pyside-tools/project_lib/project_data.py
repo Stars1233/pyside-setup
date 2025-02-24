@@ -7,9 +7,10 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from . import (METATYPES_JSON_SUFFIX, PYPROJECT_JSON_PATTERN,
+from . import (METATYPES_JSON_SUFFIX, PYPROJECT_JSON_PATTERN, PYPROJECT_TOML_PATTERN,
                PYPROJECT_FILE_PATTERNS, TRANSLATION_SUFFIX, qt_metatype_json_dir, MOD_CMD,
                QML_IMPORT_MAJOR_VERSION, QML_IMPORT_MINOR_VERSION, QML_IMPORT_NAME, QT_MODULES)
+from .pyproject_toml import parse_pyproject_toml
 from .pyproject_json import parse_pyproject_json
 
 
@@ -40,6 +41,8 @@ class ProjectData:
 
         if project_file.match(PYPROJECT_JSON_PATTERN):
             project_file_data = parse_pyproject_json(project_file)
+        elif project_file.match(PYPROJECT_TOML_PATTERN):
+            project_file_data = parse_pyproject_toml(project_file)
         else:
             print(f"Unknown project file format: {project_file}", file=sys.stderr)
             sys.exit(1)

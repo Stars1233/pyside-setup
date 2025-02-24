@@ -6,6 +6,21 @@ from pathlib import Path
 from .pyproject_parse_result import PyProjectParseResult
 
 
+def write_pyproject_json(pyproject_file: Path, project_files: list[str]):
+    """
+    Create or update a *.pyproject file with the specified content.
+
+    :param pyproject_file: The *.pyproject file path to create or update.
+    :param project_files: The relative paths of the files to include in the project.
+    """
+    # The content of the file is fully replaced, so it is not necessary to read and merge any
+    # existing content
+    content = {
+        "files": sorted(project_files),
+    }
+    pyproject_file.write_text(json.dumps(content), encoding="utf-8")
+
+
 def parse_pyproject_json(pyproject_json_file: Path) -> PyProjectParseResult:
     """
     Parse a pyproject.json file and return a PyProjectParseResult object.

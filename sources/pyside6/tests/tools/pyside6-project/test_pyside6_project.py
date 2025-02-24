@@ -90,7 +90,7 @@ class TestPySide6ProjectNew(PySide6ProjectTestBase):
         with self.assertRaises(SystemExit) as context:
             self.project.main(mode="new-ui", project_dir="TestProject")
         test_project_path = Path("TestProject")
-        self.assertTrue((test_project_path / "TestProject.pyproject").exists())
+        self.assertTrue((test_project_path / "pyproject.toml").exists())
         self.assertTrue((test_project_path / "mainwindow.ui").exists())
         self.assertTrue((test_project_path / "main.py").exists())
         self.assertEqual(context.exception.code, 0)
@@ -111,7 +111,7 @@ class TestPySide6ProjectNew(PySide6ProjectTestBase):
         with self.assertRaises(SystemExit) as context:
             self.project.main(mode="new-quick", project_dir="TestProject")
         test_project_path = Path("TestProject")
-        self.assertTrue((test_project_path / "TestProject.pyproject").exists())
+        self.assertTrue((test_project_path / "pyproject.toml").exists())
         self.assertTrue((test_project_path / "main.qml").exists())
         self.assertTrue((test_project_path / "main.py").exists())
         self.assertEqual(context.exception.code, 0)
@@ -121,7 +121,7 @@ class TestPySide6ProjectNew(PySide6ProjectTestBase):
         with self.assertRaises(SystemExit) as context:
             self.project.main(mode="new-widget", project_dir="TestProject")
         test_project_path = Path("TestProject")
-        self.assertTrue((test_project_path / "TestProject.pyproject").exists())
+        self.assertTrue((test_project_path / "pyproject.toml").exists())
         self.assertTrue((test_project_path / "main.py").exists())
         self.assertEqual(context.exception.code, 0)
         shutil.rmtree(test_project_path)

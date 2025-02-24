@@ -7,11 +7,11 @@ import os
 from pathlib import Path
 from argparse import ArgumentParser, RawTextHelpFormatter
 
-from project_lib import (QmlProjectData, check_qml_decorators, is_python_file,
-                         QMLDIR_FILE, MOD_CMD, METATYPES_JSON_SUFFIX,
-                         SHADER_SUFFIXES, TRANSLATION_SUFFIX, requires_rebuild, run_command,
-                         remove_path, ProjectData, resolve_valid_project_file, new_project,
-                         NewProjectTypes, ClOptions, DesignStudioProject)
+from project_lib import (QmlProjectData, check_qml_decorators, is_python_file, migrate_pyproject,
+                         QMLDIR_FILE, MOD_CMD, METATYPES_JSON_SUFFIX, SHADER_SUFFIXES,
+                         TRANSLATION_SUFFIX, requires_rebuild, run_command, remove_path,
+                         ProjectData, resolve_valid_project_file, new_project, NewProjectTypes,
+                         ClOptions, DesignStudioProject)
 
 DESCRIPTION = """
 pyside6-project is a command line tool for creating, building and deploying Qt for Python
@@ -29,6 +29,7 @@ OPERATION_HELP = {
     "qmllint": "Run the qmllint tool on QML files in the project.",
     "deploy": "Create a deployable package of the application including all dependencies.",
     "lupdate": "Update translation files (.ts) with new strings from source files.",
+    "migrate-pyproject": "Migrate a *.pyproject file to pyproject.toml format."
 }
 
 UIC_CMD = "pyside6-uic"
@@ -263,7 +264,8 @@ class Project:
 
 
 def main(mode: str = None, dry_run: bool = False, quiet: bool = False, force: bool = False,
-         qml_module: bool = None, project_dir: str = None, project_path: str = None):
+         qml_module: bool = None, project_dir: str = None, project_path: str = None,
+         legacy_pyproject: bool = False):
     cl_options = ClOptions(dry_run=dry_run, quiet=quiet,  # noqa: F841
                            force=force, qml_module=qml_module)
 
@@ -281,7 +283,10 @@ def main(mode: str = None, dry_run: bool = False, quiet: bool = False, force: bo
             print("Invalid project name", file=sys.stderr)
             sys.exit(1)
 
-        sys.exit(new_project(project_dir, new_project_type))
+        sys.exit(new_project(project_dir, new_project_type, legacy_pyproject))
+
+    if mode == "migrate-pyproject":
+        sys.exit(migrate_pyproject(project_path))
 
     try:
         project_file = resolve_valid_project_file(project_path)
@@ -325,6 +330,9 @@ if __name__ == "__main__":
         new_parser.add_argument(
             "project_dir", help="Name or location of the new project", nargs="?", type=str)
 
+        new_parser.add_argument(
+            "--legacy-pyproject", action="store_true", help="Create a legacy *.pyproject file")
+
     # Add subparser for project operation commands
     for op_mode, op_help in OPERATION_HELP.items():
         op_parser = subparsers.add_parser(op_mode, help=op_help)
@@ -333,4 +341,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args.mode, args.dry_run, args.quiet, args.force, args.qml_module,
-         getattr(args, "project_dir", None), getattr(args, "project_path", None))
+         getattr(args, "project_dir", None), getattr(args, "project_path", None),
+         getattr(args, "legacy_pyproject", None))
