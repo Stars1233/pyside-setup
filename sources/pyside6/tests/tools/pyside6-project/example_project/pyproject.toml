@@ -1,0 +1,5 @@
+[project]
+name = "example_project"
+
+[tool.pyside6-project]
+files = ["folder/file_in_folder.py", "main.py", "mainwindow.py", "my_widget.py", "subproject/subproject.pyproject"]

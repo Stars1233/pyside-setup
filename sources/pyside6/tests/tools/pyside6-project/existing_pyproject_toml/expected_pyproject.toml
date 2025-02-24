@@ -1,0 +1,22 @@
+[project]
+name = "my_project"
+version = "0.1.0"
+description = "A sample Python project"
+authors = [
+    { name = "John Doe", email = "john.doe@example.com" },
+]
+optional-dependencies = { dev = ["pytest", "black"], docs = ["sphinx"] }
+
+# Comment
+
+[tool.black]
+line-length = 88
+target-version = ["py38"]
+
+# Another comment
+
+[tool.pyside6-project]
+files = ["main.py", "zzz.py"]
+[build-system]
+requires = ["setuptools >=42"]
+build-backend = "setuptools.build_meta"

@@ -1,0 +1,5 @@
+[project]
+name = "Drumpad"
+
+[tool.pyside6-project]
+files = ["autogen/settings.py", "main.py"]

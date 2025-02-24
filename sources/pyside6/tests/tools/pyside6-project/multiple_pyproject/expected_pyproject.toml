@@ -1,0 +1,5 @@
+[project]
+name = "multiple_pyproject"
+
+[tool.pyside6-project]
+files = ["common_file.py", "file1.py", "file2.py"]
