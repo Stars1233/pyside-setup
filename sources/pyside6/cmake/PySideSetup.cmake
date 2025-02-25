@@ -170,7 +170,20 @@ collect_optional_modules()
 # Modules to be built unless specified by -DMODULES on command line
 if(NOT MODULES)
     set(MODULES "${ALL_ESSENTIAL_MODULES};${ALL_OPTIONAL_MODULES}")
+    set(required_modules ${ALL_ESSENTIAL_MODULES})
+    set(optional_modules ${ALL_OPTIONAL_MODULES})
+else()
+    set(required_modules ${MODULES})
+    set(optional_modules)
 endif()
+list(REMOVE_ITEM MODULES ${SKIP_MODULES})
+list(REMOVE_ITEM required_modules ${SKIP_MODULES})
+list(REMOVE_ITEM optional_modules ${SKIP_MODULES})
+
+find_package(Qt6
+    COMPONENTS ${required_modules}
+    OPTIONAL_COMPONENTS ${optional_modules}
+)
 
 # This will contain the set of modules for which bindings are not built.
 set(DISABLED_MODULES "${ALL_ESSENTIAL_MODULES};${ALL_OPTIONAL_MODULES}")

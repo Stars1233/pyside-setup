@@ -173,13 +173,6 @@ macro(use_protected_as_public_hack)
 endmacro()
 
 macro(remove_skipped_modules)
-    # Removing from the MODULES list the items that were defined with
-    # -DSKIP_MODULES on command line
-    if(SKIP_MODULES)
-        foreach(s ${SKIP_MODULES})
-            list(REMOVE_ITEM MODULES ${s})
-        endforeach()
-    endif()
 
     foreach(m ${MODULES})
         collect_module_if_found(${m})
@@ -221,7 +214,6 @@ macro(collect_module_if_found shortname)
         set(quiet_argument "QUIET")
     endif()
 
-    find_package(${_qt_module_name} ${quiet_argument})
     # If package is found, _name_found will be equal to 1
     set(_name_found "${_qt_module_name}_FOUND")
     # _name_dir will keep the path to the directory where the CMake rules were found
