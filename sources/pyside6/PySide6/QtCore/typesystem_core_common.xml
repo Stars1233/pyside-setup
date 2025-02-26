@@ -150,7 +150,6 @@
   <rejection class="*" argument-type="Qt::Initialization"/>
 
   <rejection class="*" argument-type="FILE*"/>
-  <rejection class="*" argument-type="std::chrono::milliseconds"/>
   <rejection class="*" argument-type="^std::nullptr_t&amp;?$"/>
   <rejection class="*" argument-type="^std::initializer_list&lt;.*$"/>
 
@@ -195,6 +194,19 @@
   <?if linux?>
   <primitive-type name="Qt::HANDLE" target-lang-api-name="PyLong"/>
   <?endif?>
+
+  <primitive-type name="std::chrono::milliseconds" target-lang-api-name="PyLong">
+    <extra-includes>
+        <include file-name="chrono" location="global"/>
+    </extra-includes>
+    <conversion-rule>
+        <native-to-target file="../glue/qtcore.cpp" snippet="chrono-to-pylong"/>
+        <target-to-native>
+            <add-conversion type="PyLong" file="../glue/qtcore.cpp"
+                            snippet="pylong-to-chrono-milliseconds"/>
+        </target-to-native>
+    </conversion-rule>
+  </primitive-type>
 
   <!-- Qt5: add the new pointer-ish types -->
   <primitive-type name="qintptr" target-lang-api-name="PyLong">
