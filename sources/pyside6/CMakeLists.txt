@@ -9,6 +9,8 @@ cmake_policy(VERSION 3.18)
 include(".cmake.conf")
 project(pysidebindings)
 
+set(QT_NO_PRIVATE_MODULE_WARNING ON)
+
 include(cmake/PySideSetup.cmake)
 
 get_rpath_base_token(base)

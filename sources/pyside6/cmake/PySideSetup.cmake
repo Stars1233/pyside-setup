@@ -97,7 +97,8 @@ if(QFP_QT_HOST_PATH)
         endif()
     endif()
 endif()
-find_package(Qt6 REQUIRED COMPONENTS Core)
+# Find QtGui private headers for exposing some QPA classes
+find_package(Qt6 REQUIRED COMPONENTS Core CorePrivate Gui GuiPrivate)
 
 add_definitions(${Qt${QT_MAJOR_VERSION}Core_DEFINITIONS})
 

@@ -235,9 +235,10 @@ macro(collect_module_if_found shortname)
         # record the shortnames for the tests
         list(APPEND all_module_shortnames ${shortname})
         # Build Qt 5 compatibility variables
-        if(${QT_MAJOR_VERSION} GREATER_EQUAL 6 AND NOT "${shortname}" STREQUAL "OpenGLFunctions")
-            get_target_property(Qt6${shortname}_INCLUDE_DIRS Qt6::${shortname}
-                                INTERFACE_INCLUDE_DIRECTORIES)
+        get_target_property(Qt6${shortname}_INCLUDE_DIRS Qt6::${shortname}
+                            INTERFACE_INCLUDE_DIRECTORIES)
+        # Find QtGui private headers for exposing some QPA classes
+        if("${shortname}" STREQUAL "Gui")
             get_target_property(Qt6${shortname}_PRIVATE_INCLUDE_DIRS
                                 Qt6::${shortname}Private
                                 INTERFACE_INCLUDE_DIRECTORIES)
