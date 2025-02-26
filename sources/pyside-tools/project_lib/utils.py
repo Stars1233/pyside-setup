@@ -2,23 +2,36 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
-import sys
 import subprocess
-from pathlib import Path
+import sys
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
-from . import QTPATHS_CMD, PROJECT_FILE_SUFFIX, ClOptions
+from . import QTPATHS_CMD, PYPROJECT_JSON_PATTERN, PYPROJECT_FILE_PATTERNS, ClOptions
+from .pyproject_json import parse_pyproject_json
 
 
-def run_command(command: list[str], cwd: str = None, ignore_fail: bool = False):
-    """Run a command observing quiet/dry run"""
+def run_command(command: list[str], cwd: str = None, ignore_fail: bool = False) -> int:
+    """
+    Run a command using a subprocess.
+    If dry run is enabled, the command will be printed to stdout instead of being executed.
+
+    :param command: The command to run including the arguments
+    :param cwd: The working directory to run the command in
+    :param ignore_fail: If True, the current process will not exit if the command fails
+
+    :return: The exit code of the command
+    """
     cloptions = ClOptions()
     if not cloptions.quiet or cloptions.dry_run:
         print(" ".join(command))
-    if not cloptions.dry_run:
-        ex = subprocess.call(command, cwd=cwd)
-        if ex != 0 and not ignore_fail:
-            sys.exit(ex)
+    if cloptions.dry_run:
+        return 0
+
+    ex = subprocess.call(command, cwd=cwd)
+    if ex != 0 and not ignore_fail:
+        sys.exit(ex)
+    return ex
 
 
 def qrc_file_requires_rebuild(resources_file_path: Path, compiled_resources_path: Path) -> bool:
@@ -46,7 +59,7 @@ def requires_rebuild(sources: list[Path], artifact: Path) -> bool:
         if source.stat().st_mtime > artifact_mod_time:
             return True
         # The .qrc file references other files that might have changed
-        if source.suffix == '.qrc' and qrc_file_requires_rebuild(source, artifact):
+        if source.suffix == ".qrc" and qrc_file_requires_rebuild(source, artifact):
             return True
     return False
 
@@ -115,13 +128,58 @@ def qt_metatype_json_dir() -> Path:
     return _qt_metatype_json_dir
 
 
-def resolve_project_file(cmdline: str) -> Path | None:
-    """Return the project file from the command  line value, either
-    from the file argument or directory"""
-    project_file = Path(cmdline).resolve() if cmdline else Path.cwd()
-    if project_file.is_file():
+def resolve_valid_project_file(
+    project_path_input: str = None, project_file_patterns: list[str] = PYPROJECT_FILE_PATTERNS
+) -> Path:
+    """
+    Find a valid project file given a preferred project file name and a list of project file name
+    patterns for a fallback search.
+
+    If the provided file name is a valid project file, return it. Otherwise, search for a known
+    project file in the current working directory with the given patterns.
+
+    Raises a ValueError if no project file is found or multiple project files are found in the same
+    directory.
+
+    :param project_path_input: The command-line argument specifying a project file path.
+    :param project_file_patterns: The list of project file patterns to search for.
+
+    :return: The resolved project file path if found, otherwise None.
+    """
+    if project_path_input and (project_file := Path(project_path_input).resolve()).is_file():
+        if project_file.match(PYPROJECT_JSON_PATTERN):
+            pyproject_json_result = parse_pyproject_json(project_file)
+            if errors := '\n'.join(str(e) for e in pyproject_json_result.errors):
+                raise ValueError(f"Invalid project file: {project_file}\n{errors}")
+        else:
+            raise ValueError(f"Unknown project file: {project_file}")
         return project_file
-    if project_file.is_dir():
-        for m in project_file.glob(f"*{PROJECT_FILE_SUFFIX}"):
-            return m
-    return None
+
+    project_folder = Path.cwd()
+    if project_path_input:
+        if not Path(project_path_input).resolve().is_dir():
+            raise ValueError(f"Invalid project path: {project_path_input}")
+        project_folder = Path(project_path_input).resolve()
+
+    # Search a project file in the project folder using the provided patterns
+    for pattern in project_file_patterns:
+        matches = list(project_folder.glob(pattern))
+        if not matches:
+            # No project files found with the specified pattern
+            continue
+
+        if len(matches) > 1:
+            matched_files = '\n'.join(str(f) for f in matches)
+            raise ValueError(f"Multiple project files found:\n{matched_files}")
+
+        project_file = matches[0]
+
+        if pattern == PYPROJECT_JSON_PATTERN:
+            pyproject_json_result = parse_pyproject_json(project_file)
+            if errors := '\n'.join(str(e) for e in pyproject_json_result.errors):
+                raise ValueError(f"Invalid project file: {project_file}\n{errors}")
+
+        # Found a valid project file
+        return project_file
+
+    raise ValueError("No project file found in the current directory")

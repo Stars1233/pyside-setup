@@ -7,7 +7,9 @@ from dataclasses import dataclass
 QTPATHS_CMD = "qtpaths6"
 MOD_CMD = "pyside6-metaobjectdump"
 
-PROJECT_FILE_SUFFIX = ".pyproject"
+PYPROJECT_JSON_PATTERN = "*.pyproject"
+# Note that the order is important, as the first pattern that matches is used
+PYPROJECT_FILE_PATTERNS = [PYPROJECT_JSON_PATTERN]
 QMLDIR_FILE = "qmldir"
 
 QML_IMPORT_NAME = "QML_IMPORT_NAME"
@@ -41,8 +43,9 @@ class ClOptions(metaclass=Singleton):
 
 
 from .utils import (run_command, requires_rebuild, remove_path, package_dir, qtpaths,
-                    qt_metatype_json_dir, resolve_project_file)
+                    qt_metatype_json_dir, resolve_valid_project_file)
 from .project_data import (is_python_file, ProjectData, QmlProjectData,
                            check_qml_decorators)
-from .newproject import new_project, ProjectType
+from .newproject import new_project, NewProjectTypes
 from .design_studio_project import DesignStudioProject
+from .pyproject_json import parse_pyproject_json

@@ -2,23 +2,6 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
-"""
-Builds a '.pyproject' file
-
-Builds Qt Designer forms, resource files and QML type files
-
-Deploys the application by creating an executable for the corresponding platform
-
-For each entry in a '.pyproject' file:
-- <name>.pyproject: Recurse to handle subproject
-- <name>.qrc      : Runs the resource compiler to create a file rc_<name>.py
-- <name>.ui       : Runs the user interface compiler to create a file ui_<name>.py
-
-For a Python file declaring a QML module, a directory matching the URI is
-created and populated with .qmltypes and qmldir files for use by code analysis
-tools. Currently, only one QML module consisting of several classes can be
-handled per project file.
-"""
 import sys
 import os
 from pathlib import Path
@@ -26,21 +9,27 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 
 from project_lib import (QmlProjectData, check_qml_decorators, is_python_file,
                          QMLDIR_FILE, MOD_CMD, METATYPES_JSON_SUFFIX,
-                         SHADER_SUFFIXES, TRANSLATION_SUFFIX,
-                         requires_rebuild, run_command, remove_path,
-                         ProjectData, resolve_project_file, new_project,
-                         ProjectType, ClOptions, DesignStudioProject)
+                         SHADER_SUFFIXES, TRANSLATION_SUFFIX, requires_rebuild, run_command,
+                         remove_path, ProjectData, resolve_valid_project_file, new_project,
+                         NewProjectTypes, ClOptions, DesignStudioProject)
 
-MODE_HELP = """build    Builds the project
-run        Builds the project and runs the first file")
-clean      Cleans the build artifacts")
-qmllint    Runs the qmllint tool
-deploy     Deploys the application
-lupdate    Updates translation (.ts) files
-new-ui     Creates a new QtWidgets project with a Qt Designer-based main window
-new-widget Creates a new QtWidgets project with a main window
-new-quick  Creates a new QtQuick project
+DESCRIPTION = """
+pyside6-project is a command line tool for creating, building and deploying Qt for Python
+applications. It operates on project files which are also used by Qt Creator.
+
+Official documentation:
+https://doc.qt.io/qtforpython-6/tools/pyside-project.html
 """
+
+OPERATION_HELP = {
+    "build": "Build the project. Compiles resources, UI files, and QML files if existing and "
+             "necessary.",
+    "run": "Build and run the project.",
+    "clean": "Clean build artifacts and generated files from the project directory.",
+    "qmllint": "Run the qmllint tool on QML files in the project.",
+    "deploy": "Create a deployable package of the application including all dependencies.",
+    "lupdate": "Update translation files (.ts) with new strings from source files.",
+}
 
 UIC_CMD = "pyside6-uic"
 RCC_CMD = "pyside6-rcc"
@@ -50,10 +39,6 @@ QMLTYPEREGISTRAR_CMD = "pyside6-qmltyperegistrar"
 QMLLINT_CMD = "pyside6-qmllint"
 QSB_CMD = "pyside6-qsb"
 DEPLOY_CMD = "pyside6-deploy"
-
-NEW_PROJECT_TYPES = {"new-quick": ProjectType.QUICK,
-                     "new-ui": ProjectType.WIDGET_FORM,
-                     "new-widget": ProjectType.WIDGET}
 
 
 def _sort_sources(files: list[Path]) -> list[Path]:
@@ -200,11 +185,11 @@ class Project:
 
         self._regenerate_qmldir()
 
-    def run(self):
+    def run(self) -> int:
         """Runs the project"""
         self.build()
         cmd = [sys.executable, str(self.project.main_file)]
-        run_command(cmd, cwd=self.project.project_file.parent)
+        return run_command(cmd, cwd=self.project.project_file.parent)
 
     def _clean_file(self, source: Path):
         """Clean an artifact."""
@@ -277,27 +262,38 @@ class Project:
                 run_command(cmd, cwd=project_dir)
 
 
-def main(mode: str = None, file: str = None, dry_run: bool = False, quiet: bool = False,
-         force: bool = False, qml_module: bool = None):
+def main(mode: str = None, dry_run: bool = False, quiet: bool = False, force: bool = False,
+         qml_module: bool = None, project_dir: str = None, project_path: str = None):
     cl_options = ClOptions(dry_run=dry_run, quiet=quiet,  # noqa: F841
                            force=force, qml_module=qml_module)
 
-    new_project_type = NEW_PROJECT_TYPES.get(mode)
-    if new_project_type:
-        if not file:
-            print(f"{mode} requires a directory name.", file=sys.stderr)
+    if new_project_type := NewProjectTypes.find_by_command(mode):
+        if not project_dir:
+            print(f"Error creating new project: {mode} requires a directory name or path",
+                  file=sys.stderr)
             sys.exit(1)
-        sys.exit(new_project(file, new_project_type))
 
-    project_file = resolve_project_file(file)
-    if not project_file:
-        print(f"Cannot determine project_file {file}", file=sys.stderr)
+        project_dir = Path(project_dir)
+        try:
+            project_dir.resolve()
+            project_dir.mkdir(parents=True, exist_ok=True)
+        except (OSError, RuntimeError, ValueError):
+            print("Invalid project name", file=sys.stderr)
+            sys.exit(1)
+
+        sys.exit(new_project(project_dir, new_project_type))
+
+    try:
+        project_file = resolve_valid_project_file(project_path)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
+
     project = Project(project_file)
     if mode == "build":
         project.build()
     elif mode == "run":
-        project.run()
+        sys.exit(project.run())
     elif mode == "clean":
         project.clean()
     elif mode == "qmllint":
@@ -312,20 +308,29 @@ def main(mode: str = None, file: str = None, dry_run: bool = False, quiet: bool 
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
+    parser = ArgumentParser(description=DESCRIPTION, formatter_class=RawTextHelpFormatter)
     parser.add_argument("--quiet", "-q", action="store_true", help="Quiet")
     parser.add_argument("--dry-run", "-n", action="store_true", help="Only print commands")
     parser.add_argument("--force", "-f", action="store_true", help="Force rebuild")
     parser.add_argument("--qml-module", "-Q", action="store_true",
                         help="Perform check for QML module")
-    mode_choices = ["build", "run", "clean", "qmllint", "deploy", "lupdate"]
-    mode_choices.extend(NEW_PROJECT_TYPES.keys())
-    parser.add_argument("mode", choices=mode_choices, default="build",
-                        type=str, help=MODE_HELP)
 
-    # TODO: improve the command structure.
-    #  "File" argument is not correct when doing new-... project
-    parser.add_argument("file", help="Project file", nargs="?", type=str)
+    # Create subparsers for the two different command branches
+    subparsers = parser.add_subparsers(dest='mode', required=True)
+
+    # Add subparser for project creation commands
+    for project_type in NewProjectTypes:
+        new_parser = subparsers.add_parser(project_type.value.command,
+                                           help=project_type.value.description)
+        new_parser.add_argument(
+            "project_dir", help="Name or location of the new project", nargs="?", type=str)
+
+    # Add subparser for project operation commands
+    for op_mode, op_help in OPERATION_HELP.items():
+        op_parser = subparsers.add_parser(op_mode, help=op_help)
+        op_parser.add_argument("project_path", nargs="?", type=str, help="Path to the project file")
 
     args = parser.parse_args()
-    main(args.mode, args.file, args.dry_run, args.quiet, args.force, args.qml_module)
+
+    main(args.mode, args.dry_run, args.quiet, args.force, args.qml_module,
+         getattr(args, "project_dir", None), getattr(args, "project_path", None))

@@ -7,9 +7,10 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from . import (METATYPES_JSON_SUFFIX, PROJECT_FILE_SUFFIX, TRANSLATION_SUFFIX,
-               qt_metatype_json_dir, MOD_CMD, QML_IMPORT_MAJOR_VERSION,
-               QML_IMPORT_MINOR_VERSION, QML_IMPORT_NAME, QT_MODULES)
+from . import (METATYPES_JSON_SUFFIX, PYPROJECT_JSON_PATTERN,
+               PYPROJECT_FILE_PATTERNS, TRANSLATION_SUFFIX, qt_metatype_json_dir, MOD_CMD,
+               QML_IMPORT_MAJOR_VERSION, QML_IMPORT_MINOR_VERSION, QML_IMPORT_NAME, QT_MODULES)
+from .pyproject_json import parse_pyproject_json
 
 
 def is_python_file(file: Path) -> bool:
@@ -19,7 +20,7 @@ def is_python_file(file: Path) -> bool:
 
 class ProjectData:
     def __init__(self, project_file: Path) -> None:
-        """Parse the project."""
+        """Parse the project file."""
         self._project_file = project_file.resolve()
         self._sub_projects_files: list[Path] = []
 
@@ -37,26 +38,37 @@ class ProjectData:
         # ts files
         self._ts_files: list[Path] = []
 
-        with project_file.open("r") as pyf:
-            pyproject = json.load(pyf)
-            for f in pyproject["files"]:
-                file = Path(project_file.parent / f)
-                if file.suffix == PROJECT_FILE_SUFFIX:
-                    self._sub_projects_files.append(file)
-                else:
-                    self._files.append(file)
-                    if file.suffix == ".qml":
-                        self._qml_files.append(file)
-                    elif is_python_file(file):
-                        if file.stem == "main":
-                            self.main_file = file
-                        self._python_files.append(file)
-                    elif file.suffix == ".ui":
-                        self._ui_files.append(file)
-                    elif file.suffix == ".qrc":
-                        self._qrc_files.append(file)
-                    elif file.suffix == TRANSLATION_SUFFIX:
-                        self._ts_files.append(file)
+        if project_file.match(PYPROJECT_JSON_PATTERN):
+            project_file_data = parse_pyproject_json(project_file)
+        else:
+            print(f"Unknown project file format: {project_file}", file=sys.stderr)
+            sys.exit(1)
+
+        if project_file_data.errors:
+            print(f"Invalid project file: {project_file}. Errors found:", file=sys.stderr)
+            for error in project_file_data.errors:
+                print(f"{error}", file=sys.stderr)
+            sys.exit(1)
+
+        for f in project_file_data.files:
+            file = Path(project_file.parent / f)
+            if any(file.match(pattern) for pattern in PYPROJECT_FILE_PATTERNS):
+                self._sub_projects_files.append(file)
+                continue
+
+            self._files.append(file)
+            if file.suffix == ".qml":
+                self._qml_files.append(file)
+            elif is_python_file(file):
+                if file.stem == "main":
+                    self.main_file = file
+                self._python_files.append(file)
+            elif file.suffix == ".ui":
+                self._ui_files.append(file)
+            elif file.suffix == ".qrc":
+                self._qrc_files.append(file)
+            elif file.suffix == TRANSLATION_SUFFIX:
+                self._ts_files.append(file)
 
         if not self.main_file:
             self._find_main_file()

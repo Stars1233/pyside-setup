@@ -11,7 +11,7 @@ from configparser import ConfigParser
 from pathlib import Path
 from enum import Enum
 
-from project_lib import ProjectData, DesignStudioProject
+from project_lib import ProjectData, DesignStudioProject, resolve_valid_project_file
 from . import (DEFAULT_APP_ICON, DEFAULT_IGNORE_DIRS, find_pyside_modules,
                find_permission_categories, QtDependencyReader, run_qmlimportscanner)
 
@@ -349,15 +349,12 @@ class Config(BaseConfig):
         else:
             pyproject_location = self.project_dir
 
-        files = list(pyproject_location.glob("*.pyproject"))
-        if not files:
-            logging.info("[DEPLOY] No .pyproject file found. Project file not set")
-            return None
-        if len(files) > 1:
-            warnings.warn("DEPLOY: More that one .pyproject files found. Project file not set")
-            return None
-
-        return files[0]
+        try:
+            return resolve_valid_project_file(pyproject_location)
+        except ValueError as e:
+            logging.warning(f"[DEPLOY] Error resolving a valid project file. Project file not set. "
+                            f"Error:\n{e}. ")
+        return None
 
     def _find_excluded_qml_plugins(self) -> list[str] | None:
         if not self.qml_files and not DesignStudioProject.is_ds_project(self.source_file):

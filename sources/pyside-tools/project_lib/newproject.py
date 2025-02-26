@@ -5,20 +5,12 @@ from __future__ import annotations
 import json
 import os
 import sys
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+from typing import Callable
 
 """New project generation code."""
-
-
-Project = list[tuple[str, str]]  # tuple of (filename, contents).
-
-
-class ProjectType(Enum):
-    WIDGET_FORM = 1
-    WIDGET = 2
-    QUICK = 3
-
 
 _WIDGET_MAIN = """if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -108,27 +100,43 @@ if __name__ == "__main__":
 """
 
 
-def _write_project(directory: Path, files: Project):
-    """Write out the project."""
-    file_list = []
-    for file, contents in files:
-        (directory / file).write_text(contents)
-        print(f"Wrote {directory.name}{os.sep}{file}.")
-        file_list.append(file)
-    pyproject = {"files": file_list}
+@dataclass(frozen=True)
+class NewProjectType:
+    command: str
+    description: str
+    get_files: Callable
+
+
+NewProjectFiles = list[tuple[str, str]]  # tuple of (filename, contents).
+
+
+def _write_project(directory: Path, files: NewProjectFiles):
+    """
+    Create the project files in the specified directory.
+
+    :param directory: The directory to create the project in.
+    :param files: The files that belong to the project to create.
+    """
+    file_names = []
+    for file_name, contents in files:
+        (directory / file_name).write_text(contents)
+        print(f"Wrote {directory.name}{os.sep}{file_name}.")
+        file_names.append(file_name)
+
+    pyproject = {"files": files}
     pyproject_file = f"{directory}.pyproject"
     (directory / pyproject_file).write_text(json.dumps(pyproject))
-    print(f"Wrote {directory.name}{os.sep}{pyproject_file}.")
+    print(f"Wrote {pyproject_file}.")
 
 
-def _widget_project() -> Project:
+def _widget_project() -> NewProjectFiles:
     """Create a (form-less) widgets project."""
     main_py = (_WIDGET_IMPORTS + "\n\n" + _WIDGET_CLASS_DEFINITION + "\n\n"
                + _WIDGET_MAIN)
     return [("main.py", main_py)]
 
 
-def _ui_form_project() -> Project:
+def _ui_form_project() -> NewProjectFiles:
     """Create a Qt Designer .ui form based widgets project."""
     main_py = (_WIDGET_IMPORTS
                + "\nfrom ui_mainwindow import Ui_MainWindow\n\n\n"
@@ -138,28 +146,45 @@ def _ui_form_project() -> Project:
             ("mainwindow.ui", _MAINWINDOW_FORM)]
 
 
-def _qml_project() -> Project:
+def _qml_project() -> NewProjectFiles:
     """Create a QML project."""
     return [("main.py", _QUICK_MAIN),
             ("main.qml", _QUICK_FORM)]
 
 
-def new_project(directory_s: str,
-                project_type: ProjectType = ProjectType.WIDGET_FORM) -> int:
-    directory = Path(directory_s)
-    if directory.exists():
-        print(f"{directory_s} already exists.", file=sys.stderr)
-        return -1
-    directory.mkdir(parents=True)
+class NewProjectTypes(Enum):
+    QUICK = NewProjectType("new-quick", "Create a new Qt Quick project", _qml_project)
+    WIDGET_FORM = NewProjectType("new-ui", "Create a new Qt Widgets Form project", _ui_form_project)
+    WIDGET = NewProjectType("new-widget", "Create a new Qt Widgets project", _widget_project)
 
-    if project_type == ProjectType.WIDGET_FORM:
-        project = _ui_form_project()
-    elif project_type == ProjectType.QUICK:
-        project = _qml_project()
-    else:
-        project = _widget_project()
-    _write_project(directory, project)
-    if project_type == ProjectType.WIDGET_FORM:
-        print(f'Run "pyside6-project build {directory_s}" to build the project')
-    print(f'Run "python {directory.name}{os.sep}main.py" to run the project')
+    @staticmethod
+    def find_by_command(command: str) -> NewProjectType | None:
+        return next((pt.value for pt in NewProjectTypes if pt.value.command == command), None)
+
+
+def new_project(project_dir: Path, project_type: NewProjectType) -> int:
+    """
+    Create a new project at the specified project_dir directory.
+
+    :param project_dir: The directory path to create the project. If existing, must be empty.
+    :param project_type: The Qt type of project to create (Qt Widgets, Qt Quick, etc.)
+
+    :return: 0 if the project was created successfully, otherwise 1.
+    """
+    if any(project_dir.iterdir()):
+        print(f"Can not create project at {project_dir}: directory is not empty.", file=sys.stderr)
+        return 1
+    project_dir.mkdir(parents=True, exist_ok=True)
+
+    files = project_type.get_files()
+
+    try:
+        _write_project(project_dir, files)
+    except Exception as e:
+        print(f"Error creating project file: {str(e)}", file=sys.stderr)
+        return 1
+
+    if project_type == NewProjectTypes.WIDGET_FORM:
+        print(f'Run "pyside6-project build {project_dir}" to build the project')
+    print(f'Run "pyside6-project run {project_dir}{os.sep}main.py" to run the project')
     return 0

@@ -88,7 +88,7 @@ class TestPySide6ProjectDesignStudio(PySide6ProjectTestBase):
 class TestPySide6ProjectNew(PySide6ProjectTestBase):
     def testNewUi(self):
         with self.assertRaises(SystemExit) as context:
-            self.project.main(mode="new-ui", file="TestProject")
+            self.project.main(mode="new-ui", project_dir="TestProject")
         test_project_path = Path("TestProject")
         self.assertTrue((test_project_path / "TestProject.pyproject").exists())
         self.assertTrue((test_project_path / "mainwindow.ui").exists())
@@ -98,18 +98,18 @@ class TestPySide6ProjectNew(PySide6ProjectTestBase):
 
     def testRaiseErrorOnExistingProject(self):
         with self.assertRaises(SystemExit) as context:
-            self.project.main(mode="new-ui", file="TestProject")
+            self.project.main(mode="new-ui", project_dir="TestProject")
         self.assertEqual(context.exception.code, 0)
         error_message = io.StringIO()
         with self.assertRaises(SystemExit) as context, contextlib.redirect_stderr(error_message):
-            self.project.main(mode="new-ui", file="TestProject")
-        self.assertEqual(context.exception.code, -1)
+            self.project.main(mode="new-ui", project_dir="TestProject")
+        self.assertEqual(context.exception.code, 1)
         self.assertTrue(error_message.getvalue())  # some error message is printed
         shutil.rmtree(self.temp_dir / "TestProject")
 
     def testNewQuick(self):
         with self.assertRaises(SystemExit) as context:
-            self.project.main(mode="new-quick", file="TestProject")
+            self.project.main(mode="new-quick", project_dir="TestProject")
         test_project_path = Path("TestProject")
         self.assertTrue((test_project_path / "TestProject.pyproject").exists())
         self.assertTrue((test_project_path / "main.qml").exists())
@@ -119,7 +119,7 @@ class TestPySide6ProjectNew(PySide6ProjectTestBase):
 
     def testNewWidget(self):
         with self.assertRaises(SystemExit) as context:
-            self.project.main(mode="new-widget", file="TestProject")
+            self.project.main(mode="new-widget", project_dir="TestProject")
         test_project_path = Path("TestProject")
         self.assertTrue((test_project_path / "TestProject.pyproject").exists())
         self.assertTrue((test_project_path / "main.py").exists())
@@ -127,11 +127,13 @@ class TestPySide6ProjectNew(PySide6ProjectTestBase):
         shutil.rmtree(test_project_path)
 
     def testRaiseErrorWhenNoProjectNameIsSpecified(self):
+        mode = "new-widget"
         error_message = io.StringIO()
         with self.assertRaises(SystemExit) as context, contextlib.redirect_stderr(error_message):
-            self.project.main(mode="new-widget", file="")
+            self.project.main(mode=mode)
         self.assertEqual(context.exception.code, 1)
-        self.assertTrue(error_message.getvalue())  # some error message is printed
+        expected_msg = f"Error creating new project: {mode} requires a directory name or path"
+        self.assertTrue(expected_msg in error_message.getvalue())
 
 
 class TestPySide6ProjectRun(PySide6ProjectTestBase):
