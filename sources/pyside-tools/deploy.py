@@ -26,7 +26,6 @@ from __future__ import annotations
         deployment platform etc.
 
         Note: This file is used by both pyside6-deploy and pyside6-android-deploy
-
 """
 
 import sys
@@ -64,26 +63,27 @@ HELP_MODE = dedent("""
 def main(main_file: Path = None, name: str = None, config_file: Path = None, init: bool = False,
          loglevel=logging.WARNING, dry_run: bool = False, keep_deployment_files: bool = False,
          force: bool = False, extra_ignore_dirs: str = None, extra_modules_grouped: str = None,
-         mode: str = None):
+         mode: str = None) -> str | None:
+    """
+    Entry point for pyside6-deploy command.
+
+    :return: If successful, the Nuitka command that was executed. None otherwise.
+    """
 
     logging.basicConfig(level=loglevel)
 
-    # in case pyside6-deploy is run from a completely different location than the project
-    # directory
+    # In case pyside6-deploy is run from a completely different location than the project directory
     if main_file and main_file.exists():
         config_file = main_file.parent / "pysidedeploy.spec"
 
     if config_file and not config_file.exists() and not main_file.exists():
         raise RuntimeError(dedent("""
             Directory does not contain main.py file.
-            Please specify the main python entrypoint file or the config file.
-            Run "pyside6-deploy desktop --help" to see info about cli options.
+            Please specify the main Python entry point file or the pysidedeploy.spec config file.
+            Run "pyside6-deploy --help" to see info about CLI options.
 
             pyside6-deploy exiting..."""))
 
-    # Nuitka command to run
-    command_str = None
-    config = None
     logging.info("[DEPLOY] Start")
 
     if extra_ignore_dirs:
@@ -104,7 +104,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
     if config_file_exists:
         logging.info(f"[DEPLOY] Using existing config file {config_file}")
     else:
-        config_file = create_config_file(main_file=main_file, dry_run=dry_run, )
+        config_file = create_config_file(main_file=main_file, dry_run=dry_run)
 
     config = DesktopConfig(config_file=config_file, source_file=main_file, python_exe=python.exe,
                            dry_run=dry_run, existing_config_file=config_file_exists,
@@ -130,7 +130,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
                      f"{[str(qml_file) for qml_file in config.qml_files]}")
 
     if init:
-        # config file created above. Exiting.
+        # Config file created above. Exiting.
         logging.info(f"[DEPLOY]: Config file {config.config_file} created")
         return
 
@@ -143,8 +143,9 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
         print("[DEPLOY] QtSql Application is not supported on macOS with pyside6-deploy")
         return
 
+    command_str = None
     try:
-        # create executable
+        # Run the Nuitka command to create the executable
         if not dry_run:
             logging.info("[DEPLOY] Deploying application")
 
@@ -158,6 +159,8 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
                                                dry_run=dry_run,
                                                permissions=config.permissions,
                                                mode=config.mode)
+        if not dry_run:
+            logging.info("[DEPLOY] Successfully deployed application")
     except Exception:
         print(f"[DEPLOY] Exception occurred: {traceback.format_exc()}")
     finally:

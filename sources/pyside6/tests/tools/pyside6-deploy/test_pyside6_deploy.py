@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
+import json
 import unittest
 import tempfile
 import shutil
@@ -10,6 +11,7 @@ import os
 import importlib
 import platform
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 from unittest import mock
 
@@ -21,35 +23,33 @@ init_test_paths(False)
 
 def is_pyenv_python():
     pyenv_root = os.environ.get("PYENV_ROOT")
-
     if pyenv_root and (resolved_exe := str(Path(sys.executable).resolve())):
         return resolved_exe.startswith(pyenv_root)
     return False
 
 
-class LongSortedOptionTest(unittest.TestCase):
+class DeployTestBase(unittest.TestCase):
     @staticmethod
-    def _option_prepare(s):
+    def _sort_command(command: str) -> list[str]:
         """
-        Take a string and return a list obtained by text.split().
-        Options starting with "--" are also sorted."
+        Given a command, returns a list obtained by text.split().
+        Options starting with "--" are also sorted.
         """
-        items = s.split()
+        items = command.split()
         for idx in range(len(items)):
             if items[idx].startswith("--"):
                 return items[:idx] + sorted(items[idx:])
         return items
 
-    def assertEqual(self, text_a, text_b):
-        if (not isinstance(text_a, str) or not isinstance(text_b, str)
-                or (len(text_a) < 50 and len(text_b) < 50)):
-            return super().assertEqual(text_a, text_b)
-        sort_a = self._option_prepare(text_a)
-        sort_b = self._option_prepare(text_b)
-        return super().assertEqual(sort_a, sort_b)
+    def assertCmdEqual(self, first: str, second: str, msg: Any = None):
+        """
+        Assert that two commands are equal. Sort their arguments
+        """
+        if not isinstance(first, str) or not isinstance(second, str):
+            return super().assertEqual(first, second, msg)
 
+        return super().assertEqual(self._sort_command(first), self._sort_command(second), msg)
 
-class DeployTestBase(LongSortedOptionTest):
     @classmethod
     def setUpClass(cls):
         cls.pyside_root = Path(__file__).parents[5].resolve()
@@ -64,6 +64,7 @@ class DeployTestBase(LongSortedOptionTest):
             sys.path.append(str(cls.pyside_root / "sources" / "pyside-tools"))
         cls.deploy_lib = importlib.import_module("deploy_lib")
         cls.deploy = importlib.import_module("deploy")
+        cls.project_lib = importlib.import_module("project_lib")
         sys.modules["deploy"] = cls.deploy
         files_to_ignore = [".cpp.o", ".qsb"]
         cls.dlls_ignore_nuitka = " ".join([f"--noinclude-dlls=*{file}"
@@ -106,7 +107,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
                             "imageformats", "platforminputcontexts", "platforms",
                             "platformthemes", "styles", "xcbglintegrations"]
         # Plugins that needs to be passed to Nuitka
-        plugins_nuitka = ("platforminputcontexts")
+        plugins_nuitka = "platforminputcontexts"
         self.expected_run_cmd = (
             f"{sys.executable} -m nuitka {str(self.main_file)} --follow-imports"
             f" --enable-plugin=pyside6 --output-dir={str(self.deployment_files)} --quiet"
@@ -128,11 +129,10 @@ class TestPySide6DeployWidgets(DeployTestBase):
 
     def testWidgetDryRun(self, mock_plugins):
         mock_plugins.return_value = self.all_plugins
-        # Checking for dry run commands is equivalent to mocking the
-        # subprocess.check_call() in commands.py as the the dry run command
-        # is the command being run.
+        # Checking for dry run commands is equivalent to mocking the subprocess.check_call()
+        # in commands.py as the dry run command is the command being run.
         original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
-        self.assertEqual(original_output, self.expected_run_cmd)
+        self.assertCmdEqual(original_output, self.expected_run_cmd)
 
     @patch("deploy_lib.dependency_util.QtDependencyReader.get_qt_libs_dir")
     def testWidgetConfigFile(self, mock_sitepackages, mock_plugins):
@@ -141,13 +141,13 @@ class TestPySide6DeployWidgets(DeployTestBase):
         # includes both dry run and config_file tests
         # init
         init_result = self.deploy.main(self.main_file, init=True, force=True)
-        self.assertEqual(init_result, None)
+        self.assertEqual(None, init_result)
 
         # test with config
         original_output = self.deploy.main(config_file=self.config_file, dry_run=True, force=True)
-        self.assertEqual(original_output, self.expected_run_cmd)
+        self.assertCmdEqual(original_output, self.expected_run_cmd)
 
-        # # test config file contents
+        # test config file contents
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
         self.assertTrue(config_obj.get_value("app", "input_file").endswith("tetrix.py"))
         self.assertTrue(config_obj.get_value("app", "project_dir").endswith("tetrix"))
@@ -170,7 +170,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
 
     def testErrorReturns(self, mock_plugins):
         mock_plugins.return_value = self.all_plugins
-        # main file and config file does not exists
+        # Main file and config file do not exist
         fake_main_file = self.main_file.parent / "main.py"
         with self.assertRaises(RuntimeError) as context:
             self.deploy.main(main_file=fake_main_file, config_file=self.config_file)
@@ -178,13 +178,13 @@ class TestPySide6DeployWidgets(DeployTestBase):
 
     def testStandaloneMode(self, mock_plugins):
         mock_plugins.return_value = self.all_plugins
-        # remove --onefile from self.expected_run_cmd and replace it with --standalone
+        # Remove --onefile from self.expected_run_cmd and replace it with --standalone
         self.expected_run_cmd = self.expected_run_cmd.replace(" --onefile", " --standalone")
-        # test standalone mode
+        # Test standalone mode
         original_output = self.deploy.main(self.main_file, mode="standalone", dry_run=True,
                                            force=True)
 
-        self.assertEqual(original_output, self.expected_run_cmd)
+        self.assertCmdEqual(original_output, self.expected_run_cmd)
 
     @patch("deploy_lib.dependency_util.QtDependencyReader.get_qt_libs_dir")
     def testExtraModules(self, mock_sitepackages, mock_plugins):
@@ -192,10 +192,10 @@ class TestPySide6DeployWidgets(DeployTestBase):
         mock_plugins.return_value = self.all_plugins
         init_result = self.deploy.main(self.main_file, extra_modules_grouped="QtNetwork,QtOpenGL",
                                        init=True, force=True)
-        self.assertEqual(init_result, None)
+        self.assertEqual(None, init_result)
         self.deploy.main(config_file=self.config_file, dry_run=True, force=True)
 
-        # test config file contents
+        # Test config file contents
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
         expected_modules = {"Core", "Gui", "Widgets", "Network", "OpenGL"}
         if sys.platform != "win32":
@@ -206,7 +206,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
 
     @patch("deploy_lib.dependency_util.QtDependencyReader.get_qt_libs_dir")
     def testExtraIgnoreDirs(self, mock_sitepackages, mock_plugins):
-        # create a directory to ignore
+        # Create a directory to ignore
         ignore_dir = self.temp_example_widgets / "ignore_dir"
         ignore_dir.mkdir()
         ignore_file = ignore_dir / "test_ignore.py"
@@ -220,7 +220,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
         mock_plugins.return_value = self.all_plugins
         init_result = self.deploy.main(self.main_file, extra_ignore_dirs="ignore_dir",
                                        init=True, force=True)
-        self.assertEqual(init_result, None)
+        self.assertEqual(None, init_result)
         self.deploy.main(config_file=self.config_file, dry_run=True, force=True)
 
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
@@ -263,7 +263,7 @@ class TestPySide6DeployQml(DeployTestBase):
                             "platformthemes", "qmltooling", "tls",
                             "xcbglintegrations"]
         # Plugins that needs to be passed to Nuitka
-        plugins_nuitka = ("networkinformation,platforminputcontexts,qml,qmltooling")
+        plugins_nuitka = "networkinformation,platforminputcontexts,qml,qmltooling"
         self.expected_run_cmd = (
             f"{sys.executable} -m nuitka {str(self.main_file)} --follow-imports"
             f" --enable-plugin=pyside6 --output-dir={str(self.deployment_files)} --quiet"
@@ -309,7 +309,7 @@ class TestPySide6DeployQml(DeployTestBase):
         with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:
             mock_qmlimportscanner.return_value = ["QtQuick"]
             init_result = self.deploy.main(self.main_file, init=True, force=True)
-            self.assertEqual(init_result, None)
+            self.assertEqual(None, init_result)
 
         # test config file contents
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
@@ -341,7 +341,7 @@ class TestPySide6DeployQml(DeployTestBase):
         with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:
             mock_qmlimportscanner.return_value = ["QtQuick"]
             original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
-            self.assertEqual(original_output, self.expected_run_cmd)
+            self.assertCmdEqual(original_output, self.expected_run_cmd)
             self.assertEqual(mock_qmlimportscanner.call_count, 1)
 
     def testMainFileDryRun(self, mock_plugins):
@@ -349,7 +349,7 @@ class TestPySide6DeployQml(DeployTestBase):
         with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:
             mock_qmlimportscanner.return_value = ["QtQuick"]
             original_output = self.deploy.main(Path.cwd() / "main.py", dry_run=True, force=True)
-            self.assertEqual(original_output, self.expected_run_cmd)
+            self.assertCmdEqual(original_output, self.expected_run_cmd)
             self.assertEqual(mock_qmlimportscanner.call_count, 1)
 
 
@@ -380,7 +380,7 @@ class TestPySide6DeployWebEngine(DeployTestBase):
         main_file = self.temp_example_webenginequick / "quicknanobrowser.py"
         deployment_files = self.temp_example_webenginequick / "deployment"
         # Plugins that needs to be passed to Nuitka
-        plugins_nuitka = ("networkinformation,platforminputcontexts,qml,qmltooling")
+        plugins_nuitka = "networkinformation,platforminputcontexts,qml,qmltooling"
         qml_files = [
             "ApplicationRoot.qml",
             "BrowserDialog.qml",
@@ -432,7 +432,7 @@ class TestPySide6DeployWebEngine(DeployTestBase):
         with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:
             mock_qmlimportscanner.return_value = ["QtQuick", "QtWebEngine"]
             init_result = self.deploy.main(main_file, init=True, force=True)
-            self.assertEqual(init_result, None)
+            self.assertEqual(None, init_result)
 
             # run dry_run
             original_output = self.deploy.main(main_file, dry_run=True, force=True)
@@ -495,12 +495,12 @@ class TestLongCommand(DeployTestBase):
 @unittest.skipIf(sys.platform == "darwin" and int(platform.mac_ver()[0].split('.')[0]) <= 11,
                  "Test only works on macOS version 12+")
 @patch("deploy_lib.config.QtDependencyReader.find_plugin_dependencies")
-class EmptyDSProjectTest(DeployTestBase):
+class TestEmptyDSProject(DeployTestBase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
 
-        # setup a test DS Python project
+        # Set up a Qt Design Studio empty Python project
         base_path = Path(cls.temp_dir) / "PythonProject"
 
         project_name = "TestProject"
@@ -515,10 +515,15 @@ class EmptyDSProjectTest(DeployTestBase):
             base_path / f"{project_name}.qrc"
         ]
 
-        # Create the files
+        # Create the project files
         for file in files:
             file.parent.mkdir(parents=True, exist_ok=True)
             file.touch(exist_ok=True)
+
+        # Create a project file in the Python folder
+        cls.pyproject_path = (base_path / "Python" / ".pyproject").resolve()
+        cls.pyproject_path.touch()
+        cls.pyproject_path.write_text(json.dumps({"files": ["main.py", "autogen/settings.py"]}))
 
         cls.temp_example = base_path
 
@@ -566,21 +571,25 @@ class EmptyDSProjectTest(DeployTestBase):
     def testDryRun(self, mock_plugins):
         with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:  # noqa: F841
             original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
-            self.assertEqual(self.expected_run_cmd, original_output)
+            self.assertCmdEqual(self.expected_run_cmd, original_output)
 
     @patch("deploy_lib.dependency_util.QtDependencyReader.get_qt_libs_dir")
     def testConfigFile(self, mock_sitepackages, mock_plugins):
         mock_sitepackages.return_value = Path(_get_qt_lib_dir())
-        # create config file
         with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:  # noqa: F841
+            # Create the pysidedeploy.spec file only
             init_result = self.deploy.main(self.main_file, init=True, force=True)
-            self.assertEqual(init_result, None)
+            self.assertEqual(None, init_result)
 
         # test config file contents
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
 
         self.assertTrue(config_obj.get_value("app", "input_file").endswith("main.py"))
         self.assertTrue(config_obj.get_value("app", "project_dir").endswith("PythonProject"))
+
+        expected_project_file = self.pyproject_path.relative_to(self.temp_example)
+        self.assertEqual(str(expected_project_file), config_obj.get_value("app", "project_file"))
+
         self.config_file.unlink()
 
 

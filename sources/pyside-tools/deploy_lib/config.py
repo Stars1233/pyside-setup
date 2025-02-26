@@ -106,24 +106,21 @@ class Config(BaseConfig):
         self.extra_ignore_dirs = extra_ignore_dirs
         self._dry_run = dry_run
         self.qml_modules = set()
-        # set source_file
+
         self.source_file = Path(
-            self.set_or_fetch(config_property_val=source_file, config_property_key="input_file")
+            self.set_or_fetch(property_value=source_file, property_key="input_file")
         ).resolve()
 
-        # set python path
         self.python_path = Path(
             self.set_or_fetch(
-                config_property_val=python_exe,
-                config_property_key="python_path",
-                config_property_group="python",
+                property_value=python_exe,
+                property_key="python_path",
+                property_group="python",
             )
         )
 
-        # set application name
-        self.title = self.set_or_fetch(config_property_val=name, config_property_key="title")
+        self.title = self.set_or_fetch(property_value=name, property_key="title")
 
-        # set application icon
         config_icon = self.get_value("app", "icon")
         if config_icon:
             self._icon = str(Path(config_icon).resolve())
@@ -176,44 +173,44 @@ class Config(BaseConfig):
 
         self.modules = []
 
-    def set_or_fetch(self, config_property_val, config_property_key, config_property_group="app"):
+    def set_or_fetch(self, property_value, property_key, property_group="app") -> str:
         """
-        Set the configuration value if provided, otherwise fetch the existing value.
-        Raise an exception if neither is available.
+        If a new property value is provided, store it in the config file
+        Otherwise return the existing value in the config file.
+        Raise an exception if neither are available.
 
-        :param value: The value to set if provided.
-        :param key: The configuration key.
-        :param group: The configuration group (default is "app").
+        :param property_value: The value to set if provided.
+        :param property_key: The configuration key.
+        :param property_group: The configuration group (default is "app").
         :return: The configuration value.
         :raises RuntimeError: If no value is provided and no existing value is found.
         """
-        existing_value = self.get_value(config_property_group, config_property_key)
+        existing_value = self.get_value(property_group, property_key)
 
-        if config_property_val:
-            self.set_value(config_property_group, config_property_key, str(config_property_val))
-            return config_property_val
-        elif existing_value:
+        if property_value:
+            self.set_value(property_group, property_key, str(property_value))
+            return property_value
+        if existing_value:
             return existing_value
-        else:
-            raise RuntimeError(
-                f"[DEPLOY] No value for {config_property_key} specified in config file or as cli"
-                " option"
-            )
+
+        raise RuntimeError(
+            f"[DEPLOY] No value for {property_key} specified in config file or as cli option"
+        )
 
     @property
-    def dry_run(self):
+    def dry_run(self) -> bool:
         return self._dry_run
 
     @property
-    def generated_files_path(self):
+    def generated_files_path(self) -> Path:
         return self._generated_files_path
 
     @property
-    def qml_files(self):
+    def qml_files(self) -> list[Path]:
         return self._qml_files
 
     @qml_files.setter
-    def qml_files(self, qml_files):
+    def qml_files(self, qml_files: list[Path]):
         self._qml_files = qml_files
         qml_files = [str(file.absolute().relative_to(self.project_dir.absolute()))
                      if file.absolute().is_relative_to(self.project_dir) else str(file.absolute())
@@ -221,42 +218,42 @@ class Config(BaseConfig):
         self.set_value("qt", "qml_files", ",".join(qml_files))
 
     @property
-    def project_dir(self):
+    def project_dir(self) -> Path:
         return self._project_dir
 
     @project_dir.setter
-    def project_dir(self, project_dir):
+    def project_dir(self, project_dir: Path):
         self._project_dir = project_dir
         self.set_value("app", "project_dir", str(project_dir))
 
     @property
-    def project_file(self):
+    def project_file(self) -> Path:
         return self._project_file
 
     @project_file.setter
-    def project_file(self, project_file):
+    def project_file(self, project_file: Path):
         self._project_file = project_file
         self.set_value("app", "project_file", str(project_file.relative_to(self.project_dir)))
 
     @property
-    def title(self):
+    def title(self) -> str:
         return self._title
 
     @title.setter
-    def title(self, title):
+    def title(self, title: str):
         self._title = title
 
     @property
-    def icon(self):
+    def icon(self) -> str:
         return self._icon
 
     @icon.setter
-    def icon(self, icon):
+    def icon(self, icon: str):
         self._icon = icon
         self.set_value("app", "icon", icon)
 
     @property
-    def source_file(self):
+    def source_file(self) -> Path:
         return self._source_file
 
     @source_file.setter
@@ -265,7 +262,7 @@ class Config(BaseConfig):
         self.set_value("app", "input_file", str(source_file))
 
     @property
-    def python_path(self):
+    def python_path(self) -> Path:
         return self._python_path
 
     @python_path.setter
@@ -273,25 +270,25 @@ class Config(BaseConfig):
         self._python_path = python_path
 
     @property
-    def extra_args(self):
+    def extra_args(self) -> str:
         return self.get_value("nuitka", "extra_args")
 
     @extra_args.setter
-    def extra_args(self, extra_args):
+    def extra_args(self, extra_args: str):
         self.set_value("nuitka", "extra_args", extra_args)
 
     @property
-    def excluded_qml_plugins(self):
+    def excluded_qml_plugins(self) -> list[str]:
         return self._excluded_qml_plugins
 
     @excluded_qml_plugins.setter
-    def excluded_qml_plugins(self, excluded_qml_plugins):
+    def excluded_qml_plugins(self, excluded_qml_plugins: list[str]):
         self._excluded_qml_plugins = excluded_qml_plugins
         if excluded_qml_plugins:  # check required for Android
             self.set_value("qt", "excluded_qml_plugins", ",".join(excluded_qml_plugins))
 
     @property
-    def exe_dir(self):
+    def exe_dir(self) -> Path:
         return self._exe_dir
 
     @exe_dir.setter
@@ -300,11 +297,11 @@ class Config(BaseConfig):
         self.set_value("app", "exec_directory", str(exe_dir))
 
     @property
-    def modules(self):
+    def modules(self) -> list[str]:
         return self._modules
 
     @modules.setter
-    def modules(self, modules):
+    def modules(self, modules: list[str]):
         self._modules = modules
         self.set_value("qt", "modules", ",".join(modules))
 
@@ -314,7 +311,6 @@ class Config(BaseConfig):
         field qml_files is empty in the config_file
         """
 
-        qml_files = []
         if self.project_data:
             qml_files = [(self.project_dir / str(qml_file)) for qml_file in
                          self.project_data.qml_files]
@@ -340,7 +336,7 @@ class Config(BaseConfig):
         if DesignStudioProject.is_ds_project(self.source_file):
             return DesignStudioProject(self.source_file).project_dir
 
-        # there is no other way to find the project_dir than assume it is the parent directory
+        # There is no other way to find the project_dir than assume it is the parent directory
         # of source_file
         return self.source_file.parent
 
@@ -459,25 +455,25 @@ class DesktopConfig(Config):
                                    f"the resources manually using pyside6-rcc")
 
     @property
-    def qt_plugins(self):
+    def qt_plugins(self) -> list[str]:
         return self._qt_plugins
 
     @qt_plugins.setter
-    def qt_plugins(self, qt_plugins):
+    def qt_plugins(self, qt_plugins: list[str]):
         self._qt_plugins = qt_plugins
         self.set_value("qt", "plugins", ",".join(qt_plugins))
 
     @property
-    def permissions(self):
+    def permissions(self) -> list[str]:
         return self._permissions
 
     @permissions.setter
-    def permissions(self, permissions):
+    def permissions(self, permissions: list[str]):
         self._permissions = permissions
         self.set_value("nuitka", "macos.permissions", ",".join(permissions))
 
     @property
-    def mode(self):
+    def mode(self) -> NuitkaMode:
         return self._mode
 
     @mode.setter
@@ -516,7 +512,7 @@ class DesktopConfig(Config):
         logging.info(f"[DEPLOY] Usage descriptions for the {perm_categories_str} will be added to "
                      "the Info.plist file of the macOS application bundle")
 
-        # handling permissions
+        # Handling permissions
         for perm_category in perm_categories:
             if perm_category in PERMISSION_MAP:
                 permissions.append(PERMISSION_MAP[perm_category])
