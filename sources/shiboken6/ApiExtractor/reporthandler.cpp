@@ -3,8 +3,10 @@
 
 #include "reporthandler.h"
 #include "typedatabase.h"
+#include "messages.h"
 
 #include <QtCore/QElapsedTimer>
+#include <QtCore/QFile>
 #include <QtCore/QOperatingSystemVersion>
 #include <QtCore/QSet>
 #include <cstring>
@@ -194,4 +196,26 @@ QByteArray ReportHandler::doneMessage()
     if (m_suppressedCount)
         result += " (" + QByteArray::number(m_suppressedCount) + " known issues)";
     return  result;
+}
+
+static QStringList generalMessages;
+
+void ReportHandler::addGeneralMessage(const QString &message)
+{
+    generalMessages.append(message);
+}
+
+void ReportHandler::writeGeneralLogFile(const QString &directory)
+{
+    if (generalMessages.isEmpty())
+        return;
+    QFile file(directory + "/mjb_shiboken.log"_L1);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qWarning(lcShiboken, "%s", qPrintable(msgCannotOpenForWriting(file)));
+        return;
+    }
+    for (const auto &m : std::as_const(generalMessages)) {
+        file.write(m.toUtf8());
+        file.putChar('\n');
+    }
 }

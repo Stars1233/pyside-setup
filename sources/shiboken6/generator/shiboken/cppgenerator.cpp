@@ -636,13 +636,13 @@ static void warnAboutTypes(const AbstractMetaClassCPtr &metaClass)
         // Warn about special value types.
         if (!typeEntry->isDefaultConstructible()
             && typeEntry->defaultConstructibleFlag() == TypeSystem::DefaultConstructibleFlag::Unspecified) {
-            qCWarning(lcShiboken, "Value type \"%s\" is not default constructible.",
-                      qPrintable(typeEntry->qualifiedCppName()));
+            ReportHandler::addGeneralMessage("Value type \""_L1 + typeEntry->qualifiedCppName()
+                                             + "\" is not default constructible."_L1);
         }
         if (!typeEntry->isCopyable()
             && typeEntry->copyableFlag() == TypeSystem::CopyableFlag::Unspecified) {
-            qCWarning(lcShiboken, "Value type \"%s\" is not copyable, std::move() will be used.",
-                      qPrintable(typeEntry->qualifiedCppName()));
+            ReportHandler::addGeneralMessage("Value type \""_L1 + typeEntry->qualifiedCppName()
+                                             + "\" is not copyable, std::move() will be used."_L1);
         }
     } else if (typeEntry->isObject())
         if (metaClass->isDefaultConstructible()
@@ -5631,10 +5631,10 @@ void CppGenerator::writeSignalInitialization(TextStream &s, const AbstractMetaCl
             const QByteArray cppSig =
                 QMetaObject::normalizedType(qPrintable(metaType.cppSignature()));
             if ((origType != cppSig) && (!metaType.isFlags())) {
-                qCWarning(lcShiboken).noquote().nospace()
-                    << "Typedef used on signal " << metaClass->qualifiedCppName() << "::"
-                    << cppSignal->signature();
-                }
+                QString msg = "Typedef used on signal "_L1 + metaClass->qualifiedCppName()
+                              + "::"_L1 + cppSignal->signature();
+                ReportHandler::addGeneralMessage(msg);
+            }
         }
     }
 

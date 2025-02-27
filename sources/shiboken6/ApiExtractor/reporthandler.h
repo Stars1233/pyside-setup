@@ -39,6 +39,9 @@ public:
 
     static QByteArray doneMessage();
 
+    static void addGeneralMessage(const QString &message);
+    static void writeGeneralLogFile(const QString &directory);
+
 private:
     static void messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 };

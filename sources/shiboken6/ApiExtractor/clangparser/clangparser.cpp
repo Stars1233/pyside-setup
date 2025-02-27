@@ -5,6 +5,7 @@
 #include "clangutils.h"
 #include "clangdebugutils.h"
 #include "compilersupport.h"
+#include "reporthandler.h"
 
 #include <QtCore/QByteArrayList>
 #include <QtCore/QDebug>
@@ -260,7 +261,7 @@ static CXTranslationUnit createTranslationUnit(CXIndex index,
     clangArgs += detectVulkan();
     clangArgs += args;
     QScopedArrayPointer<const char *> argv(byteArrayListToFlatArgV(clangArgs));
-    qDebug().noquote().nospace() << msgCreateTranslationUnit(clangArgs, flags);
+    ReportHandler::addGeneralMessage(QString::fromUtf8(msgCreateTranslationUnit(clangArgs, flags)));
 
     CXTranslationUnit tu{};
     CXErrorCode err = clang_parseTranslationUnit2(index, nullptr, argv.data(),

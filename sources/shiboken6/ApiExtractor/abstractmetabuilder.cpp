@@ -1450,8 +1450,7 @@ void AbstractMetaBuilderPrivate::traverseFunctions(const ScopeModelItem& scopeIt
             && !(metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction)) {
 
             if (metaFunction->isSignal() && metaClass->hasSignal(metaFunction.get()))
-                qCWarning(lcShiboken, "%s", qPrintable(msgSignalOverloaded(metaClass,
-                                                                           metaFunction.get())));
+                ReportHandler::addGeneralMessage(msgSignalOverloaded(metaClass, metaFunction.get()));
 
             if (metaFunction->isConversionOperator())
                 fixReturnTypeOfConversionOperator(metaFunction);
@@ -2148,8 +2147,7 @@ AbstractMetaFunctionPtr
             arguments.removeLast(); // Strip QT6_DECL_NEW_OVERLOAD_TAIL
             if (!currentClass || currentClass->typeEntry()->generateCode()) {
                 const QString signature = qualifiedFunctionSignatureWithType(functionItem, className);
-                qCWarning(lcShiboken, "%s",
-                          qPrintable(msgStrippingQtDisambiguatedArgument(functionItem, signature)));
+                ReportHandler::addGeneralMessage(msgStrippingQtDisambiguatedArgument(functionItem, signature));
             }
             break;
         }
@@ -2419,8 +2417,8 @@ AbstractMetaClassCPtr AbstractMetaBuilderPrivate::resolveTypeSystemTypeDef(const
 
 static void synthesizeWarning(const AbstractMetaFunctionCPtr &f)
 {
-    qCWarning(lcShiboken, "Synthesizing \"%s\"...",
-              qPrintable(f->classQualifiedSignature()));
+    ReportHandler::addGeneralMessage("Synthesizing \""_L1 + f->classQualifiedSignature()
+                                     + "\"..."_L1);
 }
 
 static AbstractMetaFunctionPtr
@@ -2589,8 +2587,8 @@ void AbstractMetaBuilderPrivate::fixSmartPointers()
             fixSmartPointerClass(std::const_pointer_cast<AbstractMetaClass>(smartPointerClass),
                                  ste);
         } else {
-            qCWarning(lcShiboken, "Synthesizing smart pointer \"%s\"...",
-                      qPrintable(ste->qualifiedCppName()));
+            ReportHandler::addGeneralMessage("Synthesizing smart pointer \""_L1
+                                             + ste->qualifiedCppName() + "\"..."_L1);
             m_smartPointers.append(createSmartPointerClass(ste, m_metaClasses));
         }
     }

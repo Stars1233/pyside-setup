@@ -395,6 +395,8 @@ int shibokenMain(const QStringList &argV)
     if (commonOptions.logUnmatched)
         TypeDatabase::instance()->logUnmatched();
 
+    ReportHandler::writeGeneralLogFile(commonOptions.outputDirectory);
+
     const QByteArray doneMessage = ReportHandler::doneMessage();
     std::cout << doneMessage.constData() << '\n';
 
