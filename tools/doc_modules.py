@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
-import os
 import subprocess
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
@@ -190,8 +189,8 @@ if __name__ == "__main__":
     module_dependency_dict = {}
     for m in SOURCE_DIR.glob("Qt*"):
         module = m.name
-        # QtGraphs duplicates symbols from QtDataVisualization causing shiboken errors
-        if module == "QtDataVisualization":
+        # QtGraphs duplicates symbols from QtDataVisualization/QtCharts causing shiboken errors
+        if module == "QtDataVisualization" or module == "QtCharts":
             continue
         qt_include_path = qt_include_dir / module
         if qt_include_path.is_dir():
