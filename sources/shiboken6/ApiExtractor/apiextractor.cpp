@@ -450,6 +450,24 @@ static inline void classListToCList(const AbstractMetaClassList &list, AbstractM
     std::copy(list.cbegin(), list.cend(), std::back_inserter(*target));
 }
 
+static QString nameFromType(const InstantiatedSmartPointer &ismp)
+{
+    return ismp.type.cppSignature();
+}
+
+static void logInstantiations(QString title, QStringList nameList)
+{
+    if (!nameList.isEmpty()) {
+        std::sort(nameList.begin(), nameList.end());
+        title += " ("_L1 + QString::number(nameList.size()) + u')';
+        const auto underLine = QString(title.size(), u'-');
+        ReportHandler::addGeneralMessage(u'\n' + title + u'\n' + underLine + u'\n');
+        for (const auto &e : nameList)
+            ReportHandler::addGeneralMessage(" * "_L1 + e);
+        ReportHandler::addGeneralMessage(QString(1, u'\n'));
+    }
+}
+
 std::optional<ApiExtractorResult> ApiExtractor::run(ApiExtractorFlags flags)
 {
     if (!d->runHelper(flags))
@@ -475,6 +493,15 @@ std::optional<ApiExtractorResult> ApiExtractor::run(ApiExtractorFlags flags)
     }
     result.m_instantiatedSmartPointers =
         topologicalSortSmartPointers(collectContext.instantiatedSmartPointers);
+
+    logInstantiations("Instantiated Containers"_L1, collectContext.instantiatedContainersNames);
+    QStringList smartPointers;
+    std::transform(collectContext.instantiatedSmartPointers.cbegin(),
+                   collectContext.instantiatedSmartPointers.cend(),
+                   std::back_inserter(smartPointers), nameFromType);
+    logInstantiations("Instantiated Smart Pointers"_L1, smartPointers);
+
+
     return result;
 }
 
