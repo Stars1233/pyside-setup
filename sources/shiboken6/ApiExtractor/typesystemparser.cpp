@@ -1428,7 +1428,9 @@ SmartPointerTypeEntryPtr
     QString valueCheckMethod;
     QString nullCheckMethod;
     QString resetMethod;
+    TypeDatabaseParserContext::SmartPointerEntry entry;
     QString instantiations;
+    QString excludedInstantiations;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"type") {
@@ -1444,7 +1446,9 @@ SmartPointerTypeEntryPtr
         } else if (name == u"ref-count-method") {
             refCountMethodName = attributes->takeAt(i).value().toString();
         } else if (name == u"instantiations") {
-            instantiations = attributes->takeAt(i).value().toString();
+            entry.instantiations = attributes->takeAt(i).value().toString();
+        } else if (name == u"excluded-instantiations") {
+            entry.excludedInstantiations = attributes->takeAt(i).value().toString();
         } else if (name == u"value-check-method") {
             valueCheckMethod = attributes->takeAt(i).value().toString();
         } else if (name == u"null-check-method") {
@@ -1486,7 +1490,8 @@ SmartPointerTypeEntryPtr
     type->setNullCheckMethod(nullCheckMethod);
     type->setValueCheckMethod(valueCheckMethod);
     type->setResetMethod(resetMethod);
-    m_context->smartPointerInstantiations.insert(type, instantiations);
+    if (!entry.instantiations.isEmpty() || !entry.excludedInstantiations.isEmpty())
+        m_context->smartPointerInstantiations.insert(type, entry);
     return type;
 }
 
