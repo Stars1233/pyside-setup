@@ -1,0 +1,21 @@
+{
+    "files": ["../Drumpad.qmlproject",
+              "../Drumpad.qrc",
+              "../qtquickcontrols2.conf",
+              "../Drumpad/AvailableSoundsComboBox.qml",
+              "../Drumpad/CenteredFlow.qml",
+              "../Drumpad/Constants.qml",
+              "../Drumpad/PadButton.qml",
+              "../Drumpad/qmldir",
+              "../Drumpad/SoundEffectPlayer.qml",
+              "../Drumpad/StyledSpinBox.qml",
+              "../Drumpad/VolumeSlider.qml",
+              "../DrumpadContent/App.qml",
+              "../DrumpadContent/MainScreen.qml",
+              "../DrumpadContent/qmldir",
+              "../Mocks/Audio/AudioEngine.qml",
+              "../Mocks/Audio/qmldir",
+              "../Mocks/Audio/WaveformItem.qml",
+              "../Mocks/Components/AudioFilesModel.qml",
+              "../Mocks/Components/qmldir"]
+}

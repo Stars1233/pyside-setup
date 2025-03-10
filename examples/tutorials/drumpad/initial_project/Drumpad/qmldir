@@ -1,0 +1,10 @@
+module Drumpad
+
+AvailableSoundsComboBox 1.0 AvailableSoundsComboBox.qml
+SoundEffectPlayer 1.0 SoundEffectPlayer.qml
+CenteredFlow 1.0 CenteredFlow.qml
+VolumeSlider 1.0 VolumeSlider.qml
+StyledSpinBox 1.0 StyledSpinBox.qml
+PadButton 1.0 PadButton.qml
+
+singleton Constants 1.0 Constants.qml

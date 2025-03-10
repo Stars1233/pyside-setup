@@ -218,6 +218,25 @@ General Applications
     expenses/expenses.rst
     embedded/boot2qt.md
 
+Qt Design Studio
+----------------
+
+.. grid:: 1 3 3 3
+    :gutter: 2
+
+    .. grid-item-card:: Qt Design Studio integration tutorial
+        :class-item: cover-img
+        :link: tutorial_qt_design_studio_integration
+        :link-type: ref
+        :img-top: drumpad/resources/drumpad.png
+
+        Export a Qt Design Studio project to create a PySide6 application
+
+.. toctree::
+    :hidden:
+
+    drumpad/index.rst
+
 Qt Overviews
 ------------
 

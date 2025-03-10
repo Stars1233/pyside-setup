@@ -1,0 +1,23 @@
+<RCC>
+    <qresource>
+        <file>Drumpad.qmlproject</file>
+        <file>Drumpad/AvailableSoundsComboBox.qml</file>
+        <file>Drumpad/CenteredFlow.qml</file>
+        <file>Drumpad/Constants.qml</file>
+        <file>Drumpad/PadButton.qml</file>
+        <file>Drumpad/qmldir</file>
+        <file>Drumpad/SoundEffectPlayer.qml</file>
+        <file>Drumpad/StyledSpinBox.qml</file>
+        <file>Drumpad/VolumeSlider.qml</file>
+        <file>DrumpadContent/App.qml</file>
+        <file>DrumpadContent/MainScreen.qml</file>
+        <file>DrumpadContent/qmldir</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>../Sounds/Bongo Loop 125bpm.wav</file>
+        <file>../Sounds/Clap.wav</file>
+        <file>../Sounds/Closed Hat.wav</file>
+        <file>../Sounds/Kick Drum.wav</file>
+        <file>../Sounds/Open Hat.wav</file>
+        <file>../Sounds/Sine Bass Ebm.wav</file>
+    </qresource>
+</RCC>

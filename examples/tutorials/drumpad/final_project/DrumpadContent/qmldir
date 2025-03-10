@@ -1,0 +1,4 @@
+module DrumpadContent
+
+App 1.0 App.qml
+MainScreen 1.0 MainScreen.qml

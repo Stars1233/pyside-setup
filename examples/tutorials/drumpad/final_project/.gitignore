@@ -1,0 +1,11 @@
+__pycache__/
+.DS_Store
+build/
+deployment/
+pysidedeploy.spec
+resources.py
+*.autosave
+*.dist/
+Dependencies/
+*.qtds
+.qmlls.ini
