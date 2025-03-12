@@ -281,4 +281,6 @@ QString msgCannotCall(const AbstractMetaFunctionCPtr &func,
 QString msgRemoveRedundantOverload(const AbstractMetaFunctionCPtr &func,
                                    const QString &type);
 
+QString msgCommandLineArguments(const QStringList &argv);
+
 #endif // MESSAGES_H

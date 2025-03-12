@@ -252,8 +252,7 @@ int shibokenMain(const QStringList &argV)
     QHashSeed::setDeterministicGlobalSeed();
 
     ReportHandler::install();
-    if (ReportHandler::isDebug(ReportHandler::SparseDebug))
-        qCInfo(lcShiboken()).noquote().nospace() << appName << ' ' << argV.join(u' ');
+    ReportHandler::addGeneralMessage(msgCommandLineArguments(argV));
 
     Options options;
     options.setOptions(argV);

@@ -1069,3 +1069,19 @@ QString msgRemoveRedundantOverload(const AbstractMetaFunctionCPtr &func,
            + "\" due to presence of an overload taking a \""_L1
            + type + "\" parameter."_L1;
 }
+
+QString msgCommandLineArguments(const QStringList &argv)
+{
+    QString result = "Command line:\n   "_L1;
+    for (const QString &arg : argv) {
+        result.append(u' ');
+        const bool quote = arg.contains(u' ');
+        if (quote)
+            result.append(u'"');
+        result.append(arg);
+        if (quote)
+            result.append(u'"');
+    }
+    result.append(u'\n');
+    return result;
+}
