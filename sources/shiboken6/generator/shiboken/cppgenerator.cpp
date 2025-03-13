@@ -702,6 +702,8 @@ void CppGenerator::generateClass(TextStream &s,
 
     s  << '\n';
 
+    writeClassTypeFunction(s, classContext.metaClass());
+
     // class inject-code native/beginning
     if (!typeEntry->codeSnips().isEmpty()) {
         writeClassCodeSnips(s, typeEntry->codeSnips(),
@@ -4571,6 +4573,17 @@ static QString docString(const AbstractMetaClassCPtr &metaClass)
     return it != docModifs.cend() ? it->code().trimmed() : QString{};
 }
 
+void CppGenerator::writeClassTypeFunction(TextStream &s,
+                                          const AbstractMetaClassCPtr &metaClass)
+{
+    const QString className = chopType(cpythonTypeName(metaClass));
+    const QString typePtr = u"_"_s + className + u"_Type"_s;
+    s << openExternC << "static PyTypeObject *" << typePtr << " = nullptr;\n"
+        << "static PyTypeObject *" << className << "_TypeF(void)\n"
+        << "{\n" << indent << "return " << typePtr << ";\n" << outdent << "}\n"
+        << closeExternC;
+}
+
 void CppGenerator::writeClassDefinition(TextStream &s,
                                         const AbstractMetaClassCPtr &metaClass,
                                         const GeneratorContext &classContext)
@@ -4665,8 +4678,8 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         s << '\n';
     }
 
-    s << "// Class Definition -----------------------------------------------\n"
-         "extern \"C\" {\n";
+    s << "\n// Class Definition -----------------------------------------------\n"
+          << openExternC;
 
     if (hasHashFunction(metaClass))
         tp_hash = u'&' + cpythonBaseName(metaClass) + u"_HashFunc"_s;
@@ -4675,12 +4688,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     if (callOp && !callOp->isModifiedRemoved())
         tp_call = u'&' + cpythonFunctionName(callOp);
 
-    const QString typePtr = u"_"_s + className
-        + u"_Type"_s;
-    s << "static PyTypeObject *" << typePtr << " = nullptr;\n"
-        << "static PyTypeObject *" << className << "_TypeF(void)\n"
-        << "{\n" << indent << "return " << typePtr << ";\n" << outdent
-        << "}\n\nstatic PyType_Slot " << className << "_slots[] = {\n" << indent
+    s << "\nstatic PyType_Slot " << className << "_slots[] = {\n" << indent
         << "{Py_tp_base,        nullptr}, // inserted by introduceWrapperType\n"
         << pyTypeSlotEntry("Py_tp_dealloc", tp_dealloc)
       << pyTypeSlotEntry("Py_tp_repr", m_tpFuncs.value(REPR_FUNCTION))

@@ -33,6 +33,7 @@ constexpr auto CPP_ARG0 = QLatin1StringView("cppArg0");
 extern const char *const METHOD_DEF_SENTINEL;
 extern const char *const PYTHON_TO_CPPCONVERSION_STRUCT;
 extern const char *const openTargetExternC;
+extern const char *const openExternC;
 extern const char *const closeExternC;
 extern const char *const richCompareComment;
 

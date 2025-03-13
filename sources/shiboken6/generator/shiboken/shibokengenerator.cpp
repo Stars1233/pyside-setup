@@ -88,6 +88,7 @@ const char *const openTargetExternC =  R"(
 
 extern "C" {
 )";
+const char *const openExternC = "extern \"C\" {\n";
 const char *const closeExternC =  "} // extern \"C\"\n\n";
 const char *const richCompareComment =
     "// PYSIDE-74: By default, we redirect to object's tp_richcompare (which is `==`, `!=`).\n";

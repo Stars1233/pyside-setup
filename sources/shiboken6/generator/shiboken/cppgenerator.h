@@ -419,6 +419,8 @@ private:
     void writeClassDefinition(TextStream &s,
                               const AbstractMetaClassCPtr &metaClass,
                               const GeneratorContext &classContext);
+    static void writeClassTypeFunction(TextStream &s,
+                                       const AbstractMetaClassCPtr &metaClass);
     QByteArrayList methodDefinitionParameters(const OverloadData &overloadData) const;
     QList<PyMethodDefEntry> methodDefinitionEntries(const OverloadData &overloadData) const;
 

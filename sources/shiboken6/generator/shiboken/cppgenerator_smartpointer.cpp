@@ -210,6 +210,7 @@ void CppGenerator::generateSmartPointerClass(TextStream &s,
     writeTpTraverseFunction(s, metaClass);
     writeTpClearFunction(s, metaClass);
 
+    writeClassTypeFunction(s, metaClass);
     writeClassDefinition(s, metaClass, classContext);
 
     s << '\n';
