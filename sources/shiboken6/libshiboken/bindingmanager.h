@@ -33,7 +33,8 @@ public:
 
     static BindingManager &instance();
 
-    bool hasWrapper(const void *cptr);
+    bool hasWrapper(const void *cptr, PyTypeObject *typeObject) const;
+    bool hasWrapper(const void *cptr) const;
 
     void registerWrapper(SbkObject *pyObj, void *cptr);
     void releaseWrapper(SbkObject *wrapper);
@@ -41,7 +42,8 @@ public:
     void runDeletionInMainThread();
     void addToDeletionInMainThread(const DestructorEntry &);
 
-    SbkObject *retrieveWrapper(const void *cptr);
+    SbkObject *retrieveWrapper(const void *cptr, PyTypeObject *typeObject) const;
+    SbkObject *retrieveWrapper(const void *cptr) const;
     PyObject *getOverride(const void *cptr, PyObject *nameCache[], const char *methodName);
 
     void addClassInheritance(Module::TypeInitStruct *parent, Module::TypeInitStruct *child);

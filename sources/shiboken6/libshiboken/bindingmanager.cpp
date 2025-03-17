@@ -48,7 +48,9 @@ struct std::hash<GraphNode> {
 namespace Shiboken
 {
 
-using WrapperMap = std::unordered_map<const void *, SbkObject *>;
+// Mapping of C++ address to wrapper. We use a multimap to allow for co-located
+// objects, which happens for example for the first field of a struct.
+using WrapperMap = std::unordered_multimap<const void *, SbkObject *>;
 
 template <class NodeType>
 class BaseGraph
@@ -175,6 +177,9 @@ struct BindingManager::BindingManagerPrivate {
     Graph classHierarchy;
     DestructorEntries deleteInMainThread;
 
+    WrapperMap::const_iterator findSbkObject(const void *cptr, SbkObject *wrapper) const;
+    WrapperMap::const_iterator findByType(const void *cptr, PyTypeObject *desiredType) const;
+
     bool releaseWrapper(void *cptr, SbkObject *wrapper, const int *bases = nullptr);
     bool releaseWrapperHelper(void *cptr, SbkObject *wrapper);
 
@@ -182,14 +187,43 @@ struct BindingManager::BindingManagerPrivate {
     void assignWrapperHelper(SbkObject *wrapper, const void *cptr);
 };
 
-inline bool BindingManager::BindingManagerPrivate::releaseWrapperHelper(void *cptr, SbkObject *wrapper)
+// Find wrapper map entry by Python instance
+WrapperMap::const_iterator
+    BindingManager::BindingManagerPrivate::findSbkObject(const void *cptr,
+                                                         SbkObject *wrapper) const
+{
+    const auto end = wrapperMapper.cend();
+    auto it = wrapperMapper.find(cptr);
+    for (; it != end && it->first == cptr; ++it) {
+        if (it->second == wrapper)
+            return it;
+    }
+    return end;
+}
+
+// Find wrapper map entry by Python type
+WrapperMap::const_iterator
+    BindingManager::BindingManagerPrivate::findByType(const void *cptr,
+                                                      PyTypeObject *desiredType) const
+{
+    const auto end = wrapperMapper.cend();
+    auto it = wrapperMapper.find(cptr);
+    for (; it != end && it->first == cptr; ++it) {
+        auto *foundType = Py_TYPE(reinterpret_cast<PyObject *>(it->second));
+        if (foundType == desiredType || PyType_IsSubtype(foundType, desiredType) != 0)
+            return it;
+    }
+    return end;
+}
+
+bool BindingManager::BindingManagerPrivate::releaseWrapperHelper(void *cptr, SbkObject *wrapper)
 {
     // The wrapper argument is checked to ensure that the correct wrapper is released.
     // Returns true if the correct wrapper is found and released.
     // If wrapper argument is NULL, no such check is performed.
-    auto iter = wrapperMapper.find(cptr);
-    if (iter != wrapperMapper.end() && (wrapper == nullptr || iter->second == wrapper)) {
-        wrapperMapper.erase(iter);
+    const auto it = wrapper != nullptr ? findSbkObject(cptr, wrapper) : wrapperMapper.find(cptr);
+    if (it != wrapperMapper.cend()) {
+        wrapperMapper.erase(it);
         return true;
     }
     return false;
@@ -212,8 +246,8 @@ bool BindingManager::BindingManagerPrivate::releaseWrapper(void *cptr, SbkObject
 inline void BindingManager::BindingManagerPrivate::assignWrapperHelper(SbkObject *wrapper,
                                                                        const void *cptr)
 {
-    auto iter = wrapperMapper.find(cptr);
-    if (iter == wrapperMapper.end())
+    const auto it = findSbkObject(cptr, wrapper);
+    if (it == wrapperMapper.cend())
         wrapperMapper.insert(std::make_pair(cptr, wrapper));
 }
 
@@ -265,10 +299,16 @@ BindingManager &BindingManager::instance() {
     return singleton;
 }
 
-bool BindingManager::hasWrapper(const void *cptr)
+bool BindingManager::hasWrapper(const void *cptr) const
 {
     std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
     return m_d->wrapperMapper.find(cptr) != m_d->wrapperMapper.end();
+}
+
+bool BindingManager::hasWrapper(const void *cptr, PyTypeObject *typeObject) const
+{
+    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+    return m_d->findByType(cptr, typeObject) != m_d->wrapperMapper.cend();
 }
 
 void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
@@ -311,13 +351,20 @@ void BindingManager::addToDeletionInMainThread(const DestructorEntry &e)
     m_d->deleteInMainThread.push_back(e);
 }
 
-SbkObject *BindingManager::retrieveWrapper(const void *cptr)
+SbkObject *BindingManager::retrieveWrapper(const void *cptr) const
 {
     std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
     auto iter = m_d->wrapperMapper.find(cptr);
     if (iter == m_d->wrapperMapper.end())
         return nullptr;
     return iter->second;
+}
+
+SbkObject *BindingManager::retrieveWrapper(const void *cptr, PyTypeObject *typeObject) const
+{
+    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+    const auto it = m_d->findByType(cptr, typeObject);
+    return it != m_d->wrapperMapper.cend() ? it->second : nullptr;
 }
 
 PyObject *BindingManager::getOverride(const void *cptr,
@@ -451,7 +498,7 @@ void BindingManager::visitAllPyObjects(ObjectVisitor visitor, void *data)
 {
     WrapperMap copy = m_d->wrapperMapper;
     for (const auto &p : copy) {
-        if (hasWrapper(p.first))
+        if (m_d->findSbkObject(p.first, p.second) != m_d->wrapperMapper.cend())
             visitor(p.second, data);
     }
 }
