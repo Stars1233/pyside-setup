@@ -99,6 +99,9 @@ public:
     static QString minimalConstructorExpression(const ApiExtractorResult &api,
                                                 const TypeEntryCPtr &type);
 
+    static QString cpythonTypeName(const AbstractMetaClassCPtr &metaClass);
+    static QString cpythonTypeName(const TypeEntryCPtr &type);
+
 protected:
     bool doSetup() override;
 
@@ -263,8 +266,6 @@ protected:
     static QString cpythonBaseName(const TypeEntryCPtr &type);
     static QString containerCpythonBaseName(const ContainerTypeEntryCPtr &ctype);
     static QString cpythonBaseName(const AbstractMetaType &type);
-    static QString cpythonTypeName(const AbstractMetaClassCPtr &metaClass);
-    static QString cpythonTypeName(const TypeEntryCPtr &type);
     static QString cpythonTypeNameExtSet(const TypeEntryCPtr &type);
     static QString cpythonTypeNameExtSet(const AbstractMetaType &type);
     static QString cpythonTypeNameExt(const TypeEntryCPtr &type);

@@ -1582,42 +1582,16 @@ PyObject *newObjectWithHeuristics(PyTypeObject *instanceType,
 
 PyObject *newObjectForType(PyTypeObject *instanceType, void *cptr, bool hasOwnership)
 {
-    bool shouldCreate = true;
-    bool shouldRegister = true;
-    SbkObject *self = nullptr;
-
     auto &bindingManager = BindingManager::instance();
-    // Some logic to ensure that colocated child field does not overwrite the parent
-    if (SbkObject *existingWrapper = bindingManager.retrieveWrapper(cptr)) {
-        self = findColocatedChild(existingWrapper, instanceType);
-        if (self) {
-            // Wrapper already registered for cptr.
-            // This should not ideally happen, binding code should know when a wrapper
-            // already exists and retrieve it instead.
-            shouldRegister = shouldCreate = false;
-        } else if (hasOwnership &&
-                  (!(Shiboken::Object::hasCppWrapper(existingWrapper) ||
-                     Shiboken::Object::hasOwnership(existingWrapper)))) {
-            // Old wrapper is likely junk, since we have ownership and it doesn't.
-            bindingManager.releaseWrapper(existingWrapper);
-        } else {
-            // Old wrapper may be junk caused by some bug in identifying object deletion
-            // but it may not be junk when a colocated field is accessed for an
-            // object which was not created by python (returned from c++ factory function).
-            // Hence we cannot release the wrapper confidently so we do not register.
-            shouldRegister = false;
-        }
-    }
-
-    if (shouldCreate) {
+    SbkObject *self = bindingManager.retrieveWrapper(cptr, instanceType);
+    if (self != nullptr) {
+        Py_IncRef(reinterpret_cast<PyObject *>(self));
+    } else {
         self = reinterpret_cast<SbkObject *>(SbkObject_tp_new(instanceType, nullptr, nullptr));
         self->d->cptr[0] = cptr;
         self->d->hasOwnership = hasOwnership;
         self->d->validCppObject = 1;
-        if (shouldRegister)
-            bindingManager.registerWrapper(self, cptr);
-    } else {
-        Py_IncRef(reinterpret_cast<PyObject *>(self));
+        bindingManager.registerWrapper(self, cptr);
     }
     return reinterpret_cast<PyObject *>(self);
 }

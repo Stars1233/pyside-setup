@@ -88,6 +88,23 @@ TextStream &operator<<(TextStream &str, const sbkUnusedVariableCast &c)
     return str;
 }
 
+struct retrieveWrapper
+{
+    explicit retrieveWrapper(const AbstractMetaClassCPtr &klass,
+                             QAnyStringView instanceName = "this")
+        : m_klass(klass), m_instanceName(instanceName) {}
+
+    const AbstractMetaClassCPtr m_klass;
+    const QAnyStringView m_instanceName;
+};
+
+TextStream &operator<<(TextStream &str, const retrieveWrapper &rw)
+{
+    str << "Shiboken::BindingManager::instance().retrieveWrapper(" << rw.m_instanceName
+        << ", " << CppGenerator::cpythonTypeName(rw.m_klass) << ')';
+    return str;
+}
+
 struct pyTypeGetSlot
 {
     explicit pyTypeGetSlot(QAnyStringView funcType, QAnyStringView typeObject,
@@ -1016,9 +1033,8 @@ void CppGenerator::writeDestructorNative(TextStream &s,
     if (wrapperDiagnostics())
         s << R"(std::cerr << __FUNCTION__ << ' ' << this << '\n';)" << '\n';
     // kill pyobject
-    s << R"(SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(this);
-Shiboken::Object::destroy(wrapper, this);
-)" << outdent << "}\n";
+    s << "auto *wrapper = " << retrieveWrapper(classContext.metaClass())
+      << ";\nShiboken::Object::destroy(wrapper, this);\n" << outdent << "}\n";
 }
 
 // Return type for error messages when getting invalid types from virtual
@@ -1439,7 +1455,7 @@ void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
 
     if (!snips.isEmpty()) {
         if (func->injectedCodeUsesPySelf())
-            s << "PyObject *pySelf = BindingManager::instance().retrieveWrapper(this);\n";
+            s << "PyObject *pySelf = " << retrieveWrapper(func->ownerClass()) << ";\n";
 
         const AbstractMetaArgument *lastArg = func->arguments().isEmpty()
                                             ? nullptr : &func->arguments().constLast();
@@ -1756,7 +1772,7 @@ static void writePointerToPythonConverter(TextStream &c,
                                           const QString &typeName,
                                           const QString &cpythonType)
 {
-    c << "auto *pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(cppIn));\n"
+    c << "auto *pyOut = reinterpret_cast<PyObject *>(" << retrieveWrapper(metaClass, "cppIn") << ");\n"
         << "if (pyOut) {\n" << indent
         << "Py_INCREF(pyOut);\nreturn pyOut;\n" << outdent
         << "}\n";
@@ -2318,12 +2334,8 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     // Python owns it and C++ wrapper is false.
     if (shouldGenerateCppWrapper(overloadData.referenceFunction()->ownerClass()))
         s << "Shiboken::Object::setHasCppWrapper(sbkSelf, true);\n";
-    // Need to check if a wrapper for same pointer is already registered
-    // Caused by bug PYSIDE-217, where deleted objects' wrappers are not released
-    s << "if (Shiboken::BindingManager::instance().hasWrapper(cptr)) {\n" << indent
-        << "Shiboken::BindingManager::instance().releaseWrapper("
-           "Shiboken::BindingManager::instance().retrieveWrapper(cptr));\n" << outdent
-        << "}\nShiboken::BindingManager::instance().registerWrapper(sbkSelf, cptr);\n";
+
+    s << "Shiboken::BindingManager::instance().registerWrapper(sbkSelf, cptr);\n";
 
     // Create metaObject and register signal/slot
     if (needsMetaObject) {
@@ -5026,27 +5038,7 @@ void CppGenerator::writeGetterFunction(TextStream &s,
         cppField = u"cppOut_local"_s;
     }
 
-    s << "PyObject *pyOut = {};\n";
     if (newWrapperSameObject) {
-        // Special case colocated field with same address (first field in a struct)
-        s << "if (reinterpret_cast<void *>("
-            << cppField << ") == reinterpret_cast<void *>("
-            << CPP_SELF_VAR << ")) {\n" << indent
-            << "pyOut = reinterpret_cast<PyObject *>(Shiboken::Object::findColocatedChild("
-            << "reinterpret_cast<SbkObject *>(self), "
-            << cpythonTypeNameExt(fieldType) << "));\n"
-            << "if (pyOut != nullptr) {\n" << indent
-            << "Py_IncRef(pyOut);\n"
-            << "return pyOut;\n"
-            << outdent << "}\n";
-        // Check if field wrapper has already been created.
-        s << outdent << "} else if (Shiboken::BindingManager::instance().hasWrapper("
-            << cppField << ")) {" << "\n" << indent
-            << "pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper("
-            << cppField << "));" << "\n"
-            << "Py_IncRef(pyOut);" << "\n"
-            << "return pyOut;" << "\n"
-            << outdent << "}\n";
         // Create and register new wrapper. We force a pointer conversion also
         // for wrapped value types so that they refer to the struct member,
         // avoiding any trouble copying them. Add a parent relationship to
@@ -5055,15 +5047,23 @@ void CppGenerator::writeGetterFunction(TextStream &s,
         // unsolved issues when using temporary Python lists of structs
         // which can cause elements to be reported deleted in expressions like
         // "foo.list_of_structs[2].field".
-        s << "pyOut = "
-            << "Shiboken::Object::newObject(" << cpythonTypeNameExt(fieldType)
-            << ", " << cppField << ", false, true);\n"
-            << "Shiboken::Object::setParent(self, pyOut)";
+        s << "PyObject *pyOut = {};\n"
+            << "auto *fieldTypeObject = " << cpythonTypeNameExt(fieldType) << ";\n"
+            << "if (auto *sbkOut = Shiboken::BindingManager::instance().retrieveWrapper("
+            << cppField << ", fieldTypeObject)) {\n" << indent
+            << "pyOut = reinterpret_cast<PyObject *>(sbkOut);\n"
+            << "Py_INCREF(pyOut);\n" << outdent << "} else {\n" << indent
+            << "pyOut = Shiboken::Object::newObject(fieldTypeObject, "
+            << cppField << ", false, true);\n"
+            << "Shiboken::Object::setParent(self, pyOut);\n"
+            << outdent << "}\n"
+            << "return pyOut;\n";
     } else {
-        s << "pyOut = ";
+        s << "return ";
         writeToPythonConversion(s, fieldType, metaField.enclosingClass(), cppField);
+        s << ";\n";
     }
-    s << ";\nreturn pyOut;\n" << outdent << "}\n";
+    s << outdent << "}\n";
 }
 
 // Write a getter for QPropertySpec

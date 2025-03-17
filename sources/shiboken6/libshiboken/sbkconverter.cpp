@@ -293,8 +293,8 @@ PyObject *referenceToPython(const SbkConverter *converter, const void *cppIn)
 {
     assert(cppIn);
 
-    auto *pyOut = reinterpret_cast<PyObject *>(BindingManager::instance().retrieveWrapper(cppIn));
-    if (pyOut) {
+    if (auto *sbkOut = BindingManager::instance().retrieveWrapper(cppIn, converter->pythonType)) {
+        auto *pyOut = reinterpret_cast<PyObject *>(sbkOut);
         Py_INCREF(pyOut);
         return pyOut;
     }
