@@ -760,8 +760,8 @@ bool checkDictTypes(PyTypeObject *keyType, PyTypeObject *valueType, PyObject *py
     if (!PyDict_Check(pyIn))
         return false;
 
-    PyObject *key;
-    PyObject *value;
+    PyObject *key{};
+    PyObject *value{};
     Py_ssize_t pos = 0;
     while (PyDict_Next(pyIn, &pos, &key, &value)) {
         if (!PyObject_TypeCheck(key, keyType))
@@ -807,8 +807,8 @@ bool convertibleDictTypes(const SbkConverter *keyConverter, bool keyCheckExact, 
     assert(pyIn);
     if (!PyDict_Check(pyIn))
         return false;
-    PyObject *key;
-    PyObject *value;
+    PyObject *key{};
+    PyObject *value{};
     Py_ssize_t pos = 0;
     while (PyDict_Next(pyIn, &pos, &key, &value)) {
         if (keyCheckExact) {
@@ -836,8 +836,8 @@ bool convertibleMultiDictTypes(const SbkConverter *keyConverter, bool keyCheckEx
     assert(pyIn);
     if (!PyDict_Check(pyIn))
         return false;
-    PyObject *key;
-    PyObject *values;
+    PyObject *key{};
+    PyObject *values{};
     Py_ssize_t pos = 0;
     while (PyDict_Next(pyIn, &pos, &key, &values)) {
         if (keyCheckExact) {
@@ -904,7 +904,7 @@ SpecificConverter::SpecificConverter(const char *typeName)
     m_converter = getConverter(typeName);
     if (!m_converter)
         return;
-    const Py_ssize_t len = strlen(typeName);
+    const auto len = strlen(typeName);
     char lastChar = typeName[len -1];
     if (lastChar == '&') {
         m_type = ReferenceConversion;
