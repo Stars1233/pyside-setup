@@ -123,9 +123,8 @@ LIBSHIBOKEN_API PyObject *Sbk_ReturnFromPython_Self(PyObject *self);
 } // extern "C"
 
 LIBSHIBOKEN_API PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
-                                            Shiboken::GilState &gil,
-                                            const char *funcName, bool &resultCache,
-                                            PyObject **nameCache);
+                                            Shiboken::GilState &gil, const char *funcName,
+                                            PyObject *&resultCache, PyObject **nameCache);
 
 namespace Shiboken
 {

@@ -21,6 +21,7 @@
 #include "voidptr.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cstddef>
 #include <cstring>
 #include <iostream>
@@ -786,32 +787,57 @@ static PyObject *overrideMethodName(PyObject *pySelf, const char *methodName,
 // The virtual function call
 PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
                             Shiboken::GilState &gil, const char *funcName,
-                            bool &resultCache, PyObject **nameCache)
+                            PyObject *&resultCache, PyObject **nameCache)
 {
-    PyObject *pyOverride{};
-    if (!resultCache) {
-        gil.acquire();
-        auto &bindingManager = Shiboken::BindingManager::instance();
-        SbkObject *wrapper = bindingManager.retrieveWrapper(voidThis, typeObject);
-        // The refcount can be 0 if the object is dieing and someone called
-        // a virtual method from the destructor
-        if (wrapper == nullptr)
-            return nullptr;
-        auto *pySelf = reinterpret_cast<PyObject *>(wrapper);
-        if (Py_REFCNT(pySelf) == 0)
-            return nullptr;
-        PyObject *pyMethodName = overrideMethodName(pySelf, funcName, nameCache);
-        pyOverride = Shiboken::BindingManager::getOverride(wrapper, pyMethodName);
-        if (pyOverride == nullptr) {
-            resultCache = true;
-            gil.release();
-        } else if (Shiboken::Errors::occurred() != nullptr) {
-            // Give up.
-            Py_XDECREF(pyOverride);
-            pyOverride = nullptr;
-        }
+    if (Py_IsInitialized() == 0 || resultCache == Py_None)
+        return nullptr; // Bail out, execute C++ call (wrappers may outlive Python).
+
+    auto &bindingManager = Shiboken::BindingManager::instance();
+    SbkObject *wrapper = bindingManager.retrieveWrapper(voidThis, typeObject);
+    // The refcount can be 0 if the object is dieing and someone called
+    // a virtual method from the destructor
+    if (wrapper == nullptr)
+        return nullptr;
+    auto *pySelf = reinterpret_cast<PyObject *>(wrapper);
+    if (Py_REFCNT(pySelf) == 0)
+        return nullptr;
+
+    gil.acquire();
+
+    if (resultCache != nullptr) // recreate the callable from function/self
+        return PepExt_Type_CallDescrGet(resultCache, pySelf, nullptr);
+
+    PyObject *pyMethodName = overrideMethodName(pySelf, funcName, nameCache);
+    auto *wrapper_dict = SbkObject_GetDict_NoRef(pySelf);
+
+    // Note: This special case was implemented for duck-punching, which happens
+    // in the instance dict. It does not work with properties.
+    // This is not cached to avoid leaking. FIXME PYSIDE 7: Remove (PYSIDE-2916)?
+    if (PyObject *method = PyDict_GetItem(wrapper_dict, pyMethodName)) {
+        Py_INCREF(method);
+        return method;
     }
-    return pyOverride;
+
+    auto *pyOverride = Shiboken::BindingManager::getOverride(wrapper, pyMethodName);
+    if (pyOverride == nullptr) {
+        resultCache = Py_None;
+        Py_INCREF(resultCache);
+        gil.release();
+        return nullptr; // No override, execute C++ call
+    }
+
+    if (Shiboken::Errors::occurred() != nullptr) {
+        // Give up.
+        Py_XDECREF(pyOverride);
+        resultCache = Py_None;
+        Py_INCREF(resultCache);
+        gil.release();
+        return nullptr; // // Give up.
+    }
+
+    resultCache = pyOverride;
+    // recreate the callable from function/self
+    return PepExt_Type_CallDescrGet(resultCache, pySelf, nullptr);
 }
 
 namespace

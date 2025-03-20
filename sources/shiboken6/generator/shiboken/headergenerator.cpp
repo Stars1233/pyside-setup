@@ -185,6 +185,7 @@ void HeaderGenerator::writeWrapperClass(TextStream &s,
         for( const auto &includeGroup : includeGroups)
             s << includeGroup;
     }
+    s << "#include <sbkpython.h>\n\n#include <array>\n";
 
     s << "namespace Shiboken { class AutoDecRef; class GilState; }\n\n";
 
@@ -288,9 +289,10 @@ void *qt_metacast(const char *_clname) override;
     }
 
     if (needsMethodCache) {
-        s << "mutable bool m_PyMethodCache[" << maxOverrides << "] = {false";
+        s << "mutable std::array<PyObject *, " << maxOverrides
+            << "> m_PyMethodCache = {nullptr";
         for (int i = 1; i < maxOverrides; ++i)
-            s << ", false";
+            s << ", nullptr";
         s << "};\n";
     }
 

@@ -369,13 +369,6 @@ SbkObject *BindingManager::retrieveWrapper(const void *cptr, PyTypeObject *typeO
 PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *pyMethodName)
 {
     auto *obWrapper = reinterpret_cast<PyObject *>(wrapper);
-    auto *wrapper_dict = SbkObject_GetDict_NoRef(obWrapper);
-    if (PyObject *method = PyDict_GetItem(wrapper_dict, pyMethodName)) {
-        // Note: This special case was implemented for duck-punching, which happens
-        // in the instance dict. It does not work with properties.
-        Py_INCREF(method);
-        return method;
-    }
 
     Shiboken::AutoDecRef method(PyObject_GetAttr(obWrapper, pyMethodName));
     if (method.isNull())
@@ -413,13 +406,13 @@ PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *pyMethodName
             if (PyObject *defaultMethod = PyDict_GetItem(parentDict.object(), pyMethodName)) {
                 defaultFound = true;
                 if (function != defaultMethod)
-                    return method.release();
+                    return function;
             }
         }
     }
     // PYSIDE-2255: If no default method was found, use the method.
     if (!defaultFound)
-        return method.release();
+        return function;
     return nullptr;
 }
 

@@ -997,7 +997,7 @@ void CppGenerator::writeCacheResetNative(TextStream &s, const GeneratorContext &
 {
     s << "void " << classContext.wrapperName()
         << "::resetPyMethodCache()\n{\n" << indent
-        << "std::fill_n(m_PyMethodCache, sizeof(m_PyMethodCache) / sizeof(m_PyMethodCache[0]), false);\n"
+        << "std::fill(m_PyMethodCache.begin(), m_PyMethodCache.end(), nullptr);\n"
         << outdent << "}\n\n";
 }
 
