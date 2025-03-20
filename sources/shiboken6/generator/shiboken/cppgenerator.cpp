@@ -1314,7 +1314,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     const QString funcName = func->isOperatorOverload()
         ? pythonOperatorFunctionName(func) : func->definitionNames().constFirst();
 
-    QString className = wrapperName(func->ownerClass());
+    auto owner = func->ownerClass();
+    QString className = wrapperName(owner);
     const Options options = Generator::SkipDefaultValues | Generator::OriginalTypeDescription;
     s << functionSignature(func, className, {}, options)
       << "\n{\n" << indent;
@@ -1356,7 +1357,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     s << "static PyObject *nameCache[2] = {};\n"
       << "Shiboken::GilState gil(false);\n"
       << "Shiboken::AutoDecRef " << PYTHON_OVERRIDE_VAR << "(Sbk_GetPyOverride("
-      << "this, gil, funcName, &m_PyMethodCache[" << cacheIndex << "], nameCache));\n"
+      << "this, " << CppGenerator::cpythonTypeName(owner) << ", gil, funcName, m_PyMethodCache["
+      << cacheIndex << "], nameCache));\n"
       << "if (pyOverride.isNull()) {\n" << indent;
     writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
                               returnStatement.statement, false, true);
@@ -1370,7 +1372,6 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     if (!func->isVoid())
         s << "return ";
 
-    auto owner = func->ownerClass();
     const auto &reusedFuncs = getReusedOverridenFunctions(owner);
     auto rit = reusedFuncs.constFind(func);
     const bool canReuse = rit != reusedFuncs.cend();

@@ -367,16 +367,9 @@ SbkObject *BindingManager::retrieveWrapper(const void *cptr, PyTypeObject *typeO
     return it != m_d->wrapperMapper.cend() ? it->second : nullptr;
 }
 
-PyObject *BindingManager::getOverride(const void *cptr,
-                                      PyObject *nameCache[],
+PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *nameCache[],
                                       const char *methodName)
 {
-    SbkObject *wrapper = retrieveWrapper(cptr);
-    // The refcount can be 0 if the object is dieing and someone called
-    // a virtual method from the destructor
-    if (!wrapper || Py_REFCNT(reinterpret_cast<const PyObject *>(wrapper)) == 0)
-        return nullptr;
-
     // PYSIDE-1626: Touch the type to initiate switching early.
     SbkObjectType_UpdateFeature(Py_TYPE(wrapper));
 

@@ -763,16 +763,25 @@ PyObject *Sbk_ReturnFromPython_Self(PyObject *self)
     return self;
 }
 
+} //extern "C"
+
 // The virtual function call
-PyObject *Sbk_GetPyOverride(const void *voidThis, Shiboken::GilState &gil, const char *funcName,
-                            bool *resultCache, PyObject **nameCache)
+PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
+                            Shiboken::GilState &gil, const char *funcName,
+                            bool &resultCache, PyObject **nameCache)
 {
     PyObject *pyOverride{};
-    if (!*resultCache) {
+    if (!resultCache) {
         gil.acquire();
-        pyOverride = Shiboken::BindingManager::instance().getOverride(voidThis, nameCache, funcName);
+        auto &bindingManager = Shiboken::BindingManager::instance();
+        SbkObject *wrapper = bindingManager.retrieveWrapper(voidThis, typeObject);
+        // The refcount can be 0 if the object is dieing and someone called
+        // a virtual method from the destructor
+        if (wrapper == nullptr || Py_REFCNT(reinterpret_cast<const PyObject *>(wrapper)) == 0)
+            return nullptr;
+        pyOverride = Shiboken::BindingManager::getOverride(wrapper, nameCache, funcName);
         if (pyOverride == nullptr) {
-            *resultCache = true;
+            resultCache = true;
             gil.release();
         } else if (Shiboken::Errors::occurred() != nullptr) {
             // Give up.
@@ -782,9 +791,6 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, Shiboken::GilState &gil, const
     }
     return pyOverride;
 }
-
-} //extern "C"
-
 
 namespace
 {
