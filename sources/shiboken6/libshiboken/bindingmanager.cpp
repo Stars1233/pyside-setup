@@ -392,63 +392,49 @@ PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *nameCache[],
         return method;
     }
 
-    PyObject *method = PyObject_GetAttr(obWrapper, pyMethodName);
+    Shiboken::AutoDecRef method(PyObject_GetAttr(obWrapper, pyMethodName));
+    if (method.isNull())
+        return nullptr;
 
     PyObject *function = nullptr;
 
     // PYSIDE-1523: PyMethod_Check is not accepting compiled methods, we do this rather
     // crude check for them.
-    if (method) {
-        // PYSIDE-535: This macro is redefined in a compatible way in pep384
-        if (PyMethod_Check(method)) {
-            if (PyMethod_GET_SELF(method) == obWrapper) {
-                function = PyMethod_GET_FUNCTION(method);
-            } else {
-                Py_DECREF(method);
-                method = nullptr;
-            }
-        } else if (isCompiledMethod(method)) {
-            PyObject *im_self = PyObject_GetAttr(method, PyName::im_self());
-            // Not retaining a reference inline with what PyMethod_GET_SELF does.
-            Py_DECREF(im_self);
-
-            if (im_self == obWrapper) {
-                function = PyObject_GetAttr(method, PyName::im_func());
-                // Not retaining a reference inline with what PyMethod_GET_FUNCTION does.
-                Py_DECREF(function);
-            } else {
-                Py_DECREF(method);
-                method = nullptr;
-            }
-        } else {
-            Py_DECREF(method);
-            method = nullptr;
-        }
+    // PYSIDE-535: This macro is redefined in a compatible way in pep384
+    if (PyMethod_Check(method) != 0) {
+        if (PyMethod_GET_SELF(method) != obWrapper)
+            return nullptr;
+        function = PyMethod_GET_FUNCTION(method);
+    } else if (isCompiledMethod(method)) {
+        Shiboken::AutoDecRef im_self(PyObject_GetAttr(method, PyName::im_self()));
+        // Not retaining a reference inline with what PyMethod_GET_SELF does.
+        if (im_self.object() != obWrapper)
+            return nullptr;
+        function = PyObject_GetAttr(method, PyName::im_func());
+        // Not retaining a reference inline with what PyMethod_GET_FUNCTION does.
+        Py_DECREF(function);
+    } else {
+        return nullptr;
     }
 
-    if (method != nullptr) {
-        PyObject *mro = Py_TYPE(wrapper)->tp_mro;
-
-        bool defaultFound = false;
-        // The first class in the mro (index 0) is the class being checked and it should not be tested.
-        // The last class in the mro (size - 1) is the base Python object class which should not be tested also.
-        for (Py_ssize_t idx = 1, size = PyTuple_Size(mro); idx < size - 1; ++idx) {
-            auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
-            AutoDecRef parentDict(PepType_GetDict(parent));
-            if (parentDict) {
-                if (PyObject *defaultMethod = PyDict_GetItem(parentDict.object(), pyMethodName)) {
-                    defaultFound = true;
-                    if (function != defaultMethod)
-                        return method;
-                }
+    PyObject *mro = Py_TYPE(wrapper)->tp_mro;
+    bool defaultFound = false;
+    // The first class in the mro (index 0) is the class being checked and it should not be tested.
+    // The last class in the mro (size - 1) is the base Python object class which should not be tested also.
+    for (Py_ssize_t idx = 1, size = PyTuple_Size(mro); idx < size - 1; ++idx) {
+        auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+        AutoDecRef parentDict(PepType_GetDict(parent));
+        if (parentDict) {
+            if (PyObject *defaultMethod = PyDict_GetItem(parentDict.object(), pyMethodName)) {
+                defaultFound = true;
+                if (function != defaultMethod)
+                    return method.release();
             }
         }
-        // PYSIDE-2255: If no default method was found, use the method.
-        if (!defaultFound)
-            return method;
-        Py_DECREF(method);
     }
-
+    // PYSIDE-2255: If no default method was found, use the method.
+    if (!defaultFound)
+        return method.release();
     return nullptr;
 }
 
