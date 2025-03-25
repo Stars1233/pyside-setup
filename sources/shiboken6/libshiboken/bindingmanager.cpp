@@ -366,23 +366,8 @@ SbkObject *BindingManager::retrieveWrapper(const void *cptr, PyTypeObject *typeO
     return it != m_d->wrapperMapper.cend() ? it->second : nullptr;
 }
 
-PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *nameCache[],
-                                      const char *methodName)
+PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *pyMethodName)
 {
-    // PYSIDE-1626: Touch the type to initiate switching early.
-    SbkObjectType_UpdateFeature(Py_TYPE(wrapper));
-
-    int flag = currentSelectId(Py_TYPE(wrapper));
-    int propFlag = isdigit(methodName[0]) ? methodName[0] - '0' : 0;
-    bool is_snake = flag & 0x01;
-    PyObject *pyMethodName = nameCache[is_snake];  // borrowed
-    if (pyMethodName == nullptr) {
-        if (propFlag)
-            methodName += 2;    // skip the propFlag and ':'
-        pyMethodName = Shiboken::String::getSnakeCaseName(methodName, is_snake);
-        nameCache[is_snake] = pyMethodName;
-    }
-
     auto *obWrapper = reinterpret_cast<PyObject *>(wrapper);
     auto *wrapper_dict = SbkObject_GetDict_NoRef(obWrapper);
     if (PyObject *method = PyDict_GetItem(wrapper_dict, pyMethodName)) {

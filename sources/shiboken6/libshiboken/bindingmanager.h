@@ -44,7 +44,7 @@ public:
 
     SbkObject *retrieveWrapper(const void *cptr, PyTypeObject *typeObject) const;
     SbkObject *retrieveWrapper(const void *cptr) const;
-    static PyObject *getOverride(SbkObject *wrapper, PyObject *nameCache[], const char *methodName);
+    static PyObject *getOverride(SbkObject *wrapper, PyObject *pyMethodName);
 
     void addClassInheritance(Module::TypeInitStruct *parent, Module::TypeInitStruct *child);
     /// Try to find the correct type of cptr via type discovery knowing that it's at least

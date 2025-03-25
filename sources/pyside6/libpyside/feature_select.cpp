@@ -283,6 +283,7 @@ static inline void SelectFeatureSetSubtype(PyTypeObject *type, int select_id)
     }
     if (!moveToFeatureSet(type, select_id)) {
         if (!createNewFeatureSet(type, select_id)) {
+            PyErr_Print();
             Py_FatalError("failed to create a new feature set!");
             return;
         }

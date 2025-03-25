@@ -761,6 +761,28 @@ PyObject *Sbk_ReturnFromPython_Self(PyObject *self)
 
 } //extern "C"
 
+// Determine name of a Python override of a virtual method according to features
+// and populate name cache.
+static PyObject *overrideMethodName(PyObject *pySelf, const char *methodName,
+                                    PyObject **nameCache)
+{
+    // PYSIDE-1626: Touch the type to initiate switching early.
+    auto *obType = Py_TYPE(pySelf);
+    SbkObjectType_UpdateFeature(obType);
+
+    const int flag = currentSelectId(obType);
+    const int propFlag = isdigit(methodName[0]) ? methodName[0] - '0' : 0;
+    const bool is_snake = flag & 0x01;
+    PyObject *pyMethodName = nameCache[is_snake];  // borrowed
+    if (pyMethodName == nullptr) {
+        if (propFlag)
+            methodName += 2; // skip the propFlag and ':'
+        pyMethodName = Shiboken::String::getSnakeCaseName(methodName, is_snake);
+        nameCache[is_snake] = pyMethodName;
+    }
+    return pyMethodName;
+}
+
 // The virtual function call
 PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
                             Shiboken::GilState &gil, const char *funcName,
@@ -773,9 +795,13 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
         SbkObject *wrapper = bindingManager.retrieveWrapper(voidThis, typeObject);
         // The refcount can be 0 if the object is dieing and someone called
         // a virtual method from the destructor
-        if (wrapper == nullptr || Py_REFCNT(reinterpret_cast<const PyObject *>(wrapper)) == 0)
+        if (wrapper == nullptr)
             return nullptr;
-        pyOverride = Shiboken::BindingManager::getOverride(wrapper, nameCache, funcName);
+        auto *pySelf = reinterpret_cast<PyObject *>(wrapper);
+        if (Py_REFCNT(pySelf) == 0)
+            return nullptr;
+        PyObject *pyMethodName = overrideMethodName(pySelf, funcName, nameCache);
+        pyOverride = Shiboken::BindingManager::getOverride(wrapper, pyMethodName);
         if (pyOverride == nullptr) {
             resultCache = true;
             gil.release();
