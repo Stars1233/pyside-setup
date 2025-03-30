@@ -2,19 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
-
-"""
-This tool reads all the examples from the main repository that have a
-'.pyproject' file, and generates a special table/gallery in the documentation
-page.
-
-For the usage, simply run:
-    python tools/example_gallery/main.py
-since there is no special requirements.
-"""
-
-import json
-import math
+import fnmatch
 import os
 import shutil
 import zipfile
@@ -23,8 +11,12 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 from dataclasses import dataclass
 from enum import IntEnum, Enum
 from pathlib import Path
-from textwrap import dedent
 from collections import defaultdict
+from typing import DefaultDict
+
+sys.path.append(os.fspath(Path(__file__).parent.parent.parent / "sources" / "pyside-tools"))
+from project_lib import parse_pyproject_json, parse_pyproject_toml, \
+    PYPROJECT_FILE_PATTERNS, PYPROJECT_TOML_PATTERN, PYPROJECT_JSON_PATTERN  # noqa: E402
 
 
 class Format(Enum):
@@ -32,40 +24,38 @@ class Format(Enum):
     MD = 1
 
 
-class ModuleType(IntEnum):
-    ESSENTIALS = 0
-    ADDONS = 1
-    M2M = 2
+__doc__ = """\
+This tool scans the main repository for examples with project files and generates a documentation
+page formatted as a gallery, displaying the examples in a table
 
-
-SUFFIXES = {Format.RST: "rst", Format.MD: "md"}
-
-
-opt_quiet = False
-
-
+For the usage, simply run:
+    python tools/example_gallery/main.py
+"""
+DIR = Path(__file__).parent
+EXAMPLES_DOC = Path(f"{DIR}/../../sources/pyside6/doc/examples").resolve()
+EXAMPLES_DIR = Path(f"{DIR}/../../examples/").resolve()
+TARGET_HELP = f"Directory into which to generate Doc files (default: {str(EXAMPLES_DOC)})"
+BASE_URL = "https://code.qt.io/cgit/pyside/pyside-setup.git/tree"
+DOC_SUFFIXES = {Format.RST: "rst", Format.MD: "md"}
 LITERAL_INCLUDE = ".. literalinclude::"
-
-
 IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".svg", ".svgz", ".webp")
-
-
+# Suffixes to ignore when displaying source files that are referenced in the project file
 IGNORED_SUFFIXES = IMAGE_SUFFIXES + (".pdf", ".pyc", ".obj", ".mesh")
-
-
-suffixes = {
-    ".h": "cpp",
-    ".cpp": "cpp",
-    ".md": "markdown",
-    ".py": "py",
-    ".qml": "js",
-    ".conf": "ini",
-    ".qrc": "xml",
-    ".ui": "xml",
-    ".xbel": "xml",
-    ".xml": "xml",
+LANGUAGE_PATTERNS = {
+    "*.h": "cpp",
+    "*.cpp": "cpp",
+    "*.md": "markdown",
+    "*.py": "py",
+    "*.qml": "js",
+    "*.qmlproject": "js",
+    "*.conf": "ini",
+    "*.qrc": "xml",
+    "*.ui": "xml",
+    "*.xbel": "xml",
+    "*.xml": "xml",
+    "*.html": "html",
+    "CMakeLists.txt": "cmake",
 }
-
 
 BASE_CONTENT = """\
 .. _pyside6_examples:
@@ -82,42 +72,59 @@ Examples
  directory.
 
 """
+# We generate a 'toctree' at the end of the file to include the new 'example' rst files, so we get
+# no warnings and also that users looking for them will be able to, since they are indexed
+# Notice that :hidden: will not add the list of files by the end of the main examples HTML page.
+FOOTER_INDEX = """\
+.. toctree::
+    :hidden:
+    :maxdepth: 1
+
+"""
+TUTORIAL_HEADLINES = {
+    "tutorials/extending-qml/chapter": "Tutorial: Writing QML Extensions with Python",
+    "tutorials/extending-qml-advanced/advanced": "Tutorial: Writing advanced QML Extensions with"
+                                                 "Python",
+    "tutorials/finance_manager": "Tutorial: Finance Manager - Integrating PySide6 with SQLAlchemy "
+                                 "and FastAPI",
+}
 
 
-def tutorial_headline(path: str):
-    if "tutorials/extending-qml/chapter" in path:
-        return "Tutorial: Writing QML Extensions with Python"
-    if "tutorials/extending-qml-advanced/advanced" in path:
-        return "Tutorial: Writing advanced QML Extensions with Python"
-    if "tutorials/finance_manager" in path:
-        return "Tutorial: Finance Manager - Integrating PySide6 with SQLAlchemy and FastAPI"
-    return ""
+class ModuleType(IntEnum):
+    ESSENTIALS = 0
+    ADDONS = 1
+    M2M = 2
 
 
-def ind(x):
-    return " " * 4 * x
+def get_lexer(path: Path) -> str:
+    """Given a file path, return the language lexer to use for syntax highlighting"""
+    for pattern, lexer in LANGUAGE_PATTERNS.items():
+        if fnmatch.fnmatch(path.name, pattern):
+            return lexer
+    # Default to text
+    return "text"
 
 
-def get_lexer(path):
-    if path.name == "CMakeLists.txt":
-        return "cmake"
-    lexer = suffixes.get(path.suffix)
-    return lexer if lexer else "text"
+def ind(level: int) -> str:
+    """Return a string of spaces for string indentation given certain level"""
+    return " " * 4 * level
 
 
-def add_indent(s, level):
+def add_indent(s: str, level: int) -> str:
+    """Add indentation to a string"""
     new_s = ""
     for line in s.splitlines():
         if line.strip():
             new_s += f"{ind(level)}{line}\n"
         else:
+            # Empty line
             new_s += "\n"
     return new_s
 
 
-def check_img_ext(i):
-    """Check whether path is an image."""
-    return i.suffix in IMAGE_SUFFIXES
+def check_img_ext(image_path: Path) -> bool:
+    """Check whether a file path is an image depending on its suffix."""
+    return image_path.suffix in IMAGE_SUFFIXES
 
 
 @dataclass
@@ -177,15 +184,15 @@ MODULE_DESCRIPTIONS = {
 }
 
 
-def module_sort_key(name):
-    """Return key for sorting modules."""
+def module_sort_key(name: str) -> str:
+    """Return a key for sorting the Qt modules."""
     description = MODULE_DESCRIPTIONS.get(name)
     module_type = int(description.module_type) if description else 5
     sort_key = description.sort_key if description else 100
     return f"{module_type}:{sort_key:04}:{name}"
 
 
-def module_title(name):
+def module_title(name: str) -> str:
     """Return title for a module."""
     result = name.title()
     description = MODULE_DESCRIPTIONS.get(name)
@@ -205,25 +212,22 @@ def module_title(name):
 class ExampleData:
     """Example data for formatting the gallery."""
 
-    def __init__(self):
-        self.headline = ""
-
-    example: str
-    module: str
-    extra: str
-    doc_file: str
-    file_format: Format
-    abs_path: str
-    has_doc: bool
-    img_doc: Path
-    headline: str
-    tutorial: str
+    example_name: str = None
+    module: str = None
+    extra: str = None
+    doc_file: str = None
+    file_format: Format = None
+    abs_path: str = None
+    src_doc_file: Path = None
+    img_doc: Path = None
+    tutorial: str = None
+    headline: str = ""
 
 
-def get_module_gallery(examples):
+def get_module_gallery(examples: list[ExampleData]) -> str:
     """
-    This function takes a list of dictionaries, that contain examples
-    information, from one specific module.
+    This function takes a list of examples from one specific module and returns the resulting string
+    in RST format that can be used to generate the table for the examples
     """
 
     gallery = (
@@ -231,25 +235,22 @@ def get_module_gallery(examples):
         f"{ind(2)}:gutter: 3\n\n"
     )
 
-    # Iteration per rows
-    for i in range(math.ceil(len(examples))):
-        e = examples[i]
-        suffix = SUFFIXES[e.file_format]
+    for i, example in enumerate(examples):
+        suffix = DOC_SUFFIXES[example.file_format]
         # doc_file with suffix removed, to be used as a sphinx reference
-        doc_file_name = e.doc_file.replace(f".{suffix}", "")
         # lower case sphinx reference
         # this seems to be a bug or a requirement from sphinx
-        doc_file_name = doc_file_name.lower()
+        doc_file_name = example.doc_file.replace(f".{suffix}", "").lower()
 
-        name = e.example
-        underline = e.module
+        name = example.example_name
+        underline = example.module
 
-        if e.extra:
-            underline += f"/{e.extra}"
+        if example.extra:
+            underline += f"/{example.extra}"
 
         if i > 0:
             gallery += "\n"
-        img_name = e.img_doc.name if e.img_doc else "../example_no_image.png"
+        img_name = example.img_doc.name if example.img_doc else "../example_no_image.png"
 
         # Fix long names
         if name.startswith("chapter"):
@@ -259,28 +260,17 @@ def get_module_gallery(examples):
 
         # Handling description from original file
         desc = ""
-        original_dir = Path(e.abs_path) / "doc"
-
-        if e.has_doc:
-            # cannot use e.doc_file because that is the target file name
-            # so finding the original file by the name
-            original_file = (next(original_dir.glob("*.rst"), None)
-                             or next(original_dir.glob("*.md"), None))
-            if not original_file:
-                # ideally won't reach here because has_doc is True
-                print(f"example_gallery: No .rst or .md file found in {original_dir}")
-                continue
-
-            with original_file.open("r", encoding="utf-8") as f:
+        if example.src_doc_file:
+            with example.src_doc_file.open("r", encoding="utf-8") as f:
                 # Read the first line
                 first_line = f.readline().strip()
 
                 # Check if the first line is a reference (starts with '(' and ends with ')=' for MD,
                 # or starts with '.. ' and ends with '::' for RST)
-                if ((e.file_format == Format.MD and first_line.startswith('(')
+                if ((example.file_format == Format.MD and first_line.startswith('(')
                      and first_line.endswith(')='))
-                    or (e.file_format == Format.RST and first_line.startswith('.. ')
-                        and first_line.endswith('::'))):
+                        or (example.file_format == Format.RST and first_line.startswith('.. ')
+                            and first_line.endswith('::'))):
                     # The first line is a reference, so read the next lines until a non-empty line
                     # is found
                     while True:
@@ -294,21 +284,17 @@ def get_module_gallery(examples):
                 # The next line handling depends on the file format
                 line = f.readline().strip()
 
-                if e.file_format == Format.MD:
+                if example.file_format == Format.MD:
                     # For markdown, the second line is the empty line
-                    if line != "":
-                        # If the line is not empty, raise a runtime error
-                        raise RuntimeError(f"Unexpected line: {line} in {original_file}. "
-                                           "Needs handling.")
+                    pass
                 else:
-                    # For RST and other formats
-                    # The second line is the underline under the title
-                    _ = line
+                    # For RST and other formats, the second line is the underline under the title
                     # The next line should be empty
                     line = f.readline().strip()
-                    if line != "":
-                        raise RuntimeError(f"Unexpected line: {line} in {original_file}. "
-                                           "Needs handling.")
+
+                if line != "":
+                    raise RuntimeError(
+                        f"{line} was expected to be empty. Doc file: {example.src_doc_file}")
 
                 # Now read until another empty line
                 lines = []
@@ -328,10 +314,14 @@ def get_module_gallery(examples):
                 if len(desc) > 120:
                     desc = desc[:120] + "..."
         else:
-            print(f"example_gallery: No .rst or .md file found in {original_dir}")
+            if not opt_quiet:
+                print(
+                    f"example_gallery: No source doc file found in {example.abs_path}."
+                    f"Skipping example",
+                    file=sys.stderr,
+                )
 
-        title = e.headline
-        if not title:
+        if not (title := example.headline):
             title = f"{name} from ``{underline}``."
 
         # Clean refs from desc
@@ -344,28 +334,30 @@ def get_module_gallery(examples):
         gallery += f"{ind(3)}:link: {doc_file_name}\n"
         gallery += f"{ind(3)}:link-type: ref\n"
         gallery += f"{ind(3)}:img-top: {img_name}\n\n"
-        gallery += f"{ind(3)}+++\n{ind(3)}{desc}\n"
+        gallery += f"{ind(3)}+++\n"
+        gallery += f"{ind(3)}{desc}\n"
 
     return f"{gallery}\n"
 
 
-def remove_licenses(s):
+def remove_licenses(file_content: str) -> str:
+    # Return the content of the file with the Qt license removed
     new_s = []
-    for line in s.splitlines():
+    for line in file_content.splitlines():
         if line.strip().startswith(("/*", "**", "##")):
             continue
         new_s.append(line)
     return "\n".join(new_s)
 
 
-def make_zip_archive(zip_file, src, skip_dirs=None):
-    src_path = Path(src).expanduser().resolve(strict=True)
+def make_zip_archive(output_path: Path, src: Path, skip_dirs: list[str] = None):
+    # Create a .zip file from a source directory ignoring the specified directories
+    src_path = src.expanduser().resolve(strict=True)
     if skip_dirs is None:
         skip_dirs = []
     if not isinstance(skip_dirs, list):
-        print("Error: A list needs to be passed for 'skip_dirs'")
-        return
-    with zipfile.ZipFile(zip_file, 'w', zipfile.ZIP_DEFLATED) as zf:
+        raise ValueError("Type error: 'skip_dirs' must be a list instance")
+    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zf:
         for file in src_path.rglob('*'):
             skip = False
             _parts = file.relative_to(src_path).parts
@@ -377,75 +369,76 @@ def make_zip_archive(zip_file, src, skip_dirs=None):
                 zf.write(file, file.relative_to(src_path.parent))
 
 
-def doc_file(project_dir, project_file_entry):
-    """Return the (optional) .rstinc file describing a source file."""
+def get_rstinc_for_file(project_dir: Path, project_file: Path) -> Path | None:
+    """Return the .rstinc file in the doc folder describing a source file, if found"""
     rst_file = project_dir
-    if rst_file.name != "doc":  # Special case: Dummy .pyproject file in doc dir
+    if project_dir.name != "doc":  # Special case: Dummy .pyproject file in doc dir
         rst_file /= "doc"
-    rst_file /= Path(project_file_entry).name + ".rstinc"
+    rst_file /= project_file.name + ".rstinc"
     return rst_file if rst_file.is_file() else None
 
 
-def get_code_tabs(files, project_dir, file_format):
+def get_code_tabs(files: list[Path], project_dir: Path, file_format: Format) -> str:
+    """
+    Return the string which contains the code tabs source for the example
+    Also creates a .zip file for downloading the source files
+    """
     content = "\n"
 
     # Prepare ZIP file, and copy to final destination
-    # Handle examples which only have a dummy pyproject file in the "doc" dir
-    zip_root = project_dir.parent if project_dir.name == "doc" else project_dir
-    zip_name = f"{zip_root.name}.zip"
-    make_zip_archive(EXAMPLES_DOC / zip_name, zip_root, skip_dirs=["doc"])
+    zip_name = f"{project_dir.name}.zip"
+    make_zip_archive(EXAMPLES_DOC / zip_name, project_dir, skip_dirs=["doc"])
 
     if file_format == Format.RST:
         content += f":download:`Download this example <{zip_name}>`\n\n"
-    else:
+    elif file_format == Format.MD:
         content += f"{{download}}`Download this example <{zip_name}>`\n\n"
+        # MD files wrap the content in a eval-rst block
         content += "```{eval-rst}\n"
+    else:
+        raise ValueError(f"Unknown documentation file format {file_format}")
 
-    for i, project_file in enumerate(files):
-        if i == 0:
-            content += ".. tab-set::\n\n"
+    if files:
+        content += ".. tab-set::\n\n"
 
-        pfile = Path(project_file)
-        if pfile.suffix in IGNORED_SUFFIXES:
+    for i, file in enumerate(files):
+        if file.suffix in IGNORED_SUFFIXES:
             continue
 
-        content += f"{ind(1)}.. tab-item:: {project_file}\n\n"
+        try:
+            tab_title = file.relative_to(project_dir).as_posix()
+        except ValueError:
+            # The file is outside project_dir, so the best we can do is to use the file name
+            tab_title = file.name
 
-        doc_rstinc_file = doc_file(project_dir, project_file)
-        if doc_rstinc_file:
-            indent = ind(2)
-            for line in doc_rstinc_file.read_text("utf-8").split("\n"):
-                content += indent + line + "\n"
+        content += f"{ind(1)}.. tab-item:: {tab_title}\n\n"
+
+        if doc_rstinc_file := get_rstinc_for_file(project_dir, file):
+            content += add_indent(doc_rstinc_file.read_text("utf-8"), 2)
             content += "\n"
 
-        lexer = get_lexer(pfile)
-        content += add_indent(f"{ind(1)}.. code-block:: {lexer}", 1)
+        content += add_indent(f"{ind(1)}.. code-block:: {get_lexer(file)}", 1)
         content += "\n"
 
-        _path = project_dir / project_file
-        _file_content = ""
         try:
-            with open(_path, "r", encoding="utf-8") as _f:
-                _file_content = remove_licenses(_f.read())
+            file_content = remove_licenses(file.read_text(encoding="utf-8"))
         except UnicodeDecodeError as e:
-            print(f"example_gallery: error decoding {project_dir}/{_path}:{e}",
-                  file=sys.stderr)
-            raise
+            raise RuntimeError(f"example_gallery: error decoding {file}: {e}")
         except FileNotFoundError as e:
-            print(f"example_gallery: error opening {project_dir}/{_path}:{e}",
-                  file=sys.stderr)
-            raise
+            raise RuntimeError(f"example_gallery: error opening {file}: {e}")
 
-        content += add_indent(_file_content, 3)
+        content += add_indent(file_content, 3)
         content += "\n\n"
 
     if file_format == Format.MD:
+        # Close the eval-rst block
         content += "```"
 
     return content
 
 
-def get_header_title(example_dir):
+def get_default_header_title(example_dir: Path) -> str:
+    """Get a default header title for an example directory without a doc file"""
     _index = example_dir.parts.index("examples")
     rel_path = "/".join(example_dir.parts[_index:])
     _title = rel_path
@@ -459,24 +452,29 @@ def get_header_title(example_dir):
     )
 
 
-def rel_path(from_path, to_path):
-    """Determine relative paths for paths that are not subpaths (where
-       relative_to() fails) via a common root."""
-    common = Path(*os.path.commonprefix([from_path.parts, to_path.parts]))
-    up_dirs = len(from_path.parts) - len(common.parts)
+def rel_path(from_path: Path, to_path: Path) -> str:
+    """
+    Get a relative path for a given path that is not a subpath (where Path.relative_to() fails)
+    of from_path via a common ancestor path
+
+    For example: from_path = Path("/a/b/c/d"), to_path = Path("/a/b/e/f"). Returns: "../../e/f"
+    """
+    common_path = Path(*os.path.commonprefix([from_path.parts, to_path.parts]))
+    up_dirs = len(from_path.parts) - len(common_path.parts)
     prefix = up_dirs * "../"
-    rel_to_common = os.fspath(to_path.relative_to(common))
-    return f"{prefix}{rel_to_common}"
+    relative_to_common = to_path.relative_to(common_path).as_posix()
+    return f"{prefix}{relative_to_common}"
 
 
-def read_rst_file(project_dir, project_files, doc_rst):
-    """Read the example .rst file and expand literal includes to project files
-       by relative paths to the example directory. Note: sphinx does not
-       handle absolute paths as expected, they need to be relative."""
-    content = ""
-    with open(doc_rst, encoding="utf-8") as doc_f:
-        content = doc_f.read()
+def read_rst_file(project_dir: Path, project_files: list[Path], doc_rst: Path) -> str:
+    """
+    Read the example .rst file and replace Sphinx literal includes of project files by paths
+    relative to the example directory
+    Note: Sphinx does not handle absolute paths as expected, they need to be relative
+    """
+    content = Path(doc_rst).read_text(encoding="utf-8")
     if LITERAL_INCLUDE not in content:
+        # The file does not contain any literal includes, so we can return it as is
         return content
 
     result = []
@@ -484,14 +482,16 @@ def read_rst_file(project_dir, project_files, doc_rst):
     for line in content.split("\n"):
         if line.startswith(LITERAL_INCLUDE):
             file = line[len(LITERAL_INCLUDE) + 1:].strip()
-            if file in project_files:
-                line = f"{LITERAL_INCLUDE} {path_to_example}/{file}"
+            file_path = project_dir / file
+            if file_path not in project_files:
+                raise RuntimeError(f"File {file} not found in project files: {project_files}")
+            line = f"{LITERAL_INCLUDE} {path_to_example}/{file}"
         result.append(line)
     return "\n".join(result)
 
 
-def get_headline(text, file_format):
-    """Find the headline in the .rst file."""
+def get_headline(text: str, file_format: Format) -> str:
+    """Find the headline in the documentation file."""
     if file_format == Format.RST:
         underline = text.find("\n====")
         if underline != -1:
@@ -503,23 +503,32 @@ def get_headline(text, file_format):
             new_line = text.find("\n", headline + 1)
             if new_line != -1:
                 return text[headline + 2:new_line].strip()
+    else:
+        raise ValueError(f"Unknown file format {file_format}")
     return ""
 
 
-def get_doc_source_file(original_doc_dir, example_name):
-    """Find the doc source file, return (Path, Format)."""
-    if original_doc_dir.is_dir():
-        for file_format in (Format.RST, Format.MD):
-            suffix = SUFFIXES[file_format]
-            result = original_doc_dir / f"{example_name}.{suffix}"
-            if result.is_file():
-                return result, file_format
-    return None, Format.RST
+def get_doc_source_file(original_doc_dir: Path, example_name: str) -> tuple[Path, Format] | None:
+    """
+    Find the doc source file given a doc directory and an example name
+    Returns the doc file path and the file format, if found
+    """
+    if not original_doc_dir.is_dir():
+        return None
+
+    for file_format, suffix in DOC_SUFFIXES.items():
+        result = original_doc_dir / f"{example_name}.{suffix}"
+        if result.is_file():
+            return result, file_format
+    return None
 
 
-def get_screenshot(image_dir, example_name):
-    """Find screen shot: We look for an image with the same
-       example_name first, if not, we select the first."""
+def get_screenshot(image_dir: Path, example_name: str) -> Path | None:
+    """
+    Find an screenshot given an image directory and the example name
+    Returns the image with the same example_name, if found
+    If not found, the first image in the directory is returned
+    """
     if not image_dir.is_dir():
         return None
     images = [i for i in image_dir.glob("*") if i.is_file() and check_img_ext(i)]
@@ -531,36 +540,30 @@ def get_screenshot(image_dir, example_name):
     return None
 
 
-def write_resources(src_list, dst):
+def write_resources(src_list: list[Path], dst: Path):
     """Write a list of example resource paths to the dst path."""
     for src in src_list:
         resource_written = shutil.copy(src, dst / src.name)
         if not opt_quiet:
-            print("Written resource:", resource_written)
+            print(f"Written resource: {resource_written}")
 
 
 @dataclass
 class ExampleParameters:
     """Parameters obtained from scanning the examples directory."""
-
-    def __init__(self):
-        self.file_format = Format.RST
-        self.src_doc_dir = self.src_doc_file_path = self.src_screenshot = None
-        self.extra_names = ""
-
-    example_dir: Path
-    module_name: str
-    example_name: str
-    extra_names: str
-    file_format: Format
-    target_doc_file: str
-    src_doc_dir: Path
-    src_doc_file_path: Path
-    src_screenshot: Path
+    example_dir: Path = None
+    module_name: str = ""
+    example_name: str = ""
+    target_doc_file: str = None
+    extra_names: str = ""
+    src_doc_dir: Path = None
+    src_doc_file_path: Path = None
+    src_screenshot: Path = None
+    file_format: Format = Format.RST
 
 
-def detect_pyside_example(example_root, pyproject_file):
-    """Detemine parameters of a PySide example."""
+def get_pyside_example_parameters(example_root: Path, pyproject_file: Path) -> ExampleParameters:
+    """Analyze a PySide example folder to get the example parameters"""
     p = ExampleParameters()
 
     p.example_dir = pyproject_file.parent
@@ -568,7 +571,7 @@ def detect_pyside_example(example_root, pyproject_file):
         # Design Studio project example
         p.example_dir = pyproject_file.parent.parent
 
-    if p.example_dir.name == "doc":  # Dummy pyproject in doc dir (scriptableapplication)
+    if p.example_dir.name == "doc":  # Dummy pyproject file in doc dir (e.g. scriptableapplication)
         p.example_dir = p.example_dir.parent
 
     parts = p.example_dir.parts[len(example_root.parts):]
@@ -581,21 +584,23 @@ def detect_pyside_example(example_root, pyproject_file):
     src_doc_dir = p.example_dir / "doc"
 
     if src_doc_dir.is_dir():
-        src_doc_file_path, fmt = get_doc_source_file(src_doc_dir, p.example_name)
-        if src_doc_file_path:
-            p.src_doc_file_path = src_doc_file_path
-            p.file_format = fmt
+        src_doc_file = get_doc_source_file(src_doc_dir, p.example_name)
+        if src_doc_file:
+            p.src_doc_file_path, p.file_format = src_doc_file
             p.src_doc_dir = src_doc_dir
             p.src_screenshot = get_screenshot(src_doc_dir, p.example_name)
 
-    target_suffix = SUFFIXES[p.file_format]
+    target_suffix = DOC_SUFFIXES[p.file_format]
     doc_file = f"example_{p.module_name}_{p.extra_names}_{p.example_name}.{target_suffix}"
     p.target_doc_file = doc_file.replace("__", "_")
     return p
 
 
-def detect_qt_example(example_root, pyproject_file):
-    """Detemine parameters of an example from a Qt repository."""
+def get_qt_example_parameters(pyproject_file: Path) -> ExampleParameters:
+    """
+    Analyze a Qt repository example to get its parameters.
+    For instance, the qtdoc/examples/demos/mediaplayer example
+    """
     p = ExampleParameters()
 
     p.example_dir = pyproject_file.parent
@@ -604,142 +609,155 @@ def detect_qt_example(example_root, pyproject_file):
     # Check for a 'doc' directory inside the example (qdoc)
     doc_root = p.example_dir / "doc"
     if doc_root.is_dir():
-        src_doc_file_path, fmt = get_doc_source_file(doc_root / "src", p.example_name)
-        if src_doc_file_path:
-            p.src_doc_file_path = src_doc_file_path
-            p.file_format = fmt
+        src_doc_file = get_doc_source_file(doc_root / "src", p.example_name)
+        if src_doc_file:
+            p.src_doc_file_path, p.file_format = src_doc_file
             p.src_doc_dir = doc_root
             p.src_screenshot = get_screenshot(doc_root / "images", p.example_name)
-
-    target_suffix = SUFFIXES[p.file_format]
+        else:
+            raise ValueError(f"No source file found in {doc_root} / src given {p.example_name}")
+    else:
+        raise ValueError(f"No doc directory found in {p.example_dir}")
+    target_suffix = DOC_SUFFIXES[p.file_format]
     p.target_doc_file = f"example_qtdemos_{p.example_name}.{target_suffix}"
     return p
 
 
-def write_example(example_root, pyproject_file, pyside_example=True):
-    """Read the project file and documentation, create the .rst file and
-       copy the data. Return a tuple of module name and a dict of example data."""
-    p = (detect_pyside_example(example_root, pyproject_file) if pyside_example
-         else detect_qt_example(example_root, pyproject_file))
+def write_example(
+    example_root: Path, pyproject_file: Path, pyside_example: bool = True
+) -> tuple[str, ExampleData]:
+    """
+    Read the project file and documentation, create the .rst file and copy the example data
+    Return a tuple with the module name and an ExampleData instance
+    """
+    # Get the example parameters depending on whether it is a PySide example or a Qt one
+    p: ExampleParameters = (
+        get_pyside_example_parameters(example_root, pyproject_file)
+        if pyside_example else get_qt_example_parameters(pyproject_file))
 
     result = ExampleData()
-    result.example = p.example_name
+    result.example_name = p.example_name
     result.module = p.module_name
     result.extra = p.extra_names
     result.doc_file = p.target_doc_file
     result.file_format = p.file_format
     result.abs_path = str(p.example_dir)
-    result.has_doc = bool(p.src_doc_file_path)
+    result.src_doc_file = p.src_doc_file_path
     result.img_doc = p.src_screenshot
-    result.tutorial = tutorial_headline(result.abs_path)
+    result.tutorial = TUTORIAL_HEADLINES.get(result.abs_path, "")
 
-    files = []
-    try:
-        with pyproject_file.open("r", encoding="utf-8") as pyf:
-            pyproject = json.load(pyf)
-            # iterate through the list of files in .pyproject and
-            # check if they exist, before appending to the list.
-            for f in pyproject["files"]:
-                if not Path(f).exists:
-                    print(f"example_gallery: {f} listed in {pyproject_file} does not exist")
-                    raise FileNotFoundError
-                else:
-                    files.append(f)
-    except (json.JSONDecodeError, KeyError, FileNotFoundError) as e:
-        print(f"example_gallery: error reading {pyproject_file}: {e}")
-        raise
+    if pyproject_file.match(PYPROJECT_JSON_PATTERN):
+        pyproject_parse_result = parse_pyproject_json(pyproject_file)
+    elif pyproject_file.match(PYPROJECT_TOML_PATTERN):
+        pyproject_parse_result = parse_pyproject_toml(pyproject_file)
+    else:
+        raise RuntimeError(f"Invalid project file: {pyproject_file}")
 
+    if pyproject_parse_result.errors:
+        raise RuntimeError(f"Error reading {pyproject_file}: {pyproject_parse_result.errors}")
+
+    for file in pyproject_parse_result.files:
+        if not Path(file).exists:
+            raise FileNotFoundError(f"{file} listed in {pyproject_file} does not exist")
+
+    files = pyproject_parse_result.files
     headline = ""
     if files:
         doc_file = EXAMPLES_DOC / p.target_doc_file
-        sphnx_ref_example = p.target_doc_file.replace(f'.{SUFFIXES[p.file_format]}', '')
+        sphnx_ref_example = p.target_doc_file.replace(f'.{DOC_SUFFIXES[p.file_format]}', '')
         # lower case sphinx reference
         # this seems to be a bug or a requirement from sphinx
         sphnx_ref_example = sphnx_ref_example.lower()
-        content_f = ""
+
         if p.file_format == Format.RST:
             content_f = f".. _{sphnx_ref_example}:\n\n"
         elif p.file_format == Format.MD:
             content_f = f"({sphnx_ref_example})=\n\n"
         else:
-            print(f"example_gallery: Invalid file format {p.file_format}", file=sys.stderr)
-            raise ValueError
+            raise ValueError(f"Invalid file format {p.file_format}")
 
         with open(doc_file, "w", encoding="utf-8") as out_f:
             if p.src_doc_file_path:
                 content_f += read_rst_file(p.example_dir, files, p.src_doc_file_path)
                 headline = get_headline(content_f, p.file_format)
-                if not headline:
-                    print(f"example_gallery: No headline found in {doc_file}",
-                          file=sys.stderr)
+                if not headline and not opt_quiet:
+                    print(f"example_gallery: No headline found in {doc_file}", file=sys.stderr)
 
-                # Copy other files in the 'doc' directory, but
-                # excluding the main '.rst' file and all the
-                # directories.
+                # Copy other files in the 'doc' directory, but excluding the main '.rst' file and
+                # all the directories
                 resources = []
                 if pyside_example:
                     for _f in p.src_doc_dir.glob("*"):
                         if _f != p.src_doc_file_path and not _f.is_dir():
                             resources.append(_f)
-                else:  # Qt example: only use image.
-                    if p.src_screenshot:
-                        resources.append(p.src_screenshot)
+                elif p.src_screenshot:
+                    # Qt example: only use image, if found
+                    resources.append(p.src_screenshot)
                 write_resources(resources, EXAMPLES_DOC)
             else:
-                content_f += get_header_title(p.example_dir)
-            content_f += get_code_tabs(files, pyproject_file.parent, p.file_format)
+                content_f += get_default_header_title(p.example_dir)
+            content_f += get_code_tabs(files, p.example_dir, p.file_format)
             out_f.write(content_f)
 
         if not opt_quiet:
             print(f"Written: {doc_file}")
     else:
         if not opt_quiet:
-            print("Empty '.pyproject' file, skipping")
+            print(f"{pyproject_file} does not contain any file, skipping")
 
     result.headline = headline
 
-    return (p.module_name, result)
+    return p.module_name, result
 
 
-def example_sort_key(example: ExampleData):
+def example_sort_key(example: ExampleData) -> str:
+    """
+    Return a key for sorting the examples. Tutorials are sorted first, then the examples which
+    contain "gallery" in their name, then alphabetically
+    """
     result = ""
     if example.tutorial:
         result += "AA:" + example.tutorial + ":"
-    elif "gallery" in example.example:
+    elif "gallery" in example.example_name:
         result += "AB:"
-    result += example.example
+    result += example.example_name
     return result
 
 
-def sort_examples(example):
+def sort_examples(examples: dict[str, list[ExampleData]]) -> dict[str, list[ExampleData]]:
+    """Sort the examples using a custom function."""
     result = {}
-    for module in example.keys():
-        result[module] = sorted(example.get(module), key=example_sort_key)
+    for module in examples.keys():
+        result[module] = sorted(examples.get(module), key=example_sort_key)
     return result
 
 
-def scan_examples_dir(examples_dir, pyside_example=True):
-    """Scan a directory of examples."""
-    for pyproject_file in examples_dir.glob("**/*.pyproject"):
-        if pyproject_file.name != "examples.pyproject":
-            module_name, data = write_example(examples_dir, pyproject_file,
-                                              pyside_example)
-            if module_name not in examples:
-                examples[module_name] = []
-            examples[module_name].append(data)
+def scan_examples_dir(
+    examples_dir: Path, pyside_example: bool = True
+) -> dict[str, list[ExampleData]]:
+    """
+    Scan a directory of examples and return a dictionary with the found examples grouped by module
+    Also creates the .rst file for each example
+    """
+    examples: dict[str, list[ExampleData]] = defaultdict(list)
+    # Find all the project files contained in the examples directory
+    project_files: list[Path] = []
+    for project_file_pattern in PYPROJECT_FILE_PATTERNS:
+        project_files.extend(examples_dir.glob(f"**/{project_file_pattern}"))
+
+    for project_file in project_files:
+        if project_file.name == "examples.pyproject":
+            # Ignore this project file. It contains files from many examples
+            continue
+
+        module_name, data = write_example(examples_dir, project_file, pyside_example)
+        examples[module_name].append(data)
+
+    return dict(examples)
 
 
 if __name__ == "__main__":
-    # Only examples with a '.pyproject' file will be listed.
-    DIR = Path(__file__).parent
-    EXAMPLES_DOC = Path(f"{DIR}/../../sources/pyside6/doc/examples").resolve()
-    EXAMPLES_DIR = Path(f"{DIR}/../../examples/").resolve()
-    BASE_URL = "https://code.qt.io/cgit/pyside/pyside-setup.git/tree"
-    columns = 5
-    gallery = ""
-
     parser = ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
-    TARGET_HELP = f"Directory into which to generate Doc files (default: {str(EXAMPLES_DOC)})"
     parser.add_argument("--target", "-t", action="store", dest="target_dir", help=TARGET_HELP)
     parser.add_argument("--qt-src-dir", "-s", action="store", help="Qt source directory")
     parser.add_argument("--quiet", "-q", action="store_true", help="Quiet")
@@ -748,55 +766,43 @@ if __name__ == "__main__":
     if options.target_dir:
         EXAMPLES_DOC = Path(options.target_dir).resolve()
 
-    # This main loop will be in charge of:
-    #   * Getting all the .pyproject files,
-    #   * Gather the information of the examples and store them in 'examples'
-    #   * Read the .pyproject file to output the content of each file
-    #     on the final .rst file for that specific example.
-    examples = {}
+    # This script will be in charge of:
+    #   * Getting all the project files
+    #   * Gather the information of the examples
+    #   * Read the project file to output the content of each source file
+    #     on the final .rst file for that specific example
 
     # Create the 'examples' directory if it doesn't exist
-    # If it does exist, remove it and create a new one to start fresh
+    # If it does exist, try to remove it and create a new one to start fresh
     if EXAMPLES_DOC.is_dir():
         shutil.rmtree(EXAMPLES_DOC, ignore_errors=True)
         if not opt_quiet:
-            print("WARNING: Deleted old html directory")
+            print("WARNING: Deleted existing examples HTML directory")
     EXAMPLES_DOC.mkdir(exist_ok=True)
 
-    scan_examples_dir(EXAMPLES_DIR)
+    examples = scan_examples_dir(EXAMPLES_DIR)
+
     if options.qt_src_dir:
+        # Scan the Qt source directory for Qt examples and include them in the dictionary of
+        # discovered examples
         qt_src = Path(options.qt_src_dir)
         if not qt_src.is_dir():
-            print("Invalid Qt source directory: {}", file=sys.stderr)
-            sys.exit(-1)
-        scan_examples_dir(qt_src.parent / "qtdoc", pyside_example=False)
+            raise RuntimeError(f"Invalid Qt source directory: {qt_src}")
+        examples.update(scan_examples_dir(qt_src.parent / "qtdoc", pyside_example=False))
 
     examples = sort_examples(examples)
 
-    # We generate a 'toctree' at the end of the file, to include the new
-    # 'example' rst files, so we get no warnings, and also that users looking
-    # for them will be able to, since they are indexed.
-    # Notice that :hidden: will not add the list of files by the end of the
-    # main examples HTML page.
-    footer_index = dedent(
-        """\
-      .. toctree::
-         :hidden:
-         :maxdepth: 1
-
-        """
-    )
-
-    # Writing the main example rst file.
-    index_files = []
+    # List of all the example files found to be included in the index table of contents
+    index_files: list[str] = []
+    # Write the main example .rst file and the example files
     with open(f"{EXAMPLES_DOC}/index.rst", "w") as f:
         f.write(BASE_CONTENT)
         for module_name in sorted(examples.keys(), key=module_sort_key):
-            e = examples.get(module_name)
-            tutorial_examples = defaultdict(list)
-            non_tutorial_examples = []
+            module_examples = examples.get(module_name)
+            tutorial_examples: DefaultDict[str, list[ExampleData]] = defaultdict(list)
+            non_tutorial_examples: list[ExampleData] = []
 
-            for example in e:
+            for example in module_examples:
                 index_files.append(example.doc_file)
                 if example.tutorial:
                     tutorial_examples[example.tutorial].append(example)
@@ -817,12 +823,14 @@ if __name__ == "__main__":
                 f.write(get_module_gallery(non_tutorial_examples))
             # If no tutorials exist, list all examples
             elif not tutorial_examples:
-                f.write(get_module_gallery(e))
+                f.write(get_module_gallery(module_examples))
 
         f.write("\n\n")
-        f.write(footer_index)
-        for i in index_files:
-            f.write(f"   {i}\n")
+
+        # Add the list of the example files found to the index table of contents
+        f.write(FOOTER_INDEX)
+        for index_file in index_files:
+            f.write(f"{ind(1)}{index_file}\n")
 
     if not opt_quiet:
         print(f"Written index: {EXAMPLES_DOC}/index.rst")
