@@ -192,8 +192,8 @@ holds the reference(s). It defaults to the function signature.
 For instance, in a model/view relation, a view receiving a model
 as argument for a **setModel()** method should increment the model's reference
 counting, since the model should be kept alive as long as the view lives.
-Remember that our hypothetical view cannot become a :ref:`parent` of the
-model, since the said model could be used by other views as well.
+Remember that our hypothetical view cannot become a :ref:`parent <ownership-parent>`
+of the model, since the said model could be used by other views as well.
 
 .. _parent-on-arguments:
 
