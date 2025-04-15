@@ -38,6 +38,18 @@ class QPolygonFNotIterableTest(unittest.TestCase):
         p << QPoint(10, 20) << QPoint(20, 30) << [QPoint(20, 30), QPoint(40, 50)]
         self.assertEqual(len(p), 4)
 
+    def testPolygonComparassion(self):
+        points = [QPointF(10, 20), QPointF(20, 30), QPointF(20, 30), QPointF(40, 50)]
+
+        p = QPolygonF(points)
+        other = QPolygonF(points)
+        self.assertEqual(p, other)
+
+        points = [QPointF(10, 10), QPointF(20, 20), QPointF(30, 30), QPointF(40, 40)]
+        polygon = QPolygonF(points)
+        self.assertNotEqual(p, polygon)
+        self.assertNotEqual(other, polygon)
+
 
 if __name__ == '__main__':
     unittest.main()

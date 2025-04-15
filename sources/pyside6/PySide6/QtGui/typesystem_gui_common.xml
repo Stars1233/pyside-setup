@@ -486,6 +486,11 @@
     <extra-includes>
       <include file-name="QTransform" location="global"/>
     </extra-includes>
+    <!-- Expose operator==, != inherited from QList, which the parser does
+         not see due to the TMP expression of the return type. -->
+    <add-function signature="operator==(const QPolygonF&amp;)" return-type="bool"/>
+    <add-function signature="operator!=(const QPolygonF&amp;)" return-type="bool"/>
+
     <!-- ### A QList parameter, for no defined type, will generate wrong code. -->
     <modify-function signature="operator+=(QList&lt;QPointF&gt;)" remove="all"/>
     <!-- ### See bug 777 -->
