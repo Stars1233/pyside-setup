@@ -129,13 +129,42 @@ static bool prependToExceptionMessage(PyObject *exc, const char *context)
     return true;
 }
 
-struct ErrorStore {
-    PyObject *type;
-    PyObject *exc;
-    PyObject *traceback;
+struct ErrorStore
+{
+    operator bool() const { return exc != nullptr; }
+
+    PyObject *exc = nullptr;
+#ifdef PEP_OLD_ERR_API
+    PyObject *traceback = nullptr;
+    PyObject *type = nullptr;
+#endif
 };
 
-static thread_local ErrorStore savedError{};
+static void fetchError(ErrorStore &s)
+{
+#ifdef PEP_OLD_ERR_API
+    PyErr_Fetch(&s.type, &s.exc, &s.traceback);
+#else
+    s.exc = PyErr_GetRaisedException();
+#endif
+}
+
+static void restoreError(ErrorStore &s)
+{
+#ifdef PEP_OLD_ERR_API
+    PyErr_Restore(s.type, s.exc, s.traceback);
+    s.type = s.exc = s.traceback = nullptr;
+#else
+    if (s.exc) {
+        PyErr_SetRaisedException(s.exc);
+        s.exc = nullptr;
+    } else {
+        PyErr_Clear();
+    }
+#endif
+}
+
+static thread_local ErrorStore savedError;
 
 static bool hasPythonContext()
 {
@@ -148,7 +177,7 @@ void storeErrorOrPrint()
     // Therefore, we handle the error when we are error checking, anyway.
     // But we do that only when we know that an error handler can pick it up.
     if (hasPythonContext())
-        PyErr_Fetch(&savedError.type, &savedError.exc, &savedError.traceback);
+        fetchError(savedError);
     else
         PyErr_Print();
 }
@@ -158,7 +187,7 @@ void storeErrorOrPrint()
 static void storeErrorOrPrintWithContext(const char *context)
 {
     if (hasPythonContext()) {
-        PyErr_Fetch(&savedError.type, &savedError.exc, &savedError.traceback);
+        fetchError(savedError);
         prependToExceptionMessage(savedError.exc, context);
     } else {
         std::fputs(context, stderr);
@@ -175,10 +204,8 @@ void storePythonOverrideErrorOrPrint(const char *className, const char *funcName
 
 PyObject *occurred()
 {
-    if (savedError.type) {
-        PyErr_Restore(savedError.type, savedError.exc, savedError.traceback);
-        savedError.type = nullptr;
-    }
+    if (savedError)
+        restoreError(savedError);
     return PyErr_Occurred();
 }
 
