@@ -9,6 +9,7 @@
 #include "pysidestaticstrings.h"
 #include "qobjectconnect.h"
 #include "signalmanager.h"
+#include "pysideqenum.h"
 
 #include <autodecref.h>
 #include <helper.h>
@@ -988,23 +989,6 @@ void updateSourceObject(PyObject *source)
         return;
 }
 
-// PYSIDE-2840: For an enum registered in Qt, return the C++ name.
-// Ignore flags here; their underlying enums are of Python type flags anyways.
-static QByteArray getQtEnumTypeName(PyTypeObject *type)
-{
-    if (!Shiboken::Enum::checkType(type))
-        return {};
-
-    Shiboken::AutoDecRef qualName(PyObject_GetAttr(reinterpret_cast<PyObject *>(type),
-                                                   Shiboken::PyMagicName::qualname()));
-    QByteArray result = Shiboken::String::toCString(qualName.object());
-    result.replace(".", "::");
-
-    const auto metaType = QMetaType::fromName(result);
-    return metaType.isValid() && metaType.flags().testFlag(QMetaType::IsEnumeration)
-        ? result : QByteArray{};
-}
-
 QByteArray getTypeName(PyObject *obType)
 {
     if (PyType_Check(obType)) {
@@ -1024,7 +1008,7 @@ QByteArray getTypeName(PyObject *obType)
             return QByteArrayLiteral("QVariantList");
         if (type == &PyDict_Type)
             return QByteArrayLiteral("QVariantMap");
-        QByteArray enumName = getQtEnumTypeName(type);
+        QByteArray enumName = PySide::QEnum::getTypeName(type);
         return enumName.isEmpty() ? "PyObject"_ba : enumName;
     }
     if (obType == Py_None) // Must be checked before as Shiboken::String::check accepts Py_None

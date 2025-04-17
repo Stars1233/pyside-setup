@@ -27,3 +27,8 @@ bool TestQVariantEnum::isEnumChanneled() const
 {
     return this->channelingEnum(this->getRValEnum());
 }
+
+bool TestQVariantEnum::isQtOrientationEnum(QVariant var)
+{
+    return (var.typeId() == QMetaType::fromType<Qt::Orientation>().id());
+}

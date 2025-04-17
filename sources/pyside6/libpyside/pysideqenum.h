@@ -10,6 +10,8 @@
 
 #include <vector>
 
+#include <QtCore/qbytearray.h>
+
 namespace PySide::QEnum {
 
 // PYSIDE-957: Support the QEnum macro
@@ -17,6 +19,11 @@ PYSIDE_API PyObject *QEnumMacro(PyObject *, bool);
 PYSIDE_API int isFlag(PyObject *);
 PYSIDE_API std::vector<PyObject *> resolveDelayedQEnums(PyTypeObject *);
 PYSIDE_API void init();
+
+
+// PYSIDE-2840: For an enum registered in Qt, return the C++ name.
+// Ignore flags here; their underlying enums are of Python type flags anyways.
+PYSIDE_API QByteArray getTypeName(PyTypeObject *type);
 
 } // namespace PySide::QEnum
 

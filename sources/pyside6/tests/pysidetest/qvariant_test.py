@@ -64,6 +64,9 @@ class QVariantTest(UsesQApplication):
         # check toInt() conversion for IntEnum
         self.assertEqual(PyTestQVariantEnum.getNumberFromQVarEnum(Qt.GestureType.TapGesture), 1)
 
+        # Test if enum still an enum on C++ land
+        self.assertTrue(TestQVariantEnum.isQtOrientationEnum(Qt.Orientation.Vertical))
+
 
 if __name__ == '__main__':
     unittest.main()

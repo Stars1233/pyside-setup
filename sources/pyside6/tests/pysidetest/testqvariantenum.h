@@ -18,6 +18,8 @@ public:
     virtual QVariant getRValEnum() const;
     virtual bool channelingEnum(QVariant rvalEnum) const;
     virtual ~TestQVariantEnum() = default;
+    static bool isQtOrientationEnum(QVariant var);
+
 private:
     QVariant m_enum;
 };

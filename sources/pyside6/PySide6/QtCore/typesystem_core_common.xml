@@ -318,6 +318,7 @@
   <primitive-type name="QVariant" target-lang-api-name="PyObject">
     <extra-includes>
         <include file-name="optional" location="global"/>
+        <include file-name="pysideqenum.h" location="global"/>
     </extra-includes>
     <conversion-rule>
         <native-to-target file="../glue/qtcore.cpp" snippet="return-qvariant"/>
@@ -328,6 +329,7 @@
             <add-conversion type="QByteArray" file="../glue/qtcore.cpp" snippet="conversion-qbytearray"/>
             <add-conversion type="PyFloat" check="PyFloat_CheckExact(%in)" file="../glue/qtcore.cpp" snippet="conversion-pyfloat"/>
             <add-conversion type="PyLong" check="PyLong_CheckExact(%in)"  file="../glue/qtcore.cpp" snippet="conversion-qlonglong"/>
+            <add-conversion type="SbkEnumType" check="Shiboken::Enum::check(%in)" file="../glue/qtcore.cpp" snippet="conversion-sbkobject"/>
             <add-conversion type="SbkObject" file="../glue/qtcore.cpp" snippet="conversion-sbkobject"/>
             <add-conversion type="PyDict" check="PyDict_CheckExact(%in)" file="../glue/qtcore.cpp" snippet="conversion-pydict"/>
             <add-conversion type="PyList" check="PyList_Check(%in)" file="../glue/qtcore.cpp" snippet="conversion-pylist"/>

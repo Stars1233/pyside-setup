@@ -10,6 +10,8 @@
 
 #include <map>
 
+#include <QtCore/qmetatype.h>
+
 ///////////////////////////////////////////////////////////////
 //
 // PYSIDE-957: Create QEnum dynamically from Python Enum
@@ -191,6 +193,21 @@ std::vector<PyObject *> resolveDelayedQEnums(PyTypeObject *containerType)
         }
     }
     return result;
+}
+
+QByteArray getTypeName(PyTypeObject *type)
+{
+    if (!Shiboken::Enum::checkType(type))
+        return {};
+
+    Shiboken::AutoDecRef qualName(PyObject_GetAttr(reinterpret_cast<PyObject *>(type),
+                                                   Shiboken::PyMagicName::qualname()));
+    QByteArray result = Shiboken::String::toCString(qualName.object());
+    result.replace(".", "::");
+
+    const auto metaType = QMetaType::fromName(result);
+    return metaType.isValid() && metaType.flags().testFlag(QMetaType::IsEnumeration)
+        ? result : QByteArray{};
 }
 
 } // namespace Shiboken::Enum
