@@ -164,6 +164,17 @@ static void restoreError(ErrorStore &s)
 #endif
 }
 
+static void releaseError(ErrorStore &s)
+{
+    Py_XDECREF(s.exc);
+    s.exc = nullptr;
+#ifdef PEP_OLD_ERR_API
+    Py_XDECREF(s.type);
+    Py_XDECREF(s.traceback);
+    s.type = s.traceback = nullptr;
+#endif
+}
+
 static thread_local ErrorStore savedError;
 
 static bool hasPythonContext()
@@ -207,6 +218,37 @@ PyObject *occurred()
     if (savedError)
         restoreError(savedError);
     return PyErr_Occurred();
+}
+
+Stash::Stash() : m_store(std::make_unique<ErrorStore>())
+{
+    fetchError(*m_store);
+}
+
+Stash::~Stash()
+{
+    restore();
+}
+
+PyObject *Stash::getException() const
+{
+    return m_store ? m_store->exc : nullptr;
+}
+
+void Stash::restore()
+{
+    if (m_store) {
+        restoreError(*m_store);
+        m_store.reset();
+    }
+}
+
+void Stash::release()
+{
+    if (m_store) {
+        releaseError(*m_store);
+        m_store.reset();
+    }
 }
 
 } // namespace Errors

@@ -5,6 +5,7 @@
 
 #include <sbkpython.h>
 #include <sbkstring.h>
+#include <sbkerrors.h>
 #include <autodecref.h>
 
 // Remove deprecated MACRO of copysign for MSVC #86286
@@ -40,17 +41,17 @@ std::optional<int> qmlMetaCallErrorHandler(QObject *object)
     if (engine->currentStackFrame == nullptr)
         return {};
 
-    PyObject *errType{};
-    PyObject *errValue{};
-    PyObject *errTraceback{};
-    PyErr_Fetch(&errType, &errValue, &errTraceback);
+    Shiboken::Errors::Stash errorStash;
+    PyObject *errValue = errorStash.getException();
     // PYSIDE-464: The error is only valid before PyErr_Restore,
     // PYSIDE-464: therefore we take local copies.
     Shiboken::AutoDecRef objStr(PyObject_Str(errValue));
     const QString errString = QString::fromUtf8(Shiboken::String::toCString(objStr));
-    const bool isSyntaxError = errType == PyExc_SyntaxError;
-    const bool isTypeError = errType == PyExc_TypeError;
-    PyErr_Restore(errType, errValue, errTraceback);
+    const bool isSyntaxError = errValue != nullptr
+                               && PyErr_GivenExceptionMatches(errValue, PyExc_SyntaxError);
+    const bool isTypeError = errValue != nullptr
+                             && PyErr_GivenExceptionMatches(errValue, PyExc_TypeError);
+    errorStash.restore();
 
     PyErr_Print();    // Note: PyErr_Print clears the error.
 

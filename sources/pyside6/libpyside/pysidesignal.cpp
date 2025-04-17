@@ -16,6 +16,7 @@
 #include <pep384ext.h>
 #include <sbkconverter.h>
 #include <sbkenum.h>
+#include <sbkerrors.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 #include <sbktypefactory.h>
@@ -667,13 +668,9 @@ static PyObject *signalInstanceGetItem(PyObject *self, PyObject *key)
 static inline void warnDisconnectFailed(PyObject *aSlot, const QByteArray &signature)
 {
     if (PyErr_Occurred() != nullptr) { // avoid "%S" invoking str() when an error is set.
-        PyObject *exc{};
-        PyObject *inst{};
-        PyObject *tb{};
-        PyErr_Fetch(&exc, &inst, &tb);
+        Shiboken::Errors::Stash errorStash;
         PyErr_WarnFormat(PyExc_RuntimeWarning, 0, "Failed to disconnect (%s) from signal \"%s\".",
                          Py_TYPE(aSlot)->tp_name, signature.constData());
-        PyErr_Restore(exc, inst, tb);
     } else {
         PyErr_WarnFormat(PyExc_RuntimeWarning, 0, "Failed to disconnect (%S) from signal \"%s\".",
                          aSlot, signature.constData());

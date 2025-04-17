@@ -30,6 +30,7 @@
 #include <gilstate.h>
 #include <helper.h>
 #include <sbkconverter.h>
+#include <sbkerrors.h>
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
 #include <sbkfeature_base.h>
@@ -595,10 +596,7 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
 
     // Search on metaobject (avoid internal attributes started with '__')
     if (!attr) {
-        PyObject *type{};
-        PyObject *value{};
-        PyObject *traceback{};
-        PyErr_Fetch(&type, &value, &traceback);     // This was omitted for a loong time.
+        Shiboken::Errors::Stash errorStash;
 
         int flags = currentSelectId(Py_TYPE(self));
         int snake_flag = flags & 0x01;
@@ -623,8 +621,10 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
                     if (res) {
                         AutoDecRef elemName(PyObject_GetAttr(res, PySideMagicName::name()));
                         // Note: This comparison works because of interned strings.
-                        if (elemName == name)
+                        if (elemName == name) {
+                            errorStash.release();
                             return res;
+                        }
                         Py_DECREF(res);
                     }
                     PyErr_Clear();
@@ -655,6 +655,7 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
                     } else if (auto *func = MetaFunction::newObject(cppSelf, i)) {
                         auto *result = reinterpret_cast<PyObject *>(func);
                         PyObject_SetAttr(self, name, result);
+                        errorStash.release();
                         return result;
                     }
                 }
@@ -663,10 +664,10 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
                 auto *pySignal = reinterpret_cast<PyObject *>(
                     Signal::newObjectFromMethod(cppSelf, self, signalList));
                 PyObject_SetAttr(self, name, pySignal);
+                errorStash.release();
                 return pySignal;
             }
         }
-        PyErr_Restore(type, value, traceback);
     }
     return attr;
 }

@@ -17,6 +17,7 @@
         <include file-name="pysidemetatype.h" location="global"/>
         <include file-name="pysideutils.h" location="global"/> <!-- QString conversion -->
         <include file-name="signalmanager.h" location="global"/>
+        <include file-name="sbkerrors.h" location="global"/>
         <!-- QtCoreHelper::QGenericReturnArgumentHolder -->
         <include file-name="qtcorehelper.h" location="local"/>
     </extra-includes>

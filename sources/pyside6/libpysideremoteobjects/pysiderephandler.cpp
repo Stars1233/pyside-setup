@@ -7,6 +7,7 @@
 #include "pysidedynamiccommon_p.h"
 
 #include <pep384ext.h>
+#include <sbkerrors.h>
 #include <sbkstring.h>
 #include <sbktypefactory.h>
 #include <signature.h>
@@ -372,17 +373,11 @@ bool instantiateFromDefaultValue(QVariant &variant, const QString &defaultValue)
     PyObject *pyResult = PyRun_String(code.c_str(), Py_eval_input, pyLocals, pyLocals);
 
     if (!pyResult) {
-        PyObject *ptype = nullptr;
-        PyObject *pvalue = nullptr;
-        PyObject *ptraceback = nullptr;
-        PyErr_Fetch(&ptype, &pvalue, &ptraceback);
-        PyErr_NormalizeException(&ptype, &pvalue, &ptraceback);
+        Shiboken::Errors::Stash errorStash;
         PyErr_Format(PyExc_TypeError,
                      "Failed to generate default value. Error: %s. Problematic code: %s",
-                     Shiboken::String::toCString(PyObject_Str(pvalue)), code.c_str());
-        Py_XDECREF(ptype);
-        Py_XDECREF(pvalue);
-        Py_XDECREF(ptraceback);
+                     Shiboken::String::toCString(PyObject_Str(errorStash.getException())), code.c_str());
+        errorStash.release();
         Py_DECREF(pyLocals);
         return false;
     }

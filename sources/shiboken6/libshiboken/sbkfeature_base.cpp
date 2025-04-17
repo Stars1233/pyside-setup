@@ -6,6 +6,7 @@
 #include "autodecref.h"
 #include "pep384ext.h"
 #include "sbkenum.h"
+#include "sbkerrors.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
@@ -60,8 +61,8 @@ SelectableFeatureHook initSelectableFeature(SelectableFeatureHook func)
 void disassembleFrame(const char *marker)
 {
     Shiboken::GilState gil;
-    PyObject *error_type, *error_value, *error_traceback;
-    PyErr_Fetch(&error_type, &error_value, &error_traceback);
+
+    Shiboken::Errors::Stash errorStash;
     static PyObject *dismodule = PyImport_ImportModule("dis");
     static PyObject *disco = PyObject_GetAttrString(dismodule, "disco");
     static PyObject *const _f_lasti = Shiboken::String::createStaticString("f_lasti");
@@ -84,12 +85,11 @@ void disassembleFrame(const char *marker)
         fprintf(stdout, "%s END line=%ld %s\n\n", marker, line, fname);
     }
 #if PY_VERSION_HEX >= 0x030C0000 && !Py_LIMITED_API
-    if (error_type)
-        PyErr_DisplayException(error_value);
+    if (auto *exc = errorStash.getException())
+        PyErr_DisplayException(exc);
 #endif
     static PyObject *stdout_file = PySys_GetObject("stdout");
     ignore.reset(PyObject_CallMethod(stdout_file, "flush", nullptr));
-    PyErr_Restore(error_type, error_value, error_traceback);
 }
 
 // Python 3.13
@@ -361,15 +361,11 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
     }
 
     if (!ret && name != ignAttr1 && name != ignAttr2) {
-        PyObject *error_type{}, *error_value{}, *error_traceback{};
-        PyErr_Fetch(&error_type, &error_value, &error_traceback);
+        Shiboken::Errors::Stash errorsStash;
         ret = lookupUnqualifiedOrOldEnum(type, name);
         if (ret) {
-            Py_DECREF(error_type);
-            Py_XDECREF(error_value);
-            Py_XDECREF(error_traceback);
-        } else {
-            PyErr_Restore(error_type, error_value, error_traceback);
+            errorsStash.release();
+            return ret;
         }
     }
     return ret;

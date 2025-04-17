@@ -347,20 +347,15 @@ int SignalManagerPrivate::qtPropertyMetacall(QObject *object,
     if (PyErr_Occurred()) {
         // PYSIDE-2160: An unknown type was reported. Indicated by StopIteration.
         if (PyErr_ExceptionMatches(PyExc_StopIteration)) {
-            PyObject *excType{};
-            PyObject *excValue{};
-            PyObject *excTraceback{};
-            PyErr_Fetch(&excType, &excValue, &excTraceback);
+            Shiboken::Errors::Stash errorStash;
             bool ign = call == QMetaObject::WriteProperty;
             PyErr_WarnFormat(PyExc_RuntimeWarning, 0,
                 ign ? "Unknown property type '%s' of QObject '%s' used in fset"
                     : "Unknown property type '%s' of QObject '%s' used in fget with %R",
-                pp->d->typeName.constData(), metaObject->className(), excValue);
+                pp->d->typeName.constData(), metaObject->className(), errorStash.getException());
             if (PyErr_Occurred())
                 Shiboken::Errors::storeErrorOrPrint();
-            Py_DECREF(excType);
-            Py_DECREF(excValue);
-            Py_XDECREF(excTraceback);
+            errorStash.release();
             return result;
         }
 

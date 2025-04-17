@@ -415,12 +415,8 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
         }
     }
 
-    PyObject *error_type{};
-    PyObject *error_value{};
-    PyObject *error_traceback{};
-
     /* Save the current exception, if any. */
-    PyErr_Fetch(&error_type, &error_value, &error_traceback);
+    Shiboken::Errors::Stash errorStash;
 
     if (canDelete) {
         if (sotp->is_multicpp) {
@@ -441,7 +437,7 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
     }
 
     /* Restore the saved exception. */
-    PyErr_Restore(error_type, error_value, error_traceback);
+    errorStash.restore();
 
     if (needTypeDecref)
         Py_DECREF(pyType);
