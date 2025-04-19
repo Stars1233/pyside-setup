@@ -464,7 +464,7 @@ Pep_GetVerboseFlag()
 
 // Support for pyerrors.h
 
-#if defined(Py_LIMITED_API) || PY_VERSION_HEX < 0x030C0000
+#ifdef PEP_OLD_ERR_API
 // Emulate PyErr_GetRaisedException() using the deprecated PyErr_Fetch()/PyErr_Store()
 PyObject *PepErr_GetRaisedException()
 {

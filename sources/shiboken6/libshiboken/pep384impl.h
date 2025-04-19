@@ -190,15 +190,20 @@ LIBSHIBOKEN_API int Pep_GetFlag(const char *name);
 LIBSHIBOKEN_API int Pep_GetVerboseFlag(void);
 #endif
 
+#if (defined(Py_LIMITED_API) && Py_LIMITED_API < 0x030C0000) || PY_VERSION_HEX < 0x030C0000
+#  define PEP_OLD_ERR_API
+#endif
+
 // pyerrors.h
-#if defined(Py_LIMITED_API) || PY_VERSION_HEX < 0x030C0000
+#ifdef PEP_OLD_ERR_API
 LIBSHIBOKEN_API PyObject *PepErr_GetRaisedException();
 LIBSHIBOKEN_API PyObject *PepException_GetArgs(PyObject *ex);
 LIBSHIBOKEN_API void PepException_SetArgs(PyObject *ex, PyObject *args);
 #else
-#  define PepErr_GetRaisedException PyErr_GetRaisedException
-#  define PepException_GetArgs PyException_GetArgs
-#  define PepException_SetArgs PyException_SetArgs
+inline PyObject *PepErr_GetRaisedException() { return PyErr_GetRaisedException(); }
+inline PyObject *PepException_GetArgs(PyObject *ex) { return PyException_GetArgs(ex); }
+inline void PepException_SetArgs(PyObject *ex, PyObject *args)
+{ PyException_SetArgs(ex, args); }
 #endif
 
 /*****************************************************************************
