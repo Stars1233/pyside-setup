@@ -869,28 +869,9 @@ endfunction()
 
 # Get path to libclang.dll/libclang.so depending on the platform
 macro(find_libclang)
-    if(CMAKE_HOST_WIN32)
-        set(libclang_directory_suffix "bin")
-        set(libclang_suffix ".dll")
-    else()
-        set(libclang_directory_suffix "lib")
-        if(CMAKE_HOST_APPLE)
-            set(libclang_suffix ".dylib")
-        else()
-            set(libclang_suffix ".so")
-        endif()
-    endif()
-
-    set(libclang_lib_dir "")
-    if(DEFINED ENV{LLVM_INSTALL_DIR})
-        set(libclang_lib_dir "$ENV{LLVM_INSTALL_DIR}/${libclang_directory_suffix}")
-    elseif(DEFINED ENV{CLANG_INSTALL_DIR})
-        set(libclang_lib_dir "$ENV{CLANG_INSTALL_DIR}/${libclang_directory_suffix}")
-    else()
-        message(WARNING
-            "Couldn't find libclang${libclang_suffix} "
-            "You will likely need to add it manually to PATH to ensure the build succeeds.")
-    endif()
+    find_package(Clang CONFIG REQUIRED)
+    get_target_property(libclang_location libclang LOCATION)
+    get_filename_component(libclang_lib_dir "${libclang_location}" DIRECTORY)
 endmacro()
 
 # Allow setting a shiboken debug level from the the build system or from the environment
