@@ -1536,9 +1536,7 @@ double in = %CONVERTTOCPP[double](%in);
 // @snippet conversion-sbkobject
 // a class supported by QVariant?
 QMetaType metaType;
-if (Shiboken::Enum::check(%in))
-{
-    const auto baseType = PyObject_Type(%in);
+if (Shiboken::Enum::check(%in)) {
     const auto typeName = PySide::QEnum::getTypeName(Py_TYPE(%in));
     if (!typeName.isEmpty())
         metaType = QMetaType::fromName(typeName);
