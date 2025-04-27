@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
+import os
 import sys
 # TODO: Remove this import when Python 3.11 is the minimum supported version
 if sys.version_info >= (3, 11):
@@ -48,19 +49,19 @@ def _parse_toml_content(content: str) -> dict:
     return result
 
 
-def _write_toml_content(data: dict) -> str:
+def _write_base_toml_content(data: dict) -> str:
     """
     Write minimal TOML content with project and tool.pyside6-project sections.
     """
     lines = []
 
-    if 'project' in data and data['project']:
+    if data.get('project'):
         lines.append('[project]')
         for key, value in sorted(data['project'].items()):
             if isinstance(value, str):
                 lines.append(f'{key} = "{value}"')
 
-    if 'tool' in data and 'pyside6-project' in data['tool']:
+    if data.get("tool") and data['tool'].get('pyside6-project'):
         lines.append('\n[tool.pyside6-project]')
         for key, value in sorted(data['tool']['pyside6-project'].items()):
             if isinstance(value, list):
@@ -115,7 +116,7 @@ def parse_pyproject_toml(pyproject_toml_file: Path) -> PyProjectParseResult:
 
 def write_pyproject_toml(pyproject_file: Path, project_name: str, project_files: list[str]):
     """
-    Create or update a pyproject.toml file with the specified content.
+    Create or overwrite a pyproject.toml file with the specified content.
     """
     data = {
         "project": {"name": project_name},
@@ -124,11 +125,31 @@ def write_pyproject_toml(pyproject_file: Path, project_name: str, project_files:
         }
     }
 
+    content = _write_base_toml_content(data)
     try:
-        content = _write_toml_content(data)
         pyproject_file.write_text(content, encoding='utf-8')
     except Exception as e:
         raise ValueError(f"Error writing TOML file: {str(e)}")
+
+
+def robust_relative_to_posix(target_path: Path, base_path: Path) -> str:
+    """
+    Calculates the relative path from base_path to target_path.
+    Uses Path.relative_to first, falls back to os.path.relpath if it fails.
+    Returns the result as a POSIX path string.
+    """
+    # Ensure both paths are absolute for reliable calculation, although in this specific code,
+    # project_folder and paths in output_files are expected to be resolved/absolute already.
+    abs_target = target_path.resolve() if not target_path.is_absolute() else target_path
+    abs_base = base_path.resolve() if not base_path.is_absolute() else base_path
+
+    try:
+        return abs_target.relative_to(abs_base).as_posix()
+    except ValueError:
+        # Fallback to os.path.relpath which is more robust for paths that are not direct subpaths.
+        relative_str = os.path.relpath(str(abs_target), str(abs_base))
+        # Convert back to Path temporarily to get POSIX format
+        return Path(relative_str).as_posix()
 
 
 def migrate_pyproject(pyproject_file: Path | str = None) -> int:
@@ -170,7 +191,7 @@ def migrate_pyproject(pyproject_file: Path | str = None) -> int:
             project_name = project_files[0].stem
 
     # The project files that will be written to the pyproject.toml file
-    output_files = set()
+    output_files: set[Path] = set()
     for project_file in project_files:
         project_data = parse_pyproject_json(project_file)
         if project_data.errors:
@@ -185,39 +206,58 @@ def migrate_pyproject(pyproject_file: Path | str = None) -> int:
         project_name = project_folder.name
 
     pyproject_toml_file = project_folder / "pyproject.toml"
-    if pyproject_toml_file.exists():
-        already_existing_file = True
-        try:
-            content = pyproject_toml_file.read_text(encoding='utf-8')
-            data = _parse_toml_content(content)
-        except Exception as e:
-            raise ValueError(f"Error parsing TOML: {str(e)}")
-    else:
-        already_existing_file = False
-        data = {"project": {}, "tool": {"pyside6-project": {}}}
 
-    # Update project name if not present
-    if "name" not in data["project"]:
-        data["project"]["name"] = project_name
-
-    # Update files list
-    data["tool"]["pyside6-project"]["files"] = sorted(
-        p.relative_to(project_folder).as_posix() for p in output_files
+    relative_files = sorted(
+        robust_relative_to_posix(p, project_folder) for p in output_files
     )
 
-    # Generate TOML content
-    toml_content = _write_toml_content(data)
+    if not (already_existing_file := pyproject_toml_file.exists()):
+        # Create new pyproject.toml file
+        data = {
+            "project": {"name": project_name},
+            "tool": {
+                "pyside6-project": {"files": relative_files}
+            }
+        }
+        updated_content = _write_base_toml_content(data)
+    else:
+        # For an already existing file, append our tool.pyside6-project section
+        # If the project section is missing, add it
+        try:
+            content = pyproject_toml_file.read_text(encoding='utf-8')
+        except Exception as e:
+            print(f"Error processing existing TOML file: {str(e)}", file=sys.stderr)
+            return 1
 
-    if already_existing_file:
+        append_content = []
+
+        if '[project]' not in content:
+            # Add project section if needed
+            append_content.append('\n[project]')
+            append_content.append(f'name = "{project_name}"')
+
+        if '[tool.pyside6-project]' not in content:
+            # Add tool.pyside6-project section
+            append_content.append('\n[tool.pyside6-project]')
+            items = [f'"{item}"' for item in relative_files]
+            append_content.append(f'files = [{", ".join(items)}]')
+
+        if append_content:
+            updated_content = content.rstrip() + '\n' + '\n'.join(append_content)
+        else:
+            # No changes needed
+            print("pyproject.toml already contains [project] and [tool.pyside6-project] sections")
+            return 0
+
         print(f"WARNING: A pyproject.toml file already exists at \"{pyproject_toml_file}\"")
         print("The file will be updated with the following content:")
-        print(toml_content)
+        print(updated_content)
         response = input("Proceed? [Y/n] ")
         if response.lower().strip() not in {"yes", "y"}:
             return 0
 
     try:
-        pyproject_toml_file.write_text(toml_content)
+        pyproject_toml_file.write_text(updated_content, encoding='utf-8')
     except Exception as e:
         print(f"Error writing to \"{pyproject_toml_file}\": {str(e)}", file=sys.stderr)
         return 1

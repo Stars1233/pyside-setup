@@ -2,4 +2,4 @@
 name = "subproject"
 
 [tool.pyside6-project]
-files = ["subproject_button.py"]
+files = ["subproject_button.py", "../main.py"]
