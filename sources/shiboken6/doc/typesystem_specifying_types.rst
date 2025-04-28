@@ -208,6 +208,9 @@ can be generated for them. Instead, an instance of the viewed class should
 be instantiated and passed to functions using the view class
 for argument types.
 
+It is also possible to specify template specializations
+like "std::optional<int>" as primitive types with converters.
+
 See :ref:`predefined_templates` for built-in templates for standard type
 conversion rules.
 

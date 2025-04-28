@@ -9,6 +9,7 @@
 #include "point.h"
 #include "objecttype.h"
 
+#include <optional>
 #include <list>
 
 // Anonymous global enum
@@ -156,6 +157,9 @@ LIBSAMPLE_API void forceDecisorSideB(int a, const Point &pt, const Str &text,
 LIBSAMPLE_API double passReferenceToValueType(const Point &point, double multiplier);
 // Add a new signature on type system with only a ObjectType pointer as parameter.
 LIBSAMPLE_API int passReferenceToObjectType(const ObjectType &obj, int multiplier);
+
+LIBSAMPLE_API std::optional<long> optionalMultiply(const std::optional<long> &v1,
+                                                   const std::optional<long> &v2);
 
 extern LIBSAMPLE_API int variableInNamespace;
 

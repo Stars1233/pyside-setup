@@ -120,6 +120,25 @@
         </conversion-rule>
     </primitive-type>
 
+    <primitive-type name="std::optional&lt;long&gt;" target-langapi-name="PyObject">
+      <conversion-rule>
+          <native-to-target>
+          if (!%in.has_value())
+              Py_RETURN_NONE;
+          return PyLong_FromLong(%in.value());
+          </native-to-target>
+          <target-to-native>
+              <add-conversion type="Py_None">
+              SBK_UNUSED(%in)
+              %out = %OUTTYPE();
+              </add-conversion>
+              <add-conversion type="PyLong" check="PyLong_CheckExact(%in)">
+              %out = %OUTTYPE(PyLong_AsLong(%in));
+              </add-conversion>
+          </target-to-native>
+      </conversion-rule>
+    </primitive-type>
+
     <value-type name="MoveOnly"/>
     <object-type name="MoveOnlyHandler"/>
 

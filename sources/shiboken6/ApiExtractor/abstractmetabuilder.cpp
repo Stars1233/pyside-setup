@@ -2763,6 +2763,16 @@ std::optional<AbstractMetaType>
 
     TypeEntryCList types = findTypeEntries(qualifiedName, name, flags,
                                            currentClass, d, errorMessageIn);
+    if (types.isEmpty() && !typeInfo.instantiations().isEmpty()) {
+        // Allow for specifying template specializations as primitive types
+        // with converters ('std::optional<int>' or similar).
+        auto pt = TypeDatabase::instance()->findPrimitiveType(typeInfo.qualifiedInstantationName());
+        if (pt) {
+            types.append(pt);
+            typeInfo.clearInstantiations();
+        }
+    }
+
     if (!flags.testFlag(AbstractMetaBuilder::TemplateArgument)) {
         // Avoid clashes between QByteArray and enum value QMetaType::QByteArray
         // unless we are looking for template arguments.

@@ -79,6 +79,13 @@ class ModuleTest(unittest.TestCase):
         mo2 = sample.MoveOnlyHandler.passMoveOnly(mo)
         self.assertEqual(mo2.value(), v)
 
+    def testOptionalLong(self):
+        v1 = 2
+        v2 = 3
+        self.assertEqual(sample.SampleNamespace.optionalMultiply(v1, v2), 6)
+        self.assertIsNone(sample.SampleNamespace.optionalMultiply(v1, None))
+        self.assertIsNone(sample.SampleNamespace.optionalMultiply(None, v2))
+
 
 if __name__ == '__main__':
     unittest.main()
