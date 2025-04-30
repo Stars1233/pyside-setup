@@ -2247,3 +2247,252 @@ if (PySequence_Check(%PYARG_0) != 0 && PySequence_Size(%PYARG_0) == 2) {
 PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
 PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[qintptr](*result_out));
 // @snippet return-native-eventfilter
+
+
+// @snippet qrangemodel-wrapper
+// Import the template constructors
+using QRangeModel::QRangeModel;
+// @snippet qrangemodel-wrapper
+
+// @snippet qrangemodel-helper-functions
+template <class T>
+static inline QSpan<T> createSpan(void *vData, Py_ssize_t size)
+{
+    auto *data = reinterpret_cast<T *>(vData);
+    return QSpan<T>{data, data + size};
+}
+
+// Simple 2d table range for creating a QRangeModel
+// (potentially replaceable by a std::mdspan in C++ 23).
+template <class T>
+class TableRange
+{
+    struct TableData
+    {
+        T *data = nullptr;
+        qsizetype rowCount = -1;
+        qsizetype columCount = -1;
+    };
+
+public:
+    explicit TableRange(void *data, qsizetype rowCount, qsizetype columCount) :
+        m_data{reinterpret_cast<T *>(data), rowCount, columCount} {}
+
+    class Iterator
+    {
+    public:
+        using value_type = QSpan<T>;
+        using size_type = qsizetype;
+        using reference = value_type;
+        using pointer = value_type;
+        using difference_type = std::ptrdiff_t;
+        using iterator_category = std::random_access_iterator_tag;
+
+        explicit Iterator(const TableData &data, size_type row) noexcept:
+            m_data(data), m_row(row) {}
+
+        Iterator() = default;
+
+        constexpr Iterator &operator++() noexcept
+        {
+            Q_ASSERT(m_row < m_data.rowCount);
+            ++m_row;
+            return *this;
+        }
+
+        constexpr Iterator operator++(int) noexcept
+        {
+            Q_ASSERT(m_row < m_data.rowCount);
+            auto copy = *this;
+            ++m_row;
+            return copy;
+        }
+
+        constexpr Iterator &operator--() noexcept
+        {
+            Q_ASSERT(m_row > 0);
+            --m_row;
+            return *this;
+        }
+
+        constexpr Iterator operator--(int) noexcept
+        {
+            Q_ASSERT(m_row > 0);
+            auto copy = *this;
+            --m_row;
+            return copy;
+        }
+
+        Iterator &operator+=(difference_type i)
+        {
+            const auto row = m_row + i;
+            Q_ASSERT(row >= 0 && row <= m_data.rowCount);
+            m_row = row;
+            return *this;
+        }
+
+        Iterator &operator-=(difference_type i)
+        {
+            const auto row = m_row - i;
+            Q_ASSERT(row >= 0 && row <= m_data.rowCount);
+            m_row = row;
+            return *this;
+        }
+
+        Iterator operator+(difference_type i) const
+        {
+            const auto row = m_row + i;
+            Q_ASSERT(row >= 0 && row <= m_data.rowCount);
+            return {m_data, row};
+        }
+
+        Iterator operator-(difference_type i) const
+        {
+            const auto row = m_row - i;
+            Q_ASSERT(row >= 0 && row <= m_data.rowCount);
+            return {m_data, row};
+        }
+
+        difference_type operator-(const Iterator &it) const { return m_row - it.m_row; } // std::distance
+
+        reference operator*() const noexcept
+        {
+            auto *rowStart = m_data.data + m_row * m_data.columCount;
+            return {rowStart, rowStart + m_data.columCount};
+        }
+
+        [[nodiscard]] value_type operator[](difference_type i) const
+        {
+            auto *rowStart = m_data.data + (m_row + i) * m_data.columCount;
+            return {rowStart, rowStart + m_data.columCount};
+        }
+
+    private:
+        friend bool comparesEqual(const Iterator &lhs, const Iterator &rhs) noexcept
+        {
+            Q_ASSERT(lhs.m_data.data != nullptr);
+            Q_ASSERT(lhs.m_data.data == rhs.m_data.data);
+            return lhs.m_row == rhs.m_row;
+        }
+
+        friend Qt::strong_ordering compareThreeWay(const Iterator &lhs,
+                                                   const Iterator &rhs) noexcept
+        {
+            Q_ASSERT(lhs.m_data.data != nullptr);
+            Q_ASSERT(lhs.m_data.data == rhs.m_data.data);
+            return Qt::compareThreeWay(lhs.m_row, rhs.m_row);
+        }
+
+        Q_DECLARE_STRONGLY_ORDERED(Iterator)
+
+        TableData m_data;
+        size_type m_row = 0;
+    };
+
+    [[nodiscard]] Iterator begin() const { return Iterator(m_data, 0); }
+    [[nodiscard]] Iterator end() const   { return Iterator(m_data, m_data.rowCount); }
+
+private:
+    TableData m_data;
+};
+
+template <class RangeModel> // QRangeModelWrapper
+static RangeModel *createRangeModel(PyObject *in, QObject *parent)
+{
+    auto view = Shiboken::Numpy::View::fromPyObject(in);
+    if (!view) {
+        PyErr_SetString(PyExc_TypeError, "Invalid parameter or missing numpy support.");
+        return nullptr;
+    }
+    switch (view.ndim) {
+    case 1: {
+        const auto size = view.dimensions[0];
+        switch (view.type) {
+        case Shiboken::Numpy::View::Int16:
+            return new RangeModel(createSpan<short>(view.data, size), parent);
+        case Shiboken::Numpy::View::Unsigned16:
+            return new RangeModel(createSpan<unsigned short>(view.data, size), parent);
+        case Shiboken::Numpy::View::Int:
+            return new RangeModel(createSpan<int>(view.data, size), parent);
+        case Shiboken::Numpy::View::Unsigned:
+            return new RangeModel(createSpan<unsigned>(view.data, size), parent);
+        case Shiboken::Numpy::View::Int64:
+            return new RangeModel(createSpan<int64_t>(view.data, size), parent);
+        case Shiboken::Numpy::View::Unsigned64:
+            return new RangeModel(createSpan<uint64_t>(view.data, size), parent);
+        case Shiboken::Numpy::View::Float:
+            return new RangeModel(createSpan<float>(view.data, size), parent);
+        case Shiboken::Numpy::View::Double:
+            return new RangeModel(createSpan<double>(view.data, size), parent);
+        default:
+            PyErr_SetString(PyExc_TypeError, "Unsupported data type for one-dimensional arrays.");
+            return nullptr;
+        }
+    }
+    break;
+
+    case 2: {
+        const auto rows = view.dimensions[0];
+        const auto columns = view.dimensions[1];
+        switch (view.type) {
+        case Shiboken::Numpy::View::Int16:
+            return new RangeModel(TableRange<short>(view.data, rows, columns), parent);
+        case Shiboken::Numpy::View::Unsigned16:
+            return new RangeModel(TableRange<unsigned short>(view.data, rows, columns), parent);
+        case Shiboken::Numpy::View::Int:
+            return new RangeModel(TableRange<int>(view.data, rows, columns), parent);
+        case Shiboken::Numpy::View::Unsigned:
+            return new RangeModel(TableRange<unsigned>(view.data, rows, columns), parent);
+        case Shiboken::Numpy::View::Int64:
+            return new RangeModel(TableRange<int64_t>(view.data, rows, columns), parent);
+        case Shiboken::Numpy::View::Unsigned64:
+            return new RangeModel(TableRange<uint64_t>(view.data, rows, columns), parent);
+        case Shiboken::Numpy::View::Float:
+            return new RangeModel(TableRange<float>(view.data, rows, columns), parent);
+        case Shiboken::Numpy::View::Double:
+            return new RangeModel(TableRange<double>(view.data, rows, columns), parent);
+        default:
+            PyErr_SetString(PyExc_TypeError, "Unsupported data type for two-dimensional arrays.");
+            return nullptr;
+        }
+    }
+    break;
+    default:
+        PyErr_SetString(PyExc_TypeError, "Only one and two-dimensional arrays are supported.");
+        return nullptr;
+    }
+    return nullptr;
+}
+
+static bool isVariantList(const QVariant &v)
+{
+    return v.typeId() == QMetaType::QVariantList;
+};
+// @snippet qrangemodel-helper-functions
+
+// @snippet qrangemodel-numpy-constructor
+auto *model = createRangeModel<%TYPE>(%PYARG_1, %2);
+if (model == nullptr)
+    return -1;
+%0 = model;
+// @snippet qrangemodel-numpy-constructor
+
+// @snippet qrangemodel-sequence-constructor
+const auto vlOptional = PySide::Variant::pyListToVariantList(%PYARG_1);
+if (!vlOptional.has_value()) {
+    PyErr_SetString(PyExc_TypeError, "Unable convert input sequence.");
+    return -1;
+}
+
+const QVariantList &vList = vlOptional.value();
+if (!vList.isEmpty() && std::all_of(vList.cbegin(),  vList.cend(), isVariantList)) {
+    // Empirical: Transform QVariantList<QVariant(List)>  -> QList<QVariantList> for a table
+    QList<QVariantList> variantTable;
+    variantTable.reserve(vList.size());
+    for (const auto &rowV : vList)
+        variantTable.append(rowV.value<QVariantList>());
+    %0 = new %TYPE(variantTable, %2);
+} else {
+    %0 = new %TYPE(vList, %2);
+}
+// @snippet qrangemodel-sequence-constructor

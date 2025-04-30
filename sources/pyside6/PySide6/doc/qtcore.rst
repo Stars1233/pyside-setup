@@ -116,3 +116,12 @@ Example::
     logging.debug("Test debug message")
 
 // @snippet qmessagelogger
+
+// @snippet qrangemodel-numpy-constructor
+The function takes one-dimensional or two-dimensional numpy arrays of various
+integer or float types to populate an editable QRangeModel.
+// @snippet qrangemodel-numpy-constructor
+
+// @snippet qrangemodel-sequence-constructor
+The function takes a sequence of of data to populate a read-only QRangeModel.
+// @snippet qrangemodel-sequence-constructor

@@ -1738,6 +1738,33 @@
     <modify-function signature="endResetModel()" allow-thread="yes"/>
   </object-type>
 
+  <object-type name="QRangeModel" since="6.10">
+    <extra-includes>
+      <include file-name="QtCore/qspan.h" location="global"/>
+      <include file-name="sbknumpycheck.h" location="global"/>
+      <include file-name="sbknumpyview.h" location="global"/>
+      <include file-name="pysidevariantutils.h" location="global"/>
+      <include file-name="vector" location="global"/>
+    </extra-includes>
+    <enum-type name="RowCategory"/>
+    <inject-code class="native" position="wrapper-declaration"
+                 file="../glue/qtcore.cpp" snippet="qrangemodel-wrapper"/>
+    <inject-code class="native" position="beginning"
+                 file="../glue/qtcore.cpp" snippet="qrangemodel-helper-functions"/>
+    <add-function signature="QRangeModel(PyArrayObject *@data@, QObject *@parent@ = nullptr)"
+                  overload-number="0">
+        <inject-documentation format="target" mode="append" file="../doc/qtcore.rst"
+                              snippet="qrangemodel-numpy-constructor"/>
+        <inject-code file="../glue/qtcore.cpp" snippet="qrangemodel-numpy-constructor"/>
+    </add-function>
+    <add-function signature="QRangeModel(PySequence@list@, QObject *@parent@ = nullptr)"
+                  overload-number="1">
+        <inject-documentation format="target" mode="append" file="../doc/qtcore.rst"
+                              snippet="qrangemodel-sequence-constructor"/>
+        <inject-code file="../glue/qtcore.cpp" snippet="qrangemodel-sequence-constructor"/>
+    </add-function>
+  </object-type>
+
   <value-type name="QItemSelection">
     <include file-name="QList" location="global"/>
     <!-- Expose operator==, != inherited from QList, which the parser does
