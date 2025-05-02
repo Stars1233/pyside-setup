@@ -40,6 +40,7 @@ set(libpyside_HEADERS # installed below
     pysideslot_p.h
     pysidestaticstrings.h
     pysideutils.h
+    pysidevariantutils.h
     pysideweakref.h
     qobjectconnect.h
     signalmanager.h
@@ -59,6 +60,7 @@ set(libpyside_SRC
     pysidesignal.cpp
     pysideslot.cpp
     pysideproperty.cpp
+    pysidevariantutils.cpp
     pysideweakref.cpp
     pyside.cpp
     pyside_numpy.cpp

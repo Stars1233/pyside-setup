@@ -14,10 +14,8 @@
 
 QT_FORWARD_DECLARE_CLASS(QGenericArgument)
 QT_FORWARD_DECLARE_CLASS(QGenericReturnArgument)
-QT_FORWARD_DECLARE_CLASS(QMetaType)
 QT_FORWARD_DECLARE_CLASS(QObject)
 QT_FORWARD_DECLARE_CLASS(QRegularExpression)
-QT_FORWARD_DECLARE_CLASS(QVariant);
 
 QT_BEGIN_NAMESPACE
 namespace QtCoreHelper {
@@ -25,14 +23,6 @@ class QGenericArgumentHolder;
 class QGenericReturnArgumentHolder;
 }
 QT_END_NAMESPACE
-
-// Helpers for QVariant conversion
-
-QMetaType QVariant_resolveMetaType(PyTypeObject *type);
-
-QVariant QVariant_convertToValueList(PyObject *list);
-
-bool QVariant_isStringList(PyObject *list);
 
 // Helpers for qAddPostRoutine
 namespace PySide {

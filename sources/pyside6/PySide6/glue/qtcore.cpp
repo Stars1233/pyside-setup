@@ -225,49 +225,6 @@ return %out;
 // @snippet conversion-qmetatype-pytypeobject
 
 // @snippet qvariant-conversion
-static QVariant QVariant_convertToVariantMap(PyObject *map)
-{
-    Py_ssize_t pos = 0;
-    Shiboken::AutoDecRef keys(PyDict_Keys(map));
-    if (!QVariant_isStringList(keys))
-        return {};
-    PyObject *key{};
-    PyObject *value{};
-    QMap<QString,QVariant> ret;
-    while (PyDict_Next(map, &pos, &key, &value)) {
-        QString cppKey = %CONVERTTOCPP[QString](key);
-        QVariant cppValue = %CONVERTTOCPP[QVariant](value);
-        ret.insert(cppKey, cppValue);
-    }
-    return QVariant(ret);
-}
-static QVariant QVariant_convertToVariantList(PyObject *list)
-{
-    if (QVariant_isStringList(list)) {
-        QList<QString > lst = %CONVERTTOCPP[QList<QString>](list);
-        return QVariant(QStringList(lst));
-    }
-    QVariant valueList = QVariant_convertToValueList(list);
-    if (valueList.isValid())
-        return valueList;
-
-    if (PySequence_Size(list) < 0) {
-        // clear the error if < 0 which means no length at all
-        PyErr_Clear();
-        return {};
-    }
-
-    QList<QVariant> lst;
-    Shiboken::AutoDecRef fast(PySequence_Fast(list, "Failed to convert QVariantList"));
-    const Py_ssize_t size = PySequence_Size(fast.object());
-    for (Py_ssize_t i = 0; i < size; ++i) {
-        Shiboken::AutoDecRef pyItem(PySequence_GetItem(fast.object(), i));
-        QVariant item = %CONVERTTOCPP[QVariant](pyItem);
-        lst.append(item);
-    }
-    return QVariant(lst);
-}
-
 using SpecificConverter = Shiboken::Conversions::SpecificConverter;
 
 static std::optional<SpecificConverter> converterForQtType(const char *typeNameC)
@@ -1544,7 +1501,7 @@ if (Shiboken::Enum::check(%in)) {
         metaType = QMetaType::fromName(typeName);
 }
 if (!metaType.isValid())
-  metaType = QVariant_resolveMetaType(Py_TYPE(%in));
+  metaType = PySide::Variant::resolveMetaType(Py_TYPE(%in));
 
 bool ok = false;
 if (metaType.isValid()) {
@@ -1566,12 +1523,12 @@ if (!ok)
 // @snippet conversion-sbkobject
 
 // @snippet conversion-pydict
-QVariant ret = QVariant_convertToVariantMap(%in);
+QVariant ret = PySide::Variant::convertToVariantMap(%in);
 %out = ret.isValid() ? ret : QVariant::fromValue(PySide::PyObjectWrapper(%in));
 // @snippet conversion-pydict
 
 // @snippet conversion-pylist
-QVariant ret = QVariant_convertToVariantList(%in);
+QVariant ret = PySide::Variant::convertToVariantList(%in);
 %out = ret.isValid() ? ret : QVariant::fromValue(PySide::PyObjectWrapper(%in));
 // @snippet conversion-pylist
 
@@ -1581,7 +1538,7 @@ QVariant ret = QVariant_convertToVariantList(%in);
 // @snippet conversion-pyobject
 
 // @snippet conversion-qjsonobject-pydict
-QVariant dict = QVariant_convertToVariantMap(%in);
+QVariant dict = PySide::Variant::convertToVariantMap(%in);
 QJsonValue val = QJsonValue::fromVariant(dict);
 %out = val.toObject();
 // @snippet conversion-qjsonobject-pydict

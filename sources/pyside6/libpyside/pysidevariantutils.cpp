@@ -1,0 +1,212 @@
+// Copyright (C) 2025 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+
+#include "pysidevariantutils.h"
+#include "pysideutils.h"
+
+#include <QtCore/qvariantmap.h>
+
+#include <autodecref.h>
+#include <sbkconverter.h>
+#include <basewrapper.h>
+
+using namespace Qt::StringLiterals;
+
+static const char qVariantTypeName[] = "QVariant";
+
+static void warnConverter(const char *name)
+{
+    qWarning("Type converter for: %s not registered.", name);
+}
+
+// Helper converting each item of a non-empty list using the "QVariant" converter
+static std::optional<QVariantList> pyListToVariantListHelper(PyObject *list, Py_ssize_t size)
+{
+    Q_ASSERT(size > 0);
+    QVariantList result;
+    result.reserve(size);
+    Shiboken::Conversions::SpecificConverter converter(qVariantTypeName);
+    if (!converter) {
+        warnConverter(qVariantTypeName);
+        return std::nullopt;
+    }
+    for (Py_ssize_t i = 0; i < size; ++i) {
+        Shiboken::AutoDecRef pyItem(PySequence_GetItem(list, i));
+        QVariant item;
+        converter.toCpp(pyItem.object(), &item);
+        result.append(item);
+    }
+    return result;
+}
+
+// Helper checking for a sequence of Unicode objects
+static bool isStringList(PyObject *list)
+{
+    const Py_ssize_t size = PySequence_Size(list);
+    if (size == 0)
+        return false;
+    for (Py_ssize_t i = 0; i < size; ++i) {
+        Shiboken::AutoDecRef item(PySequence_GetItem(list, i));
+        if (PyUnicode_Check(item) == 0)
+            return false;
+    }
+    return true;
+}
+
+// Helper to convert to a QStringList
+static std::optional<QStringList> listToStringList(PyObject *list)
+{
+    static const char listType[] = "QList<QString>";
+    Shiboken::Conversions::SpecificConverter converter(listType);
+    if (!converter) {
+        warnConverter(listType);
+        return std::nullopt;
+    }
+    QStringList result;
+    converter.toCpp(list, &result);
+    return result;
+}
+
+// Helper to convert a non-empty, homogenous list using the converter of the first item
+static QVariant convertToValueList(PyObject *list)
+{
+    Q_ASSERT(PySequence_Size(list) >= 0);
+
+    Shiboken::AutoDecRef element(PySequence_GetItem(list, 0));
+
+    auto *type = reinterpret_cast<PyTypeObject *>(element.object());
+    QMetaType metaType = PySide::Variant::resolveMetaType(type);
+    if (!metaType.isValid())
+        return {};
+
+    const QByteArray listTypeName = QByteArrayLiteral("QList<") + metaType.name() + '>';
+    metaType = QMetaType::fromName(listTypeName);
+    if (!metaType.isValid())
+        return {};
+
+    Shiboken::Conversions::SpecificConverter converter(listTypeName);
+    if (!converter) {
+        warnConverter(listTypeName.constData());
+        return {};
+    }
+
+    QVariant var(metaType);
+    converter.toCpp(list, &var);
+    return var;
+}
+
+namespace PySide::Variant
+{
+
+QMetaType resolveMetaType(PyTypeObject *type)
+{
+    if (!PyObject_TypeCheck(type, SbkObjectType_TypeF()))
+        return {};
+    const char *typeName = Shiboken::ObjectType::getOriginalName(type);
+    if (!typeName)
+        return {};
+    const bool valueType = '*' != typeName[qstrlen(typeName) - 1];
+    // Do not convert user type of value
+    if (valueType && Shiboken::ObjectType::isUserType(type))
+        return {};
+    QMetaType metaType = QMetaType::fromName(typeName);
+    if (metaType.isValid())
+        return metaType;
+    // Do not resolve types to value type
+    if (valueType)
+        return {};
+    // Find in base types. First check tp_bases, and only after check tp_base, because
+    // tp_base does not always point to the first base class, but rather to the first
+    // that has added any python fields or slots to its object layout.
+    // See https://mail.python.org/pipermail/python-list/2009-January/520733.html
+    if (type->tp_bases) {
+        const auto size = PyTuple_Size(type->tp_bases);
+        Py_ssize_t i = 0;
+        // PYSIDE-1887, PYSIDE-86: Skip QObject base class of QGraphicsObject;
+        // it needs to use always QGraphicsItem as a QVariant type for
+        // QGraphicsItem::itemChange() to work.
+        if (qstrcmp(typeName, "QGraphicsObject*") == 0)
+            ++i;
+        for ( ; i < size; ++i) {
+            auto baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_bases, i));
+            const QMetaType derived = resolveMetaType(baseType);
+            if (derived.isValid())
+                return derived;
+        }
+        return {};
+    }
+    if (type->tp_base != nullptr)
+        return resolveMetaType(type->tp_base);
+    return {};
+}
+
+std::optional<QVariantList> pyListToVariantList(PyObject *list)
+{
+    if (list == nullptr || PySequence_Check(list) == 0)
+        return std::nullopt;
+    const auto size = PySequence_Size(list);
+    if (size < 0) { // Some infinite (I/O read) thing? - bail out
+        PyErr_Clear();
+        return std::nullopt;
+    }
+    if (size == 0)
+        return QVariantList{};
+    return pyListToVariantListHelper(list, size);
+}
+
+QVariant convertToVariantList(PyObject *list)
+{
+    const auto size = PySequence_Size(list);
+    if (size < 0) { // Some infinite (I/O read) thing? - bail out
+        PyErr_Clear();
+        return {};
+    }
+    if (size == 0)
+        return QVariantList{};
+
+    if (isStringList(list)) {
+        auto stringListO = listToStringList(list);
+        if (stringListO.has_value())
+            return {stringListO.value()};
+    }
+
+    if (QVariant valueList = convertToValueList(list); valueList.isValid())
+        return valueList;
+
+    if (auto vlO = pyListToVariantListHelper(list, size); vlO.has_value())
+        return vlO.value();
+
+    return {};
+}
+
+QVariant convertToVariantMap(PyObject *map)
+{
+    if (map == nullptr || PyDict_Check(map) == 0)
+        return {};
+
+    QVariantMap result;
+    if (PyDict_Size(map) == 0)
+        return result;
+
+    Py_ssize_t pos = 0;
+    Shiboken::AutoDecRef keys(PyDict_Keys(map));
+    if (!isStringList(keys))
+        return {};
+
+    Shiboken::Conversions::SpecificConverter converter(qVariantTypeName);
+    if (!converter) {
+        warnConverter(qVariantTypeName);
+        return {};
+    }
+
+    PyObject *key{};
+    PyObject *value{};
+    while (PyDict_Next(map, &pos, &key, &value)) {
+        QVariant cppValue;
+        converter.toCpp(value, &cppValue);
+        result.insert(PySide::pyUnicodeToQString(key), cppValue);
+    }
+    return result;
+}
+
+} // namespace PySide::Variant
