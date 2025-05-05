@@ -177,7 +177,7 @@ In other words, use
 .. code-block:: xml
 
      <inject-code class="target" position="beginning | end">
-         %CPPSELF.originalMethodName();
+         %CPPSELF.%FUNCTION_NAME();
      </inject-code>
 
 
@@ -187,7 +187,7 @@ instead of
 .. code-block:: xml
 
      <inject-code class="target" position="beginning | end">
-        %CPPSELF.%FUNCTION_NAME();
+        %CPPSELF.originalMethodName();
      </inject-code>
 
 
