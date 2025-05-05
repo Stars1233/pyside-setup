@@ -240,6 +240,10 @@ void HeaderGenerator::writeWrapperClassDeclaration(TextStream &s,
       << " : public " << metaClass->qualifiedCppName()
       << "\n{\npublic:\n" << indent;
 
+    writeClassCodeSnips(s, metaClass->typeEntry()->codeSnips(),
+                        TypeSystem::CodeSnipPositionWrapperDeclaration,
+                        TypeSystem::NativeCode, classContext);
+
     writeProtectedEnums(s, classContext);
     writeSpecialFunctions(s, wrapperName, classContext);
 
