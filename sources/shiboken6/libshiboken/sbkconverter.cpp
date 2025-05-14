@@ -451,8 +451,11 @@ void nonePythonToCppNullPtr(PyObject *, void *cppOut)
 void *cppPointer(PyTypeObject *desiredType, SbkObject *pyIn)
 {
     assert(pyIn);
-    if (!ObjectType::checkType(desiredType))
+    if (!ObjectType::checkType(desiredType)) {
+        std::cerr << __FUNCTION__ << ": Conversion to non SbkObject type " << desiredType->tp_name
+                  << " requested, falling back to pass-through.\n";
         return pyIn;
+    }
     auto *inType = Py_TYPE(pyIn);
     if (ObjectType::hasCast(inType))
         return ObjectType::cast(inType, pyIn, desiredType);
@@ -485,8 +488,14 @@ static void _pythonToCppCopy(const SbkConverter *converter, PyObject *pyIn, void
     assert(pyIn);
     assert(cppOut);
     PythonToCppFunc toCpp = IsPythonToCppConvertible(converter, pyIn);
-    if (toCpp)
+    if (toCpp) {
         toCpp(pyIn, cppOut);
+    } else {
+        std::cerr << __FUNCTION__ << ": Cannot copy-convert " << pyIn;
+        if (pyIn)
+            std::cerr << " (" << Py_TYPE(pyIn)->tp_name << ')';
+        std::cerr << " to C++.\n";
+    }
 }
 
 void pythonToCppCopy(PyTypeObject *type, PyObject *pyIn, void *cppOut)
