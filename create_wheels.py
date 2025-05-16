@@ -92,6 +92,10 @@ def get_manifest(wheel_name: str, data: list[ModuleData], package_path: Path) ->
     # adding PySide6_Essentials.json and PySide6_Addons.json
     lines.append(f"include PySide6/{wheel_name}.json")
 
+    # Only include CMake configs for PySide6_Essentials
+    if wheel_name == "PySide6_Essentials":
+        lines.append("graft PySide6/lib/cmake")
+
     return "\n".join(lines)
 
 

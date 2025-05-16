@@ -8,7 +8,7 @@ from pathlib import Path
 from ..log import log
 from ..config import config
 from ..options import OPTION
-from ..utils import copydir, copyfile, copy_qt_metatypes, makefile
+from ..utils import copydir, copyfile, copy_qt_metatypes, makefile, copy_cmake_config_dirs
 from .. import PYSIDE, SHIBOKEN
 from .linux import prepare_standalone_package_linux
 from .macos import prepare_standalone_package_macos
@@ -89,6 +89,12 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
                                   generated_config['shiboken_library_soversion']),
             ],
             recursive=False, _vars=_vars, force_copy_symlinks=True)
+
+        # Copy all CMake config directories matching the prefix
+        copy_cmake_config_dirs(
+            _vars["install_dir"], _vars["st_build_dir"],
+            _vars["st_package_name"], _vars["cmake_package_name"]
+        )
 
     if config.is_internal_shiboken_generator_build():
         # <install>/bin/* -> {st_package_name}/
@@ -176,6 +182,12 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
                                                    _filter=lib_exec_filters,
                                                    recursive=False,
                                                    _vars=_vars))
+
+            # Copy all CMake config directories matching the prefix
+            copy_cmake_config_dirs(
+                _vars["install_dir"], _vars["st_build_dir"],
+                _vars["st_package_name"], _vars["cmake_package_name"]
+            )
 
         # <install>/lib/lib* -> {st_package_name}/
         copydir(

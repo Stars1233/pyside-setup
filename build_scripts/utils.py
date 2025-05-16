@@ -1136,3 +1136,19 @@ def parse_modules(modules: str) -> str:
             module_sub_set += ';'
         module_sub_set += m
     return module_sub_set
+
+
+def copy_cmake_config_dirs(install_dir, st_build_dir, st_package_name, cmake_package_name):
+    """
+    Copy all CMake config directories from <install_dir>/lib/cmake whose names start with
+    <cmake_package_name> (case-insensitive) into <st_build_dir>/<st_package_name>/lib/cmake.
+    """
+    src_cmake_dir = Path(install_dir) / "lib" / "cmake"
+    dst_cmake_dir = Path(st_build_dir) / st_package_name / "lib" / "cmake"
+    dst_cmake_dir.mkdir(parents=True, exist_ok=True)
+    for src_path in src_cmake_dir.iterdir():
+        if src_path.is_dir() and src_path.name.lower().startswith(cmake_package_name.lower()):
+            dst_path = dst_cmake_dir / src_path.name
+            if dst_path.exists():
+                shutil.rmtree(dst_path)
+            shutil.copytree(src_path, dst_path)

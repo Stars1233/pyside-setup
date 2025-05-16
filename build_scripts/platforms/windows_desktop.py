@@ -12,8 +12,8 @@ from pathlib import Path
 from ..log import log
 from ..config import config
 from ..options import OPTION
-from ..utils import (copydir, copyfile, copy_qt_metatypes,
-                     download_and_extract_7z, filter_match, makefile, in_coin)
+from ..utils import (copydir, copyfile, copy_qt_metatypes, download_and_extract_7z,
+                     filter_match, makefile, in_coin, copy_cmake_config_dirs)
 from .. import PYSIDE, SHIBOKEN, PYSIDE_WINDOWS_BIN_TOOLS, PYSIDE_MULTIMEDIA_LIBS
 
 
@@ -69,6 +69,12 @@ def prepare_packages_win32(pyside_build, _vars):
             f"{{build_dir}}/{SHIBOKEN}/libshiboken", destination_dir,
             _filter=pdbs,
             recursive=False, _vars=_vars)
+
+        # Copy all CMake config directories matching the prefix
+        copy_cmake_config_dirs(
+            _vars["install_dir"], _vars["st_build_dir"],
+            _vars["st_package_name"], _vars["cmake_package_name"]
+        )
 
     if config.is_internal_shiboken_generator_build():
         # <install>/bin/*.dll -> {st_package_name}/
@@ -191,6 +197,12 @@ def prepare_packages_win32(pyside_build, _vars):
                         "libeay32.dll",
                         "ssleay32.dll"],
                     force=False, _vars=_vars)
+
+        # Copy all CMake config directories matching the prefix
+        copy_cmake_config_dirs(
+            _vars["install_dir"], _vars["st_build_dir"],
+            _vars["st_package_name"], _vars["cmake_package_name"]
+        )
 
     if config.is_internal_shiboken_module_build():
         # The C++ std library dlls need to be packaged with the
