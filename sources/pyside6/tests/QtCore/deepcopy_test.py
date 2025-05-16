@@ -12,8 +12,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QByteArray, QDate, QDateTime, QTime, QLine, QLineF
-from PySide6.QtCore import Qt, QSize, QSizeF, QRect, QRectF, QDir, QPoint, QPointF
+from PySide6.QtCore import QByteArray, QDate, QDateTime, QTime, QLine, QLineF, QTimeZone
+from PySide6.QtCore import QSize, QSizeF, QRect, QRectF, QDir, QPoint, QPointF
 try:
     from PySide6.QtCore import QUuid
     HAVE_Q = True
@@ -45,7 +45,7 @@ class QTimeDeepCopy(DeepCopyHelper, unittest.TestCase):
 
 class QDateTimeDeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
-        self.original = QDateTime(2010, 5, 18, 10, 24, 45, 223, Qt.TimeSpec.LocalTime)
+        self.original = QDateTime(2010, 5, 18, 10, 24, 45, 223, QTimeZone(QTimeZone.LocalTime))
 
 
 class QSizeDeepCopy(DeepCopyHelper, unittest.TestCase):

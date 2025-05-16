@@ -934,8 +934,11 @@
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdatetime-2"/>
     </add-function>
     <!-- PYSIDE-1735: Qt::TimeSpec is no more compatible with int -->
-    <add-function signature="QDateTime(int@year@,int@month@,int@day@,int@h@,int@m@,int@s@,int@ms@,Qt::TimeSpec@spec@=Qt::LocalTime)">
+    <add-function signature="QDateTime(int@year@,int@month@,int@day@,int@h@,int@m@,int@s@,int@ms@,Qt::TimeSpec@spec@)">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdatetime-3"/>
+    </add-function>
+    <add-function signature="QDateTime(int@year@,int@month@,int@day@,int@h@,int@m@,int@s@,int@ms@,QTimeZone@spec@=QTimeZone::LocalTime)" since="6.5">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdatetime-4"/>
     </add-function>
     <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">

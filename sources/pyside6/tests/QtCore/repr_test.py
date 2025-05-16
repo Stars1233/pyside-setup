@@ -13,8 +13,8 @@ init_test_paths(False)
 
 # for 'self.original'
 import PySide6  # noqa
-from PySide6.QtCore import QByteArray, QDate, QDateTime, QTime, QLine, QLineF
-from PySide6.QtCore import Qt, QSize, QSizeF, QRect, QRectF, QPoint, QPointF
+from PySide6.QtCore import QByteArray, QDate, QDateTime, QTime, QLine, QLineF, QTimeZone
+from PySide6.QtCore import QSize, QSizeF, QRect, QRectF, QPoint, QPointF
 try:
     from PySide6.QtCore import QUuid
     HAVE_Q = True
@@ -46,7 +46,7 @@ class QTimeReprCopy(ReprCopyHelper, unittest.TestCase):
 
 class QDateTimeReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
-        self.original = QDateTime(2010, 5, 18, 10, 24, 45, 223, Qt.TimeSpec.LocalTime)
+        self.original = QDateTime(2010, 5, 18, 10, 24, 45, 223, QTimeZone(QTimeZone.LocalTime))
 
 
 class QSizeReprCopy(ReprCopyHelper, unittest.TestCase):

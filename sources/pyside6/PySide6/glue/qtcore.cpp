@@ -535,6 +535,12 @@ QTime time(%4, %5, %6, %7);
 Shiboken::Warnings::warnDeprecated("QDateTime", "QDateTime(..., Qt::TimeSpec spec)");
 // @snippet qdatetime-3
 
+// @snippet qdatetime-4
+QDate date(%1, %2, %3);
+QTime time(%4, %5, %6, %7);
+%0 = new %TYPE(date, time, QTimeZone(%8));
+// @snippet qdatetime-4
+
 // @snippet qdatetime-topython
 QDate date = %CPPSELF.date();
 QTime time = %CPPSELF.time();
