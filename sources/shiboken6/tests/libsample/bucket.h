@@ -7,6 +7,7 @@
 #include "libsamplemacros.h"
 #include "objecttype.h"
 
+#include <atomic>
 #include <list>
 
 class ObjectType;
@@ -19,7 +20,7 @@ public:
     int pop();
     bool empty();
     void lock();
-    inline bool locked() { return m_locked; }
+    bool locked() { return m_locked.load(); }
     void unlock();
 
     virtual bool virtualBlockerMethod();
@@ -27,8 +28,7 @@ public:
 
 private:
     std::list<int> m_data;
-
-    volatile bool m_locked = false;
+    std::atomic<bool> m_locked{false};
 };
 
 #endif // BUCKET_H

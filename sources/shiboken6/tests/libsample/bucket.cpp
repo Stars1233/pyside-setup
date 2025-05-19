@@ -40,15 +40,21 @@ bool Bucket::empty()
 
 void Bucket::lock()
 {
-    m_locked = true;
-    while (m_locked) {
-        SLEEP(300);
+    bool expected = false;
+    if (m_locked.compare_exchange_strong(expected, true)) {
+        while (m_locked) {
+            SLEEP(300);
+        }
+    } else {
+        std::cerr << __FUNCTION__ << " Attempt to lock twice.\n";
     }
 }
 
 void Bucket::unlock()
 {
-    m_locked = false;
+    bool expected = true;
+    if (!m_locked.compare_exchange_strong(expected, false))
+        std::cerr << __FUNCTION__ << " Attempt to unlock twice.\n";
 }
 
 bool Bucket::virtualBlockerMethod()
