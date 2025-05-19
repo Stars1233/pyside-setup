@@ -285,6 +285,14 @@ macro(create_pyside_module)
         set(ld_prefix_var_name "LD_LIBRARY_PATH")
     endif()
 
+    # Get the full path to the directory containing the shiboken shared library
+    get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_RELEASE)
+    if(NOT _shiboken_lib_location)
+        get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION)
+    endif()
+    # Get the directory containing the library file, which is the lib directory
+    get_filename_component(SHIBOKEN_SHARED_LIBRARY_DIR "${_shiboken_lib_location}" DIRECTORY)
+
     set(ld_prefix_list "")
     list(APPEND ld_prefix_list "${pysidebindings_BINARY_DIR}/libpyside")
     list(APPEND ld_prefix_list "${pysidebindings_BINARY_DIR}/libpysideqml")
@@ -328,6 +336,7 @@ macro(create_pyside_module)
     # on the host machine (usually, unless you use some userspace qemu based mechanism).
     # TODO: Can we do something better here to still get pyi files?
     if(NOT (PYSIDE_IS_CROSS_BUILD OR DISABLE_PYI))
+        set(SHIBOKEN_PYTHON_MODULE_DIR "${PYTHON_SITE_PACKAGES}/shiboken6")
         set(generate_pyi_options ${module_NAME} --sys-path
             "${pysidebindings_BINARY_DIR}"
             "${SHIBOKEN_PYTHON_MODULE_DIR}/..")     # use the layer above shiboken6
