@@ -20,7 +20,7 @@
         <enum-type name="ParseOption" flags="ParseOptions" since="6.5"/>
         <!-- will be replaced in inject code -->
 
-        <value-type name="ParseResult"/>
+        <value-type name="ParseResult" operator-bool="yes"/>
 
         <modify-function signature="setContent(const QByteArray&amp;,bool,QString*,int*,int*)">
             <modify-argument index="3">
@@ -130,6 +130,8 @@
             </modify-argument>
             <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
         </modify-function>
+        <declare-function signature="setContent(const QByteArray&amp;@data@, QDomDocument::ParseOptions@options@=QDomDocument::ParseOption::Default)"
+                          return-type="QDomDocument::ParseResult" since="6.8" />
     </value-type>
 
     <value-type name="QDomDocumentFragment"/>

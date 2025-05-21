@@ -44,18 +44,20 @@ class QDomDocumentTest(unittest.TestCase):
 
     def testQDomDocumentSetContentWithBadXmlData(self):
         '''Sets invalid xml as the QDomDocument contents.'''
-        ok, errorStr, errorLine, errorColumn = self.dom.setContent(self.badXmlData, True)
-        self.assertFalse(ok)
-        self.assertEqual(errorStr, 'Opening and ending tag mismatch.')
-        self.assertEqual(errorLine, 4)
+        parseResult = self.dom.setContent(self.badXmlData,
+                                          QDomDocument.ParseOption.UseNamespaceProcessing)
+        self.assertFalse(parseResult)
+        self.assertEqual(parseResult.errorMessage, 'Opening and ending tag mismatch.')
+        self.assertEqual(parseResult.errorLine, 4)
 
     def testQDomDocumentSetContentWithGoodXmlData(self):
         '''Sets valid xml as the QDomDocument contents.'''
-        ok, errorStr, errorLine, errorColumn = self.dom.setContent(self.goodXmlData, True)
-        self.assertTrue(ok)
-        self.assertEqual(errorStr, '')
-        self.assertEqual(errorLine, 0)
-        self.assertEqual(errorColumn, 0)
+        parseResult = self.dom.setContent(self.goodXmlData,
+                                          QDomDocument.ParseOption.UseNamespaceProcessing)
+        self.assertTrue(parseResult)
+        self.assertEqual(parseResult.errorMessage, '')
+        self.assertEqual(parseResult.errorLine, 0)
+        self.assertEqual(parseResult.errorColumn, 0)
 
     def testQDomDocumentData(self):
         '''Checks the QDomDocument elements for the valid xml contents.'''
@@ -66,7 +68,8 @@ class QDomDocumentTest(unittest.TestCase):
             self.assertTrue(element.hasAttribute(attribute))
             self.assertEqual(element.attribute(attribute), value)
 
-        ok, errorStr, errorLine, errorColumn = self.dom.setContent(self.goodXmlData, True)
+        parseResult = self.dom.setContent(self.goodXmlData,  # noqa F:841
+                                          QDomDocument.ParseOption.UseNamespaceProcessing)
         root = self.dom.documentElement()
         self.assertEqual(root.tagName(), 'typesystem')
         checkAttribute(root, 'package', 'PySide6.QtXml')

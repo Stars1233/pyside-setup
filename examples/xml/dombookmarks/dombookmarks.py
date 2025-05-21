@@ -112,11 +112,12 @@ class XbelTree(QTreeWidget):
         self._bookmark_icon.addPixmap(style.standardPixmap(QStyle.StandardPixmap.SP_FileIcon))
 
     def read(self, device):
-        ok, errorStr, errorLine, errorColumn = self._dom_document.setContent(device, True)
-        if not ok:
+        result = self._dom_document.setContent(device,
+                                               QDomDocument.ParseOption.UseNamespaceProcessing)
+        if not result:
             QMessageBox.information(self.window(), "DOM Bookmarks",
-                                    f"Parse error at line {errorLine}, "
-                                    f"column {errorColumn}:\n{errorStr}")
+                                    f"Parse error at line {result.errorLine}, "
+                                    f"column {result.errorColumn}:\n{result.errorMessage}")
             return False
 
         root = self._dom_document.documentElement()
