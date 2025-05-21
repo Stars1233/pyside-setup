@@ -387,9 +387,9 @@ PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *pyMethodName
     // crude check for them.
     // PYSIDE-535: This macro is redefined in a compatible way in pep384
     if (PyMethod_Check(method) != 0) {
-        if (PyMethod_GET_SELF(method) != obWrapper)
+        if (PyMethod_Self(method) != obWrapper)
             return nullptr;
-        function = PyMethod_GET_FUNCTION(method);
+        function = PyMethod_Function(method);
     } else if (isCompiledMethod(method)) {
         Shiboken::AutoDecRef im_self(PyObject_GetAttr(method, PyName::im_self()));
         // Not retaining a reference inline with what PyMethod_GET_SELF does.
