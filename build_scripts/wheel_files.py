@@ -318,6 +318,10 @@ def module_QtCore() -> ModuleData:
     data.qtlib.append("libicuuc*")
     data.qtlib.append("libicuio*")
 
+    # add the include folders for libpyside binaries
+    # this is useful for downstream cmake projects like QtBridges
+    data.include.append("pyside6/*.h")
+
     return data
 
 

@@ -109,7 +109,7 @@ add_library(Shiboken6::libshiboken ALIAS libshiboken)
 target_include_directories(libshiboken PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-  $<INSTALL_INTERFACE:include/shiboken6>
+  $<INSTALL_INTERFACE:shiboken6/include>
 )
 
 if (NOT "${NUMPY_INCLUDE_DIR}" STREQUAL "")
@@ -192,7 +192,7 @@ install(FILES
         signature.h
         signature_p.h
 
-        DESTINATION include/shiboken6${shiboken6_SUFFIX})
+        DESTINATION shiboken6${shiboken6_SUFFIX}/include)
 install(TARGETS libshiboken EXPORT Shiboken6Targets
                             LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
                             ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"

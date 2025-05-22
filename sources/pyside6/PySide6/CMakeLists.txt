@@ -103,7 +103,7 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/widgets_common.xml
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/datavisualization_common.xml
         DESTINATION share/PySide6${pyside_SUFFIX}/typesystems)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/pyside6_global.h
-        DESTINATION include/${BINDING_NAME}${pyside6_SUFFIX})
+        DESTINATION ${BINDING_NAME}${pyside6_SUFFIX}/include)
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/QtAsyncio"
         DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside6_SUFFIX}")

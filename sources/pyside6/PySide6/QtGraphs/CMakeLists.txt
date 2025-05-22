@@ -96,4 +96,4 @@ create_pyside_module(NAME QtGraphs
                      DROPPED_ENTRIES QtGraphs_DROPPED_ENTRIES)
 
 install(FILES ${pyside6_SOURCE_DIR}/qtgraphs_helper.h
-        DESTINATION include/PySide6/QtGraphs)
+        DESTINATION PySide6/include/QtGraphs)

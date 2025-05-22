@@ -358,7 +358,7 @@ macro(create_pyside_module)
 
 
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PySide6/${module_NAME}/pyside6_${lower_module_name}_python.h
-            DESTINATION include/PySide6${pyside6_SUFFIX}/${module_NAME}/)
+            DESTINATION PySide6${pyside6_SUFFIX}/include/${module_NAME}/)
     file(GLOB typesystem_files ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_*.xml ${typesystem_path})
 
 #   Copy typesystem files and remove module names from the <load-typesystem> element

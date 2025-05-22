@@ -45,7 +45,7 @@ add_library(PySide6::pyside6qml ALIAS pyside6qml)
 
 target_include_directories(pyside6qml PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-  $<INSTALL_INTERFACE:include/PySide6Qml>
+  $<INSTALL_INTERFACE:PySide6Qml/include>
 )
 
 target_compile_definitions(pyside6qml PRIVATE -DQT_LEAN_HEADERS=1 -DQT_NO_KEYWORDS=1)
@@ -97,7 +97,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/PySide6QmlConfigVersion.cmake.in"
                "${CMAKE_CURRENT_BINARY_DIR}/PySide6QmlConfigVersion.cmake" @ONLY)
 
 install(FILES ${libpysideqml_HEADERS}
-        DESTINATION include/${BINDING_NAME}${pyside6qml_SUFFIX})
+        DESTINATION ${BINDING_NAME}${pyside6qml_SUFFIX}/include)
 
 install(TARGETS pyside6qml EXPORT PySide6QmlTargets
                            LIBRARY DESTINATION "${LIB_INSTALL_DIR}"

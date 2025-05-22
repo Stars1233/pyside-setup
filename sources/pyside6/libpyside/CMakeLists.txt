@@ -101,7 +101,7 @@ append_size_optimization_flags(pyside6)
 
 target_include_directories(pyside6 PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-  $<INSTALL_INTERFACE:include/PySide6>
+  $<INSTALL_INTERFACE:PySide6/include>
 )
 
 target_compile_definitions(pyside6 PRIVATE -DQT_LEAN_HEADERS=1 -DQT_NO_KEYWORDS=1)
@@ -176,7 +176,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/PySide6ConfigVersion.cmake.in"
                "${CMAKE_CURRENT_BINARY_DIR}/PySide6ConfigVersion.cmake" @ONLY)
 
 install(FILES ${libpyside_HEADERS}
-        DESTINATION include/${BINDING_NAME}${pyside6_SUFFIX})
+        DESTINATION ${BINDING_NAME}${pyside6_SUFFIX}/include)
 
 install(TARGETS pyside6 EXPORT PySide6Targets
                         LIBRARY DESTINATION "${LIB_INSTALL_DIR}"

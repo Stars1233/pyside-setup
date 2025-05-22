@@ -357,4 +357,4 @@ create_pyside_module(NAME QtGui
 
 install(FILES ${pyside6_SOURCE_DIR}/qpytextobject.h
               ${pyside6_SOURCE_DIR}/qtguihelper.h
-        DESTINATION include/PySide6/QtGui/)
+        DESTINATION PySide6/include/QtGui/)
