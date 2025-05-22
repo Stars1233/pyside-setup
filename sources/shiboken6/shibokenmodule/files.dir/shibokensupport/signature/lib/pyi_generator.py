@@ -69,12 +69,12 @@ class Formatter(Writer):
     backup = inspect.formatannotation
 
     @classmethod
-    def formatannotation(cls, annotation, base_module=None):
+    def formatannotation(cls, annotation, base_module=None, *args, **kwargs):
         if getattr(annotation, '__module__', None) == 'typing':
             # do not remove the prefix!
             return repr(annotation)
         # do the normal action.
-        return cls.backup(annotation, base_module)
+        return cls.backup(annotation, base_module, *args, **kwargs)
 
     @classmethod
     def fix_typing_prefix(cls, signature):
