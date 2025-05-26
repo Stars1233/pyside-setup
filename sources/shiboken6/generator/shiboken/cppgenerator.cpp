@@ -2120,6 +2120,24 @@ void CppGenerator::writeCustomConverterRegister(TextStream &s,
     }
 }
 
+void CppGenerator::writeTemplateCustomConverterRegister(TextStream &s,
+                                                        const AbstractMetaType &type,
+                                                        QString converter)
+{
+    auto customConversion = CustomConversion::getCustomConversion(type.typeEntry());
+    if (!customConversion || customConversion->targetToNativeConversions().isEmpty())
+        return;
+    if (converter.isEmpty())
+        converter = converterVar;
+    const QString typeName = fixedCppTypeName(type);
+    for (const auto &conv : customConversion->targetToNativeConversions()) {
+        const QString &sourceTypeName = conv.sourceTypeName();
+        QString toCpp = pythonToCppFunctionName(sourceTypeName, typeName);
+        QString isConv = convertibleToCppFunctionName(sourceTypeName, typeName);
+        writeAddPythonToCppConversion(s, converter, toCpp, isConv);
+    }
+}
+
 void CppGenerator::writeContainerConverterFunctions(TextStream &s,
                                                     const AbstractMetaType &containerType) const
 {
@@ -4438,8 +4456,7 @@ QString CppGenerator::writeContainerConverterInitialization(TextStream &s,
         s << '&' << targetTypeName << "_Type";
     }
 
-    const QString typeName = fixedCppTypeName(type);
-    s << ", " << cppToPythonFunctionName(typeName, targetTypeName) << ");\n";
+    s << ", " << cppToPythonFunctionName(fixedCppTypeName(type), targetTypeName) << ");\n";
 
     s << registerConverterName(cppSignature, converter);
     if (usePySideExtensions() && cppSignature.startsWith("const "_L1)
@@ -4448,12 +4465,7 @@ QString CppGenerator::writeContainerConverterInitialization(TextStream &s,
         s << registerConverterName(underlyingType, converter);
     }
 
-    for (const auto &conv : typeEntry->customConversion()->targetToNativeConversions()) {
-        const QString &sourceTypeName = conv.sourceTypeName();
-        QString toCpp = pythonToCppFunctionName(sourceTypeName, typeName);
-        QString isConv = convertibleToCppFunctionName(sourceTypeName, typeName);
-        writeAddPythonToCppConversion(s, converter, toCpp, isConv);
-    }
+    writeTemplateCustomConverterRegister(s, type, converter);
 
     auto typedefItPair = api.typedefTargetToName().equal_range(type.cppSignature());
     if (typedefItPair.first != typedefItPair.second) {

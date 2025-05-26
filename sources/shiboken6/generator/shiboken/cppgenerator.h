@@ -114,6 +114,9 @@ private:
     static void writeCustomConverterRegister(TextStream &s,
                                              const CustomConversionPtr &customConversion,
                                              const QString &converterVar);
+    static void writeTemplateCustomConverterRegister(TextStream &s,
+                                                     const AbstractMetaType &type,
+                                                     QString converter = {});
 
     void writeContainerConverterFunctions(TextStream &s,
                                           const AbstractMetaType &containerType) const;
