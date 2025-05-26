@@ -1387,6 +1387,12 @@ void ShibokenGenerator::processClassCodeSnip(QString &code, const GeneratorConte
     processCodeSnip(code, context.effectiveClassName());
 }
 
+void ShibokenGenerator::processTypeCheckCodeSnip(QString &code, const QString &context) const
+{
+    code.replace("%in"_L1, "pyIn"_L1);
+    processCodeSnip(code, context);
+}
+
 void ShibokenGenerator::processCodeSnip(QString &code) const
 {
     // replace "toPython" converters

@@ -3606,8 +3606,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
         typeCheck = u"PyObject_TypeCheck(%in, "_s
                     + cpythonTypeNameExt(toNative.sourceType()) + u')';
     }
-    typeCheck.replace(u"%in"_s, u"pyIn"_s);
-    processCodeSnip(typeCheck, targetType->qualifiedCppName());
+    processTypeCheckCodeSnip(typeCheck, targetType->qualifiedCppName());
     writeIsPythonConvertibleToCppFunction(s, sourceTypeName, targetTypeName, typeCheck);
 }
 
@@ -3623,18 +3622,31 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
 }
 
 void CppGenerator::writePythonToCppConversionFunction(TextStream &s,
-                                                      const AbstractMetaType &containerType,
+                                                      const AbstractMetaType &templateType,
                                                       const TargetToNativeConversion &conv) const
 {
+    // Python to C++ convertible check function.
+    QString typeName = fixedCppTypeName(templateType);
+    // Check fallback is too broad for containers that need elements of same type
+    QString typeCheck = templateType.isContainer()
+        ? conv.sourceTypeCheck() : conv.sourceTypeCheckFallback();
+    if (typeCheck.isEmpty()) {
+        typeCheck = cpythonCheckFunction(templateType);
+        if (typeCheck.isEmpty())
+            typeCheck = u"false"_s;
+        else
+            typeCheck = typeCheck + u"pyIn)"_s;
+    }
+
     // Python to C++ conversion function.
-    QString cppTypeName = getFullTypeNameWithoutModifiers(containerType);
+    QString cppTypeName = getFullTypeNameWithoutModifiers(templateType);
     QString code = conv.conversion();
     const QString line = u"auto &cppOutRef = *reinterpret_cast<"_s
         + cppTypeName + u" *>(cppOut);"_s;
     CodeSnipAbstract::prependCode(&code, line);
-    for (qsizetype i = 0; i < containerType.instantiations().size(); ++i) {
-        const AbstractMetaType &type = containerType.instantiations().at(i);
-        QString typeName = getFullTypeName(type);
+    for (qsizetype i = 0; i < templateType.instantiations().size(); ++i) {
+        const AbstractMetaType &type = templateType.instantiations().at(i);
+        QString instTypeName = getFullTypeName(type);
         // Containers of opaque containers are not handled here.
         const auto generatorArg = GeneratorArgument::fromMetaType(type);
         if (generatorArg.indirections > 0 && !type.generateOpaqueContainer()) {
@@ -3648,23 +3660,19 @@ void CppGenerator::writePythonToCppConversionFunction(TextStream &s,
                 rightCode.replace(varName, u'*' + varName);
                 code.replace(pos, code.size() - pos, rightCode);
             }
-            typeName.append(u" *"_s);
+            instTypeName.append(" *"_L1);
         }
-        code.replace(u"%OUTTYPE_"_s + QString::number(i), typeName);
+        const QString var = "%OUTTYPE_"_L1 + QString::number(i);
+        code.replace(var, instTypeName);
+        typeCheck.replace(var, instTypeName);
     }
     code.replace(u"%OUTTYPE"_s, cppTypeName);
     code.replace(u"%in"_s, u"pyIn"_s);
     code.replace(u"%out"_s, u"cppOutRef"_s);
-    QString typeName = fixedCppTypeName(containerType);
     const QString &sourceTypeName = conv.sourceTypeName();
     writePythonToCppFunction(s, code, sourceTypeName, typeName);
 
-    // Python to C++ convertible check function.
-    QString typeCheck = cpythonCheckFunction(containerType);
-    if (typeCheck.isEmpty())
-        typeCheck = u"false"_s;
-    else
-        typeCheck = typeCheck + u"pyIn)"_s;
+    processTypeCheckCodeSnip(typeCheck, typeName); // needs %OUTTYPE_[n]
     writeIsPythonConvertibleToCppFunction(s, sourceTypeName, typeName, typeCheck);
     s << '\n';
 }

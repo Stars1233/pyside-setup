@@ -161,6 +161,8 @@ protected:
     void processCodeSnip(QString &code) const;
     void processCodeSnip(QString &code, const QString &context) const;
     void processClassCodeSnip(QString &code, const GeneratorContext &context) const;
+    /// Replaces variables in a custom conversion type check snippet
+    void processTypeCheckCodeSnip(QString &code, const QString &context) const;
 
     /**
      *   Verifies if any of the function's code injections makes a call

@@ -370,7 +370,7 @@ private:
                                              const AbstractMetaType &templateType) const;
 
     void writePythonToCppConversionFunction(TextStream &s,
-                                            const AbstractMetaType &containerType,
+                                            const AbstractMetaType &templateType,
                                             const TargetToNativeConversion &conv) const;
 
     static void writeAddPythonToCppConversion(TextStream &s, const QString &converterVar,
