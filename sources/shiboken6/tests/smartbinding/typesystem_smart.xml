@@ -50,6 +50,19 @@
                             value-check-method="has_value"
                             instantiations="Integer,int">
             <include file-name="optional" location="global"/>
+            <!-- PYSIDE-3107: Generic rule constructing std::optional<T>' from 'T'. -->
+            <conversion-rule>
+                <target-to-native>
+                    <add-conversion type="Py_None">
+                    SBK_UNUSED(pyIn)
+                    %out = std::nullopt;
+                    </add-conversion>
+                    <add-conversion type="InstType" check="%CHECKTYPE[%OUTTYPE_0](%in)">
+                    %OUTTYPE_0 v = %CONVERTTOCPP[%OUTTYPE_0](%in);
+                    %out = %OUTTYPE(v);
+                    </add-conversion>
+                </target-to-native>
+            </conversion-rule>
         </smart-pointer-type>
 
     </namespace-type>

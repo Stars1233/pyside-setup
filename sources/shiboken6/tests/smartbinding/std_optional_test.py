@@ -26,6 +26,15 @@ def integer_from_value(v):
 
 class StdOptionalTests(unittest.TestCase):
 
+    def testConversionFromInt(self):
+        """PYSIDE-3107: Test whether a parameter taking a 'std::optional<int>'
+           accepts 'int'."""
+        b = StdOptionalTestBench()
+        b.setOptionalInt(43)
+        self.assertEqual(b.optionalInt().value(), 43)
+        b.setOptionalInt(None)
+        self.assertFalse(b.optionalInt().has_value())
+
     def testCInt(self):
         b = StdOptionalTestBench()
         ci = b.optionalInt()
