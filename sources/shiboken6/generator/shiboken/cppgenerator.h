@@ -364,9 +364,10 @@ private:
                                              const TargetToNativeConversion &toNative,
                                              const TypeEntryCPtr &targetType) const;
 
-    /// Writes a pair of Python to C++ conversion and check functions for instantiated container types.
+    /// Writes a pair of Python to C++ conversion and check functions for instantiated
+    /// template (smart pointer/container types).
     void writePythonToCppConversionFunctions(TextStream &s,
-                                             const AbstractMetaType &containerType) const;
+                                             const AbstractMetaType &templateType) const;
 
     void writePythonToCppConversionFunction(TextStream &s,
                                             const AbstractMetaType &containerType,

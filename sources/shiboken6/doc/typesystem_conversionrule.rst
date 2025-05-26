@@ -12,9 +12,13 @@ The **conversion-rule** tag specifies how a **primitive-type**, a **container-ty
 or a **value-type** may be converted to and from the native C++ language types to the
 target language types (see also :ref:`user-defined-type-conversion`).
 
-It is a child of the :ref:`container-type`, :ref:`primitive-type` or
-:ref:`value-type` and may contain :ref:`native-to-target` or
-:ref:`native-to-target` child nodes.
+It may be a child of the :ref:`container-type` and :ref:`primitive-type` nodes,
+where conversions have to be provided for both directions using the
+:ref:`native-to-target` and :ref:`target-to-native` child nodes.
+
+It may also appear as a child of :ref:`value-type` or :ref:`smart-pointer-type`
+where additional conversions from other target language types can be provided
+using the :ref:`target-to-native` child node.
 
 .. code-block:: xml
 
@@ -70,8 +74,9 @@ an input value an does what's needed to convert it to the output value.
     </conversion-rule>
 
 Use the replace node to modify the template code.
-Notice that the generator must provide type system variables for the input
-and output values and types, namely **%in**, **%out**, **%INTYPE** and
+Notice that the generator provides type system variables for the input
+and output values and types (see :ref:`converter_variables_and_functions`).
+The most important ones are **%in**, **%out**, **%INTYPE** and
 **%OUTTYPE**. In the case of container types, **%INTYPE** refers to the
 full container type (e.g. **"list<int>"**) and **%INTYPE_0**, **%INTYPE_1**,
 **%INTYPE_#**, should be replaced by the types used in the container template

@@ -2154,6 +2154,7 @@ public:
     QString m_resetMethod;
     SmartPointerTypeEntry::Instantiations m_instantiations;
     TypeEntryCList m_excludedInstantiations;
+    CustomConversionPtr m_customConversion;
     TypeSystem::SmartPointerType m_smartPointerType;
 };
 
@@ -2304,6 +2305,24 @@ QString SmartPointerTypeEntry::getTargetName(const AbstractMetaType &metaType) c
             name.remove(0, colonPos + 2);
     }
     return fixSmartPointerName(name);
+}
+
+bool SmartPointerTypeEntry::hasCustomConversion() const
+{
+    S_D(const SmartPointerTypeEntry);
+    return bool(d->m_customConversion);
+}
+
+void SmartPointerTypeEntry::setCustomConversion(const CustomConversionPtr &customConversion)
+{
+    S_D(SmartPointerTypeEntry);
+    d->m_customConversion = customConversion;
+}
+
+CustomConversionPtr SmartPointerTypeEntry::customConversion() const
+{
+    S_D(const SmartPointerTypeEntry);
+    return d->m_customConversion;
 }
 
 // ----------------- NamespaceTypeEntry

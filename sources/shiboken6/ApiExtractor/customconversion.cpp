@@ -5,6 +5,7 @@
 #include "containertypeentry.h"
 #include "customtypenentry.h"
 #include "primitivetypeentry.h"
+#include "smartpointertypeentry.h"
 #include "valuetypeentry.h"
 
 #include <QtCore/qdebug.h>
@@ -139,6 +140,8 @@ CustomConversionPtr CustomConversion::getCustomConversion(const TypeEntryCPtr &t
         return std::static_pointer_cast<const ContainerTypeEntry>(type)->customConversion();
     if (type->isValue())
         return std::static_pointer_cast<const ValueTypeEntry>(type)->customConversion();
+    if (type->isSmartPointer())
+        return std::static_pointer_cast<const SmartPointerTypeEntry>(type)->customConversion();
     return {};
 }
 

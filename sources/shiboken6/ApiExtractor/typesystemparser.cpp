@@ -2348,9 +2348,10 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
     if (topElement != StackElement::ModifyArgument
         && topElement != StackElement::ValueTypeEntry
         && topElement != StackElement::PrimitiveTypeEntry
-        && topElement != StackElement::ContainerTypeEntry) {
+        && topElement != StackElement::ContainerTypeEntry
+        && topElement != StackElement::SmartPointerTypeEntry) {
         m_error = u"Conversion rules can only be specified for argument modification, "
-                   "value-type, primitive-type or container-type conversion."_s;
+                   "value-type, primitive-type, or container-type or smartpointer-type conversion."_s;
         return false;
     }
 
@@ -2415,6 +2416,9 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
         std::static_pointer_cast<ContainerTypeEntry>(top->entry)->setCustomConversion(customConversion);
     else if (top->entry->isValue())
         std::static_pointer_cast<ValueTypeEntry>(top->entry)->setCustomConversion(customConversion);
+    else if (top->entry->isSmartPointer())
+        std::static_pointer_cast<SmartPointerTypeEntry>(top->entry)->setCustomConversion(customConversion);
+
     customConversionsForReview.append(customConversion);
     return true;
 }

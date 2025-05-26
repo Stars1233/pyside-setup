@@ -3618,13 +3618,15 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
     writeIsPythonConvertibleToCppFunction(s, sourceTypeName, targetTypeName, typeCheck);
 }
 
-void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const AbstractMetaType &containerType) const
+void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
+                                                       const AbstractMetaType &templateType) const
 {
-    Q_ASSERT(containerType.typeEntry()->isContainer());
-    const auto cte = std::static_pointer_cast<const ContainerTypeEntry>(containerType.typeEntry());
-    const auto customConversion = cte->customConversion();
-    for (const auto &conv : customConversion->targetToNativeConversions())
-        writePythonToCppConversionFunction(s, containerType, conv);
+    const auto customConversion = CustomConversion::getCustomConversion(templateType.typeEntry());
+    if (customConversion) {
+        const auto &conversions = customConversion->targetToNativeConversions();
+        for (const auto &conv : conversions)
+            writePythonToCppConversionFunction(s, templateType, conv);
+    }
 }
 
 void CppGenerator::writePythonToCppConversionFunction(TextStream &s,

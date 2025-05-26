@@ -729,7 +729,8 @@ The ``smart pointer`` type node indicates that the given class is a smart pointe
 and requires inserting calls to **getter** to access the pointeee.
 Currently, the usage is limited to function return values.
 **ref-count-method** specifies the name of the method used to do reference counting.
-It is a child of the :ref:`typesystem_details` node or other type nodes.
+It is a child of the :ref:`typesystem_details` node or other type nodes
+and may contain :ref:`conversion-rule` nodes.
 
 The *optional* attribute **instantiations** specifies for which instantiations
 of the smart pointer wrappers will be generated (comma-separated list).
