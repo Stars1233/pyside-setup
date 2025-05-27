@@ -3595,14 +3595,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
     writePythonToCppFunction(s, code, sourceTypeName, targetTypeName);
 
     // Python to C++ convertible check function.
-    QString typeCheck = toNative.sourceTypeCheck();
-    if (typeCheck.isEmpty()) {
-        QString pyTypeName = toNative.sourceTypeName();
-        if (pyTypeName == u"Py_None" || pyTypeName == u"PyNone")
-            typeCheck = u"%in == Py_None"_s;
-        else if (pyTypeName == u"SbkObject")
-            typeCheck = u"Shiboken::Object::checkType(%in)"_s;
-    }
+    QString typeCheck = toNative.sourceTypeCheckFallback();
     if (typeCheck.isEmpty()) {
         if (!toNative.sourceType() || toNative.sourceType()->isPrimitive()) {
             QString m;

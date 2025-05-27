@@ -25,7 +25,10 @@ public:
     void setSourceType(const TypeEntryCPtr &sourceType);
     bool isCustomType() const;
     QString sourceTypeName() const;
+    // Check as specified in the type system
     QString sourceTypeCheck() const;
+    // Check with fallback bases on sourceType
+    QString sourceTypeCheckFallback() const;
     QString conversion() const;
     void setConversion(const QString &conversion);
 
