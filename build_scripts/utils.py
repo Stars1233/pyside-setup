@@ -1144,11 +1144,40 @@ def copy_cmake_config_dirs(install_dir, st_build_dir, st_package_name, cmake_pac
     <cmake_package_name> (case-insensitive) into <st_build_dir>/<st_package_name>/lib/cmake.
     """
     src_cmake_dir = Path(install_dir) / "lib" / "cmake"
+    wheel_cmake_dir = Path(install_dir) / "lib" / "wheels" / "cmake"
     dst_cmake_dir = Path(st_build_dir) / st_package_name / "lib" / "cmake"
     dst_cmake_dir.mkdir(parents=True, exist_ok=True)
+
     for src_path in src_cmake_dir.iterdir():
         if src_path.is_dir() and src_path.name.lower().startswith(cmake_package_name.lower()):
             dst_path = dst_cmake_dir / src_path.name
             if dst_path.exists():
                 shutil.rmtree(dst_path)
-            shutil.copytree(src_path, dst_path)
+            dst_path.mkdir(parents=True)
+
+            # check for wheel target files
+            wheel_path = wheel_cmake_dir / src_path.name
+            wheel_targets_exist = {}
+            if wheel_path.exists():
+                for item in wheel_path.iterdir():
+                    if item.is_file() and re.search(r"Targets(-.*)?\.cmake$", item.name):
+                        base_name = item.name.split('Targets')[0]
+                        if base_name in ("PySide6", "Shiboken6"):
+                            wheel_targets_exist[base_name] = True
+                            # Copy wheel target file
+                            shutil.copy2(str(item), str(dst_path / item.name))
+
+            # Copy remaining files
+            for item in src_path.iterdir():
+                if item.is_file():
+                    skip_file = False
+                    if re.search(r"Targets(-.*)?\.cmake$", item.name):
+                        base_name = item.name.split('Targets')[0]
+                        is_pyside_shiboken = base_name in ("PySide6", "Shiboken6")
+                        if is_pyside_shiboken and base_name in wheel_targets_exist:
+                            skip_file = True
+
+                    if not skip_file:
+                        shutil.copy2(str(item), str(dst_path / item.name))
+                elif item.is_dir():
+                    shutil.copytree(str(item), str(dst_path / item.name))

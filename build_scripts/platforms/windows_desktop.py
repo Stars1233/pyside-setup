@@ -70,12 +70,6 @@ def prepare_packages_win32(pyside_build, _vars):
             _filter=pdbs,
             recursive=False, _vars=_vars)
 
-        # Copy all CMake config directories matching the prefix
-        copy_cmake_config_dirs(
-            _vars["install_dir"], _vars["st_build_dir"],
-            _vars["st_package_name"], _vars["cmake_package_name"]
-        )
-
     if config.is_internal_shiboken_generator_build():
         # <install>/bin/*.dll -> {st_package_name}/
         copydir(
@@ -197,12 +191,6 @@ def prepare_packages_win32(pyside_build, _vars):
                         "libeay32.dll",
                         "ssleay32.dll"],
                     force=False, _vars=_vars)
-
-        # Copy all CMake config directories matching the prefix
-        copy_cmake_config_dirs(
-            _vars["install_dir"], _vars["st_build_dir"],
-            _vars["st_package_name"], _vars["cmake_package_name"]
-        )
 
     if config.is_internal_shiboken_module_build():
         # The C++ std library dlls need to be packaged with the
@@ -462,3 +450,10 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
     if copy_clang or platform.machine() == "ARM64":
         # Qt CI is using dynamic libclang with arm config.
         pyside_build.prepare_standalone_clang(is_win=True)
+
+    # Copy CMake config files
+    if config.is_internal_shiboken_module_build() or config.is_internal_pyside_build():
+        copy_cmake_config_dirs(
+            _vars["install_dir"], _vars["st_build_dir"],
+            _vars["st_package_name"], _vars["cmake_package_name"]
+        )

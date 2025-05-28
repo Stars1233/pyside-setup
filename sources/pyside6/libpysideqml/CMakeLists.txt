@@ -91,3 +91,11 @@ install(TARGETS pyside6qml EXPORT PySide6Targets
                            LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
                            ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
                            RUNTIME DESTINATION bin)
+
+# install-tree or relocatable package installation
+set_target_properties(pyside6qml PROPERTIES
+                      VERSION ${PYSIDE_SO_VERSION})
+install(TARGETS pyside6qml EXPORT PySide6WheelTargets
+                           LIBRARY DESTINATION "PySide6"
+                           ARCHIVE DESTINATION "PySide6"
+                           RUNTIME DESTINATION "PySide6")
