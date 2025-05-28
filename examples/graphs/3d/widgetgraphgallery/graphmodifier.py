@@ -336,7 +336,7 @@ class GraphModifier(QObject):
             self.changeDataMode(False)
 
     @Slot(bool)
-    def setDataModeToCustom(self, enabled):
+    def setDataModeToModel(self, enabled):
         if enabled:
             self.changeDataMode(True)
 

@@ -6,17 +6,47 @@ import sys
 
 from pathlib import Path
 
-from PySide6.QtCore import QFile, QIODevice, QObject
-from PySide6.QtGraphs import (QBar3DSeries, QCategory3DAxis, QValue3DAxis)
-
-from variantbardataproxy import VariantBarDataProxy
-from variantbardatamapping import VariantBarDataMapping
-from variantdataset import VariantDataSet
+from PySide6.QtCore import QFile, QIODevice, QObject, QRangeModel
+from PySide6.QtGraphs import (QBar3DSeries, QCategory3DAxis, QValue3DAxis, QItemModelBarDataProxy)
 
 
 MONTHS = ["January", "February", "March", "April",
           "May", "June", "July", "August", "September", "October",
           "November", "December"]
+
+
+def read_data(file_path):
+    """Return a tuple of data matrix/first year."""
+    dataFile = QFile(file_path)
+    if not dataFile.open(QIODevice.OpenModeFlag.ReadOnly | QIODevice.OpenModeFlag.Text):
+        print("Unable to open data file:", dataFile.fileName(), file=sys.stderr)
+        return None, None
+
+    last_year = -1
+    first_year = -1
+    result = []
+    data = dataFile.readAll().data().decode("utf8")
+    for line in data.split("\n"):
+        if line and not line.startswith("#"):  # Ignore comments
+            tokens = line.split(",")
+            # Each line has three data items: Year, month, and
+            # rainfall value
+            if len(tokens) >= 3:
+                # Store year and month as strings, and rainfall value
+                # as double into a variant data item and add the item to
+                # the item list.
+                year = int(tokens[0].strip())
+                month = int(tokens[1].strip())
+                value = float(tokens[2].strip())
+                if year != last_year:
+                    if first_year == -1:
+                        first_year = last_year
+                    result.append([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+                    last_year = year
+                yearly_values = result[len(result) - 1]
+                yearly_values[month - 1] = value
+
+    return result, first_year
 
 
 class RainfallData(QObject):
@@ -27,9 +57,7 @@ class RainfallData(QObject):
         self._rowCount = 0
         self._years = []
         self._numericMonths = []
-        self._proxy = VariantBarDataProxy()
         self._mapping = None
-        self._dataSet = None
         self._series = QBar3DSeries()
         self._valueAxis = QValue3DAxis()
         self._rowAxis = QCategory3DAxis()
@@ -41,10 +69,13 @@ class RainfallData(QObject):
 
         self._columnCount = len(self._numericMonths)
 
-        self.updateYearsList(2010, 2022)
-
-        # Create proxy and series
-        self._proxy = VariantBarDataProxy()
+        file_path = Path(__file__).resolve().parent / "data" / "raindata.txt"
+        values, first_year = read_data(file_path)
+        assert (values)
+        self.updateYearsList(first_year, first_year + len(values))
+        self._model = QRangeModel(values, self)
+        self._proxy = QItemModelBarDataProxy(self._model)
+        self._proxy.setUseModelCategories(True)
         self._series = QBar3DSeries(self._proxy)
 
         self._series.setItemLabelFormat("%.1f mm")
@@ -68,8 +99,6 @@ class RainfallData(QObject):
         self._colAxis.setTitleVisible(True)
         self._valueAxis.setTitleVisible(True)
 
-        self.addDataSet()
-
     def customSeries(self):
         return self._series
 
@@ -87,40 +116,3 @@ class RainfallData(QObject):
         for i in range(start, end + 1):
             self._years.append(str(i))
         self._rowCount = len(self._years)
-
-    def addDataSet(self):
-        # Create a new variant data set and data item list
-        self._dataSet = VariantDataSet()
-        itemList = []
-
-        # Read data from a data file into the data item list
-        file_path = Path(__file__).resolve().parent / "data" / "raindata.txt"
-        dataFile = QFile(file_path)
-        if dataFile.open(QIODevice.OpenModeFlag.ReadOnly | QIODevice.OpenModeFlag.Text):
-            data = dataFile.readAll().data().decode("utf8")
-            for line in data.split("\n"):
-                if line and not line.startswith("#"):  # Ignore comments
-                    tokens = line.split(",")
-                    # Each line has three data items: Year, month, and
-                    # rainfall value
-                    if len(tokens) >= 3:
-                        # Store year and month as strings, and rainfall value
-                        # as double into a variant data item and add the item to
-                        # the item list.
-                        newItem = []
-                        newItem.append(tokens[0].strip())
-                        newItem.append(tokens[1].strip())
-                        newItem.append(float(tokens[2].strip()))
-                        itemList.append(newItem)
-        else:
-            print("Unable to open data file:", dataFile.fileName(),
-                  file=sys.stderr)
-
-        # Add items to the data set and set it to the proxy
-        self._dataSet.addItems(itemList)
-        self._proxy.setDataSet(self._dataSet)
-
-        # Create new mapping for the data and set it to the proxy
-        self._mapping = VariantBarDataMapping(0, 1, 2,
-                                              self._years, self._numericMonths)
-        self._proxy.setMapping(self._mapping)

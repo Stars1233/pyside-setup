@@ -180,9 +180,9 @@ class BarGraph(QObject):
         modeGroup = QButtonGroup(self._barsWidget)
         modeWeather = QRadioButton("Temperature Data", self._barsWidget)
         modeWeather.setChecked(True)
-        modeCustomProxy = QRadioButton("Custom Proxy Data", self._barsWidget)
+        modelProxy = QRadioButton("Model Proxy Data", self._barsWidget)
         modeGroup.addButton(modeWeather)
-        modeGroup.addButton(modeCustomProxy)
+        modeGroup.addButton(modelProxy)
 
         vLayout.addWidget(QLabel("Rotate horizontally"))
         vLayout.addWidget(rotationSliderX, 0, Qt.AlignmentFlag.AlignTop)
@@ -215,7 +215,7 @@ class BarGraph(QObject):
         vLayout.addWidget(QLabel("Axis label rotation"))
         vLayout.addWidget(axisLabelRotationSlider, 0, Qt.AlignmentFlag.AlignTop)
         vLayout.addWidget(modeWeather, 0, Qt.AlignmentFlag.AlignTop)
-        vLayout.addWidget(modeCustomProxy, 1, Qt.AlignmentFlag.AlignTop)
+        vLayout.addWidget(modelProxy, 1, Qt.AlignmentFlag.AlignTop)
 
         modifier = GraphModifier(barsGraph, self)
         modifier.changeTheme(themeList.currentIndex())
@@ -260,7 +260,7 @@ class BarGraph(QObject):
         axisLabelRotationSlider.valueChanged.connect(modifier.changeLabelRotation)
 
         modeWeather.toggled.connect(modifier.setDataModeToWeather)
-        modeCustomProxy.toggled.connect(modifier.setDataModeToCustom)
+        modelProxy.toggled.connect(modifier.setDataModeToModel)
         modeWeather.toggled.connect(seriesCheckBox.setEnabled)
         modeWeather.toggled.connect(rangeList.setEnabled)
         modeWeather.toggled.connect(axisTitlesVisibleCB.setEnabled)
