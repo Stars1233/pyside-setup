@@ -10,6 +10,10 @@ if (NOT TARGET PySide6::pyside6)
     include("${CMAKE_CURRENT_LIST_DIR}/PySide6Targets.cmake")
 endif()
 
+# set static variables
+set(PYSIDE_PYTHON_CONFIG_SUFFIX "@PYTHON_CONFIG_SUFFIX@")
+set(PYSIDE_SO_VERSION "@pyside6_library_so_version@")
+
 # Set relocatable variables.
 set_and_check(PYSIDE_PYTHONPATH "@PACKAGE_PYSIDE_PYTHONPATH@")
 set_and_check(PYSIDE_TYPESYSTEMS "@PACKAGE_PYSIDE_TYPESYSTEMS@")
