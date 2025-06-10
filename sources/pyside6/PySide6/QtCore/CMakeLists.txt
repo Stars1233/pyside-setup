@@ -19,9 +19,6 @@ if(ENABLE_WIN)
     set(SPECIFIC_OS_FILES
       ${QtCore_GEN_DIR}/qwineventnotifier_wrapper.cpp
     )
-else()
-    set(SPECIFIC_OS_FILES
-      ${QtCore_GEN_DIR}/qprocess_unixprocessparameters_wrapper.cpp)
 endif()
 
 set(QtCore_SRC
@@ -130,8 +127,6 @@ ${QtCore_GEN_DIR}/qpersistentmodelindex_wrapper.cpp
 ${QtCore_GEN_DIR}/qpluginloader_wrapper.cpp
 ${QtCore_GEN_DIR}/qpoint_wrapper.cpp
 ${QtCore_GEN_DIR}/qpointf_wrapper.cpp
-${QtCore_GEN_DIR}/qprocess_wrapper.cpp
-${QtCore_GEN_DIR}/qprocessenvironment_wrapper.cpp
 ${QtCore_GEN_DIR}/qpropertyanimation_wrapper.cpp
 ${QtCore_GEN_DIR}/qrandomgenerator64_wrapper.cpp
 ${QtCore_GEN_DIR}/qrandomgenerator_wrapper.cpp
@@ -234,6 +229,23 @@ if("sharedmemory" IN_LIST QtCore_disabled_features)
     message(STATUS "Qt${QT_MAJOR_VERSION}Core: Dropping QSharedMemory")
 else()
     list(APPEND QtCore_SRC ${QtCore_GEN_DIR}/qsharedmemory_wrapper.cpp)
+endif()
+
+if("process" IN_LIST QtCore_disabled_features)
+    list(APPEND QtCore_DROPPED_ENTRIES QProcess)
+    message(STATUS "Qt${QT_MAJOR_VERSION}Core: Dropping QProcess")
+else()
+    list(APPEND QtCore_SRC ${QtCore_GEN_DIR}/qprocess_wrapper.cpp)
+    if(NOT ENABLE_WIN)
+        list(APPEND QtCore_SRC ${QtCore_GEN_DIR}/qprocess_unixprocessparameters_wrapper.cpp)
+    endif()
+endif()
+
+if("processenvironment" IN_LIST QtCore_disabled_features)
+    list(APPEND QtCore_DROPPED_ENTRIES QProcessEnvironment)
+    message(STATUS "Qt${QT_MAJOR_VERSION}Core: Dropping QProcessEnvironment")
+else()
+    list(APPEND QtCore_SRC ${QtCore_GEN_DIR}/qprocessenvironment_wrapper.cpp)
 endif()
 
 configure_file("${QtCore_SOURCE_DIR}/QtCore_global.post.h.in"

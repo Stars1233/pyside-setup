@@ -2669,7 +2669,9 @@
 
     <?if !windows?>
     <enum-type name="UnixProcessFlag" flags="UnixProcessFlags" since="6.6"/>
-    <value-type name="UnixProcessParameters" since="6.6"/>
+    <value-type name="UnixProcessParameters">
+      <configuration condition="QT_CONFIG(process)"/>
+    </value-type>
     <?endif?>
 
     <modify-function signature="waitForStarted(int)" allow-thread="yes"/>
