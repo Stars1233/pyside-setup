@@ -1,0 +1,83 @@
+#!/usr/bin/python
+# Copyright (C) 2025 The Qt Company Ltd.
+# SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
+
+'''Test cases for QEnum and QFlags within Qt Widgets Designer'''
+
+import os
+import sys
+import unittest
+
+from enum import Enum, Flag
+
+from pathlib import Path
+sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
+from init_paths import init_test_paths
+init_test_paths(False)
+
+from PySide6.QtCore import QObject, Property, QEnum, QFlag
+
+
+class CustomWidgetBase(QObject):
+    @QEnum
+    class TestEnum(Enum):
+        EnumValue0 = 0
+        EnumValue1 = 1
+        EnumValue2 = 2
+        EnumValue3 = 3
+
+    @QFlag
+    class TestFlag(Flag):
+        FlagValue0 = 1
+        FlagValue1 = 2
+        FlagValue2 = 4
+        FlagValue3 = 8
+
+
+class CustomWidget(CustomWidgetBase):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._testEnum = CustomWidget.TestEnum.EnumValue1
+        self._testFlag = (CustomWidget.TestFlag.FlagValue0
+                          | CustomWidget.TestFlag.FlagValue1)
+
+    def testEnum(self):
+        return self._testEnum
+
+    def setTestEnum(self, new_val):
+        self._testEnum = new_val
+
+    def getTestFlag(self):
+        return self._testFlag
+
+    def setTestFlag(self, new_val):
+        self._testFlag = new_val
+
+    testEnum = Property(CustomWidgetBase.TestEnum, testEnum, setTestEnum)
+    testFlag = Property(CustomWidgetBase.TestFlag, getTestFlag, setTestFlag)
+
+
+class TestDesignerEnum(unittest.TestCase):
+    """PYSIDE-2840: Test whether a custom widget with decorated enum/flag properties
+       allows for modifying the values from C++."""
+
+    def testEnum(self):
+        cw = CustomWidget()
+        # Emulate Qt Widgets Designer setting a property
+        cw.setProperty("testEnum", 3)
+        self.assertEqual(cw.testEnum, CustomWidget.TestEnum.EnumValue3)
+        # Emulate uic generated code
+        cw.setProperty("testEnum", CustomWidgetBase.TestEnum.EnumValue2)
+        self.assertEqual(cw.testEnum, CustomWidget.TestEnum.EnumValue2)
+
+        # Emulate Qt Widgets Designer setting a property
+        cw.setProperty("testFlag", 12)
+        self.assertEqual(cw.testFlag, (CustomWidget.TestFlag.FlagValue2
+                                       | CustomWidget.TestFlag.FlagValue3))
+        # Emulate uic generated code
+        cw.setProperty("testFlag", CustomWidgetBase.TestFlag.FlagValue1)
+        self.assertEqual(cw.testFlag, CustomWidget.TestFlag.FlagValue1)
+
+
+if __name__ == '__main__':
+    unittest.main()

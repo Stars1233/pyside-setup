@@ -63,8 +63,8 @@ public:
     int addProperty(const QByteArray &property, PyObject *data);
     void addInfo(const QByteArray &key, const  QByteArray &value);
     void addInfo(const QMap<QByteArray, QByteArray> &info);
-    void addEnumerator(const char *name, bool flag, bool scoped,
-                       const MetaObjectBuilder::EnumValues &entries);
+    QMetaEnumBuilder addEnumerator(const char *name, bool flag, bool scoped,
+                                   const MetaObjectBuilder::EnumValues &entries);
     void removeProperty(int index);
     const QMetaObject *update();
 
@@ -384,8 +384,9 @@ void MetaObjectBuilder::addEnumerator(const char *name, bool flag, bool scoped,
     m_d->addEnumerator(name, flag, scoped, entries);
 }
 
-void MetaObjectBuilderPrivate::addEnumerator(const char *name, bool flag, bool scoped,
-                                             const MetaObjectBuilder::EnumValues &entries)
+QMetaEnumBuilder
+    MetaObjectBuilderPrivate::addEnumerator(const char *name, bool flag, bool scoped,
+                                            const MetaObjectBuilder::EnumValues &entries)
 {
     auto *builder = ensureBuilder();
     int have_already = builder->indexOfEnumerator(name);
@@ -398,6 +399,7 @@ void MetaObjectBuilderPrivate::addEnumerator(const char *name, bool flag, bool s
     for (const auto &item : entries)
         enumbuilder.addKey(item.first, item.second);
     m_dirty = true;
+    return enumbuilder;
 }
 
 void MetaObjectBuilderPrivate::removeProperty(int index)
@@ -686,6 +688,11 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
             auto ivalue = PyLong_AsSsize_t(value);
             entries.push_back(std::make_pair(ckey, int(ivalue)));
         }
-        addEnumerator(name, isFlag, true, entries);
+        auto enumBuilder = addEnumerator(name, isFlag, true, entries);
+        QByteArray qualifiedName = ensureBuilder()->className() + "::"_ba + name;
+        auto metaType =
+            PySide::QEnum::createGenericEnumMetaType(qualifiedName,
+                                                     reinterpret_cast<PyTypeObject *>(obEnumType));
+        enumBuilder.setMetaType(metaType);
     }
 }

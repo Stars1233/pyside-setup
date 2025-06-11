@@ -4,6 +4,7 @@
 #include "pysideqenum.h"
 
 #include <autodecref.h>
+#include <sbkconverter.h>
 #include <sbkenum.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
@@ -11,6 +12,8 @@
 #include <map>
 
 #include <QtCore/qmetatype.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qlist.h>
 
 ///////////////////////////////////////////////////////////////
 //
@@ -100,6 +103,59 @@ static bool is_module_code()
 }
 
 } // extern "C"
+
+// Helper code for dynamically creating QMetaType's for @QEnum
+
+template <class UnderlyingInt>
+static void defaultCtr(const QtPrivate::QMetaTypeInterface *, void *addr)
+{
+    auto *i = reinterpret_cast<UnderlyingInt *>(addr);
+    *i = 0;
+}
+
+template <class UnderlyingInt>
+static void debugOp(const QtPrivate::QMetaTypeInterface *mti, QDebug &debug, const void *addr)
+{
+    const auto value = *reinterpret_cast<const UnderlyingInt *>(addr);
+    QDebugStateSaver saver(debug);
+    debug << mti->name << '(';
+    if constexpr (std::is_unsigned<UnderlyingInt>()) {
+        debug << Qt::showbase << Qt::hex;
+    } else {
+        if (value >= 0)
+            debug << Qt::showbase << Qt::hex;
+    }
+    debug << value << ')';
+}
+
+template <class UnderlyingInt>
+QMetaType createEnumMetaTypeHelper(const QByteArray &name)
+{
+    auto *mti = new QtPrivate::QMetaTypeInterface {
+        1,       // revision
+        ushort(std::alignment_of<UnderlyingInt>()),
+        sizeof(UnderlyingInt),
+        uint(QMetaType::fromType<UnderlyingInt>().flags() | QMetaType::IsEnumeration),
+        {},      // typeId
+        nullptr, // metaObjectFn
+        qstrdup(name.constData()),
+        defaultCtr<UnderlyingInt>,
+        nullptr, // copyCtr
+        nullptr, // moveCtr
+        nullptr, // dtor
+        QtPrivate::QEqualityOperatorForType<UnderlyingInt>::equals,
+        QtPrivate::QLessThanOperatorForType<UnderlyingInt>::lessThan,
+        debugOp<UnderlyingInt>,
+        nullptr, // dataStreamOut
+        nullptr, // dataStreamIn
+        nullptr  // legacyRegisterOp
+    };
+
+    QMetaType metaType(mti);
+
+    metaType.id(); // enforce registration
+    return metaType;
+}
 
 namespace PySide::QEnum {
 
@@ -210,7 +266,57 @@ QByteArray getTypeName(PyTypeObject *type)
         ? result : QByteArray{};
 }
 
-} // namespace Shiboken::Enum
+using GenericEnumType = int;
+
+using GenericEnumTypeList = QList<PyTypeObject *>;
+
+Q_GLOBAL_STATIC(GenericEnumTypeList, genericEnumTypeList)
+
+} // namespace PySide::QEnum
+
+extern "C"
+{
+
+static void genericEnumPythonToCpp(PyObject *pyIn, void *cppOut)
+{
+    const auto value = static_cast<PySide::QEnum::GenericEnumType>(Shiboken::Enum::getValue(pyIn));
+    *reinterpret_cast<int *>(cppOut) = value;
+}
+
+static PythonToCppFunc isGenericEnumToCppConvertible(PyObject *pyIn)
+{
+
+    if (PySide::QEnum::genericEnumTypeList()->contains(Py_TYPE(pyIn)))
+        return genericEnumPythonToCpp;
+    return {};
+}
+
+static PyObject *genericEnumCppToPython(PyTypeObject *pyType, const void *cppIn)
+{
+    const auto value = *reinterpret_cast<const PySide::QEnum::GenericEnumType *>(cppIn);
+    return Shiboken::Enum::newItem(pyType, value);
+}
+
+} // extern "C"
+
+namespace PySide::QEnum
+{
+
+QMetaType createGenericEnumMetaType(const QByteArray &name, PyTypeObject *pyType)
+{
+    SbkConverter *converter = Shiboken::Conversions::createConverter(pyType,
+                                                                     genericEnumCppToPython);
+    Shiboken::Conversions::addPythonToCppValueConversion(converter,
+                                                         genericEnumPythonToCpp,
+                                                         isGenericEnumToCppConvertible);
+    Shiboken::Conversions::registerConverterName(converter, name.constData());
+    Shiboken::Enum::setTypeConverter(pyType, converter, nullptr);
+
+    genericEnumTypeList()->append(pyType);
+    return createEnumMetaTypeHelper<GenericEnumType>(name);
+}
+
+} // namespace PySide::QEnum
 
 //
 ///////////////////////////////////////////////////////////////
