@@ -246,6 +246,7 @@ ENDIF()
 set(GENERATOR_EXTRA_FLAGS
     ${SHIBOKEN_GENERATOR_EXTRA_FLAGS}
     ${debug_level}
+    "--platform=${CMAKE_SYSTEM_NAME}"
     ${UNOPTIMIZE}
     --generator-set=shiboken
     --enable-parent-ctor-heuristic
