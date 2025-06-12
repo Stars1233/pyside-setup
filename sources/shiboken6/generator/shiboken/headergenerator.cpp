@@ -187,7 +187,7 @@ void HeaderGenerator::writeWrapperClass(TextStream &s,
     }
     s << "#include <sbkpython.h>\n\n#include <array>\n";
 
-    s << "namespace Shiboken { class AutoDecRef; class GilState; }\n\n";
+    s << "namespace Shiboken { struct AutoDecRef; class GilState; }\n\n";
 
     if (usePySideExtensions() && isQObject(metaClass))
         s << "namespace PySide { class DynamicQMetaObject; }\n\n";
