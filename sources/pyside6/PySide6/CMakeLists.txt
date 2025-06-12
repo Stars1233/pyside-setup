@@ -4,9 +4,6 @@
 project(pyside6)
 
 # Configure include based on platform
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/global.h.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/pyside6_global.h" @ONLY)
-
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_config.py.in"
@@ -51,7 +48,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/deprecated.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/deprecated.py" COPYONLY)
 
 # now compile all modules.
-file(READ "${CMAKE_CURRENT_BINARY_DIR}/pyside6_global.h" pyside6_global_contents)
+file(READ "${CMAKE_CURRENT_LIST_DIR}/pyside6_global.h" pyside6_global_contents)
 
 foreach(shortname IN LISTS all_module_shortnames)
     set(name "Qt${QT_MAJOR_VERSION}${shortname}")
@@ -105,7 +102,7 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/widgets_common.xml
         DESTINATION share/PySide6${pyside_SUFFIX}/typesystems)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/datavisualization_common.xml
         DESTINATION share/PySide6${pyside_SUFFIX}/typesystems)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pyside6_global.h
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/pyside6_global.h
         DESTINATION include/${BINDING_NAME}${pyside6_SUFFIX})
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/QtAsyncio"

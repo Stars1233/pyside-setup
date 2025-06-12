@@ -15,7 +15,7 @@ set(QtCore_static_sources
     "${pyside6_SOURCE_DIR}/qiopipe.h"
 )
 
-if(ENABLE_WIN)
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(SPECIFIC_OS_FILES
       ${QtCore_GEN_DIR}/qwineventnotifier_wrapper.cpp
     )
@@ -236,7 +236,7 @@ if("process" IN_LIST QtCore_disabled_features)
     message(STATUS "Qt${QT_MAJOR_VERSION}Core: Dropping QProcess")
 else()
     list(APPEND QtCore_SRC ${QtCore_GEN_DIR}/qprocess_wrapper.cpp)
-    if(NOT ENABLE_WIN)
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
         list(APPEND QtCore_SRC ${QtCore_GEN_DIR}/qprocess_unixprocessparameters_wrapper.cpp)
     endif()
 endif()

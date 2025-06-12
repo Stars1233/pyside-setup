@@ -68,6 +68,6 @@ foreach(shortname IN LISTS all_module_shortnames)
 endforeach()
 
 #platform specific
-if (ENABLE_MAC)
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     add_subdirectory(mac)
 endif ()

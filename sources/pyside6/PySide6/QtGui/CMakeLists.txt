@@ -67,13 +67,13 @@ ${QtGui_GEN_DIR}/qshadercode_wrapper.cpp
 ${QtGui_GEN_DIR}/qshaderkey_wrapper.cpp
 )
 
-if (ENABLE_WIN)
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     list(APPEND QtGui_SRC_RHI
          ${QtGui_GEN_DIR}/qrhid3d11initparams_wrapper.cpp
          ${QtGui_GEN_DIR}/qrhid3d11nativehandles_wrapper.cpp
          ${QtGui_GEN_DIR}/qrhid3d12initparams_wrapper.cpp
          ${QtGui_GEN_DIR}/qrhid3d12nativehandles_wrapper.cpp)
-elseif (ENABLE_MAC)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     list(APPEND QtGui_SRC_RHI
          ${QtGui_GEN_DIR}/qrhimetalinitparams_wrapper.cpp)
 endif()

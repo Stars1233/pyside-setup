@@ -143,7 +143,7 @@ if (FULLDOCSBUILD)
     configure_file("pyside-config.qdocconf.in" "${config_docconf}" @ONLY)
 
     set(global_header "${pyside6_BINARY_DIR}/qdoc.h")
-    file(READ "${pyside6_BINARY_DIR}/pyside6_global.h" docHeaderContents)
+    file(READ "${CMAKE_CURRENT_LIST_DIR}/../PySide6/pyside6_global.h" docHeaderContents)
     file(WRITE ${global_header} "${docHeaderContents}")
 
     set(global_typesystem "${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml")

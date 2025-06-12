@@ -3,16 +3,6 @@
 
 #include <QtCore/qnamespace.h>
 
-#if @ENABLE_MAC@
-#  define Q_OS_MAC
-#endif
-#if @ENABLE_WIN@
-#  define Q_OS_WIN
-#endif
-#if @ENABLE_UNIX@
-#  define Q_OS_UNIX
-#endif
-
 // There are symbols in Qt that exist in Debug but
 // not in release
 #define QT_NO_DEBUG
