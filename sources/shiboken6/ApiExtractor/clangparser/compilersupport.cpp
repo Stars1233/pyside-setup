@@ -86,12 +86,18 @@ Platform platform() { return _platform; }
 bool setPlatform(const QString &name)
 {
     bool result = true;
-    if (name == u"windows")
-        _platform = Platform::Windows;
-    else if (name == u"darwin")
-        _platform = Platform::macOS;
-    else if (name == u"unix")
+    if (name.compare("unix"_L1, Qt::CaseInsensitive) == 0)
         _platform = Platform::Unix;
+    else if (name.compare("linux"_L1, Qt::CaseInsensitive) == 0)
+        _platform = Platform::Linux;
+    if (name.compare("windows"_L1, Qt::CaseInsensitive) == 0)
+        _platform = Platform::Windows;
+    else if (name.compare("darwin"_L1, Qt::CaseInsensitive) == 0)
+        _platform = Platform::macOS;
+    else if (name.compare("android"_L1, Qt::CaseInsensitive) == 0)
+        _platform = Platform::Android;
+    else if (name.compare("ios"_L1, Qt::CaseInsensitive) == 0)
+        _platform = Platform::iOS;
     else
         result = false;
     return result;

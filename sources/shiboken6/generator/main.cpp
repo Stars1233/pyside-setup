@@ -193,8 +193,10 @@ bool CommonOptionsParser::handleOption(const QString &key, const QString &value,
         return true;
     }
     if (key == u"platform") {
-        if (!clang::setPlatform(value))
-            throw Exception(u"Invalid value \""_s + value + u"\" passed to --platform"_s);
+        if (!clang::setPlatform(value)) {
+            qCWarning(lcShiboken, "Invalid value \"%s\" passed to --platform, defaulting to host.",
+                      qPrintable(value));
+        }
         return true;
     }
 

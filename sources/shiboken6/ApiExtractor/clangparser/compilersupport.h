@@ -26,8 +26,11 @@ enum class Compiler {
 
 enum class Platform {
     Unix,
+    Linux,
     Windows,
-    macOS
+    macOS,
+    Android,
+    iOS
 };
 
 namespace clang {

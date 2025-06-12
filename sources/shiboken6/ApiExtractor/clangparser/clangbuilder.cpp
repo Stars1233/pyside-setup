@@ -827,6 +827,7 @@ BuilderPrivate::SpecialSystemHeader
     }
 
     switch (clang::platform()) {
+    case Platform::Linux:
     case Platform::Unix:
         if (fileName == u"/usr/include/stdlib.h"
             || baseName == u"types.h"

@@ -6,6 +6,7 @@
 #include "addedfunction.h"
 #include "messages.h"
 #include "typesystemparser_p.h"
+#include "clangparser/compilersupport.h"
 #include "complextypeentry.h"
 #include "constantvaluetypeentry.h"
 #include "containertypeentry.h"
@@ -433,10 +434,32 @@ void TypeDatabase::addRequiredTargetImport(const QString& moduleName)
         d->m_requiredTargetImports << moduleName;
 }
 
+static QStringList platformKeywords()
+{
+    static constexpr auto unixKeyword = "unix"_L1;
+    static constexpr auto linuxKeyword = "linux"_L1;
+    switch (clang::platform()) {
+    case Platform::Unix:
+        return {unixKeyword};
+    case Platform::Linux:
+        return {unixKeyword, linuxKeyword};
+    case Platform::Windows:
+        return {"windows"_L1};
+    case Platform::macOS:
+        return {unixKeyword, "darwin"_L1};
+    case Platform::Android:
+        return {unixKeyword, linuxKeyword, "android"_L1};
+    case Platform::iOS:
+        return {unixKeyword, "ios"_L1};
+    }
+    return {};
+}
+
 QStringList TypeDatabase::typesystemKeywords() const
 {
-    QStringList result = d->m_typesystemKeywords;
-    for (const auto &d : d->m_dropTypeEntries)
+    QStringList result = d->m_typesystemKeywords + platformKeywords();
+
+    for (const auto &d : std::as_const(d->m_dropTypeEntries))
         result.append("no_"_L1 + d);
 
     switch (clang::emulatedCompilerLanguageLevel()) {
