@@ -45,6 +45,11 @@ struct SbkArrayConverter;
  */
 using CppToPythonFunc = PyObject *(*)(const void *);
 
+/** Same as CppToPythonFunc, but additionally receives the 'PyTypeObject *'.
+  * This is handy for some converters, namely enumeration converters or
+  * dynamic user-defined converters that invoke the type object. */
+using CppToPythonWithTypeFunc = PyObject *(*)(PyTypeObject *, const void *);
+
 /**
  *  This function converts a Python object to a C++ value, it may be
  *  a pointer, value, class, container or primitive type, passed via
@@ -126,6 +131,7 @@ LIBSHIBOKEN_API SbkConverter *createConverter(PyTypeObject *type,
  *  \returns            A new type converter.
  */
 LIBSHIBOKEN_API SbkConverter *createConverter(PyTypeObject *type, CppToPythonFunc toPythonFunc);
+LIBSHIBOKEN_API SbkConverter *createConverter(PyTypeObject *type, CppToPythonWithTypeFunc toPythonFunc);
 
 LIBSHIBOKEN_API void deleteConverter(SbkConverter *converter);
 

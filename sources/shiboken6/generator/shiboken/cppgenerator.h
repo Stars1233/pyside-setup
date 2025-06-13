@@ -334,7 +334,7 @@ private:
 
     /// Writes a C++ to Python conversion function.
     void writeCppToPythonFunction(TextStream &s, const QString &code, const QString &sourceTypeName,
-                                  const QString &targetTypeName = {}) const;
+                                  const QString &targetTypeName = {}, bool withType = false) const;
     void writeCppToPythonFunction(TextStream &s, const CustomConversionPtr &customConversion) const;
     void writeCppToPythonFunction(TextStream &s, const AbstractMetaType &containerType) const;
     /// Main target type name of a container (for naming the functions).

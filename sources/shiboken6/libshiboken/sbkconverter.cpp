@@ -187,6 +187,7 @@ SbkConverter *createConverterObject(PyTypeObject *type,
 
     converter->pointerToPython = pointerToPythonFunc;
     converter->copyToPython = copyToPythonFunc;
+    converter->copyToPythonWithType = nullptr;
 
     if (toCppPointerCheckFunc && toCppPointerConvFunc)
         converter->toCppPointerConversion = std::make_pair(toCppPointerCheckFunc, toCppPointerConvFunc);
@@ -212,6 +213,13 @@ SbkConverter *createConverter(PyTypeObject *type,
 SbkConverter *createConverter(PyTypeObject *type, CppToPythonFunc toPythonFunc)
 {
     return createConverterObject(type, nullptr, nullptr, nullptr, toPythonFunc);
+}
+
+SbkConverter *createConverter(PyTypeObject *type, CppToPythonWithTypeFunc toPythonFunc)
+{
+    auto *result = createConverterObject(type, nullptr, nullptr, nullptr, nullptr);
+    result->copyToPythonWithType = toPythonFunc;
+    return result;
 }
 
 void deleteConverter(SbkConverter *converter)
@@ -310,12 +318,13 @@ static inline PyObject *CopyCppToPython(const SbkConverter *converter, const voi
 {
     if (!cppIn)
         Py_RETURN_NONE;
-    if (!converter->copyToPython) {
-        warning(PyExc_RuntimeWarning, 0, "CopyCppToPython(): SbkConverter::copyToPython is null for \"%s\".",
-                converter->pythonType->tp_name);
-        Py_RETURN_NONE;
-    }
-    return converter->copyToPython(cppIn);
+    if (converter->copyToPythonWithType != nullptr)
+        return converter->copyToPythonWithType(converter->pythonType, cppIn);
+    if (converter->copyToPython != nullptr)
+        return converter->copyToPython(cppIn);
+    warning(PyExc_RuntimeWarning, 0, "CopyCppToPython(): SbkConverter::copyToPython is null for \"%s\".",
+            converter->pythonType->tp_name);
+    Py_RETURN_NONE;
 }
 
 PyObject *copyToPython(PyTypeObject *type, const void *cppIn)
@@ -865,18 +874,23 @@ PyTypeObject *getPythonTypeObject(const char *typeName)
     return getPythonTypeObject(getConverter(typeName));
 }
 
+static bool hasCopyToPythonFunc(const SbkConverter *converter)
+{
+    return converter->copyToPython != nullptr || converter->copyToPythonWithType != nullptr;
+}
+
 bool pythonTypeIsValueType(const SbkConverter *converter)
 {
     // Unlikely to happen but for multi-inheritance SbkObjs
     // the converter is not defined, hence we need a default return.
     if (!converter)
         return false;
-    return converter->pointerToPython && converter->copyToPython;
+    return converter->pointerToPython && hasCopyToPythonFunc(converter);
 }
 
 bool pythonTypeIsObjectType(const SbkConverter *converter)
 {
-    return converter->pointerToPython && !converter->copyToPython;
+    return converter->pointerToPython && !hasCopyToPythonFunc(converter);
 }
 
 bool pythonTypeIsWrapperType(const SbkConverter *converter)

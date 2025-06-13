@@ -50,6 +50,10 @@ struct SbkConverter
      *  wrapper assigned for it.
      */
     CppToPythonFunc copyToPython;
+    /** Same as copyToPython, but additionally receives the 'PyTypeObject *'.
+      * Both functions are checked.
+      * FIXME PYSIDE 7: Add PyTypeObject parameter to CppToPythonFunc? */
+    CppToPythonWithTypeFunc copyToPythonWithType;
     /**
      *  This is a special case of a Python to C++ conversion. It returns
      *  the underlying C++ pointer of a Python wrapper passed as parameter

@@ -1743,9 +1743,9 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMeta
     c << "using IntType = std::underlying_type_t<" << cppTypeName << ">;\n"
          "const auto castCppIn = IntType(*reinterpret_cast<const "
         << cppTypeName << " *>(cppIn));\n" << "return "
-        << "Shiboken::Enum::newItem(" << enumPythonType << ", castCppIn);\n";
+        << "Shiboken::Enum::newItem(pyType, castCppIn);\n";
     s << '\n';
-    writeCppToPythonFunction(s, c.toString(), typeName, enumConverterPythonType);
+    writeCppToPythonFunction(s, c.toString(), typeName, enumConverterPythonType, true);
     s << '\n';
 
     auto flags = enumType->flags();
@@ -3422,15 +3422,17 @@ QString CppGenerator::convertibleToCppFunctionName(const TargetToNativeConversio
 }
 
 void CppGenerator::writeCppToPythonFunction(TextStream &s, const QString &code, const QString &sourceTypeName,
-                                            const QString &targetTypeName) const
+                                            const QString &targetTypeName, bool withType) const
 {
 
     QString prettyCode = code;
     const QString funcName = cppToPythonFunctionName(sourceTypeName, targetTypeName);
     processCodeSnip(prettyCode, funcName);
 
-    s << "static PyObject *" << funcName
-        << "(const void *cppIn)\n{\n" << indent << prettyCode
+    s << "static PyObject *" << funcName <<'(';
+    if (withType)
+        s << "PyTypeObject *pyType, ";
+    s << "const void *cppIn)\n{\n" << indent << prettyCode
         << ensureEndl << outdent << "}\n";
 }
 
