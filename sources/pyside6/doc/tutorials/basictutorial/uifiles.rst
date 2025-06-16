@@ -283,13 +283,47 @@ the custom widget should be visible in the widget box.
 For advanced usage, it is also possible to pass the function an implementation
 of the class QDesignerCustomWidgetInterface instead of the type to
 :meth:`addCustomWidget()<PySide6.QtDesigner.QPyDesignerCustomWidgetCollection.addCustomWidget>`.
-This is shown in taskmenuextension example, where a custom context menu
+This is shown in the :ref:`example_designer_taskmenuextension`, where a custom context menu
 is registered for the custom widget. The example is a port of the
 corresponding C++
 `Task Menu Extension Example <https://doc.qt.io/qt-6/qtdesigner-taskmenuextension-example.html>`_ .
 
 .. _QDesignerCustomWidgetCollectionInterface: https://doc.qt.io/qt-6/qdesignercustomwidgetcollectioninterface.html
 .. _QDesignerCustomWidgetInterface: https://doc.qt.io/qt-6/qdesignercustomwidgetinterface.html
+
+Writing Custom Widgets
+++++++++++++++++++++++
+
+For properties to become visible in *Qt Widgets Designer*, they need to be
+declared using :class:`PySide6.QtCore.Property`.
+
+Enums and flag types need to appear within the class and be decorated using
+:deco:`PySide6.QtCore.QEnum` or :deco:`PySide6.QtCore.QFlag`, respectively.
+This requires extracting a base class for them since otherwise, the enum type
+is not known when specifying :class:`PySide6.QtCore.Property`:
+
+.. code-block:: python
+
+     class CustomWidgetBase(QObject):
+         @QEnum
+         class TestEnum(Enum):
+             EnumValue0 = 0
+             EnumValue1 = 1
+
+
+     class CustomWidget(CustomWidgetBase):
+         def __init__(self, parent=None):
+             super().__init__(parent)
+             self._testEnum = CustomWidget.TestEnum.EnumValue1
+
+         def testEnum(self):
+             return self._testEnum
+
+         def setTestEnum(self, new_val):
+             self._testEnum = new_val
+
+         testEnum = Property(CustomWidgetBase.TestEnum, testEnum, setTestEnum)
+
 
 Troubleshooting the Qt Widgets Designer Plugin
 ++++++++++++++++++++++++++++++++++++++++++++++
