@@ -90,7 +90,7 @@ bool setPlatform(const QString &name)
         _platform = Platform::Unix;
     else if (name.compare("linux"_L1, Qt::CaseInsensitive) == 0)
         _platform = Platform::Linux;
-    if (name.compare("windows"_L1, Qt::CaseInsensitive) == 0)
+    else if (name.compare("windows"_L1, Qt::CaseInsensitive) == 0)
         _platform = Platform::Windows;
     else if (name.compare("darwin"_L1, Qt::CaseInsensitive) == 0)
         _platform = Platform::macOS;
