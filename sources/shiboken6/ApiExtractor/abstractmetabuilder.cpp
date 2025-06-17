@@ -459,6 +459,21 @@ FileModelItem AbstractMetaBuilderPrivate::buildDom(QByteArrayList arguments,
             level = clang::emulatedCompilerLanguageLevel();
         arguments.prepend(QByteArrayLiteral("-std=")
                           + clang::languageLevelOption(level));
+        // Add target for qsystemdetection.h to set the right Q_OS_ definitions
+        if (clang::isCrossCompilation() && !clang::hasTargetOption(arguments)) {
+            const auto triplet = clang::targetTripletForPlatform(clang::platform(),
+                                                                 clang::architecture(),
+                                                                 clang::compiler());
+            if (triplet.isEmpty()) {
+                qCWarning(lcShiboken,
+                          "Unable to determine a cross compilation target triplet (%d/%d/%d).",
+                          int(clang::platform()), int(clang::architecture()), int(clang::compiler()));
+            } else {
+                arguments.prepend("--target="_ba + triplet);
+                const auto msg = "Setting clang target: "_L1 + QLatin1StringView(triplet);
+                ReportHandler::addGeneralMessage(msg);
+            }
+        }
     }
     FileModelItem result = clang::parse(arguments, addCompilerSupportArguments,
                                         level, clangFlags, builder)

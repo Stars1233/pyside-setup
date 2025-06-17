@@ -677,13 +677,29 @@ void setTargetTriple(const QString &t)
     _targetTriple = t;
 }
 
-void setTargetTriple(const QStringList &clangOptions)
+bool isCrossCompilation()
 {
-    static constexpr auto targetOption = "--target="_L1;
-    auto targetOptionPred = [](const QString &o) { return o.startsWith(targetOption); };
-    const auto it = std::find_if(clangOptions.cbegin(), clangOptions.cend(), targetOptionPred);
-    if (it != clangOptions.cend())
-        _targetTriple = it->sliced(targetOption.size());
+    return platform() != hostPlatform() || architecture() != hostArchitecture()
+           || compiler() != hostCompiler();
+}
+
+static const char targetOptionC[] = "--target=";
+
+static inline bool isTargetOption(const QByteArray &o)
+{
+    return o.startsWith(targetOptionC);
+}
+
+static bool isTargetArchOption(const QByteArray &o)
+{
+    return isTargetOption(o)
+           || o.startsWith("-march=") || o.startsWith("-meabi");
+}
+
+bool hasTargetOption(const QByteArrayList &clangOptions)
+{
+    return std::any_of(clangOptions.cbegin(), clangOptions.cend(),
+                       isTargetArchOption);
 }
 
 } // namespace clang

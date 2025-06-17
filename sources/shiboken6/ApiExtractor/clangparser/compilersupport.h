@@ -73,8 +73,12 @@ unsigned pointerSize(); // (bit)
 void setPointerSize(unsigned ps); // Set by parser
 
 QString targetTriple();
-void setTargetTriple(const QStringList &clangOptions); // Set from cmd line before parsing
 void setTargetTriple(const QString &t); // Updated by clang parser while parsing
+
+bool isCrossCompilation();
+
+// Are there any options specifying a target
+bool hasTargetOption(const QByteArrayList &clangOptions);
 
 // Parse a triplet "x86_64-unknown-linux-gnu" (for testing). Note the
 // compiler might not be present and defaults to host
