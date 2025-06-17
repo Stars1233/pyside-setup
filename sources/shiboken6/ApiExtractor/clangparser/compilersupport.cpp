@@ -29,6 +29,20 @@ using namespace Qt::StringLiterals;
 
 namespace clang {
 
+// The command line options set
+enum OptionSetFlag : unsigned
+{
+    CompilerOption = 0x1,
+    CompilerPathOption = 0x2,
+    PlatformOption = 0x4,
+    ArchitectureOption = 0x8
+};
+
+Q_DECLARE_FLAGS(OptionsSet, OptionSetFlag)
+Q_DECLARE_OPERATORS_FOR_FLAGS(OptionsSet)
+
+static OptionsSet setOptions;
+
 QVersionNumber libClangVersion()
 {
     return QVersionNumber(CINDEX_VERSION_MAJOR, CINDEX_VERSION_MINOR);
@@ -67,6 +81,7 @@ bool parseCompiler(QStringView name, Compiler *c)
 
 bool setCompiler(const QString &name)
 {
+    setOptions.setFlag(CompilerOption);
     return parseCompiler(name, &_compiler);
 }
 
@@ -83,6 +98,7 @@ const QString &compilerPath()
 
 void setCompilerPath(const QString &name)
 {
+    setOptions.setFlag(CompilerPathOption);
     _compilerPath = name;
 }
 
@@ -134,6 +150,7 @@ static bool parsePlatform(QStringView name, Platform *p)
 
 bool setPlatform(const QString &name)
 {
+    setOptions.setFlag(PlatformOption);
     return parsePlatform(name, &_platform);
 }
 
@@ -189,6 +206,7 @@ Architecture architecture()
 
 bool setArchitecture(const QString &name)
 {
+    setOptions.setFlag(ArchitectureOption);
     auto newArchitecture = parseArchitecture(name);
     const bool result = newArchitecture != Architecture::Other;
     if (result)
@@ -700,6 +718,39 @@ bool hasTargetOption(const QByteArrayList &clangOptions)
 {
     return std::any_of(clangOptions.cbegin(), clangOptions.cend(),
                        isTargetArchOption);
+}
+
+void setHeuristicOptions(const QByteArrayList &clangOptions)
+{
+    // Figure out compiler type from the binary set
+    if (!setOptions.testFlag(CompilerOption) && setOptions.testFlag(CompilerPathOption)) {
+        const QString name = QFileInfo(_compilerPath).baseName().toLower();
+        if (name.contains("clang"_L1))
+            _compiler = Compiler::Clang;
+        else if (name.contains("cl"_L1))
+            _compiler = Compiler::Msvc;
+        else if (name.contains("gcc"_L1) || name.contains("g++"_L1))
+            _compiler = Compiler::Gpp;
+    }
+
+    // Figure out platform/arch from "--target" triplet
+    if (!setOptions.testFlag(PlatformOption) && !setOptions.testFlag(ArchitectureOption)) {
+        auto it = std::find_if(clangOptions.cbegin(), clangOptions.cend(), isTargetOption);
+        if (it != clangOptions.cend()) {
+            const QString triplet = QLatin1StringView(it->sliced(qstrlen(targetOptionC)));
+            Architecture arch{};
+            Platform platform{};
+            Compiler comp{};
+            if (parseTriplet(triplet, &arch, &platform, &comp)) {
+                if (!setOptions.testFlag(ArchitectureOption))
+                    _architecture = arch;
+                if (!setOptions.testFlag(PlatformOption))
+                    _platform = platform;
+            } else {
+                qCWarning(lcShiboken, "Unable to parse triplet \"%s\".", qPrintable(triplet));
+            }
+        }
+    }
 }
 
 } // namespace clang

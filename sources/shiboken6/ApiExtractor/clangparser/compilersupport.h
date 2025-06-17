@@ -80,6 +80,10 @@ bool isCrossCompilation();
 // Are there any options specifying a target
 bool hasTargetOption(const QByteArrayList &clangOptions);
 
+// Unless the platform/architecture/compiler options were set, try to find
+// values based on a --target option in clangOptions and the compiler path.
+void setHeuristicOptions(const QByteArrayList &clangOptions);
+
 // Parse a triplet "x86_64-unknown-linux-gnu" (for testing). Note the
 // compiler might not be present and defaults to host
 bool parseTriplet(QStringView name, Architecture *a, Platform *p, Compiler *c);
