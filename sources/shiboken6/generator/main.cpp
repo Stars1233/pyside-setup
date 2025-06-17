@@ -436,5 +436,7 @@ int wmain(int argc, wchar_t *argv[])
         std::cerr << appName << " error: " << e.what() << '\n';
         ex = EXIT_FAILURE;
     }
+    if (ex != 0 && qEnvironmentVariableIsSet("COIN_UNIQUE_JOB_ID"))
+        ReportHandler::dumpGeneralLogFile();
     return ex;
 }
