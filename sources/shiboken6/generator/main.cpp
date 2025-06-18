@@ -84,7 +84,7 @@ OptionDescriptions CommonOptionsParser::optionDescriptions()
         {u"documentation-only"_s,
          u"Do not generates any code, just the documentation"_s},
         {u"compiler=<type>"_s,
-         u"Emulated compiler type (g++, msvc, clang)"_s},
+         u"Emulated compiler type (g++/gnu, msvc, clang). CMAKE_CXX_COMPILER_ID may be used."_s},
         {u"platform=<name>"_s,
          u"Emulated platform (windows, darwin, unix)"_s},
         {u"compiler-path=<file>"_s,
@@ -184,8 +184,10 @@ bool CommonOptionsParser::handleOption(const QString &key, const QString &value,
         return true;
     }
     if (key == u"compiler") {
-        if (!clang::setCompiler(value))
-            throw Exception(u"Invalid value \""_s + value + u"\" passed to --compiler"_s);
+        if (!clang::setCompiler(value)) {
+            qCWarning(lcShiboken, "Invalid compiler \"%s\" passed to --compiler, defaulting to host.",
+                      qPrintable(value));
+        }
         return true;
     }
     if (key == u"compiler-path") {

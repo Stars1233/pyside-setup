@@ -46,11 +46,11 @@ Compiler compiler() { return _compiler; }
 bool setCompiler(const QString &name)
 {
     bool result = true;
-    if (name == u"msvc")
+    if (name.compare("msvc"_L1, Qt::CaseInsensitive) == 0)
         _compiler = Compiler::Msvc;
-    else if (name == u"g++")
+    else if (name.compare("g++"_L1, Qt::CaseInsensitive) == 0 || name.compare("gnu"_L1, Qt::CaseInsensitive) == 0)
         _compiler = Compiler::Gpp;
-    else if (name == u"clang")
+    else if (name.compare("clang"_L1, Qt::CaseInsensitive) == 0)
         _compiler = Compiler::Clang;
     else
         result = false;
