@@ -23,8 +23,12 @@ else()
     message(STATUS "Tests will be generated using the protected hack!")
     set(GENERATOR_EXTRA_FLAGS )
 endif()
-list(APPEND GENERATOR_EXTRA_FLAGS ${SHIBOKEN_GENERATOR_EXTRA_FLAGS} ${debug_level}
-                                  "--platform=${CMAKE_SYSTEM_NAME}")
+list(APPEND GENERATOR_EXTRA_FLAGS ${SHIBOKEN_GENERATOR_EXTRA_FLAGS} ${debug_level})
+if (CMAKE_CROSSCOMPILING)
+    list(APPEND GENERATOR_EXTRA_FLAGS
+         "--platform=${CMAKE_SYSTEM_NAME}" "--arch=${CMAKE_SYSTEM_PROCESSOR}"
+         "--compiler-path=${CMAKE_CXX_COMPILER}")
+endif()
 
 add_subdirectory(minimalbinding)
 if(NOT DEFINED MINIMAL_TESTS)

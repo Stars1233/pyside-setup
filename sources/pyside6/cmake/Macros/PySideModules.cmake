@@ -210,27 +210,18 @@ macro(create_pyside_module)
     # comes as a default requirement for building PySide6. As such for
     # cross-compiling in linux, we use the clang compiler from the installed
     # libclang itself.
-    if(CMAKE_ANDROID_ARCH_LLVM_TRIPLE AND CMAKE_HOST_APPLE)
+    if (CMAKE_CROSSCOMPILING)
+        list(APPEND shiboken_command "--platform=${CMAKE_SYSTEM_NAME}"
+                                     "--arch=${CMAKE_SYSTEM_PROCESSOR}"
+                                     "--compiler-path=${CMAKE_CXX_COMPILER}")
+    endif()
+
+    if(CMAKE_ANDROID_ARCH_LLVM_TRIPLE)
         message(STATUS "Building for Android with arch ${CMAKE_ANDROID_ARCH_LLVM_TRIPLE}")
-        list(APPEND shiboken_command "--clang-option=--target=${CMAKE_ANDROID_ARCH_LLVM_TRIPLE}")
-
-        # CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX does not contain the ANDROID_PLATFORM i.e. it ends with
-        # the form 'aarch64-linux-android-'. Remove the last '-' and add the corresponding clang
-        # based on ANDROID_PLATFORM making it 'aarch64-linux-android26-clang++'
-
-        # Get the length of the string
-        string(LENGTH "${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}" _length)
-
-        # Subtract 1 from the length to get the characters till '-'
-        math(EXPR _last_index "${_length} - 1")
-
-        # Get the substring from the start to the character before the last one
-        string(SUBSTRING "${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}" 0 "${_last_index}"
-               SHIBOKEN_ANDROID_COMPILER_PREFIX)
-
-        # use the compiler from the Android NDK
+        # CMAKE_CXX_COMPILER is the generic clang++; for finding the include paths,
+        # it needs "--target".
         list(APPEND shiboken_command
-            "--compiler-path=${SHIBOKEN_ANDROID_COMPILER_PREFIX}${CMAKE_ANDROID_API}-clang++")
+             "--compiler-argument=--target=${CMAKE_ANDROID_ARCH_LLVM_TRIPLE}")
     endif()
 
     if(CMAKE_HOST_APPLE)
