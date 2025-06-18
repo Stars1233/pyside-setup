@@ -86,7 +86,11 @@ OptionDescriptions CommonOptionsParser::optionDescriptions()
         {u"compiler=<type>"_s,
          u"Emulated compiler type (g++/gnu, msvc, clang). CMAKE_CXX_COMPILER_ID may be used."_s},
         {u"platform=<name>"_s,
-         u"Emulated platform (windows, darwin, unix)"_s},
+         u"Emulated platform (android, darwin, ios, linux, unix, windows)."
+          " CMAKE_SYSTEM_NAME may be used."_s},
+        {u"arch=<name>"_s,
+         u"Emulated architecture (x86_64, arm64, i586)."
+          " CMAKE_SYSTEM_PROCESSOR may be used."_s},
         {u"compiler-path=<file>"_s,
          u"Path to the compiler for determining builtin include paths"_s},
         {u"compiler-argument=<argument>"_s,
@@ -204,6 +208,13 @@ bool CommonOptionsParser::handleOption(const QString &key, const QString &value,
     if (key == u"platform") {
         if (!clang::setPlatform(value)) {
             qCWarning(lcShiboken, "Invalid value \"%s\" passed to --platform, defaulting to host.",
+                      qPrintable(value));
+        }
+        return true;
+    }
+    if (key == u"arch") {
+        if (!clang::setArchitecture(value)) {
+            qCWarning(lcShiboken, "Invalid architecture \"%s\" passed to --arch  defaulting to host.",
                       qPrintable(value));
         }
         return true;

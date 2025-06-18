@@ -33,6 +33,14 @@ enum class Platform {
     iOS
 };
 
+enum class Architecture {
+    Other,
+    X64,
+    X86,
+    Arm64,
+    Arm32
+};
+
 namespace clang {
 QVersionNumber libClangVersion();
 
@@ -55,6 +63,9 @@ void addCompilerArgument(const QString &arg);
 
 Platform platform();
 bool setPlatform(const QString &name);
+
+Architecture architecture();
+bool setArchitecture(const QString &name);
 
 unsigned pointerSize(); // (bit)
 void setPointerSize(unsigned ps); // Set by parser

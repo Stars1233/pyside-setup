@@ -13,6 +13,7 @@
 #include <QtCore/qdir.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qfileinfo.h>
+#include <QtCore/qlibraryinfo.h>
 #include <QtCore/qprocess.h>
 #include <QtCore/qstandardpaths.h>
 #include <QtCore/qstringlist.h>
@@ -22,6 +23,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <string_view>
 
 using namespace Qt::StringLiterals;
 
@@ -133,6 +135,65 @@ static bool parsePlatform(QStringView name, Platform *p)
 bool setPlatform(const QString &name)
 {
     return parsePlatform(name, &_platform);
+}
+
+static Architecture hostArchitecture()
+{
+    // src/corelib/global/archdetect.cpp, "Qt 6.9.2 (x86_64-little_endian-lp64..."
+    std::string_view build = QLibraryInfo::build();
+    auto startPos = build.find('(');
+    auto dashPos = build.find('-');
+    if (startPos != std::string_view::npos && dashPos != std::string_view::npos) {
+        ++startPos;
+        build = build.substr(startPos, dashPos - startPos);
+        if (build == "x86_64")
+            return Architecture::X64;
+        if (build == "i386")
+            return Architecture::X86;
+        if (build == "arm64")
+            return Architecture::Arm64;
+        if (build == "arm")
+            return Architecture::Arm32;
+    }
+    return Architecture::Other;
+}
+
+// from CMAKE_SYSTEM_PROCESSOR or target triplet
+static Architecture parseArchitecture(QStringView a)
+{
+    if (a == "AMD64"_L1 || a == "IA64"_L1 // Windows
+        || a == "x86_64"_L1)
+        return Architecture::X64;
+    if (a.compare("x86"_L1, Qt::CaseInsensitive) == 0
+        || a.compare("i386"_L1, Qt::CaseInsensitive) == 0
+        || a.compare("i486"_L1, Qt::CaseInsensitive) == 0
+        || a.compare("i586"_L1, Qt::CaseInsensitive) == 0
+        || a.compare("i686"_L1, Qt::CaseInsensitive) == 0) {
+        return Architecture::X86;
+    }
+    if (a.startsWith("armv7"_L1, Qt::CaseInsensitive))
+        return Architecture::Arm32;
+    if (a.startsWith("arm"_L1, Qt::CaseInsensitive)
+        || a.startsWith("aarch64"_L1, Qt::CaseInsensitive)) {
+        return Architecture::Arm64;
+    }
+    return Architecture::Other;
+}
+
+static Architecture _architecture = hostArchitecture();
+
+Architecture architecture()
+{
+    return _architecture;
+}
+
+bool setArchitecture(const QString &name)
+{
+    auto newArchitecture = parseArchitecture(name);
+    const bool result = newArchitecture != Architecture::Other;
+    if (result)
+        _architecture = newArchitecture;
+    return result;
 }
 
 // 3/2024: Use a recent MSVC2022 for libclang 18.X

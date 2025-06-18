@@ -211,8 +211,13 @@ Options
 ``compiler-argument=<argument>``
     Add an argument for the compiler for determining builtin include paths
 
-``--platform=<file>``
-    Emulated platform (windows, darwin, unix)
+``--platform=<name>``
+    Emulated platform (``android``, ``darwin``, ``ios``, ``linux``, ``unix``, ``windows``).
+    ``CMAKE_SYSTEM_NAME`` may be used.
+
+``--arch=<name>``
+    Emulated architecture (``x86_64``, ``arm64``, ``i586``).
+    ``CMAKE_SYSTEM_PROCESSOR`` may be used.
 
 .. _include-paths:
 
