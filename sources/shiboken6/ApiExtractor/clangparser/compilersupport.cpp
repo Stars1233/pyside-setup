@@ -196,6 +196,100 @@ bool setArchitecture(const QString &name)
     return result;
 }
 
+// Parsing triplets
+static inline bool isVersionChar(QChar c)
+{
+    return c.isDigit() || c == u'.';
+}
+
+// "macosx15.0" -> "macosx"
+QStringView stripTrailingVersion(QStringView s)
+{
+    while (!s.isEmpty() && isVersionChar(s.at(s.size() - 1)))
+        s.chop(1);
+    return s;
+}
+
+bool parseTriplet(QStringView name, Architecture *a, Platform *p, Compiler *c)
+{
+    *a = hostArchitecture();
+    *p = hostPlatform();
+    *c = hostCompiler();
+    auto values = name.split(u'-');
+    if (values.size() < 2)
+        return false;
+    *a = parseArchitecture(values.constFirst());
+    if (*a == Architecture::Other)
+        return false;
+    // Try a trailing compiler?
+    Compiler comp{};
+    if (parseCompiler(stripTrailingVersion(values.constLast()), &comp)) {
+        *c = comp;
+        values.removeLast();
+    }
+    return parsePlatform(stripTrailingVersion(values.constLast()), p);
+}
+
+const char *compilerTripletValue(Compiler c)
+{
+    switch (c) {
+    case Compiler::Clang:
+        return "clang";
+    case Compiler::Msvc:
+        return "msvc";
+    case Compiler::Gpp:
+        break;
+    }
+    return "gnu";
+}
+
+QByteArray targetTripletForPlatform(Platform p, Architecture a, Compiler c)
+{
+    QByteArray result;
+    if (p == Platform::Unix || a == Architecture::Other)
+        return result; // too unspecific
+
+    switch (a) {
+    case Architecture::Other:
+        break;
+    case Architecture::X64:
+        result += "x86_64";
+        break;
+    case Architecture::X86:
+        result += "i586";
+        break;
+    case Architecture::Arm32:
+        result += "armv7a";
+        break;
+    case Architecture::Arm64:
+        result += p == Platform::Android ? "aarch64" : "arm64";
+        break;
+    }
+
+    result += '-';
+
+    switch (p) {
+    case Platform::Unix:
+        break;
+    case Platform::Linux:
+        result += "unknown-linux-"_ba + compilerTripletValue(c);
+        break;
+    case Platform::Windows:
+        result += "pc-windows-"_ba + compilerTripletValue(c);
+        break;
+    case Platform::macOS:
+        result += "apple-macosx"_ba;
+        break;
+    case Platform::Android:
+        result += "unknown-linux-android"_ba;
+        break;
+    case Platform::iOS:
+        result += "apple-ios"_ba;
+        break;
+    }
+    return result;
+}
+
 // 3/2024: Use a recent MSVC2022 for libclang 18.X
 static QByteArray msvcCompatVersion()
 {

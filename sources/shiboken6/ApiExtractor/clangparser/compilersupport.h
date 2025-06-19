@@ -63,6 +63,8 @@ void addCompilerArgument(const QString &arg);
 
 Platform platform();
 bool setPlatform(const QString &name);
+QByteArray targetTripletForPlatform(Platform p, Architecture a, Compiler c);
+const char *compilerTripletValue(Compiler c);
 
 Architecture architecture();
 bool setArchitecture(const QString &name);
@@ -73,6 +75,10 @@ void setPointerSize(unsigned ps); // Set by parser
 QString targetTriple();
 void setTargetTriple(const QStringList &clangOptions); // Set from cmd line before parsing
 void setTargetTriple(const QString &t); // Updated by clang parser while parsing
+
+// Parse a triplet "x86_64-unknown-linux-gnu" (for testing). Note the
+// compiler might not be present and defaults to host
+bool parseTriplet(QStringView name, Architecture *a, Platform *p, Compiler *c);
 
 } // namespace clang
 

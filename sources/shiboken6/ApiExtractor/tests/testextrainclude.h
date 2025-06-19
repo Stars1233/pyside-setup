@@ -12,6 +12,8 @@ class TestExtraInclude : public QObject
     private slots:
         void testClassExtraInclude();
         void testGlobalExtraIncludes();
+        void testParseTriplet_data();
+        void testParseTriplet();
 };
 
 #endif
