@@ -32,29 +32,40 @@ QVersionNumber libClangVersion()
     return QVersionNumber(CINDEX_VERSION_MAJOR, CINDEX_VERSION_MINOR);
 }
 
-static Compiler _compiler =
+static Compiler hostCompiler()
+{
 #if defined (Q_CC_CLANG)
-    Compiler::Clang;
+    return Compiler::Clang;
 #elif defined (Q_CC_MSVC)
-    Compiler::Msvc;
+    return Compiler::Msvc;
 #else
-    Compiler::Gpp;
+    return Compiler::Gpp;
 #endif
+}
+
+static Compiler _compiler = hostCompiler();
 
 Compiler compiler() { return _compiler; }
 
-bool setCompiler(const QString &name)
+// CMAKE_CXX_COMPILER_ID or triplet name
+bool parseCompiler(QStringView name, Compiler *c)
 {
     bool result = true;
+    *c = hostCompiler();
     if (name.compare("msvc"_L1, Qt::CaseInsensitive) == 0)
-        _compiler = Compiler::Msvc;
+        *c = Compiler::Msvc;
     else if (name.compare("g++"_L1, Qt::CaseInsensitive) == 0 || name.compare("gnu"_L1, Qt::CaseInsensitive) == 0)
-        _compiler = Compiler::Gpp;
+        *c = Compiler::Gpp;
     else if (name.compare("clang"_L1, Qt::CaseInsensitive) == 0)
-        _compiler = Compiler::Clang;
+        *c = Compiler::Clang;
     else
         result = false;
     return result;
+}
+
+bool setCompiler(const QString &name)
+{
+    return parseCompiler(name, &_compiler);
 }
 
 QString _compilerPath; // Pre-defined compiler path (from command line)
@@ -72,35 +83,50 @@ void setCompilerPath(const QString &name)
     _compilerPath = name;
 }
 
-static Platform _platform =
+static Platform hostPlatform()
+{
 #if defined (Q_OS_DARWIN)
-    Platform::macOS;
+    return Platform::macOS;
 #elif defined (Q_OS_WIN)
-    Platform::Windows;
+    return Platform::Windows;
+#elif defined (Q_OS_LINUX)
+    return Platform::Linux;
 #else
-    Platform::Unix;
+    return Platform::Unix;
 #endif
+}
+
+static Platform _platform = hostPlatform();
 
 Platform platform() { return _platform; }
 
+// from CMAKE_SYSTEM_NAME / legacy lower case name or target triplet
+static bool parsePlatform(QStringView name, Platform *p)
+{
+    *p = hostPlatform();
+    bool result = true;
+    if (name.compare("unix"_L1, Qt::CaseInsensitive) == 0) {
+        *p = Platform::Unix;
+    } else if (name.compare("linux"_L1, Qt::CaseInsensitive) == 0) {
+        *p = Platform::Linux;
+    } else if (name.compare("windows"_L1, Qt::CaseInsensitive) == 0) {
+        *p = Platform::Windows;
+    } else if (name.compare("darwin"_L1, Qt::CaseInsensitive) == 0
+               || name.compare("macosx"_L1, Qt::CaseInsensitive) == 0) {
+        *p = Platform::macOS;
+    } else if (name.startsWith("android"_L1, Qt::CaseInsensitive)) {
+        *p = Platform::Android; // "androideabi"
+    } else if (name.compare("ios"_L1, Qt::CaseInsensitive) == 0) {
+        *p = Platform::iOS;
+    } else {
+        result = false;
+    }
+    return result;
+}
+
 bool setPlatform(const QString &name)
 {
-    bool result = true;
-    if (name.compare("unix"_L1, Qt::CaseInsensitive) == 0)
-        _platform = Platform::Unix;
-    else if (name.compare("linux"_L1, Qt::CaseInsensitive) == 0)
-        _platform = Platform::Linux;
-    else if (name.compare("windows"_L1, Qt::CaseInsensitive) == 0)
-        _platform = Platform::Windows;
-    else if (name.compare("darwin"_L1, Qt::CaseInsensitive) == 0)
-        _platform = Platform::macOS;
-    else if (name.compare("android"_L1, Qt::CaseInsensitive) == 0)
-        _platform = Platform::Android;
-    else if (name.compare("ios"_L1, Qt::CaseInsensitive) == 0)
-        _platform = Platform::iOS;
-    else
-        result = false;
-    return result;
+    return parsePlatform(name, &_platform);
 }
 
 // 3/2024: Use a recent MSVC2022 for libclang 18.X
