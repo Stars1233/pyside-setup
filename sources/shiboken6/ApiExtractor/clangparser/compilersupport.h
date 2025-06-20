@@ -51,6 +51,7 @@ QString compilerFromCMake();
 
 const QString &compilerPath();
 void setCompilerPath(const QString &name);
+void addCompilerArgument(const QString &arg);
 
 Platform platform();
 bool setPlatform(const QString &name);

@@ -89,6 +89,8 @@ OptionDescriptions CommonOptionsParser::optionDescriptions()
          u"Emulated platform (windows, darwin, unix)"_s},
         {u"compiler-path=<file>"_s,
          u"Path to the compiler for determining builtin include paths"_s},
+        {u"compiler-argument=<argument>"_s,
+         u"Add an argument for the compiler for determining builtin include paths"_s},
         {u"generator-set=<\"generator module\">"_s,
          u"generator-set to be used. e.g. qtdoc"_s},
         {u"diff"_s, u"Print a diff of wrapper files"_s},
@@ -194,6 +196,11 @@ bool CommonOptionsParser::handleOption(const QString &key, const QString &value,
         clang::setCompilerPath(value);
         return true;
     }
+    if (key == u"compiler-argument") {
+        clang::addCompilerArgument(value);
+        return true;
+    }
+
     if (key == u"platform") {
         if (!clang::setPlatform(value)) {
             qCWarning(lcShiboken, "Invalid value \"%s\" passed to --platform, defaulting to host.",

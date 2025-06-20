@@ -69,6 +69,7 @@ bool setCompiler(const QString &name)
 }
 
 QString _compilerPath; // Pre-defined compiler path (from command line)
+QStringList _compilerArguments; // Arguments
 
 static unsigned _pointerSize = QT_POINTER_SIZE * 8;
 static QString _targetTriple;
@@ -81,6 +82,11 @@ const QString &compilerPath()
 void setCompilerPath(const QString &name)
 {
     _compilerPath = name;
+}
+
+void addCompilerArgument(const QString &arg)
+{
+    _compilerArguments.append(arg);
 }
 
 static Platform hostPlatform()
@@ -211,10 +217,12 @@ static void filterHomebrewHeaderPaths(HeaderPaths &headerPaths)
 // /usr/local/include
 // /System/Library/Frameworks (framework directory)
 // End of search list.
-static HeaderPaths gppInternalIncludePaths(const QString &compiler)
+static HeaderPaths gppInternalIncludePaths(const QString &compiler,
+                                           const QStringList &args)
 {
     HeaderPaths result;
     QStringList arguments{u"-E"_s, u"-x"_s, u"c++"_s, u"-"_s, u"-v"_s};
+    arguments.append(args);
     QByteArray stdOut;
     QByteArray stdErr;
     if (!runProcess(compiler, arguments, &stdOut, &stdErr))
@@ -245,7 +253,8 @@ static HeaderPaths gppInternalIncludePaths(const QString &compiler)
     QString message;
     {
         QTextStream str(&message);
-        str << "gppInternalIncludePaths:\n    compiler: " << compiler  << '\n';
+        str << "gppInternalIncludePaths:\n    compiler: " << compiler
+            << arguments.join(u' ') << '\n';
         for (const auto &h : result)
             str << "    " << h.path << '\n';
         if (ReportHandler::isDebug(ReportHandler::MediumDebug))
@@ -431,7 +440,8 @@ QByteArrayList emulatedCompilerOptions(LanguageLevel level)
             appendClangBuiltinIncludes(&headerPaths);
         break;
     case Compiler::Clang:
-        headerPaths.append(gppInternalIncludePaths(compilerFromCMake(u"clang++"_s)));
+        headerPaths.append(gppInternalIncludePaths(compilerFromCMake(u"clang++"_s),
+                                                   _compilerArguments));
         result.append(noStandardIncludeOption());
         break;
     case Compiler::Gpp:
@@ -440,7 +450,8 @@ QByteArrayList emulatedCompilerOptions(LanguageLevel level)
 
         // Append the c++ include paths since Clang is unable to find
         // <type_traits> etc (g++ 11.3).
-        const HeaderPaths gppPaths = gppInternalIncludePaths(compilerFromCMake(u"g++"_s));
+        const HeaderPaths gppPaths = gppInternalIncludePaths(compilerFromCMake(u"g++"_s),
+                                                             _compilerArguments);
         for (const HeaderPath &h : gppPaths) {
             if (h.path.contains("c++") || h.path.contains("sysroot"))
                 headerPaths.append(h);

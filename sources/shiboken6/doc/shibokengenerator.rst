@@ -208,6 +208,9 @@ Options
 ``--compiler-path=<file>``
     Path to the compiler for determining builtin include paths
 
+``compiler-argument=<argument>``
+    Add an argument for the compiler for determining builtin include paths
+
 ``--platform=<file>``
     Emulated platform (windows, darwin, unix)
 
