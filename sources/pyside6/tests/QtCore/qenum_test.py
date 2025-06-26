@@ -135,6 +135,9 @@ class SomeClass(QObject):
         A = 1
         B = 2
         C = 3
+        D = 0x100000000  # >32bit
+        E = 0x200000000
+        F = 0x400000000
 
     class InnerClass(QObject):
 
@@ -186,9 +189,39 @@ class TestQEnumMacro(unittest.TestCase):
     def testIsRegistered(self):
         mo = SomeClass.staticMetaObject
         self.assertEqual(mo.enumeratorCount(), 2)
-        self.assertEqual(mo.enumerator(0).name(), "OtherEnum")
-        self.assertEqual(mo.enumerator(0).scope(), "SomeClass")
-        self.assertEqual(mo.enumerator(1).name(), "SomeEnum")
+
+        # 64 bit / IntEnum
+        other_metaenum = mo.enumerator(0)
+        self.assertEqual(other_metaenum.scope(), "SomeClass")
+        self.assertEqual(other_metaenum.name(), "OtherEnum")
+        self.assertTrue(other_metaenum.is64Bit())
+        key_count = other_metaenum.keyCount()
+        self.assertEqual(key_count, 6)
+        self.assertEqual(other_metaenum.value(key_count - 1), SomeClass.OtherEnum.F)
+        # Test lookup
+        v, ok = other_metaenum.keyToValue("F")
+        self.assertTrue(ok)
+        self.assertEqual(v, SomeClass.OtherEnum.F)
+        v, ok = other_metaenum.keysToValue("E")
+        self.assertTrue(ok)
+        self.assertEqual(v, SomeClass.OtherEnum.E)
+
+        # 32 bit / Enum
+        some_metaenum = mo.enumerator(1)
+        self.assertEqual(some_metaenum.scope(), "SomeClass")
+        self.assertEqual(some_metaenum.name(), "SomeEnum")
+        self.assertFalse(some_metaenum.is64Bit())
+        key_count = some_metaenum.keyCount()
+        self.assertEqual(key_count, 3)
+        self.assertEqual(some_metaenum.value(key_count - 1), SomeClass.SomeEnum.C.value)
+        # Test lookup
+        v, ok = some_metaenum.keyToValue("C")
+        self.assertTrue(ok)
+        self.assertEqual(v, SomeClass.SomeEnum.C.value)
+        v, ok = some_metaenum.keysToValue("C")
+        self.assertTrue(ok)
+        self.assertEqual(v, SomeClass.SomeEnum.C.value)
+
         moi = SomeClass.InnerClass.staticMetaObject
         self.assertEqual(moi.enumerator(0).name(), "InnerEnum")
         # Question: Should that scope not better be  "SomeClass.InnerClass"?

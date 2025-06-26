@@ -3401,6 +3401,10 @@
   </value-type>
 
   <value-type name="QMetaEnum">
+    <modify-function signature="value(int)const">
+        <inject-code class="target" position="beginning"
+                     file="../glue/qtcore.cpp" snippet="qmetaenum_value"/>
+    </modify-function>
     <modify-function signature="keyToValue(const char*,bool*)const">
         <modify-argument index="2">
             <remove-argument />
@@ -3408,9 +3412,8 @@
         <modify-argument index="return">
             <replace-type modified-type="PyTuple"/>
         </modify-argument>
-        <inject-code class="target" position="beginning">
-            <insert-template name="fix_args,bool*"/>
-        </inject-code>
+        <inject-code class="target" position="beginning"
+                     file="../glue/qtcore.cpp" snippet="qmetaenum_keytovalue"/>
     </modify-function>
     <modify-function signature="keysToValue(const char*,bool*)const">
         <modify-argument index="2">
@@ -3419,9 +3422,8 @@
         <modify-argument index="return">
             <replace-type modified-type="PyTuple"/>
         </modify-argument>
-        <inject-code class="target" position="beginning">
-            <insert-template name="fix_args,bool*"/>
-        </inject-code>
+        <inject-code class="target" position="beginning"
+                     file="../glue/qtcore.cpp" snippet="qmetaenum_keystovalue"/>
     </modify-function>
     <!-- This isn't part of Qt public API -->
     <modify-function signature="enclosingMetaObject()const" remove="all"/>

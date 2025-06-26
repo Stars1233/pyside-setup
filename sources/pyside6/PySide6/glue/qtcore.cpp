@@ -1820,6 +1820,43 @@ if (Shiboken::Enum::check(%PYARG_2))
     cppArg1 = QVariant(int(Shiboken::Enum::getValue(%PYARG_2)));
 // @snippet qmetaproperty_write_enum
 
+// @snippet qmetaenum_value
+auto valueOpt = %CPPSELF.value64(%1);
+if (valueOpt.has_value()) {
+    const quint64 ullValue = valueOpt.value();
+    %PYARG_0 = PyLong_FromUnsignedLongLong(ullValue);
+} else {
+    const int lValue = %CPPSELF.%FUNCTION_NAME(%1);
+    %PYARG_0 = PyLong_FromLong(lValue);
+}
+// @snippet qmetaenum_value
+
+// @snippet qmetaenum_keytovalue
+PyObject *pyLongValue{};
+auto valueOpt = %CPPSELF.keyToValue64(%1);
+bool ok_ = valueOpt.has_value();
+if (ok_)
+    pyLongValue = PyLong_FromUnsignedLongLong(valueOpt.value());
+else
+    pyLongValue = PyLong_FromLong(%CPPSELF.%FUNCTION_NAME(%1, &ok_));
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SetItem(%PYARG_0, 0, pyLongValue);
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[bool](ok_));
+// @snippet qmetaenum_keytovalue
+
+// @snippet qmetaenum_keystovalue
+PyObject *pyLongValue{};
+auto valueOpt = %CPPSELF.keysToValue64(%1);
+bool ok_ = valueOpt.has_value();
+if (ok_)
+    pyLongValue = PyLong_FromUnsignedLongLong(valueOpt.value());
+else
+    pyLongValue = PyLong_FromLong(%CPPSELF.%FUNCTION_NAME(%1, &ok_));
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SetItem(%PYARG_0, 0, pyLongValue);
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[bool](ok_));
+// @snippet qmetaenum_keystovalue
+
 // @snippet qdatastream-read-bytes
 QByteArray data;
 data.resize(%2);

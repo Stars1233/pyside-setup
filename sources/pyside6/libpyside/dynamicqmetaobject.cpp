@@ -24,11 +24,23 @@
 #include <private/qmetaobjectbuilder_p.h>
 
 #include <cstring>
+#include <limits>
 #include <vector>
 
 using namespace Qt::StringLiterals;
 
 using namespace PySide;
+
+// QMetaEnum can handle quint64 or int values. Check for big long values and force
+// them to quint64 (long=64bit/int=32bit on Linux vs long=32bit on Windows).
+// Note: underflows are currently not handled well.
+static QVariant longToEnumValue(PyObject *value)
+{
+    int overflow{};
+    const long longValue = PyLong_AsLongAndOverflow(value, &overflow);
+    return overflow != 0 || longValue > std::numeric_limits<int>::max()
+        ? QVariant(PyLong_AsUnsignedLongLong(value)) : QVariant(int(longValue));
+}
 
 // MetaObjectBuilder: Provides the QMetaObject's returned by
 // QObject::metaObject() for PySide6 objects. There are several
@@ -395,9 +407,13 @@ QMetaEnumBuilder
     auto enumbuilder = builder->addEnumerator(name);
     enumbuilder.setIsFlag(flag);
     enumbuilder.setIsScoped(scoped);
+    for (const auto &item : entries) {
+        if (item.second.typeId() == QMetaType::ULongLong)
+            enumbuilder.addKey(item.first, item.second.toULongLong());
+        else
+            enumbuilder.addKey(item.first, item.second.toInt());
+    }
 
-    for (const auto &item : entries)
-        enumbuilder.addKey(item.first, item.second);
     m_dirty = true;
     return enumbuilder;
 }
@@ -678,21 +694,26 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
         AutoDecRef items(PyMapping_Items(members));
         Py_ssize_t nr_items = PySequence_Length(items);
 
-        QList<std::pair<QByteArray, int> > entries;
+        MetaObjectBuilder::EnumValues entries;
+        entries.reserve(nr_items);
+        bool is64bit = false;
         for (Py_ssize_t idx = 0; idx < nr_items; ++idx) {
             AutoDecRef item(PySequence_GetItem(items, idx));
             AutoDecRef key(PySequence_GetItem(item, 0));
             AutoDecRef member(PySequence_GetItem(item, 1));
             AutoDecRef value(PyObject_GetAttr(member, Shiboken::PyName::value()));
             const auto *ckey = String::toCString(key);
-            auto ivalue = PyLong_AsSsize_t(value);
-            entries.push_back(std::make_pair(ckey, int(ivalue)));
+            QVariant valueV = longToEnumValue(value.object());
+            if (valueV.typeId() == QMetaType::ULongLong)
+                is64bit = true;
+            entries.append(std::make_pair(QByteArray(ckey), valueV));
         }
         auto enumBuilder = addEnumerator(name, isFlag, true, entries);
         QByteArray qualifiedName = ensureBuilder()->className() + "::"_ba + name;
-        auto metaType =
-            PySide::QEnum::createGenericEnumMetaType(qualifiedName,
-                                                     reinterpret_cast<PyTypeObject *>(obEnumType));
+        auto *typeObject = reinterpret_cast<PyTypeObject *>(obEnumType);
+        auto metaType = is64bit
+            ? PySide::QEnum::createGenericEnum64MetaType(qualifiedName, typeObject)
+            : PySide::QEnum::createGenericEnumMetaType(qualifiedName, typeObject);
         enumBuilder.setMetaType(metaType);
     }
 }

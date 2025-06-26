@@ -33,6 +33,13 @@ class CustomWidgetBase(QObject):
         FlagValue2 = 4
         FlagValue3 = 8
 
+    @QFlag
+    class BigTestFlag(Flag):
+        BigFlagValue0 = 0x100000000  # >32bit
+        BigFlagValue1 = 0x200000000
+        BigFlagValue2 = 0x400000000
+        BigFlagValue3 = 0x800000000
+
 
 class CustomWidget(CustomWidgetBase):
     def __init__(self, parent=None):
@@ -40,6 +47,7 @@ class CustomWidget(CustomWidgetBase):
         self._testEnum = CustomWidget.TestEnum.EnumValue1
         self._testFlag = (CustomWidget.TestFlag.FlagValue0
                           | CustomWidget.TestFlag.FlagValue1)
+        self._bigTestFlag = CustomWidget.BigTestFlag.BigFlagValue1
 
     def testEnum(self):
         return self._testEnum
@@ -53,8 +61,16 @@ class CustomWidget(CustomWidgetBase):
     def setTestFlag(self, new_val):
         self._testFlag = new_val
 
+    def getBigTestFlag(self):
+        return self._bigTestFlag
+
+    def setBigTestFlag(self, new_val):
+        self._bigTestFlag = new_val
+
     testEnum = Property(CustomWidgetBase.TestEnum, testEnum, setTestEnum)
     testFlag = Property(CustomWidgetBase.TestFlag, getTestFlag, setTestFlag)
+    bigTestFlag = Property(CustomWidgetBase.BigTestFlag,
+                           getBigTestFlag, setBigTestFlag)
 
 
 class TestDesignerEnum(unittest.TestCase):
@@ -77,6 +93,13 @@ class TestDesignerEnum(unittest.TestCase):
         # Emulate uic generated code
         cw.setProperty("testFlag", CustomWidgetBase.TestFlag.FlagValue1)
         self.assertEqual(cw.testFlag, CustomWidget.TestFlag.FlagValue1)
+
+        # Emulate Qt Widgets Designer setting a property (note though
+        # it does not support it).
+        self.assertEqual(cw.bigTestFlag, CustomWidget.BigTestFlag.BigFlagValue1)
+        ok = cw.setProperty("bigTestFlag", CustomWidgetBase.BigTestFlag.BigFlagValue2)
+        self.assertTrue(ok)
+        self.assertEqual(cw.bigTestFlag, CustomWidget.BigTestFlag.BigFlagValue2)
 
 
 if __name__ == '__main__':

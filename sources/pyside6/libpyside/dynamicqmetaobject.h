@@ -9,6 +9,7 @@
 
 #include <QtCore/qmetaobject.h>
 #include <QtCore/qmetaobject.h>
+#include <QtCore/qvariant.h>
 
 #include <utility>
 
@@ -21,7 +22,7 @@ class PYSIDE_API MetaObjectBuilder
 {
     Q_DISABLE_COPY_MOVE(MetaObjectBuilder)
 public:
-    using EnumValue = std::pair<QByteArray, int>;
+    using EnumValue = std::pair<QByteArray, QVariant>; // Int/ULongLong
     using EnumValues = QList<EnumValue>;
 
     MetaObjectBuilder(const char *className, const QMetaObject *metaObject);
