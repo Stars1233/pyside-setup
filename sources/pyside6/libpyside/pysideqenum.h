@@ -31,6 +31,9 @@ PYSIDE_API QByteArray getTypeName(PyTypeObject *type);
 // modification of properties by Qt Widgets Designer.
 QMetaType createGenericEnumMetaType(const QByteArray &name, PyTypeObject *pyType);
 
+// Like createGenericEnumMetaType(), but for "unsigned long long".
+QMetaType createGenericEnum64MetaType(const QByteArray &name, PyTypeObject *pyType);
+
 } // namespace PySide::QEnum
 
 #endif

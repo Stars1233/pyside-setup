@@ -267,34 +267,71 @@ QByteArray getTypeName(PyTypeObject *type)
 }
 
 using GenericEnumType = int;
+using GenericEnum64Type = unsigned long long;
 
-using GenericEnumTypeList = QList<PyTypeObject *>;
+struct GenericEnumRegistry
+{
+    QList<PyTypeObject *> enumTypes;
+    QList<PyTypeObject *> enum64Types;
+};
 
-Q_GLOBAL_STATIC(GenericEnumTypeList, genericEnumTypeList)
+Q_GLOBAL_STATIC(GenericEnumRegistry, genericEnumTypeRegistry)
 
 } // namespace PySide::QEnum
+
+template <class IntType>
+static inline void genericEnumPythonToCppTpl(PyObject *pyIn, void *cppOut)
+{
+    const auto value = static_cast<IntType>(Shiboken::Enum::getValue(pyIn));
+    *reinterpret_cast<IntType *>(cppOut) = value;
+}
+
+template <class IntType>
+static inline PyObject *genericEnumCppToPythonTpl(PyTypeObject *pyType, const void *cppIn)
+{
+    const auto value = *reinterpret_cast<const IntType *>(cppIn);
+    return Shiboken::Enum::newItem(pyType, value);
+}
 
 extern "C"
 {
 
+// int
 static void genericEnumPythonToCpp(PyObject *pyIn, void *cppOut)
 {
-    const auto value = static_cast<PySide::QEnum::GenericEnumType>(Shiboken::Enum::getValue(pyIn));
-    *reinterpret_cast<int *>(cppOut) = value;
+    genericEnumPythonToCppTpl<PySide::QEnum::GenericEnumType>(pyIn, cppOut);
 }
 
 static PythonToCppFunc isGenericEnumToCppConvertible(PyObject *pyIn)
 {
 
-    if (PySide::QEnum::genericEnumTypeList()->contains(Py_TYPE(pyIn)))
+    if (PySide::QEnum::genericEnumTypeRegistry()->enumTypes.contains(Py_TYPE(pyIn)))
         return genericEnumPythonToCpp;
     return {};
 }
 
 static PyObject *genericEnumCppToPython(PyTypeObject *pyType, const void *cppIn)
 {
-    const auto value = *reinterpret_cast<const PySide::QEnum::GenericEnumType *>(cppIn);
-    return Shiboken::Enum::newItem(pyType, value);
+    return genericEnumCppToPythonTpl<PySide::QEnum::GenericEnumType>(pyType, cppIn);
+}
+
+// unsigned long long
+static void genericEnumPythonToCpp64(PyObject *pyIn, void *cppOut)
+{
+    genericEnumPythonToCppTpl<PySide::QEnum::GenericEnum64Type>(pyIn, cppOut);
+}
+
+static PythonToCppFunc isGenericEnumToCpp64Convertible(PyObject *pyIn)
+{
+
+    if (PySide::QEnum::genericEnumTypeRegistry()->enum64Types.contains(Py_TYPE(pyIn)))
+        return genericEnumPythonToCpp64;
+    return {};
+}
+
+static PyObject *genericEnumCpp64ToPython(PyTypeObject *pyType, const void *cppIn)
+{
+    return genericEnumCppToPythonTpl<PySide::QEnum::GenericEnum64Type>(pyType, cppIn);
 }
 
 } // extern "C"
@@ -302,6 +339,7 @@ static PyObject *genericEnumCppToPython(PyTypeObject *pyType, const void *cppIn)
 namespace PySide::QEnum
 {
 
+// int
 QMetaType createGenericEnumMetaType(const QByteArray &name, PyTypeObject *pyType)
 {
     SbkConverter *converter = Shiboken::Conversions::createConverter(pyType,
@@ -312,8 +350,23 @@ QMetaType createGenericEnumMetaType(const QByteArray &name, PyTypeObject *pyType
     Shiboken::Conversions::registerConverterName(converter, name.constData());
     Shiboken::Enum::setTypeConverter(pyType, converter, nullptr);
 
-    genericEnumTypeList()->append(pyType);
+    genericEnumTypeRegistry->enumTypes.append(pyType);
     return createEnumMetaTypeHelper<GenericEnumType>(name);
+}
+
+// "unsigned long long"
+QMetaType createGenericEnum64MetaType(const QByteArray &name, PyTypeObject *pyType)
+{
+    SbkConverter *converter = Shiboken::Conversions::createConverter(pyType,
+                                                                     genericEnumCpp64ToPython);
+    Shiboken::Conversions::addPythonToCppValueConversion(converter,
+                                                         genericEnumPythonToCpp64,
+                                                         isGenericEnumToCpp64Convertible);
+    Shiboken::Conversions::registerConverterName(converter, name.constData());
+    Shiboken::Enum::setTypeConverter(pyType, converter, nullptr);
+
+    genericEnumTypeRegistry()->enum64Types.append(pyType);
+    return createEnumMetaTypeHelper<GenericEnum64Type>(name);
 }
 
 } // namespace PySide::QEnum
