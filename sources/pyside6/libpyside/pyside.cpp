@@ -64,7 +64,10 @@
 using namespace Qt::StringLiterals;
 
 static QStack<PySide::CleanupFunction> cleanupFunctionList;
-static void *qobjectNextAddr;
+
+// Used by QML (main thread), but needs to be protected against other
+// threads constructing QObject's.
+static void thread_local *qobjectNextAddr;
 
 QT_BEGIN_NAMESPACE
 extern bool qRegisterResourceData(int, const unsigned char *, const unsigned char *,
