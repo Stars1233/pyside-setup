@@ -208,6 +208,7 @@ class CommandMixin:
         ('verbose-build', None, 'Verbose build'),
         ('quiet', None, 'Quiet build'),
         ('sanitize-address', None, 'Build with address sanitizer'),
+        ('sanitize-thread', None, 'Build with thread sanitizer'),
         ('shorter-paths', None, 'Use shorter paths'),
         ('doc-build-online', None, 'Build online documentation'),
         ('qtpaths=', None, 'Path to qtpaths'),
@@ -290,6 +291,7 @@ class CommandMixin:
         self.log_level = "info"
         self.verbose_build = False
         self.sanitize_address = False
+        self.sanitize_thread = False
         self.snapshot_build = False
         self.shorter_paths = False
         self.doc_build_online = False
@@ -444,6 +446,7 @@ class CommandMixin:
                 log.setLevel(logging.DEBUG)
 
         OPTION['SANITIZE_ADDRESS'] = self.sanitize_address
+        OPTION['SANITIZE_THREAD'] = self.sanitize_thread
         OPTION['SHORTER_PATHS'] = self.shorter_paths
         OPTION['DOC_BUILD_ONLINE'] = self.doc_build_online
         if self.unity:

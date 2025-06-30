@@ -720,12 +720,12 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             cmake_cmd.append(f"-DCMAKE_CXX_COMPILER_LAUNCHER={compiler_launcher}")
 
         if OPTION["SANITIZE_ADDRESS"]:
+            cmake_cmd.append("-DSANITIZE_ADDRESS=ON")
+        if OPTION["SANITIZE_THREAD"]:
             # Some simple sanity checking. Only use at your own risk.
-            if (sys.platform.startswith('linux')
-                    or sys.platform.startswith('darwin')):
-                cmake_cmd.append("-DSANITIZE_ADDRESS=ON")
-            else:
-                raise SetupError("Address sanitizer can only be used on Linux and macOS.")
+            if sys.platform == "win32" and not self.is_cross_compile:
+                self.warn("Thread sanitizer may not be supported yet.")
+            cmake_cmd.append("-DSANITIZE_THREAD=ON")
 
         if extension.lower() == PYSIDE:
             pyside_qt_conf_prefix = ''

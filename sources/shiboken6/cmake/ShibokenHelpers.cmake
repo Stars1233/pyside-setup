@@ -33,9 +33,13 @@ macro(set_debug_build)
 endmacro()
 
 macro(setup_sanitize_address)
-    # Currently this does not check that the clang / gcc version used supports Address sanitizer,
-    # so once again, use at your own risk.
-    add_compile_options("-fsanitize=address" "-g" "-fno-omit-frame-pointer")
+    # Currently this does not check that the clang / gcc / MSVC version used supports Address
+    # sanitizer, so once again, use at your own risk.
+    if(MSVC)
+        add_compile_options("/fsanitize=address")
+    else()
+        add_compile_options("-fsanitize=address" "-g" "-fno-omit-frame-pointer")
+    endif()
     # We need to add the sanitize address option to all linked executables / shared libraries
     # so that proper sanitizer symbols are linked in.
     #
@@ -44,7 +48,21 @@ macro(setup_sanitize_address)
     # sanitizer will tell you what environment variable needs to be exported. For example:
     # export DYLD_INSERT_LIBRARIES=/Applications/Xcode.app/Contents/Developer/Toolchains/
     #   ./XcodeDefault.xctoolchain/usr/lib/clang/8.1.0/lib/darwin/libclang_rt.asan_osx_dynamic.dylib
-    set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_STANDARD_LIBRARIES} -fsanitize=address")
+    if(MSVC)
+        set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_STANDARD_LIBRARIES} /fsanitize=address")
+    else()
+        set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_STANDARD_LIBRARIES} -fsanitize=address")
+    endif()
+endmacro()
+
+macro(setup_sanitize_thread)
+    if(MSVC)
+        set(sanitize_thread_option "/fsanitize=thread")
+    else()
+        set(sanitize_thread_option "-fsanitize=thread")
+    endif()
+    add_compile_options("${sanitize_thread_option}")
+    set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_STANDARD_LIBRARIES} ${sanitize_thread_option}")
 endmacro()
 
 macro(set_cmake_cxx_flags)

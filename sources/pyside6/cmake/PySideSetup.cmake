@@ -253,8 +253,11 @@ set(GENERATOR_EXTRA_FLAGS
 use_protected_as_public_hack()
 
 # Build with Address sanitizer enabled if requested. This may break things, so use at your own risk.
-if(SANITIZE_ADDRESS AND NOT MSVC)
+if(SANITIZE_ADDRESS)
     setup_sanitize_address()
+endif()
+if(SANITIZE_THREAD)
+    setup_sanitize_thread()
 endif()
 
 find_package(Qt6 COMPONENTS Designer)
