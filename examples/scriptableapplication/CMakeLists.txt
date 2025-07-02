@@ -65,12 +65,23 @@ pyside_config(--shiboken-generator-path SHIBOKEN_GENERATOR_PATH)
 pyside_config(--pyside-path PYSIDE_PATH)
 
 pyside_config(--python-include-path PYTHON_INCLUDE_DIR)
-pyside_config(--shiboken-generator-include-path SHIBOKEN_GENERATOR_INCLUDE_DIR 1)
+pyside_config(--shiboken-include-path SHIBOKEN_INCLUDE_DIR 1)
 pyside_config(--pyside-include-path PYSIDE_INCLUDE_DIR 1)
 
 pyside_config(--python-link-flags-cmake PYTHON_LINKING_DATA 0)
 pyside_config(--shiboken-module-shared-libraries-cmake SHIBOKEN_MODULE_SHARED_LIBRARIES 0)
 pyside_config(--pyside-shared-libraries-cmake PYSIDE_SHARED_LIBRARIES 0)
+
+# Print the computed variables
+message(STATUS "Shiboken module path: ${SHIBOKEN_MODULE_PATH}")
+message(STATUS "Shiboken generator path: ${SHIBOKEN_GENERATOR_PATH}")
+message(STATUS "PySide path: ${PYSIDE_PATH}")
+message(STATUS "Python include path: ${PYTHON_INCLUDE_DIR}")
+message(STATUS "Shiboken include path: ${SHIBOKEN_INCLUDE_DIR}")
+message(STATUS "PySide include path: ${PYSIDE_INCLUDE_DIR}")
+message(STATUS "Python linking data: ${PYTHON_LINKING_DATA}")
+message(STATUS "Shiboken module shared libraries: ${SHIBOKEN_MODULE_SHARED_LIBRARIES}")
+message(STATUS "PySide shared libraries: ${PYSIDE_SHARED_LIBRARIES}")
 
 set(SHIBOKEN_PATH "${SHIBOKEN_GENERATOR_PATH}/shiboken6${CMAKE_EXECUTABLE_SUFFIX}")
 
@@ -167,7 +178,7 @@ target_sources(${PROJECT_NAME} PUBLIC ${SOURCES})
 
 # Apply relevant include and link flags.
 target_include_directories(${PROJECT_NAME} PRIVATE ${PYTHON_INCLUDE_DIR})
-target_include_directories(${PROJECT_NAME} PRIVATE ${SHIBOKEN_GENERATOR_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${SHIBOKEN_INCLUDE_DIR})
 target_include_directories(${PROJECT_NAME} PRIVATE ${PYSIDE_INCLUDE_DIR})
 target_include_directories(${PROJECT_NAME} PRIVATE ${PYSIDE_ADDITIONAL_INCLUDES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})

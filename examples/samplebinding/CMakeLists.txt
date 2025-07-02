@@ -90,9 +90,17 @@ endmacro()
 pyside_config(--shiboken-module-path shiboken_module_path)
 pyside_config(--shiboken-generator-path shiboken_generator_path)
 pyside_config(--python-include-path python_include_dir)
-pyside_config(--shiboken-generator-include-path shiboken_include_dir 1)
+pyside_config(--shiboken-include-path shiboken_include_dir 1)
 pyside_config(--shiboken-module-shared-libraries-cmake shiboken_shared_libraries 0)
 pyside_config(--python-link-flags-cmake python_linking_data 0)
+
+# Print the computed variables
+message(STATUS "Shiboken module path: ${shiboken_module_path}")
+message(STATUS "Shiboken generator path: ${shiboken_generator_path}")
+message(STATUS "Python include path: ${python_include_dir}")
+message(STATUS "Shiboken include path: ${shiboken_include_dir}")
+message(STATUS "Shiboken shared libraries: ${shiboken_shared_libraries}")
+message(STATUS "Python linking data: ${python_linking_data}")
 
 set(shiboken_path "${shiboken_generator_path}/shiboken6${CMAKE_EXECUTABLE_SUFFIX}")
 if(NOT EXISTS ${shiboken_path})
