@@ -45,7 +45,6 @@ add_library(PySide6::pyside6qml ALIAS pyside6qml)
 
 target_include_directories(pyside6qml PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-  $<INSTALL_INTERFACE:PySide6Qml/include>
 )
 
 target_compile_definitions(pyside6qml PRIVATE -DQT_LEAN_HEADERS=1 -DQT_NO_KEYWORDS=1)
@@ -84,34 +83,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D QT_NO_CAST_FROM_ASCII -D QT_NO_CAST_T
 
 qfp_strip_library("pyside6qml")
 
-# Install-tree / relocatable package config file.
-configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/PySide6QmlConfig-spec.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/install/PySide6QmlConfig${SHIBOKEN_PYTHON_CONFIG_SUFFIX}.cmake"
-     INSTALL_DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml"
-)
-
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/PySide6QmlConfig.cmake.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/PySide6QmlConfig.cmake" @ONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/PySide6QmlConfigVersion.cmake.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/PySide6QmlConfigVersion.cmake" @ONLY)
-
 install(FILES ${libpysideqml_HEADERS}
         DESTINATION ${BINDING_NAME}${pyside6qml_SUFFIX}/include)
 
-install(TARGETS pyside6qml EXPORT PySide6QmlTargets
+#built-time installation
+install(TARGETS pyside6qml EXPORT PySide6Targets
                            LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
                            ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
                            RUNTIME DESTINATION bin)
-install(EXPORT PySide6QmlTargets NAMESPACE PySide6Qml::
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml")
-
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PySide6QmlConfig.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml")
-
-install(FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/install/PySide6QmlConfig${SHIBOKEN_PYTHON_CONFIG_SUFFIX}.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml")
-
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PySide6QmlConfigVersion.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6Qml")
