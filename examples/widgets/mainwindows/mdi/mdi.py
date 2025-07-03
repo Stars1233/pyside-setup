@@ -15,8 +15,6 @@ from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
                                QMdiArea, QMessageBox, QTextEdit)
 
-import PySide6.QtExampleIcons  # noqa: F401
-
 
 class MdiChild(QTextEdit):
     sequence_number = 1
@@ -434,10 +432,6 @@ if __name__ == '__main__':
     options = argument_parser.parse_args()
 
     app = QApplication(sys.argv)
-
-    icon_paths = QIcon.themeSearchPaths()
-    QIcon.setThemeSearchPaths(icon_paths + [":/qt-project.org/icons"])
-    QIcon.setFallbackThemeName("example_icons")
 
     main_win = MainWindow()
     for f in options.files:
