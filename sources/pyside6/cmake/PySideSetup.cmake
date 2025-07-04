@@ -168,9 +168,12 @@ set (Qt${QT_MAJOR_VERSION}Widgets_FOUND "0")
 collect_essential_modules()
 collect_optional_modules()
 
+# Additional (non-Qt) modules implemented in PySide only
+set(PURE_PYTHON_MODULES Asyncio)
+
 # Modules to be built unless specified by -DMODULES on command line
 if(NOT MODULES)
-    set(MODULES "${ALL_ESSENTIAL_MODULES};${ALL_OPTIONAL_MODULES}")
+    set(MODULES "${ALL_ESSENTIAL_MODULES};${ALL_OPTIONAL_MODULES};${PURE_PYTHON_MODULES}")
     set(required_modules ${ALL_ESSENTIAL_MODULES})
     set(optional_modules ${ALL_OPTIONAL_MODULES})
 else()
@@ -180,6 +183,16 @@ endif()
 list(REMOVE_ITEM MODULES ${SKIP_MODULES})
 list(REMOVE_ITEM required_modules ${SKIP_MODULES})
 list(REMOVE_ITEM optional_modules ${SKIP_MODULES})
+
+# Non-Qt modules must be removed before find_packages tries to locate them.
+foreach(m IN LISTS PURE_PYTHON_MODULES)
+    set(DISABLE_Qt${m} 1)
+    if("Qt${m}" IN_LIST MODULES OR "${m}" IN_LIST MODULES)
+        set(DISABLE_Qt${m} 0)
+    endif()
+    list(FILTER MODULES EXCLUDE REGEX "^(Qt)?${m}$")
+    list(FILTER required_modules EXCLUDE REGEX "^(Qt)?${m}$")
+endforeach()
 
 find_package(Qt6
     COMPONENTS ${required_modules}
@@ -193,7 +206,7 @@ remove_skipped_modules()
 
 # Mark all non-collected modules as disabled. This is used for disabling tests
 # that depend on the disabled modules.
-foreach(m ${DISABLED_MODULES})
+foreach(m IN LISTS DISABLED_MODULES)
     set(DISABLE_Qt${m} 1)
 endforeach()
 

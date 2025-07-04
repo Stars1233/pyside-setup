@@ -47,6 +47,22 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/generate_pyi.py"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/deprecated.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/deprecated.py" COPYONLY)
 
+# Additional (non-Qt) modules implemented in PySide only
+foreach(mod IN LISTS PURE_PYTHON_MODULES)
+    set(src_dir "${CMAKE_CURRENT_SOURCE_DIR}/Qt${mod}")
+    set(dst_dir "${CMAKE_CURRENT_BINARY_DIR}/Qt${mod}")
+
+    if(EXISTS "${src_dir}")
+        file(GLOB_RECURSE module_files "${src_dir}/*")
+
+        foreach(f ${module_files})
+            file(RELATIVE_PATH relpath "${src_dir}" "${f}")
+            set(dst "${dst_dir}/${relpath}")
+            configure_file("${f}" "${dst}" COPYONLY)
+        endforeach()
+    endif()
+endforeach()
+
 # now compile all modules.
 file(READ "${CMAKE_CURRENT_LIST_DIR}/pyside6_global.h" pyside6_global_contents)
 
