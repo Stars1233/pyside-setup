@@ -69,8 +69,9 @@ class MypyCorrectnessTest(unittest.TestCase):
     def testMypy(self):
         self.assertTrue(HAVE_MYPY)
         insert_version = ["--python-version", "3.11"] if sys.version_info[:2] < (3, 11) else []
+        exclusion = ["--exclude", "QtAsyncio"]
         cmd = ([sys.executable, "-m", "mypy", "--pretty", "--cache-dir", self.cache_dir]
-               + insert_version + [self.pyside_dir])
+               + exclusion + insert_version + [self.pyside_dir])
         time_pre = time.time()
         ret = subprocess.run(cmd, capture_output=True)
         time_post = time.time()

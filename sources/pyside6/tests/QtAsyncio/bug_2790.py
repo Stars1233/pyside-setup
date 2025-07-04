@@ -4,9 +4,16 @@ from __future__ import annotations
 
 '''Test cases for QtAsyncio'''
 
+import os
+import sys
 import unittest
-import asyncio
 
+from pathlib import Path
+sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
+from init_paths import init_test_paths
+init_test_paths(False)
+
+import asyncio
 import PySide6.QtAsyncio as QtAsyncio
 
 
@@ -29,6 +36,7 @@ class QAsyncioTestCaseBug2790(unittest.TestCase):
             except TimeoutError:
                 outputs.append("Timeout")
 
+    @unittest.skipIf(sys.version_info < (3, 11), "requires asyncio.timeout")
     def test_timeout(self):
         # The Qt event loop (and thus QtAsyncio) does not guarantee that events
         # will be processed in the order they were posted, so there is two

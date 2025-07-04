@@ -4,10 +4,16 @@ from __future__ import annotations
 
 '''Test cases for QtAsyncio'''
 
-import asyncio
-import unittest
+import os
 import sys
+import unittest
 
+from pathlib import Path
+sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
+from init_paths import init_test_paths
+init_test_paths(False)
+
+import asyncio
 import PySide6.QtAsyncio as QtAsyncio
 
 

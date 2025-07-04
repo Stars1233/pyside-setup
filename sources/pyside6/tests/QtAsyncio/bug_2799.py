@@ -4,10 +4,16 @@ from __future__ import annotations
 
 """Test cases for QtAsyncio"""
 
-import unittest
-import asyncio
+import os
 import sys
+import unittest
 
+from pathlib import Path
+sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
+from init_paths import init_test_paths
+init_test_paths(False)
+
+import asyncio
 import PySide6.QtAsyncio as QtAsyncio
 
 
@@ -22,7 +28,7 @@ class QAsyncioTestCaseBug2799(unittest.TestCase):
             raise RuntimeError()
 
     def test_exception_group(self):
-        with self.assertRaises(ExceptionGroup):
+        with self.assertRaises(ExceptionGroup):  # noqa: F821
             QtAsyncio.run(self.main(), keep_running=False)
 
 

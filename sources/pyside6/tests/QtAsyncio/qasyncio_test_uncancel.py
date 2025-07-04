@@ -4,12 +4,20 @@ from __future__ import annotations
 
 """Test cases for QtAsyncio"""
 
+import os
+import sys
 import unittest
-import asyncio
 
+from pathlib import Path
+sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
+from init_paths import init_test_paths
+init_test_paths(False)
+
+import asyncio
 import PySide6.QtAsyncio as QtAsyncio
 
 
+@unittest.skipIf(sys.version_info < (3, 11), "requires Task.uncancel() (Python 3.11+)")
 class QAsyncioTestCaseUncancel(unittest.TestCase):
     """ https://superfastpython.com/asyncio-cancel-task-cancellation """
 
