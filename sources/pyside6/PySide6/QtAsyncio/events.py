@@ -8,7 +8,7 @@ from PySide6.QtCore import (QCoreApplication, QDateTime, QDeadlineTimer,
 from . import futures
 from . import tasks
 
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
 
 import asyncio
 import collections.abc
@@ -26,6 +26,22 @@ __all__ = [
     "QAsyncioHandle", "QAsyncioTimerHandle",
 ]
 
+from typing import TYPE_CHECKING
+
+_T = TypeVar("_T")
+
+if TYPE_CHECKING:
+    try:
+        from typing import TypeVarTuple, Unpack
+    except ImportError:
+        from typing_extensions import TypeVarTuple, Unpack  # type: ignore
+
+    _Ts = TypeVarTuple("_Ts")
+    Context = contextvars.Context   # type: ignore
+else:
+    _Ts = None  # type: ignore
+    Context = contextvars.Context
+
 
 class QAsyncioExecutorWrapper(QObject):
     """
@@ -41,14 +57,13 @@ class QAsyncioExecutorWrapper(QObject):
     the executor thread, and then creates a zero-delay singleshot timer to push
     the actual callable for the executor into this new event loop.
     """
-
-    def __init__(self, func: Callable, *args: tuple) -> None:
+    def __init__(self, func: Callable[[Unpack[_Ts]], Any], *args: Unpack[_Ts]) -> None:
         super().__init__()
         self._loop: QEventLoop
         self._func = func
         self._args = args
-        self._result = None
-        self._exception = None
+        self._result: Any = None
+        self._exception: BaseException | None = None
 
     def _cb(self):
         try:
@@ -59,7 +74,7 @@ class QAsyncioExecutorWrapper(QObject):
             self._exception = e
         self._loop.exit()
 
-    def do(self):
+    def do(self) -> Any:
         # This creates a new event loop and dispatcher for the thread, if not
         # already created.
         self._loop = QEventLoop()
@@ -326,7 +341,7 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
         if timeout is not None:
             deadline_timer = QDeadlineTimer(int(timeout * 1000))
         else:
-            deadline_timer = QDeadlineTimer(QDeadlineTimer.Forever)
+            deadline_timer = QDeadlineTimer(QDeadlineTimer.ForeverConstant.Forever)
 
         if self._default_executor is None:
             return
@@ -346,50 +361,50 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
 
     # Scheduling callbacks
 
-    def _call_soon_impl(self, callback: Callable, *args: Any,
-                        context: contextvars.Context | None = None,
+    def _call_soon_impl(self, callback: Callable[[Unpack[_Ts]], object], *args: Unpack[_Ts],
+                        context: Context | None = None,
                         is_threadsafe: bool | None = False) -> asyncio.Handle:
         return self._call_later_impl(0, callback, *args, context=context,
                                      is_threadsafe=is_threadsafe)
 
-    def call_soon(self, callback: Callable, *args: Any,
-                  context: contextvars.Context | None = None) -> asyncio.Handle:
+    def call_soon(self, callback: Callable[[Unpack[_Ts]], object], *args: Unpack[_Ts],
+                  context: Context | None = None) -> asyncio.Handle:
         return self._call_soon_impl(callback, *args, context=context, is_threadsafe=False)
 
-    def call_soon_threadsafe(self, callback: Callable, *args: Any,
-                             context: contextvars.Context | None = None) -> asyncio.Handle:
+    def call_soon_threadsafe(self, callback: Callable[[Unpack[_Ts]], object], *args: Unpack[_Ts],
+                             context: Context | None = None) -> asyncio.Handle:
         if self.is_closed():
             raise RuntimeError("Event loop is closed")
         if context is None:
             context = contextvars.copy_context()
         return self._call_soon_impl(callback, *args, context=context, is_threadsafe=True)
 
-    def _call_later_impl(self, delay: int | float, callback: Callable, *args: Any,
-                         context: contextvars.Context | None = None,
+    def _call_later_impl(self, delay: float, callback: Callable[[Unpack[_Ts]], object],
+                         *args: Unpack[_Ts], context: Context | None = None,
                          is_threadsafe: bool | None = False) -> asyncio.TimerHandle:
         if not isinstance(delay, (int, float)):
             raise TypeError("delay must be an int or float")
-        return self._call_at_impl(self.time() + delay, callback, *args, context=context,
-                                  is_threadsafe=is_threadsafe)
+        return self._call_at_impl(self.time() + delay, callback, *args,
+                                  context=context, is_threadsafe=is_threadsafe)
 
-    def call_later(self, delay: int | float, callback: Callable, *args: Any,
-                   context: contextvars.Context | None = None) -> asyncio.TimerHandle:
+    def call_later(self, delay: float, callback: Callable[[Unpack[_Ts]], object],
+                   *args: Unpack[_Ts], context: Context | None = None) -> asyncio.TimerHandle:
         return self._call_later_impl(delay, callback, *args, context=context, is_threadsafe=False)
 
-    def _call_at_impl(self, when: int | float, callback: Callable, *args: Any,
-                      context: contextvars.Context | None = None,
+    def _call_at_impl(self, when: float, callback: Callable[[Unpack[_Ts]], object],
+                      *args: Unpack[_Ts], context: Context | None = None,
                       is_threadsafe: bool | None = False) -> asyncio.TimerHandle:
         """ All call_at() and call_later() methods map to this method. """
         if not isinstance(when, (int, float)):
             raise TypeError("when must be an int or float")
         return QAsyncioTimerHandle(when, callback, args, self, context, is_threadsafe=is_threadsafe)
 
-    def call_at(self, when: int | float, callback: Callable, *args: Any,
-                context: contextvars.Context | None = None) -> asyncio.TimerHandle:
+    def call_at(self, when: float, callback: Callable[[Unpack[_Ts]], object],
+                *args: Unpack[_Ts], context: Context | None = None) -> asyncio.TimerHandle:
         return self._call_at_impl(when, callback, *args, context=context, is_threadsafe=False)
 
     def time(self) -> float:
-        return QDateTime.currentMSecsSinceEpoch() / 1000
+        return QDateTime.currentMSecsSinceEpoch() / 1000.0
 
     # Creating Futures and Tasks
 
@@ -560,9 +575,9 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
 
     # Executing code in thread or process pools
 
-    def run_in_executor(self,
-                        executor: concurrent.futures.ThreadPoolExecutor | None,
-                        func: Callable, *args: tuple) -> asyncio.futures.Future:
+    def run_in_executor(self, executor: concurrent.futures.ThreadPoolExecutor | None,
+                        func: Callable[[Unpack[_Ts]], _T],
+                        *args: Unpack[_Ts]) -> asyncio.Future[_T]:
         if self.is_closed():
             raise RuntimeError("Event loop is closed")
         if executor is None:
@@ -575,9 +590,7 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
         # attaches a QEventLoop to the executor thread, and then pushes the
         # actual callable for the executor into this new event loop.
         wrapper = QAsyncioExecutorWrapper(func, *args)
-        return asyncio.futures.wrap_future(
-            executor.submit(wrapper.do), loop=self
-        )
+        return asyncio.futures.wrap_future(executor.submit(wrapper.do), loop=self)
 
     def set_default_executor(self,
                              executor: concurrent.futures.ThreadPoolExecutor | None) -> None:
@@ -649,13 +662,11 @@ class QAsyncioHandle():
                  loop: QAsyncioEventLoop, context: contextvars.Context | None,
                  is_threadsafe: bool | None = False) -> None:
         self._callback = callback
-        self._args = args
+        self._cb_args = args  # renamed from _args to avoid conflict with TimerHandle._args
         self._loop = loop
         self._context = context
         self._is_threadsafe = is_threadsafe
-
         self._timeout = 0
-
         self._state = QAsyncioHandle.HandleState.PENDING
         self._start()
 
@@ -685,9 +696,9 @@ class QAsyncioHandle():
         """
         if self._state == QAsyncioHandle.HandleState.PENDING:
             if self._context is not None:
-                self._context.run(self._callback, *self._args)
+                self._context.run(self._callback, *self._cb_args)
             else:
-                self._callback(*self._args)
+                self._callback(*self._cb_args)
             self._state = QAsyncioHandle.HandleState.DONE
 
     def cancel(self) -> None:

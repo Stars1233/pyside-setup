@@ -6,7 +6,7 @@ from . import events
 from . import futures
 import traceback
 
-from typing import Any
+from typing import Any, Optional
 
 import asyncio
 import collections.abc
@@ -21,6 +21,10 @@ class QAsyncioTask(futures.QAsyncioFuture):
                  loop: "events.QAsyncioEventLoop | None" = None, name: str | None = None,
                  context: contextvars.Context | None = None) -> None:
         super().__init__(loop=loop, context=context)
+        self._source_traceback = None  # required for Python < 3.11
+
+        self._state: futures.QAsyncioFuture.FutureState = futures.QAsyncioFuture.FutureState.PENDING
+        self._exception: Optional[BaseException] = None
 
         self._coro = coro  # The coroutine for which this task was created.
         self._name = name if name else "QtTask"
@@ -40,12 +44,13 @@ class QAsyncioTask(futures.QAsyncioFuture):
         self._cancel_count = 0
         self._cancel_message: str | None = None
         # Store traceback in case of Exception. Useful when exception happens in coroutine
-        self._tb: str = None
+        self._tb: str | None = None
 
         # https://docs.python.org/3/library/asyncio-extending.html#task-lifetime-support
         asyncio._register_task(self)  # type: ignore[arg-type]
 
     def __repr__(self) -> str:
+        state: str = "Unknown"
         if self._state == futures.QAsyncioFuture.FutureState.PENDING:
             state = "Pending"
         elif self._state == futures.QAsyncioFuture.FutureState.DONE_WITH_RESULT:
