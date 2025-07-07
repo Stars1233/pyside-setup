@@ -285,11 +285,21 @@ macro(create_pyside_module)
         set(ld_prefix_var_name "LD_LIBRARY_PATH")
     endif()
 
-    # Get the full path to the directory containing the shiboken shared library
-    get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_RELEASE)
-    if(NOT _shiboken_lib_location)
-        get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION)
+    # Get the build type, default to RELEASE if not set
+    if(CMAKE_BUILD_TYPE)
+        string(TOUPPER "${CMAKE_BUILD_TYPE}" _build_type)
+    else()
+        set(_build_type "RELEASE")
     endif()
+
+    # Try to get the location for the current build type
+    get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_${_build_type})
+
+    # Fallback to RELEASE if not found
+    if(NOT _shiboken_lib_location)
+        get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_RELEASE)
+    endif()
+
     # Get the directory containing the library file, which is the lib directory
     get_filename_component(SHIBOKEN_SHARED_LIBRARY_DIR "${_shiboken_lib_location}" DIRECTORY)
 
@@ -339,7 +349,8 @@ macro(create_pyside_module)
         set(SHIBOKEN_PYTHON_MODULE_DIR "${PYTHON_SITE_PACKAGES}/shiboken6")
         set(generate_pyi_options ${module_NAME} --sys-path
             "${pysidebindings_BINARY_DIR}"
-            "${SHIBOKEN_PYTHON_MODULE_DIR}/..")     # use the layer above shiboken6
+            "${SHIBOKEN_PYTHON_MODULE_DIR}/.."
+            "${SHIBOKEN_PYTHON_MODULE_DIR}/../../..")     # use the layer above shiboken6
         if (QUIET_BUILD)
             list(APPEND generate_pyi_options "--quiet")
         endif()
