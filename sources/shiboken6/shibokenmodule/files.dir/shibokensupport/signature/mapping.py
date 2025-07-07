@@ -557,6 +557,9 @@ def init_PySide6_QtCore():
     type_map_tuple.update({("PySide6.QtCore.QObject.disconnect", "char*"): str})
     type_map_tuple.update({("PySide6.QtCore.QObject.receivers", "char*"): str})
     type_map_tuple.update({("PySide6.QtCore.qtTrId", "char*"): str})
+    # special case - char default is 'int'.
+    # Here we manually set it to map to 'str'.
+    type_map_tuple.update({("PySide6.QtCore.QLocale.toString", "char"): str})
 
     return locals()
 
