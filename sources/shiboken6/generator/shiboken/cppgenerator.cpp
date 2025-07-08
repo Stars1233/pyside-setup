@@ -6748,8 +6748,11 @@ bool CppGenerator::finishGeneration()
         << "_CONVERTERS_IDX_COUNT" << "];\n"
         << convertersVariableName() << " = sbkConverters;\n\n"
         << "PyObject *module = Shiboken::Module::create(\""  << moduleName()
-        << "\", &moduledef);\n\n"
-        << "// Make module available from global scope\n"
+        << "\", &moduledef);\n"
+        << "#ifdef Py_GIL_DISABLED\n"
+        << "PyUnstable_Module_SetGIL(module, Py_MOD_GIL_NOT_USED);\n"
+        << "#endif\n"
+        << "\n// Make module available from global scope\n"
         << globalModuleVar << " = module;\n\n";
 
     const QString subModuleOf = typeDb->defaultTypeSystemType()->subModuleOf();

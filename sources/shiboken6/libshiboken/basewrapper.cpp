@@ -1974,7 +1974,7 @@ std::string info(SbkObject *self)
          "validCppObject.... " << self->d->validCppObject << "\n"
          "wasCreatedByPython " << self->d->cppObjectCreated << "\n"
          "value......        " << isValueType(self) << "\n"
-         "reference count... " << reinterpret_cast<PyObject *>(self)->ob_refcnt << '\n';
+         "reference count... " << Py_REFCNT(self) << '\n';
 
     if (self->d->parentInfo && self->d->parentInfo->parent) {
         s << "parent............ ";
