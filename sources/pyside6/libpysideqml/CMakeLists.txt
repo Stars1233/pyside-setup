@@ -93,9 +93,11 @@ install(TARGETS pyside6qml EXPORT PySide6Targets
                            RUNTIME DESTINATION bin)
 
 # install-tree or relocatable package installation
-set_target_properties(pyside6qml PROPERTIES
-                      VERSION ${PYSIDE_SO_VERSION})
-install(TARGETS pyside6qml EXPORT PySide6WheelTargets
-                           LIBRARY DESTINATION "PySide6"
-                           ARCHIVE DESTINATION "PySide6"
-                           RUNTIME DESTINATION "PySide6")
+if(NOT is_pyside6_superproject_build)
+    set_target_properties(pyside6qml PROPERTIES
+                        VERSION ${PYSIDE_SO_VERSION})
+    install(TARGETS pyside6qml EXPORT PySide6WheelTargets
+                            LIBRARY DESTINATION "PySide6"
+                            ARCHIVE DESTINATION "PySide6"
+                            RUNTIME DESTINATION "PySide6")
+endif()

@@ -37,10 +37,12 @@ install(EXPORT PySide6Targets
         DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6")
 
 # wheel export set
-install(EXPORT PySide6WheelTargets
-        NAMESPACE PySide6::
-        DESTINATION "${LIB_INSTALL_DIR}/wheels/cmake/PySide6"
-        FILE PySide6Targets.cmake)
+if(NOT is_pyside6_superproject_build)
+    install(EXPORT PySide6WheelTargets
+            NAMESPACE PySide6::
+            DESTINATION "${LIB_INSTALL_DIR}/wheels/cmake/PySide6"
+            FILE PySide6Targets.cmake)
+endif()
 
 if(Qt${QT_MAJOR_VERSION}UiTools_FOUND)
     add_subdirectory(plugins/uitools)

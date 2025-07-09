@@ -201,15 +201,18 @@ install(EXPORT Shiboken6Targets NAMESPACE Shiboken6::
         DESTINATION ${LIB_INSTALL_DIR}/cmake/Shiboken6)
 
 # wheel specific installation
-set_target_properties(libshiboken PROPERTIES
-    VERSION ${libshiboken_SOVERSION})
+if(NOT is_pyside6_superproject_build)
 
-install(TARGETS libshiboken EXPORT Shiboken6WheelTargets
-        LIBRARY DESTINATION "shiboken6"
-        ARCHIVE DESTINATION "shiboken6"
-        RUNTIME DESTINATION "shiboken6")
+    set_target_properties(libshiboken PROPERTIES
+        VERSION ${libshiboken_SOVERSION})
 
-install(EXPORT Shiboken6WheelTargets
-        NAMESPACE Shiboken6::
-        DESTINATION "${LIB_INSTALL_DIR}/wheels/cmake/Shiboken6"
-        FILE Shiboken6Targets.cmake)
+    install(TARGETS libshiboken EXPORT Shiboken6WheelTargets
+            LIBRARY DESTINATION "shiboken6"
+            ARCHIVE DESTINATION "shiboken6"
+            RUNTIME DESTINATION "shiboken6")
+
+    install(EXPORT Shiboken6WheelTargets
+            NAMESPACE Shiboken6::
+            DESTINATION "${LIB_INSTALL_DIR}/wheels/cmake/Shiboken6"
+            FILE Shiboken6Targets.cmake)
+endif()
