@@ -837,6 +837,7 @@ BuilderPrivate::SpecialSystemHeader
         }
         break;
     case Platform::macOS:
+    case Platform::iOS:
         // Parse the following system headers to get the correct typdefs for types like
         // int32_t, which are used in the macOS implementation of OpenGL framework.
         // They are installed under /Applications/Xcode.app/Contents/Developer/Platforms...
