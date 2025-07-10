@@ -5,8 +5,8 @@
 #define COMPILERSUPPORT_H
 
 #include <QtCore/qbytearraylist.h>
+#include <QtCore/qversionnumber.h>
 
-QT_FORWARD_DECLARE_CLASS(QVersionNumber)
 QT_FORWARD_DECLARE_CLASS(QString)
 
 enum class LanguageLevel {
@@ -63,7 +63,8 @@ void addCompilerArgument(const QString &arg);
 
 Platform platform();
 bool setPlatform(const QString &name);
-QByteArray targetTripletForPlatform(Platform p, Architecture a, Compiler c);
+QByteArray targetTripletForPlatform(Platform p, Architecture a, Compiler c,
+                                    const QVersionNumber &platformVersion = {});
 const char *compilerTripletValue(Compiler c);
 
 Architecture architecture();
@@ -86,7 +87,8 @@ void setHeuristicOptions(const QByteArrayList &clangOptions);
 
 // Parse a triplet "x86_64-unknown-linux-gnu" (for testing). Note the
 // compiler might not be present and defaults to host
-bool parseTriplet(QStringView name, Architecture *a, Platform *p, Compiler *c);
+bool parseTriplet(QStringView name, Architecture *a, Platform *p, Compiler *c,
+                  QVersionNumber *version);
 
 } // namespace clang
 

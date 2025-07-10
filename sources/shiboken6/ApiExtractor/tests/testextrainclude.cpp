@@ -9,6 +9,7 @@
 #include <typesystemtypeentry.h>
 #include <clangparser/compilersupport.h>
 
+#include <QtCore/qversionnumber.h>
 #include <QtTest/qtest.h>
 
 using namespace Qt::StringLiterals;
@@ -72,41 +73,49 @@ void TestExtraInclude::testParseTriplet_data()
     QTest::addColumn<Platform>("expectedPlatform");
     QTest::addColumn<bool>("expectedCompilerPresent");
     QTest::addColumn<Compiler>("expectedCompiler");
+    QTest::addColumn<bool>("expectedPlatformVersionPresent");
+    QTest::addColumn<QVersionNumber>("expectedPlatformVersion");
     QTest::addColumn<QByteArray>("expectedConverted"); // test back-conversion
 
     QTest::newRow("Invalid")
         << QString("Invalid"_L1)
         << false << Architecture::X64 << Platform::Linux << false << Compiler::Gpp
-        << QByteArray{};
+        << false << QVersionNumber{} << QByteArray{};
 
     QTest::newRow("Linux")
         << QString("x86_64-unknown-linux-gnu"_L1)
         << true << Architecture::X64 << Platform::Linux << true << Compiler::Gpp
+        << false << QVersionNumber{}
         << "x86_64-unknown-linux-gnu"_ba;
 
     QTest::newRow("WindowsArm")
         << QString("aarch64-pc-windows-msvc19.39.0"_L1)
         << true << Architecture::Arm64 << Platform::Windows << true << Compiler::Msvc
+        << false << QVersionNumber{}
         << "arm64-pc-windows-msvc"_ba;
 
     QTest::newRow("Apple")
         << QString("arm64-apple-macosx15.0.0"_L1)
         << true << Architecture::Arm64 << Platform::macOS << false << Compiler::Gpp
-        << "arm64-apple-macosx"_ba;
+        << true << QVersionNumber{15, 0, 0}
+        << "arm64-apple-macosx15.0.0"_ba;
 
     QTest::newRow("AndroidArm32")
         << QString("armv7a-none-linux-android5.1"_L1)
         << true << Architecture::Arm32 << Platform::Android << false << Compiler::Gpp
-        << "armv7a-unknown-linux-android"_ba;
+        << true << QVersionNumber{5, 1}
+        << "armv7a-unknown-linux-android5.1"_ba;
 
     QTest::newRow("AndroidArm64")
         << QString("aarch64-none-linux-androideabi27.1"_L1)
         << true << Architecture::Arm64 << Platform::Android << false << Compiler::Gpp
-        << "aarch64-unknown-linux-android"_ba;
+        << true << QVersionNumber{27, 1}
+        << "aarch64-unknown-linux-android27.1"_ba;
 
     QTest::newRow("iOS")
         << QString("arm64-apple-ios"_L1)
         << true << Architecture::Arm64 << Platform::iOS << false << Compiler::Gpp
+        << false << QVersionNumber{}
         << "arm64-apple-ios"_ba;
 }
 
@@ -118,21 +127,32 @@ void TestExtraInclude::testParseTriplet()
     QFETCH(Platform, expectedPlatform);
     QFETCH(bool, expectedCompilerPresent);
     QFETCH(Compiler, expectedCompiler);
+    QFETCH(bool, expectedPlatformVersionPresent);
+    QFETCH(QVersionNumber, expectedPlatformVersion);
     QFETCH(QByteArray, expectedConverted);
 
     Architecture actualArchitecture{};
     Platform actualPlatform{};
     Compiler actualCompiler{};
+    QVersionNumber actualPlatformVersion;
 
-    const bool ok = clang::parseTriplet(triplet, &actualArchitecture, &actualPlatform, &actualCompiler);
+    const bool ok = clang::parseTriplet(triplet, &actualArchitecture, &actualPlatform,
+                                        &actualCompiler, &actualPlatformVersion);
     QCOMPARE(ok, expectedOk);
     if (ok) {
         QCOMPARE(actualArchitecture, expectedArchitecture);
         QCOMPARE(actualPlatform, expectedPlatform);
+        if (expectedPlatformVersionPresent) {
+            QCOMPARE(actualPlatformVersion.isNull(), expectedPlatformVersion.isNull());
+            QCOMPARE(actualPlatformVersion, expectedPlatformVersion);
+        } else {
+            actualPlatformVersion = QVersionNumber{}; // clear host version
+        }
         if (expectedCompilerPresent)
             QCOMPARE(expectedCompiler, actualCompiler);
         if (expectedOk) {
-            auto actualConverted = clang::targetTripletForPlatform(actualPlatform, actualArchitecture, actualCompiler);
+            auto actualConverted = clang::targetTripletForPlatform(actualPlatform, actualArchitecture,
+                                                                   actualCompiler, actualPlatformVersion);
             QCOMPARE(actualConverted, expectedConverted);
         }
     }

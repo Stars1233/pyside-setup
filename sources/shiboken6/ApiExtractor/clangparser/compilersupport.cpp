@@ -14,10 +14,10 @@
 #include <QtCore/qfile.h>
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qlibraryinfo.h>
+#include <QtCore/qoperatingsystemversion.h>
 #include <QtCore/qprocess.h>
 #include <QtCore/qstandardpaths.h>
 #include <QtCore/qstringlist.h>
-#include <QtCore/qversionnumber.h>
 
 #include <clang-c/Index.h>
 
@@ -154,6 +154,12 @@ bool setPlatform(const QString &name)
     return parsePlatform(name, &_platform);
 }
 
+static QVersionNumber hostPlatformVersion()
+{
+    auto ov = QOperatingSystemVersion::current();
+    return ov.type() != QOperatingSystemVersionBase::Unknown ? ov.version() : QVersionNumber{};
+}
+
 static Architecture hostArchitecture()
 {
     // src/corelib/global/archdetect.cpp, "Qt 6.9.2 (x86_64-little_endian-lp64..."
@@ -228,11 +234,13 @@ QStringView stripTrailingVersion(QStringView s)
     return s;
 }
 
-bool parseTriplet(QStringView name, Architecture *a, Platform *p, Compiler *c)
+bool parseTriplet(QStringView name, Architecture *a, Platform *p, Compiler *c,
+                  QVersionNumber *version)
 {
     *a = hostArchitecture();
     *p = hostPlatform();
     *c = hostCompiler();
+    *version = hostPlatformVersion();
     auto values = name.split(u'-');
     if (values.size() < 2)
         return false;
@@ -245,7 +253,13 @@ bool parseTriplet(QStringView name, Architecture *a, Platform *p, Compiler *c)
         *c = comp;
         values.removeLast();
     }
-    return parsePlatform(stripTrailingVersion(values.constLast()), p);
+    const QStringView &fullPlatform = values.constLast();
+    QStringView platformName = stripTrailingVersion(fullPlatform);
+    if (platformName.size() < fullPlatform.size()) {
+        if (auto vn = QVersionNumber::fromString(fullPlatform.sliced(platformName.size())); !vn.isNull())
+            *version = vn;
+    }
+    return parsePlatform(platformName, p);
 }
 
 const char *compilerTripletValue(Compiler c)
@@ -261,7 +275,8 @@ const char *compilerTripletValue(Compiler c)
     return "gnu";
 }
 
-QByteArray targetTripletForPlatform(Platform p, Architecture a, Compiler c)
+QByteArray targetTripletForPlatform(Platform p, Architecture a, Compiler c,
+                                    const QVersionNumber &platformVersion)
 {
     QByteArray result;
     if (p == Platform::Unix || a == Architecture::Other)
@@ -286,23 +301,25 @@ QByteArray targetTripletForPlatform(Platform p, Architecture a, Compiler c)
 
     result += '-';
 
+    const QByteArray platformVersionB = platformVersion.isNull()
+        ? QByteArray{} : platformVersion.toString().toUtf8();
     switch (p) {
     case Platform::Unix:
         break;
     case Platform::Linux:
-        result += "unknown-linux-"_ba + compilerTripletValue(c);
+        result += "unknown-linux"_ba + platformVersionB + '-' + compilerTripletValue(c);
         break;
     case Platform::Windows:
-        result += "pc-windows-"_ba + compilerTripletValue(c);
+        result += "pc-windows"_ba + platformVersionB + '-' + compilerTripletValue(c);
         break;
     case Platform::macOS:
-        result += "apple-macosx"_ba;
+        result += "apple-macosx"_ba + platformVersionB;
         break;
     case Platform::Android:
-        result += "unknown-linux-android"_ba;
+        result += "unknown-linux-android"_ba + platformVersionB;
         break;
     case Platform::iOS:
-        result += "apple-ios"_ba;
+        result += "apple-ios"_ba + platformVersionB;
         break;
     }
     return result;
@@ -741,7 +758,8 @@ void setHeuristicOptions(const QByteArrayList &clangOptions)
             Architecture arch{};
             Platform platform{};
             Compiler comp{};
-            if (parseTriplet(triplet, &arch, &platform, &comp)) {
+            QVersionNumber platformVersion;
+            if (parseTriplet(triplet, &arch, &platform, &comp, &platformVersion)) {
                 if (!setOptions.testFlag(ArchitectureOption))
                     _architecture = arch;
                 if (!setOptions.testFlag(PlatformOption))
