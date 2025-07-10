@@ -50,6 +50,7 @@ function(pyside_internal_find_host_shiboken_tools)
         list(APPEND "REQUIRED")
     endif()
 
+    set(SHIBOKEN6TOOLS_SKIP_FIND_DEPENDENCIES TRUE)
     find_package(
         Shiboken6Tools 6 CONFIG
         ${find_package_extra_args}

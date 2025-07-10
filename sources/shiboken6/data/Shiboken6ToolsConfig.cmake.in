@@ -2,6 +2,20 @@
 
 cmake_minimum_required(VERSION 3.18)
 
+include(CMakeFindDependencyMacro)
+find_dependency(Python COMPONENTS Interpreter Development)
+
+if(NOT SHIBOKEN6TOOLS_SKIP_FIND_DEPENDENCIES)
+    list(APPEND CMAKE_PREFIX_PATH
+        "${Python_SITELIB}/shiboken6/lib/cmake"
+        "${Python_SITELIB}/PySide6/lib/cmake"
+    )
+    find_dependency(Shiboken6 REQUIRED)
+    find_dependency(PySide6 REQUIRED)
+endif()
+
 if(NOT TARGET Shiboken6::shiboken6)
     include("${CMAKE_CURRENT_LIST_DIR}/Shiboken6ToolsTargets.cmake")
 endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/Shiboken6ToolsMacros.cmake")

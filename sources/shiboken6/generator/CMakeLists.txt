@@ -69,6 +69,18 @@ install(EXPORT "${package_name}Targets"
         NAMESPACE "Shiboken6::"
         DESTINATION ${LIB_INSTALL_DIR}/cmake/${package_name})
 
+# Add wheel specific installation
+if(NOT is_pyside6_superproject_build)
+    install(TARGETS shiboken6
+            EXPORT "${package_name}WheelTargets"
+            DESTINATION "shiboken6_generator")
+
+    install(EXPORT "${package_name}WheelTargets"
+            NAMESPACE "Shiboken6::"
+            DESTINATION "${LIB_INSTALL_DIR}/wheels/cmake/${package_name}"
+            FILE "${package_name}Targets.cmake")
+endif()
+
 set(shiboken_generator_package_name "shiboken6_generator")
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_config.py.in"
@@ -101,6 +113,11 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_git_shiboken_generator_version.py"
 
 include(CMakePackageConfigHelpers)
 
+# Copy macros file to build tree
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../data/${package_name}Macros.cmake"
+               "${CMAKE_CURRENT_BINARY_DIR}/${package_name}Macros.cmake"
+               COPYONLY)
+
 # Single build-tree and install-tree Config file. There's no need for separate ones because we
 # don't specify any PATH_VARS, so the relative path of PACKAGE_PREFIX_DIR does not really matter.
 configure_package_config_file(
@@ -115,8 +132,9 @@ write_basic_package_version_file(
     ARCH_INDEPENDENT
 )
 
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${package_name}Config.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/${package_name}")
-
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${package_name}ConfigVersion.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/${package_name}")
+# Install the config files
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/${package_name}Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${package_name}ConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${package_name}Macros.cmake"
+    DESTINATION "${LIB_INSTALL_DIR}/cmake/${package_name}")

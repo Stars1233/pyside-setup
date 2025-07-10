@@ -201,6 +201,8 @@ def prepare_packages_win32(pyside_build, _vars):
         copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars)
         download_qt_dependency_dlls(_vars, destination_dir, msvc_redist)
 
+    copy_cmake_packages(_vars)
+
 
 # MSVC redistributable file list.
 msvc_redist = [
@@ -440,9 +442,32 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
         # Qt CI is using dynamic libclang with arm config.
         pyside_build.prepare_standalone_clang(is_win=True)
 
-    # Copy CMake config files
-    if config.is_internal_shiboken_module_build() or config.is_internal_pyside_build():
+
+def copy_cmake_packages(_vars):
+    if config.is_internal_shiboken_generator_build():
+        print("copy_cmake_config_dirs called for Shiboken6Tools with:",
+              "_vars['install_dir'] =", _vars["install_dir"],
+              "_vars['st_build_dir'] =", _vars["st_build_dir"],
+              "_vars['st_package_name'] =", _vars["st_package_name"])
         copy_cmake_config_dirs(
             _vars["install_dir"], _vars["st_build_dir"],
-            _vars["st_package_name"], _vars["cmake_package_name"]
+            _vars["st_package_name"], "Shiboken6Tools"
+        )
+    elif config.is_internal_shiboken_module_build():
+        print("copy_cmake_config_dirs called for Shiboken6 with:",
+              "_vars['install_dir'] =", _vars["install_dir"],
+              "_vars['st_build_dir'] =", _vars["st_build_dir"],
+              "_vars['st_package_name'] =", _vars["st_package_name"])
+        copy_cmake_config_dirs(
+            _vars["install_dir"], _vars["st_build_dir"],
+            _vars["st_package_name"], "Shiboken6"
+        )
+    elif config.is_internal_pyside_build():
+        print("copy_cmake_config_dirs called for PySide6 with:",
+              "_vars['install_dir'] =", _vars["install_dir"],
+              "_vars['st_build_dir'] =", _vars["st_build_dir"],
+              "_vars['st_package_name'] =", _vars["st_package_name"])
+        copy_cmake_config_dirs(
+            _vars["install_dir"], _vars["st_build_dir"],
+            _vars["st_package_name"], "PySide6"
         )

@@ -257,10 +257,23 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             pyside_build.prepare_standalone_clang(is_win=False)
 
     # Copy CMake config files
-    if config.is_internal_shiboken_module_build() or config.is_internal_pyside_build():
+    if config.is_internal_shiboken_generator_build():
+        # Copy Shiboken6Tools CMake package for generator
         copy_cmake_config_dirs(
             _vars["install_dir"], _vars["st_build_dir"],
-            _vars["st_package_name"], _vars["cmake_package_name"]
+            _vars["st_package_name"], "Shiboken6Tools"
+        )
+    elif config.is_internal_shiboken_module_build():
+        # Copy Shiboken6 CMake package for module
+        copy_cmake_config_dirs(
+            _vars["install_dir"], _vars["st_build_dir"],
+            _vars["st_package_name"], "Shiboken6"
+        )
+    elif config.is_internal_pyside_build():
+        # Copy PySide6 CMake package
+        copy_cmake_config_dirs(
+            _vars["install_dir"], _vars["st_build_dir"],
+            _vars["st_package_name"], "PySide6"
         )
 
     # Update rpath to $ORIGIN

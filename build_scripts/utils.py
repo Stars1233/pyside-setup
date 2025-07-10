@@ -1153,7 +1153,7 @@ def copy_cmake_config_dirs(install_dir, st_build_dir, st_package_name, cmake_pac
     dst_cmake_dir.mkdir(parents=True, exist_ok=True)
 
     for src_path in src_cmake_dir.iterdir():
-        if src_path.is_dir() and src_path.name.lower().startswith(cmake_package_name.lower()):
+        if src_path.is_dir() and (src_path.name.lower() == cmake_package_name.lower()):
             dst_path = dst_cmake_dir / src_path.name
             if dst_path.exists():
                 shutil.rmtree(dst_path)
@@ -1166,7 +1166,7 @@ def copy_cmake_config_dirs(install_dir, st_build_dir, st_package_name, cmake_pac
                 for item in wheel_path.iterdir():
                     if item.is_file() and re.search(r"Targets(-.*)?\.cmake$", item.name):
                         base_name = item.name.split('Targets')[0]
-                        if base_name in ("PySide6", "Shiboken6"):
+                        if base_name in ("PySide6", "Shiboken6", "Shiboken6Tools"):
                             wheel_targets_exist[base_name] = True
                             # Copy wheel target file
                             shutil.copy2(str(item), str(dst_path / item.name))
@@ -1177,7 +1177,7 @@ def copy_cmake_config_dirs(install_dir, st_build_dir, st_package_name, cmake_pac
                     skip_file = False
                     if re.search(r"Targets(-.*)?\.cmake$", item.name):
                         base_name = item.name.split('Targets')[0]
-                        is_pyside_shiboken = base_name in ("PySide6", "Shiboken6")
+                        is_pyside_shiboken = base_name in ("PySide6", "Shiboken6", "Shiboken6Tools")
                         if is_pyside_shiboken and base_name in wheel_targets_exist:
                             skip_file = True
 
