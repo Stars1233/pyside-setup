@@ -19,6 +19,7 @@
 #include <QtCore/qdir.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qlibrary.h>
+#include <QtCore/qversionnumber.h>
 #include <QtCore/qscopeguard.h>
 #include <QtCore/qvariant.h>
 
@@ -89,6 +90,8 @@ OptionDescriptions CommonOptionsParser::optionDescriptions()
         {u"platform=<name>"_s,
          u"Emulated platform (android, darwin, ios, linux, unix, windows)."
           " CMAKE_SYSTEM_NAME may be used."_s},
+        {u"platform-version=<version>"_s,
+         u"Platform version"_s},
         {u"arch=<name>"_s,
          u"Emulated architecture (x86_64, arm64, i586)."
           " CMAKE_SYSTEM_PROCESSOR may be used."_s},
@@ -213,6 +216,13 @@ bool CommonOptionsParser::handleOption(const QString &key, const QString &value,
         }
         return true;
     }
+
+    if (key == u"platform-version") {
+        if (!clang::setPlatformVersion(value))
+            throw Exception("Invalid value "_L1 + value + " passed to --platform-version."_L1);
+        return true;
+    }
+
     if (key == u"arch") {
         if (!clang::setArchitecture(value)) {
             qCWarning(lcShiboken, "Invalid architecture \"%s\" passed to --arch  defaulting to host.",

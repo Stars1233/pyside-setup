@@ -464,7 +464,8 @@ FileModelItem AbstractMetaBuilderPrivate::buildDom(QByteArrayList arguments,
         if (clang::isCrossCompilation() && !clang::hasTargetOption(arguments)) {
             const auto triplet = clang::targetTripletForPlatform(clang::platform(),
                                                                  clang::architecture(),
-                                                                 clang::compiler());
+                                                                 clang::compiler(),
+                                                                 clang::platformVersion());
             if (triplet.isEmpty()) {
                 qCWarning(lcShiboken,
                           "Unable to determine a cross compilation target triplet (%d/%d/%d).",

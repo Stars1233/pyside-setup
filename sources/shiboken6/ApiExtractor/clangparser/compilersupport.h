@@ -63,6 +63,10 @@ void addCompilerArgument(const QString &arg);
 
 Platform platform();
 bool setPlatform(const QString &name);
+
+QVersionNumber platformVersion();
+bool setPlatformVersion(const QString &name);
+
 QByteArray targetTripletForPlatform(Platform p, Architecture a, Compiler c,
                                     const QVersionNumber &platformVersion = {});
 const char *compilerTripletValue(Compiler c);

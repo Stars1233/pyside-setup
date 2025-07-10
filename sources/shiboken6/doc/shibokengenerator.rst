@@ -223,6 +223,11 @@ Options
     Emulated platform (``android``, ``darwin``, ``ios``, ``linux``, ``unix``, ``windows``).
     ``CMAKE_SYSTEM_NAME`` may be used.
 
+.. _platform-version-option:
+
+``--platform-version=<version>``
+    Platform version
+
 .. _arch-option:
 
 ``--arch=<name>``
@@ -432,6 +437,10 @@ and architectures as used in target triplets and can be set to the values of
 the CMake variables ``CMAKE_SYSTEM_NAME`` and ``CMAKE_SYSTEM_PROCESSOR``,
 respectively. If the specified platform is different from the host, Shiboken
 will pass a target triplet based on them to the clang parser.
+
+Optionally, the version of the platform can be specified using the
+:ref:`platform-version-option`. This is useful when the clang parser defaults
+to a too-old version.
 
 If this results in a wrong or too generic triplet, it is also possible to
 directly pass a target triplet in the Clang options specified by

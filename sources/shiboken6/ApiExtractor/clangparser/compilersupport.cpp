@@ -35,7 +35,8 @@ enum OptionSetFlag : unsigned
     CompilerOption = 0x1,
     CompilerPathOption = 0x2,
     PlatformOption = 0x4,
-    ArchitectureOption = 0x8
+    PlatformVersionOption = 0x8,
+    ArchitectureOption = 0x10
 };
 
 Q_DECLARE_FLAGS(OptionsSet, OptionSetFlag)
@@ -158,6 +159,25 @@ static QVersionNumber hostPlatformVersion()
 {
     auto ov = QOperatingSystemVersion::current();
     return ov.type() != QOperatingSystemVersionBase::Unknown ? ov.version() : QVersionNumber{};
+}
+
+// Version is not initialized from host since it is optional and the host version
+// should not interfere with cross build targets
+static QVersionNumber _platformVersion;
+
+QVersionNumber platformVersion()
+{
+    return _platformVersion;
+}
+
+bool setPlatformVersion(const QString &name)
+{
+    auto v = QVersionNumber::fromString(name);
+    setOptions.setFlag(PlatformVersionOption);
+    const bool result = !v.isNull();
+    if (result)
+        _platformVersion = v;
+    return result;
 }
 
 static Architecture hostArchitecture()
@@ -764,6 +784,8 @@ void setHeuristicOptions(const QByteArrayList &clangOptions)
                     _architecture = arch;
                 if (!setOptions.testFlag(PlatformOption))
                     _platform = platform;
+                if (!setOptions.testFlag(PlatformVersionOption))
+                    _platformVersion = platformVersion;
             } else {
                 qCWarning(lcShiboken, "Unable to parse triplet \"%s\".", qPrintable(triplet));
             }
