@@ -40,6 +40,40 @@ pre-loaded. Assuming the library is found at
 
 Lately, this feature has been added to MVSC, too.
 
+Build with thread sanitizer
+===========================
+
+`Thread sanitizer <https://clang.llvm.org/docs/ThreadSanitizer.html>`_
+can be useful for detecting data races, etc, for example when experimenting
+with free threaded Python. It is similar to address sanitizer.
+
+For the build, the options ``--sanitize-thread`` and ``--disable-pyi`` should
+be passed to prevent it terminating due to false positives when generating the
+``.pyi`` files:
+
+.. code-block:: bash
+
+    python setup.py build [...] --sanitize-thread --disable-pyi
+
+Similar to address sanitizer, a library needs to be pre-loaded
+when running code:
+
+.. code-block:: bash
+
+    export LD_PRELOAD=/usr/lib/gcc/x86_64-linux-gnu/13/libtsan.so
+
+.. note:: Thread sanitizer maybe report false positives (data races
+          for  code that is protected by a ``QRecursiveMutex`` or a
+          ``std::recursive_mutex``).
+
+.. note:: When the error `Unexpected memory mapping` occurs, it helps to execute:
+
+          .. code-block:: bash
+
+              sudo sysctl vm.mmap_rnd_bits=28
+
+          See `Article on stackoverflow <https://stackoverflow.com/questions/77850769/fatal-threadsanitizer-unexpected-memory-mapping-when-running-on-linux-kernels>`_\.
+
 De-Virtualize the Python Files
 ==============================
 
