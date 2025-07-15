@@ -143,7 +143,7 @@ def generate_build_cmake():
     # Specify prefix path so find_package(Qt6) works.
     qmake_dir = Path(QMAKE_PATH).resolve().parent.parent
     args = [CMAKE_PATH, "-G", "Ninja", "-DCMAKE_BUILD_TYPE=Release",
-                        f"-Dpython_interpreter={sys.executable}",
+                        f"-DPython_EXECUTABLE={sys.executable}",
                         f"-DCMAKE_PREFIX_PATH={qmake_dir}",
                         ".."]
     exit_code = run_process(args)

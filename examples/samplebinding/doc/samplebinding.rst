@@ -156,8 +156,9 @@ For Windows you will also need:
   configuration is the same (all Release, which is more likely,
   or all Debug).
 
-The build uses the ``pyside_config.py`` file to configure the project
-using the current PySide/Shiboken installation.
+The build uses the ``Shiboken6``, ``Shiboken6Tools``, and ``PySide6``
+CMake packages to configure the project with the current PySide/Shiboken
+installation.
 
 Using CMake
 ===========
