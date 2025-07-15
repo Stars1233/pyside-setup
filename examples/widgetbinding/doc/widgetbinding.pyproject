@@ -8,6 +8,5 @@
               "../wigglywidget.cpp",
               "../wigglywidget.h",
               "../wigglywidget.py",
-              "../CMakeLists.txt",
-              "../../utils/pyside_config.py"]
+              "../CMakeLists.txt"]
 }

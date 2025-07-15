@@ -34,8 +34,6 @@ The most important files are:
  * `bindings.h` to include the header of the classes we want to expose
  * `CMakeList.txt`, with all the instructions to build the shared libraries
    (DLL, or dylib)
- * `pyside_config.py` which is located in the utils directory, one level
-   up, to get the path for Shiboken and PySide.
 
 Now create a `build/` directory, and from inside run `cmake` to use
 the provided `CMakeLists.txt`:
