@@ -740,6 +740,8 @@ def init_testbinding():
 
 # Functions which should return Optional(result) but don't.
 missing_optional_return = {
+    "PySide6.QtGui.QGuiApplication.modalWindow",
+    "PySide6.QtGui.QGuiApplication.screenAt",
     "PySide6.QtWidgets.QApplication.activeModalWidget",
     "PySide6.QtWidgets.QApplication.activePopupWidget",
     "PySide6.QtWidgets.QApplication.activeWindow",
@@ -750,6 +752,7 @@ missing_optional_return = {
     "PySide6.QtWidgets.QComboBox.completer",
     "PySide6.QtWidgets.QComboBox.lineEdit",
     "PySide6.QtWidgets.QComboBox.validator",
+    "PySide6.QtWidgets.QCompleter.popup",
     "PySide6.QtWidgets.QGridLayout.itemAt",
     "PySide6.QtWidgets.QGridLayout.itemAtPosition",
     "PySide6.QtWidgets.QLayout.itemAt",
