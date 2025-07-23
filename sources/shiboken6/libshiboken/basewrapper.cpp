@@ -1963,6 +1963,7 @@ std::string info(SbkObject *self)
 {
     std::ostringstream s;
 
+    s << "id................ " << self << '\n';
     if (self->d && self->d->cptr) {
         const std::vector<PyTypeObject *> bases = getBases(self);
 
@@ -1985,7 +1986,7 @@ std::string info(SbkObject *self)
     if (self->d->parentInfo && self->d->parentInfo->parent) {
         s << "parent............ ";
         Shiboken::AutoDecRef parent(PyObject_Str(reinterpret_cast<PyObject *>(self->d->parentInfo->parent)));
-        s << String::toCString(parent) << "\n";
+        s << String::toCString(parent) << '\n';
     }
 
     if (self->d->parentInfo && !self->d->parentInfo->children.empty()) {
