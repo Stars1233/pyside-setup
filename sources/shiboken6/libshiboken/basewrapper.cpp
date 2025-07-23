@@ -1763,8 +1763,14 @@ void setParent(PyObject *parent, PyObject *child)
             parent_->d->parentInfo = new ParentInfo;
 
         // do not re-add a child
-        if (child_->d->parentInfo && (child_->d->parentInfo->parent == parent_))
+        if (child_->d->parentInfo && (child_->d->parentInfo->parent == parent_)) {
+            if (Shiboken::pyVerbose()) {
+                std::cerr << "Warning: Attempt to re-add child "
+                          << child << '/' << Py_TYPE(child)->tp_name << " to parent "
+                          << parent << '/' << Py_TYPE(parent)->tp_name << '\n';
+            }
             return;
+        }
     }
 
     ParentInfo *pInfo = child_->d->parentInfo;
