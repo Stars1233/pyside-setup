@@ -15,8 +15,27 @@
 #include "gilstate.h"
 
 #include <cctype>
+#include <iostream>
+#include <string_view>
+#include <vector>
 
 using namespace Shiboken;
+
+using StringViewVector = std::vector<std::string_view>;
+
+static StringViewVector splitStringView(std::string_view s, char delimiter)
+{
+    StringViewVector result;
+    const auto size = s.size();
+    for (std::string_view::size_type pos = 0; pos < size; ) {
+        auto nextPos = s.find(delimiter, pos);
+        if (nextPos == std::string_view::npos)
+            nextPos = size;
+        result.push_back(s.substr(pos, nextPos - pos));
+        pos = nextPos + 1;
+    }
+    return result;
+}
 
 extern "C"
 {
@@ -199,27 +218,40 @@ static bool currentOpcode_Is_CallMethNoArgs()
     return opcode2 == CALL_OpCode(number) && oparg2 == 0;
 }
 
+static inline PyObject *PyUnicode_fromStringView(std::string_view s)
+{
+    return PyUnicode_FromStringAndSize(s.data(), s.size());
+}
+
+static bool populateEnumDicts(PyObject *typeDict, PyObject *dict, const char *enumFlagInfo)
+{
+    StringViewVector parts = splitStringView(enumFlagInfo, ':');
+    if (parts.size() < 2)
+        return false;
+    AutoDecRef name(PyUnicode_fromStringView(parts[0]));
+    AutoDecRef typeName(PyUnicode_fromStringView(parts[1]));
+    if (parts.size() >= 3) {
+        AutoDecRef key(PyUnicode_fromStringView(parts[2]));
+        auto *value = name.object();
+        if (PyDict_SetItem(dict, key, value) != 0)
+            return false;
+    }
+    if (PyDict_SetItem(typeDict, name, typeName) != 0)
+        return false;
+    return true;
+}
+
 void initEnumFlagsDict(PyTypeObject *type)
 {
     // We create a dict for all flag enums that holds the original C++ name
     // and a dict that gives every enum/flag type name.
-    static PyObject *const split = Shiboken::String::createStaticString("split");
-    static PyObject *const colon = Shiboken::String::createStaticString(":");
-    auto sotp = PepType_SOTP(type);
+    auto *sotp = PepType_SOTP(type);
     auto **enumFlagInfo = sotp->enumFlagInfo;
     auto *dict = PyDict_New();
     auto *typeDict = PyDict_New();
     for (; *enumFlagInfo; ++enumFlagInfo) {
-        AutoDecRef line(PyUnicode_FromString(*enumFlagInfo));
-        AutoDecRef parts(PyObject_CallMethodObjArgs(line, split, colon, nullptr));
-        auto *name = PyList_GetItem(parts, 0);
-        if (PyList_Size(parts) == 3) {
-            auto *key = PyList_GetItem(parts, 2);
-            auto *value = name;
-            PyDict_SetItem(dict, key, value);
-        }
-        auto *typeName = PyList_GetItem(parts, 1);
-        PyDict_SetItem(typeDict, name, typeName);
+        if (!populateEnumDicts(typeDict, dict, *enumFlagInfo))
+            std::cerr << __FUNCTION__ << ": Invalid enum \"" << *enumFlagInfo << '\n';
     }
     sotp->enumFlagsDict = dict;
     sotp->enumTypeDict = typeDict;
