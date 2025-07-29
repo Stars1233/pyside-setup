@@ -18,7 +18,7 @@ add_library(uiplugin STATIC ${ui_plugin_src})
 if(CMAKE_HOST_UNIX AND NOT CYGWIN)
     add_definitions(-fPIC)
 endif()
-add_definitions(-DQT_STATICPLUGIN)
+add_compile_definitions(QT_STATICPLUGIN)
 
 set_property(TARGET pyside6 PROPERTY CXX_STANDARD 17)
 

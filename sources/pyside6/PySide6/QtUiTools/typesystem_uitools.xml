@@ -13,7 +13,8 @@
         <include file-name="glue/plugins.h" location="local"/>
       </extra-includes>
       <inject-code class="native" position="beginning" file="../glue/qtuitools.cpp" snippet="uitools-loadui"/>
-      <inject-code file="../glue/qtuitools.cpp" snippet="quiloader"/>
+      <inject-code class="native" position="beginning"
+                   file="../glue/qtuitools.cpp" snippet="quiloader"/>
       <add-function signature="registerCustomWidget(PyObject*@customWidgetType@)" return-type="void">
          <inject-documentation format="target" mode="append" file="../doc/qtuitools.rst"
                                snippet="quiloader-registercustomwidget"/>
