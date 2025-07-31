@@ -12,7 +12,7 @@ development and deployment. You will learn how to:
  - Successfully deploy the PySide6 application
 
 ```{note}
-This tutorial is not a focused on teaching how to use Qt Design Studio or QML, but rather how to
+This tutorial is not focused on teaching how to use Qt Design Studio or QML, but rather how to
 integrate PySide6 with an existing Qt Design Studio project. If you want to learn how to use Qt
 Design Studio, check the [available tutorials][qt-design-studio-tutorials].
 ```
@@ -112,13 +112,29 @@ linenos: true
 ```
 </details>
 
+## Running the application
+
+Navigate to the `Python/` directory of the project:
+
+```bash
+cd Python/
+```
+
+Then, build the project using:
+
+```bash
+pyside6-project build
+```
+
+This command will compile resources, UI files, QML files, and other necessary components.
+
 ## Deployment
 
 In order to create a standalone executable of the application, we can use the [pyside6-deploy]
 command line tool. It will analyze the project source code, determine the required Qt modules and
 dependencies and bundle the code into a native executable.
 
-To deploy the application, execute the following command from the project directory:
+To deploy the application, execute the following command from the `Python/` directory:
 
 ```bash
 pyside6-deploy --name Drumpad
