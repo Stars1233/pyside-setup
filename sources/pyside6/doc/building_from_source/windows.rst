@@ -55,7 +55,10 @@ Setting up CLANG
 
 libclang can be downloaded from the
 `Qt servers <https://download.qt.io/development_releases/prebuilt/libclang>`_.
-for example, ``libclang-release_18.1.5-based-windows-vs2019_64.7z``.
+for example, ``libclang-release_20.1.3-based-windows-vs2019_64.7z``.
+
+For ARM64 Windows, use:
+``libclang-release_20.1.3-based-windows-vs2022_arm64.7z``.
 
 Note that from version 12 onwards, the prebuilt Windows binaries from
 `LLVM <https://www.llvm.org>`_ no longer contain CMake configuration files; so

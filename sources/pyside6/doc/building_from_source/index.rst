@@ -35,9 +35,6 @@ website.
   Prebuilt versions for each OS can be `downloaded here`_.
 * Check the `Supported Platforms of Qt`_
 
-.. _downloaded here: https://download.qt.io/development_releases/prebuilt/libclang/
-.. _`Supported Platforms of Qt` : https://doc.qt.io/qt-6/supported-platforms.html
-
 Guides per platform
 -------------------
 
@@ -570,3 +567,5 @@ A set of tools can be found under the ``tools/`` directory inside the ``pyside-s
 .. _`wiki page`: https://wiki.qt.io/Qt_for_Python_Missing_Bindings
 .. _BeautifulSoup: https://www.crummy.com/software/BeautifulSoup/
 .. _`CMake Unity Build Mode` : https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html
+.. _downloaded here: https://download.qt.io/development_releases/prebuilt/libclang/
+.. _`Supported Platforms of Qt` : https://doc.qt.io/qt-6/supported-platforms.html
