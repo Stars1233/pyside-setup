@@ -4,6 +4,8 @@
 #include "sbktypefactory.h"
 #include "shiboken.h"
 
+#include <iostream>
+
 extern "C"
 {
 
@@ -68,6 +70,12 @@ static PyObject *_PyType_FromSpecWithBasesHack(PyType_Spec *spec,
             PyTypeObject *meta = Py_TYPE(base);
             if (meta->tp_new != PyType_Type.tp_new) {
                 // make sure there is no second meta class
+                if (keepMeta != nullptr) {
+                    std::cerr << "Warning: " << __FUNCTION__
+                        << ": multiple meta classes found for " << spec->name << " at "
+                        << idx << ": " << base->tp_name << " in addition to "
+                        << keepMeta->tp_name << '\n';
+                }
                 assert(keepMeta == nullptr);
                 keepMeta = meta;
                 keepNew = meta->tp_new;
