@@ -6416,6 +6416,25 @@ static void writeSubModuleHandling(TextStream &s, const QString &moduleName,
         << indent << "return nullptr;\n" << outdent << outdent << "}\n";
 }
 
+static QString writeModuleDef(TextStream &s, const QString &moduleName)
+{
+    QString moduleDef = moduleName + "ModuleDef"_L1;
+    s << R"(static struct PyModuleDef )" << moduleDef << R"( = {
+    /* m_base     */ PyModuleDef_HEAD_INIT,
+    /* m_name     */ ")" << moduleName << R"(",
+    /* m_doc      */ nullptr,
+    /* m_size     */ -1,
+    /* m_methods  */ )" << moduleName << R"(Methods,
+    /* m_reload   */ nullptr,
+    /* m_traverse */ nullptr,
+    /* m_clear    */ nullptr,
+    /* m_free     */ nullptr
+};
+
+)";
+    return moduleDef;
+}
+
 bool CppGenerator::finishGeneration()
 {
     //Generate CPython wrapper file
@@ -6598,7 +6617,7 @@ bool CppGenerator::finishGeneration()
     s << "// Global functions "
         << "------------------------------------------------------------\n"
         << s_globalFunctionImpl.toString() << '\n'
-        << "static PyMethodDef " << moduleName() << "_methods[] = {\n" << indent
+        << "static PyMethodDef " << moduleName() << "Methods[] = {\n" << indent
         << s_globalFunctionDef.toString()
         << METHOD_DEF_SENTINEL << outdent << "};\n\n"
         << "// Classes initialization functions "
@@ -6676,16 +6695,8 @@ bool CppGenerator::finishGeneration()
         s << '\n';
     }
 
-    s << "static struct PyModuleDef moduledef = {\n"
-        << "    /* m_base     */ PyModuleDef_HEAD_INIT,\n"
-        << "    /* m_name     */ \"" << moduleName() << "\",\n"
-        << "    /* m_doc      */ nullptr,\n"
-        << "    /* m_size     */ -1,\n"
-        << "    /* m_methods  */ " << moduleName() << "_methods,\n"
-        << "    /* m_reload   */ nullptr,\n"
-        << "    /* m_traverse */ nullptr,\n"
-        << "    /* m_clear    */ nullptr,\n"
-        << "    /* m_free     */ nullptr\n};\n\n";
+    const QString &modName =  moduleName();
+    const QString moduleDef = writeModuleDef(s, modName);
 
     // PYSIDE-510: Create a signatures string for the introspection feature.
     writeSignatureStrings(s, signatureStream.toString(), moduleName(), "global functions");
@@ -6749,7 +6760,7 @@ bool CppGenerator::finishGeneration()
         << "_CONVERTERS_IDX_COUNT" << "];\n"
         << convertersVariableName() << " = sbkConverters;\n\n"
         << "PyObject *module = Shiboken::Module::create(\""  << moduleName()
-        << "\", &moduledef);\n"
+        << "\", &" << moduleDef << ");\n"
         << "#ifdef Py_GIL_DISABLED\n"
         << "PyUnstable_Module_SetGIL(module, Py_MOD_GIL_NOT_USED);\n"
         << "#endif\n"
