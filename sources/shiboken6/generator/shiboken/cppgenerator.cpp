@@ -6425,16 +6425,28 @@ static void writeSubModuleHandling(TextStream &s, const QString &moduleName,
         << indent << "return nullptr;\n" << outdent << outdent << "}\n";
 }
 
-static QString writeModuleDef(TextStream &s, const QString &moduleName)
+static QString writeModuleDef(TextStream &s, const QString &moduleName,
+                              const QString &execFunc)
 {
     QString moduleDef = moduleName + "ModuleDef"_L1;
-    s << R"(static struct PyModuleDef )" << moduleDef << R"( = {
+    s << "static PyModuleDef_Slot " << moduleName << R"(ModuleSlots[] = {
+    {Py_mod_exec, reinterpret_cast<void *>()" << execFunc << R"()},
+#if !defined(PYPY_VERSION) && ((!defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030C0000) || (defined(Py_LIMITED_API) && Py_LIMITED_API >= 0x030C0000))
+    {Py_mod_multiple_interpreters, Py_MOD_MULTIPLE_INTERPRETERS_NOT_SUPPORTED},
+#endif
+#ifdef Py_GIL_DISABLED
+    {Py_mod_gil, Py_MOD_GIL_USED},
+#endif
+    {0, nullptr}
+};
+
+static struct PyModuleDef )" << moduleDef << R"( = {
     /* m_base     */ PyModuleDef_HEAD_INIT,
     /* m_name     */ ")" << moduleName << R"(",
     /* m_doc      */ nullptr,
-    /* m_size     */ -1,
+    /* m_size     */ 0,
     /* m_methods  */ )" << moduleName << R"(Methods,
-    /* m_reload   */ nullptr,
+    /* m_slots    */ )" << moduleName << R"(ModuleSlots,
     /* m_traverse */ nullptr,
     /* m_clear    */ nullptr,
     /* m_free     */ nullptr
@@ -6545,6 +6557,7 @@ bool CppGenerator::finishGeneration()
     s << licenseComment() << R"(
 #include <sbkpep.h>
 #include <shiboken.h>
+#include <sbkbindingutils.h>
 #include <algorithm>
 #include <signature.h>
 )";
@@ -6598,8 +6611,6 @@ bool CppGenerator::finishGeneration()
        << "Shiboken::Module::TypeInitStruct *" << cppApiVariableName() << " = nullptr;\n"
        << "// Backwards compatible structure with identical indexing.\n"
        << "PyTypeObject **" << cppApiVariableNameOld() << " = nullptr;\n"
-       << "// Current module's PyObject pointer.\n"
-       << "PyObject *" << pythonModuleObjectName() << " = nullptr;\n"
        << "// Current module's converter array.\n"
        << "SbkConverter **" << convertersVariableName() << " = nullptr;\n\n";
 
@@ -6736,7 +6747,7 @@ bool CppGenerator::finishGeneration()
     writeModuleExecFunction(s, execFunc, opaqueContainerRegisterFunc, enumRegisterFunc,
                             s_classPythonDefines.toString(), classesWithStaticFields);
 
-    const QString moduleDef = writeModuleDef(s, modName);
+    const QString moduleDef = writeModuleDef(s, modName, execFunc);
 
     writeModuleInitFunction(s, moduleDef, execFunc, convInitFunc, containerConvInitFunc, qtEnumRegisterMetaTypeFunc);
 
@@ -6833,7 +6844,6 @@ void CppGenerator::writeModuleInitFunction(TextStream &s, const QString &moduleD
                                            const QString &containerConvInitFunc,
                                            const QString &qtEnumRegisterMetaTypeFunc)
 {
-     const QString globalModuleVar = pythonModuleObjectName();
      s << "extern \"C\" LIBSHIBOKEN_EXPORT PyObject *PyInit_"
          << moduleName() << "()\n{\n" << indent
          << "Shiboken::init();\n\n";
@@ -6897,16 +6907,21 @@ void CppGenerator::writeModuleInitFunction(TextStream &s, const QString &moduleD
          s << qtEnumRegisterMetaTypeFunc << "();\n";
      s << '\n';
 
-     s << "PyObject *module = Shiboken::Module::create(\""  << moduleName()
+     // As of 8/25, Nuitka does not support multi-phase initialization. Fall back
+     s << "PyObject *module = nullptr;\n"
+         << "if (Shiboken::isCompiled()) {\n" << indent
+         << moduleDef << ".m_size = -1;\n"
+         << moduleDef << ".m_slots = nullptr;\n"
+         << "module = Shiboken::Module::createOnly(\""  << moduleName()
          << "\", &" << moduleDef << ");\n"
          << "if (module == nullptr)\n" << indent << "return nullptr;\n" << outdent
          << "#ifdef Py_GIL_DISABLED\n"
          << "PyUnstable_Module_SetGIL(module, Py_MOD_GIL_NOT_USED);\n"
          << "#endif\n"
-         << "\n// Make module available from global scope\n"
-         << globalModuleVar << " = module;\n\n";
-
-     s << "if (" << execFunc << "(module) != 0)\n" << indent << "return nullptr;\n" << outdent
+         << "if (" << execFunc << "(module) != 0)\n" << indent << "return nullptr;\n" << outdent
+         << outdent << "} else {\n" << indent;
+      // Multi-phase initialization (exec() will be called by CPython).
+      s  << "module = PyModuleDef_Init(&" << moduleDef << ");\n" << outdent << "}\n"
          << "return module;\n" << outdent << "}\n\n";
 }
 
@@ -6932,7 +6947,9 @@ void CppGenerator::writeModuleExecFunction(TextStream &s, const QString &name,
                                            const AbstractMetaClassCList &classesWithStaticFields)
 {
     // Code to run in an module instance of a subinterpreter (Py_mod_exec)
-    s << "extern \"C\" {\nstatic int " << name << "(PyObject *module)\n{\n" << indent;
+    s << "extern \"C\" {\nstatic int " << name << "(PyObject *module)\n{\n" << indent
+        << "Shiboken::Module::exec(module);\n\n";
+
     // module inject-code target/beginning
     const TypeDatabase *typeDb = TypeDatabase::instance();
     const CodeSnipList snips = typeDb->defaultTypeSystemType()->codeSnips();

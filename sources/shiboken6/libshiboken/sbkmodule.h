@@ -37,10 +37,16 @@ LIBSHIBOKEN_API void resolveLazyClasses(PyObject *module);
 LIBSHIBOKEN_API PyObject *import(const char *moduleName);
 
 /**
- *  Creates a new Python module named \p moduleName using the information passed in \p moduleData.
+ *  Creates a new Python module named \p moduleName using the information passed in \p moduleData
+ *  and calls exec() on it.
  *  \returns a newly created module.
  */
-LIBSHIBOKEN_API PyObject *create(const char *moduleName, PyModuleDef *moduleData);
+[[deprecated]] LIBSHIBOKEN_API PyObject *create(const char *moduleName, PyModuleDef *moduleData);
+
+/// Creates a new Python module named \p moduleName using the information passed in \p moduleData.
+/// exec() is not called (Support for Nuitka).
+/// \returns a newly created module.
+LIBSHIBOKEN_API PyObject *createOnly(const char *moduleName, PyModuleDef *moduleData);
 
 /// Executes a module (multi-phase initialization helper)
 LIBSHIBOKEN_API void exec(PyObject *module);

@@ -481,7 +481,8 @@ static PyMethodDef lazy_methods[] = {
     {nullptr, nullptr, 0, nullptr}
 };
 
-PyObject *create(const char * /* modName */, PyModuleDef *moduleData)
+PyObject *createOnly(const char * /* moduleName */, PyModuleDef *moduleData)
+
 {
     Shiboken::init();
     auto *module = PyModule_Create(moduleData);
@@ -492,8 +493,14 @@ PyObject *create(const char * /* modName */, PyModuleDef *moduleData)
 #ifdef Py_GIL_DISABLED
     PyUnstable_Module_SetGIL(module, Py_MOD_GIL_NOT_USED);
 #endif
+    return module;
+}
 
-    exec(module);
+PyObject *create(const char *moduleName, PyModuleDef *moduleData)
+{
+    auto *module = createOnly(moduleName, moduleData);
+    if (module != nullptr)
+        exec(module);
     return module;
 }
 
