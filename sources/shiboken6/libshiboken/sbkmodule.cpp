@@ -490,7 +490,7 @@ static PyMethodDef lazy_methods[] = {
     {nullptr, nullptr, 0, nullptr}
 };
 
-PyObject *create(const char * /* modName */, void *moduleData)
+PyObject *create(const char * /* modName */, PyModuleDef *moduleData)
 {
     static auto *sysModules = PyImport_GetModuleDict();
     static auto *builtins = PyEval_GetBuiltins();
@@ -498,7 +498,11 @@ PyObject *create(const char * /* modName */, void *moduleData)
     static bool lazy_init{};
 
     Shiboken::init();
-    auto *module = PyModule_Create(reinterpret_cast<PyModuleDef *>(moduleData));
+    auto *module = PyModule_Create(moduleData);
+    if (module == nullptr) {
+        PyErr_Print();
+        return nullptr;
+    }
 #ifdef Py_GIL_DISABLED
     PyUnstable_Module_SetGIL(module, Py_MOD_GIL_NOT_USED);
 #endif
@@ -532,7 +536,7 @@ PyObject *create(const char * /* modName */, void *moduleData)
     //              that gets imported before the running import can call
     //              `_PyImport_FixupExtensionObject` which does the insertion
     //              into `sys.modules`. This can cause a race condition.
-    // Insert the module early into the module dict to prevend recursion.
+    // Insert the module early into the module dict to prevent recursion.
     PyDict_SetItemString(sysModules, PyModule_GetName(module), module);
     // Clear the non-existing name cache because we have a new module.
     Shiboken::Conversions::clearNegativeLazyCache();

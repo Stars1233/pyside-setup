@@ -38,11 +38,9 @@ LIBSHIBOKEN_API PyObject *import(const char *moduleName);
 
 /**
  *  Creates a new Python module named \p moduleName using the information passed in \p moduleData.
- *  In fact, \p moduleData expects a "PyMethodDef *" object, but that's for Python 2. A "void*"
- *  was preferred to make this work with future Python 3 support.
  *  \returns a newly created module.
  */
-LIBSHIBOKEN_API PyObject *create(const char *moduleName, void *moduleData);
+LIBSHIBOKEN_API PyObject *create(const char *moduleName, PyModuleDef *moduleData);
 
 using TypeCreationFunction = PyTypeObject *(*)(PyObject *module);
 
