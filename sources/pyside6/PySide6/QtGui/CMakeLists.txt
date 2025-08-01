@@ -294,7 +294,14 @@ get_property(QtGui_enabled_features TARGET Qt${QT_MAJOR_VERSION}::Gui
 if("xcb" IN_LIST QtGui_enabled_features)
     list(APPEND QtGui_SRC
          ${QtGui_GEN_DIR}/qnativeinterface_qx11application_wrapper.cpp)
-elseif(WIN32)
+endif()
+
+if("wayland" IN_LIST QtGui_enabled_features)
+    list(APPEND QtGui_SRC
+         ${QtGui_GEN_DIR}/qnativeinterface_qwaylandapplication_wrapper.cpp)
+endif()
+
+if(WIN32)
     list(APPEND QtGui_SRC
          ${QtGui_GEN_DIR}/qnativeinterface_qwindowsscreen_wrapper.cpp)
 endif()

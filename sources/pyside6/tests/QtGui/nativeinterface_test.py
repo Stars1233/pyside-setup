@@ -23,6 +23,9 @@ class TestNativeInterface(UsesQApplication):
         if native_app:
             if issubclass(type(native_app), QNativeInterface.QX11Application):
                 self.assertTrue(native_app.display() != 0)
+            elif issubclass(type(native_app), QNativeInterface.QWaylandApplication):
+                self.assertTrue(native_app.display() != 0)
+                self.assertTrue(native_app.seat() is not None)
 
 
 if __name__ == '__main__':

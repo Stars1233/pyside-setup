@@ -907,7 +907,13 @@ if (auto *x11App = %CPPSELF.nativeInterface<QNativeInterface::QX11Application>()
     hasNativeApp = true;
     %PYARG_0 = %CONVERTTOPYTHON[QNativeInterface::QX11Application*](x11App);
 }
-#endif
+#endif // xcb
+#if QT_CONFIG(wayland)
+if (auto *waylandApp = %CPPSELF.nativeInterface<QNativeInterface::QWaylandApplication>()) {
+    hasNativeApp = true;
+    %PYARG_0 = %CONVERTTOPYTHON[QNativeInterface::QWaylandApplication*](waylandApp);
+}
+#endif // wayland
 if (!hasNativeApp) {
     Py_INCREF(Py_None);
     %PYARG_0 = Py_None;
