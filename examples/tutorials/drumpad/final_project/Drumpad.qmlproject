@@ -43,7 +43,7 @@ Project {
     }
 
     Files {
-        directory: "../Sounds"
+        directory: "Sounds"
         filter: "*.mp3;*.wav"
     }
 

@@ -26,4 +26,4 @@ class AudioFilesModel(QObject):
                 audio_files.append(resource.split(resource_prefix)[-1])
             return audio_files
 
-        return list(p.name for p in Path(project_root / ".." / "Sounds").glob("*.wav"))
+        return list(p.name for p in Path(project_root / "Sounds").glob("*.wav"))

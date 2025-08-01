@@ -9,7 +9,7 @@ import Audio
 ComboBox {
     id: root
 
-    property string currentFile: currentText ? `../Sounds/${currentText}` : ""
+    property string currentFile: currentText ? `Sounds/${currentText}` : ""
     required property int initialIndex
 
     model: audioFilesModel.getModel()
