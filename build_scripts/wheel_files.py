@@ -330,6 +330,7 @@ def module_QtGui() -> ModuleData:
     _typesystems = [
         "gui_common.xml",
         "typesystem_gui_common.xml",
+        "typesystem_gui_nativeinterface.xml",
         "typesystem_gui_mac.xml",
         "typesystem_gui_win.xml",
         "typesystem_gui_x11.xml",

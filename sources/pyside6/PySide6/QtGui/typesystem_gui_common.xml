@@ -2836,31 +2836,6 @@
     </modify-function>
   </object-type>
 
-  <namespace-type name="QNativeInterface" private="yes" since="6.7">
-      <object-type name="QX11Application" private="yes" disable-wrapper="yes"
-                   force-abstract="yes">
-          <configuration condition="QT_CONFIG(xcb)"/>
-          <modify-function signature="display()const">
-              <modify-argument index="return">
-                  <replace-type modified-type="int"/>
-              </modify-argument>
-              <inject-code class="target" position="end" file="../glue/qtgui.cpp"
-                           snippet="qx11application-resource-ptr"/>
-          </modify-function>
-          <modify-function signature="connection()const">
-              <modify-argument index="return">
-                  <replace-type modified-type="int"/>
-              </modify-argument>
-              <inject-code class="target" position="end" file="../glue/qtgui.cpp"
-                           snippet="qx11application-resource-ptr"/>
-          </modify-function>
-      </object-type>
-      <object-type name="QWindowsScreen" private="yes" disable-wrapper="yes"
-                   force-abstract="yes">
-          <configuration condition="#ifdef Q_OS_WIN"/>
-      </object-type>
-  </namespace-type>
-
   <object-type name="QOpenGLContext">
     <enum-type name="OpenGLModuleType"/>
   </object-type>

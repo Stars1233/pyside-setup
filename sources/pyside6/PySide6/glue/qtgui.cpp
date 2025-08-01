@@ -934,10 +934,11 @@ if (!hasNativeScreen) {
 }
 // @snippet qscreen-nativeInterface
 
-// @snippet qx11application-resource-ptr
+// Return 'int' from native interface's forward-declared structs like Display*
+// @snippet native-resource-ptr
  auto *resource = %CPPSELF.%FUNCTION_NAME();
 %PYARG_0 = PyLong_FromVoidPtr(resource);
-// @snippet qx11application-resource-ptr
+// @snippet native-resource-ptr
 
 // @snippet qwindow-fromWinId
 WId id = %1;
