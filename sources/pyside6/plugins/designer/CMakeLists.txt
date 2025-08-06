@@ -22,7 +22,10 @@ target_sources(PySidePlugin PRIVATE
 
 target_compile_definitions(PySidePlugin PRIVATE -DQT_NO_KEYWORDS=1)
 
-if(FORCE_LIMITED_API)
+# For Windows we use the limited API by default
+# See ShibokenHelpers.cmake::shiboken_check_if_limited_api() which is called always
+# with default FORCE_LIMITED_API set to TRUE for building libshiboken
+if(FORCE_LIMITED_API OR WIN32)
     target_compile_definitions(PySidePlugin PRIVATE "-DPy_LIMITED_API=0x03090000")
 endif()
 
