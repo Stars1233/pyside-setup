@@ -482,10 +482,6 @@ static PyMethodDef lazy_methods[] = {
 
 PyObject *create(const char * /* modName */, PyModuleDef *moduleData)
 {
-    static auto *sysModules = PyImport_GetModuleDict();
-    static auto *partial = Pep_GetPartialFunction();
-    static bool lazy_init{};
-
     Shiboken::init();
     auto *module = PyModule_Create(moduleData);
     if (module == nullptr) {
@@ -495,6 +491,16 @@ PyObject *create(const char * /* modName */, PyModuleDef *moduleData)
 #ifdef Py_GIL_DISABLED
     PyUnstable_Module_SetGIL(module, Py_MOD_GIL_NOT_USED);
 #endif
+
+    exec(module);
+    return module;
+}
+
+void exec(PyObject *module)
+{
+    static auto *sysModules = PyImport_GetModuleDict();
+    static auto *partial = Pep_GetPartialFunction();
+    static bool lazy_init{};
 
     // Setup of a dir function for "missing" classes.
     auto *moduleDirTemplate = PyCFunction_NewEx(module_methods, nullptr, nullptr);
@@ -530,7 +536,6 @@ PyObject *create(const char * /* modName */, PyModuleDef *moduleData)
     PyDict_SetItemString(sysModules, PyModule_GetName(module), module);
     // Clear the non-existing name cache because we have a new module.
     Shiboken::Conversions::clearNegativeLazyCache();
-    return module;
 }
 
 void registerTypes(PyObject *module, TypeInitStruct *types)

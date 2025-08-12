@@ -42,6 +42,9 @@ LIBSHIBOKEN_API PyObject *import(const char *moduleName);
  */
 LIBSHIBOKEN_API PyObject *create(const char *moduleName, PyModuleDef *moduleData);
 
+/// Executes a module (multi-phase initialization helper)
+LIBSHIBOKEN_API void exec(PyObject *module);
+
 using TypeCreationFunction = PyTypeObject *(*)(PyObject *module);
 
 /// Adds a type creation function to the module.
