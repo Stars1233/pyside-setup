@@ -1618,11 +1618,13 @@
   </object-type>
   <value-type name="QStorageInfo"/>
   <!-- QReadWriteLock does not have a copy ctor! -->
+  <object-type name="QBasicReadWriteLock" since="6.11">
+    <modify-function signature="lockForRead()" allow-thread="yes"/>
+    <modify-function signature="lockForWrite()" allow-thread="yes"/>
+  </object-type>
   <object-type name="QReadWriteLock">
     <enum-type name="RecursionMode"/>
-    <modify-function signature="lockForRead()" allow-thread="yes"/>
     <modify-function signature="tryLockForRead(int)" allow-thread="yes"/>
-    <modify-function signature="lockForWrite()" allow-thread="yes"/>
     <modify-function signature="tryLockForWrite(int)" allow-thread="yes"/>
   </object-type>
   <object-type name="QReadLocker">
@@ -1755,6 +1757,7 @@
       <include file-name="vector" location="global"/>
     </extra-includes>
     <enum-type name="RowCategory"/>
+    <enum-type name="AutoConnectPolicy" since="6.11"/>
     <inject-code class="native" position="wrapper-declaration"
                  file="../glue/qtcore.cpp" snippet="qrangemodel-wrapper"/>
     <inject-code class="native" position="beginning"

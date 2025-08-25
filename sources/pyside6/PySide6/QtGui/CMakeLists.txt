@@ -213,6 +213,7 @@ ${QtGui_GEN_DIR}/qpolygon_wrapper.cpp
 ${QtGui_GEN_DIR}/qpolygonf_wrapper.cpp
 ${QtGui_GEN_DIR}/qpytextobject_wrapper.cpp
 ${QtGui_GEN_DIR}/qquaternion_wrapper.cpp
+${QtGui_GEN_DIR}/qquaternion_axes_wrapper.cpp
 ${QtGui_GEN_DIR}/qradialgradient_wrapper.cpp
 ${QtGui_GEN_DIR}/qregularexpressionvalidator_wrapper.cpp
 ${QtGui_GEN_DIR}/qrgba64_wrapper.cpp

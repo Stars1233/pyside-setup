@@ -118,6 +118,11 @@
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
+  <object-type name="QStyleOptionMenuItemV2"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionMenuItemV2 *&gt;(%B) != nullptr"
+               since="6.11">
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
   <object-type name="QStyleOptionProgressBar"
                polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionProgressBar *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
@@ -513,6 +518,7 @@
   </object-type>
   <object-type name="QFileIconProvider"/>
   <object-type name="QWizard">
+    <enum-type name="BannerStretchPolicy" since="6.11"/>
     <enum-type name="WizardButton"/>
     <enum-type name="WizardOption" flags="WizardOptions"/>
     <enum-type name="WizardPixmap"/>

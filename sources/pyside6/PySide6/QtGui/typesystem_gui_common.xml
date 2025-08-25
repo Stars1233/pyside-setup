@@ -2619,6 +2619,7 @@
     _______ end of matrix block _______ -->
 
   <value-type name="QQuaternion">
+    <value-type name="Axes" since="6.11"/>
     <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">

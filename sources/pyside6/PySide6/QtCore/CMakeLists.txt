@@ -32,6 +32,7 @@ ${QtCore_GEN_DIR}/qabstractproxymodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstracttablemodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qanimationgroup_wrapper.cpp
 ${QtCore_GEN_DIR}/qbasicmutex_wrapper.cpp
+${QtCore_GEN_DIR}/qbasicreadwritelock_wrapper.cpp
 ${QtCore_GEN_DIR}/qbasictimer_wrapper.cpp
 ${QtCore_GEN_DIR}/qbitarray_wrapper.cpp
 ${QtCore_GEN_DIR}/qbuffer_wrapper.cpp

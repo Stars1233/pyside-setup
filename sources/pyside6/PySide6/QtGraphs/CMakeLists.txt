@@ -23,6 +23,7 @@ ${QtGraphs_GEN_DIR}/qabstractdataproxy_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qbar3dseries_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qbardataitem_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qbardataproxy_wrapper.cpp
+${QtGraphs_GEN_DIR}/qcustomseries_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qcustom3ditem_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qcustom3dlabel_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qcustom3dvolume_wrapper.cpp
