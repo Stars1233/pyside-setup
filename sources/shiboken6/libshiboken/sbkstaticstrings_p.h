@@ -23,7 +23,7 @@ namespace PyMagicName
 PyObject *base();
 PyObject *bases();
 PyObject *builtins();
-PyObject *code();
+PyObject *compiled();
 PyObject *dictoffset();
 PyObject *func_kind();
 PyObject *iter();

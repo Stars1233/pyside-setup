@@ -35,6 +35,9 @@ LIBSHIBOKEN_API bool
                                      const ArgumentNameIndexMapping *mapping, size_t size,
                                      Shiboken::AutoDecRef &errInfo, PyObject **pyArgs);
 
+/// Returns whether we are running in compiled mode (Nuitka).
+LIBSHIBOKEN_API bool isCompiled();
+
 } // namespace Shiboken
 
 #endif // SBK_BINDINGUTILS

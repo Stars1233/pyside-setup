@@ -69,6 +69,7 @@ STATIC_STRING_IMPL(rrshift, "__rrshift__")
 STATIC_STRING_IMPL(base, "__base__")
 STATIC_STRING_IMPL(bases, "__bases__")
 STATIC_STRING_IMPL(builtins, "__builtins__")
+STATIC_STRING_IMPL(compiled, "__compiled__");
 STATIC_STRING_IMPL(dictoffset, "__dictoffset__")
 STATIC_STRING_IMPL(func, "__func__")
 STATIC_STRING_IMPL(func_kind, "__func_kind__")
