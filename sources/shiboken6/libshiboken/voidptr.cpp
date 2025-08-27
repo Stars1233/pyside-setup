@@ -308,7 +308,7 @@ void addVoidPtrToModule(PyObject *module)
         auto *type = SbkVoidPtr_TypeF();
         auto *obType = reinterpret_cast<PyObject *>(type);
         Py_INCREF(obType);
-        PyModule_AddObject(module, PepType_GetNameStr(type), obType);
+        PepModule_AddType(module, type);
     }
 }
 

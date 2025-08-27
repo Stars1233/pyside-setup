@@ -183,7 +183,7 @@ void init(PyObject *module)
 
     auto *obSlotType = reinterpret_cast<PyObject *>(slotType);
     Py_INCREF(obSlotType);
-    PyModule_AddObject(module, "Slot", obSlotType);
+    PepModule_AddType(module, slotType);
 }
 
 } // namespace PySide::Slot

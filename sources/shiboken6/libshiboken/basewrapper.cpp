@@ -916,7 +916,7 @@ void initShibokenSupport(PyObject *module)
     auto *type = SbkObject_TypeF();
     auto *obType = reinterpret_cast<PyObject *>(type);
     Py_INCREF(obType);
-    PyModule_AddObject(module, "Object", obType);
+    PepModule_AddType(module, type);
 
     // PYSIDE-1735: When the initialization was moved into Shiboken import, this
     //              Py_INCREF became necessary. No idea why.
@@ -1145,7 +1145,7 @@ introduceWrapperType(PyObject *enclosingObject,
 
     // PyModule_AddObject steals type's reference.
     Py_INCREF(ob_type);
-    if (PyModule_AddObject(enclosingObject, typeName, ob_type) != 0) {
+    if (PepModule_AddType(enclosingObject, type) != 0) {
         std::cerr << "Warning: " << __FUNCTION__ << " returns nullptr for "
             << typeName << '/' << originalName << " due to PyModule_AddObject(enclosingObject="
             << enclosingObject << ", ob_type=" << ob_type << ") failing\n";

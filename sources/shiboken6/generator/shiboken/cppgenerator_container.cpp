@@ -285,9 +285,8 @@ CppGenerator::OpaqueContainerData
                             result.pythonToConverterFunctionName);
 
     TextStream registrationStr(&result.registrationCode, TextStream::Language::Cpp);
-    registrationStr << "ob_type = reinterpret_cast<PyObject *>("
-        << typeFName << "());\nPy_XINCREF(ob_type);\nPyModule_AddObject(module, \""
-        << result.name << "\", ob_type);\n";
+    registrationStr << "Py_XINCREF(" << typeFName << "());\nPepModule_AddType(module, "
+        << typeFName << "());\n";
 
     if (!result.hasQVariantConversion)
         return result;

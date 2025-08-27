@@ -309,7 +309,7 @@ void initQtQmlListProperty(PyObject *module)
     auto *propertyListType = PropertyList_TypeF();
     auto *obPropertyListType = reinterpret_cast<PyObject *>(propertyListType);
     Py_INCREF(obPropertyListType);
-    PyModule_AddObject(module, PepType_GetNameStr(propertyListType), obPropertyListType);
+    PepModule_AddType(module, propertyListType);
 }
 
 } // namespace PySide::Qml

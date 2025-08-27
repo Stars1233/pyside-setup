@@ -119,7 +119,7 @@ void init(PyObject *module)
     auto *classInfoType = PySideClassInfo_TypeF();
     auto *obClassInfoType  = reinterpret_cast<PyObject *>(classInfoType);
     Py_INCREF(obClassInfoType);
-    PyModule_AddObject(module, "ClassInfo", obClassInfoType);
+    PepModule_AddType(module, classInfoType);
 }
 
 bool checkType(PyObject *pyObj)

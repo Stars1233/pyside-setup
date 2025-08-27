@@ -505,7 +505,7 @@ void init(PyObject *module)
 
     auto *obPropertyType = reinterpret_cast<PyObject *>(propertyType);
     Py_INCREF(obPropertyType);
-    PyModule_AddObject(module, "Property", obPropertyType);
+    PepModule_AddType(module, propertyType);
 }
 
 bool checkType(PyObject *pyObj)

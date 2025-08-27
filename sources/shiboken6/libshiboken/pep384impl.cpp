@@ -1167,6 +1167,21 @@ PyObject *PepEval_GetFrameBuiltins()
 #endif
 }
 
+int PepModule_AddType(PyObject *module, PyTypeObject *type)
+{
+    // PyModule_AddType (added to stable ABI in 3.10) is the replacement for
+    // PyModule_AddObject() (deprecated in 3.13) for adding types to a module.
+#if !defined(PYPY_VERSION) && ((!defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030A0000) || (defined(Py_LIMITED_API) && Py_LIMITED_API >= 0x030A0000))
+    return PyModule_AddType(module, type);
+#else
+    auto *ob = reinterpret_cast<PyObject *>(type);
+    int result = PyModule_AddObject(module, PepType_GetNameStr(type), ob);
+    if (result != 0)
+        Py_XDECREF(ob);
+    return result;
+#endif
+}
+
 /***************************************************************************
  *
  * PYSIDE-535: The enum/flag error

@@ -88,7 +88,7 @@ void init(PyObject *module)
     auto *metaFunctionType = PySideMetaFunction_TypeF();
     auto *obMetaFunctionType = reinterpret_cast<PyObject *>(metaFunctionType);
     Py_INCREF(obMetaFunctionType);
-    PyModule_AddObject(module, "MetaFunction", obMetaFunctionType);
+    PepModule_AddType(module, metaFunctionType);
 }
 
 PySideMetaFunction *newObject(QObject *source, int methodIndex)

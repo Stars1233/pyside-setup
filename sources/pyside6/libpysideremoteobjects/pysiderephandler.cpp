@@ -444,7 +444,7 @@ void init(PyObject *module)
     auto *repType = PySideRepFile_TypeF();
     auto *obRepType = reinterpret_cast<PyObject *>(repType);
     Py_INCREF(obRepType);
-    PyModule_AddObject(module, "RepFile", obRepType);
+    PepModule_AddType(module, repType);
 
     // Add a test helper to verify type reference counting
     static PyMethodDef get_capsule_count_def = {

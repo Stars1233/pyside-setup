@@ -174,7 +174,7 @@ void init(PyObject *module)
 
     auto *obClassPropertyType = reinterpret_cast<PyObject *>(classPropertyType);
     Py_INCREF(obClassPropertyType);
-    PyModule_AddObject(module, "PyClassProperty", obClassPropertyType);
+    PepModule_AddType(module, classPropertyType);
 }
 
 } // namespace PySide::ClassProperty

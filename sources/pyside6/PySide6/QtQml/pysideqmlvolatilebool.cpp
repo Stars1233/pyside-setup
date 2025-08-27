@@ -151,6 +151,5 @@ void initQtQmlVolatileBool(PyObject *module)
 
     auto *obQmlVolatileBoolType = reinterpret_cast<PyObject *>(qmlVolatileBoolType);
     Py_INCREF(obQmlVolatileBoolType);
-    PyModule_AddObject(module, PepType_GetNameStr(qmlVolatileBoolType),
-                       obQmlVolatileBoolType);
+    PepModule_AddType(module, qmlVolatileBoolType);
 }

@@ -6798,8 +6798,7 @@ bool CppGenerator::finishGeneration()
     }
 
     if (!opaqueContainers.isEmpty()) {
-        s << "\n// Opaque container type registration\n"
-            << "PyObject *ob_type{};\n";
+        s << "\n// Opaque container type registration\n";
         if (usePySideExtensions()) {
             const bool hasQVariantConversion =
                 std::any_of(opaqueContainers.cbegin(), opaqueContainers.cend(),

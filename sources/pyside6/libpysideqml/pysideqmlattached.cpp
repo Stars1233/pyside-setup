@@ -59,7 +59,7 @@ static PyTypeObject *createPySideQmlAttachedType()
         PySide::ClassDecorator::Methods<PySideQmlAttachedPrivate>::typeSlots();
 
     PyType_Spec PySideQmlAttachedType_spec = {
-        "2:PySide6.QtCore.qmlAttached",
+        "2:PySide6.QtCore.QmlAttached",
         sizeof(PySideClassDecorator),
         0,
         Py_TPFLAGS_DEFAULT,
@@ -172,7 +172,7 @@ void initQmlAttached(PyObject *module)
 
     auto *obQmlAttachedType = reinterpret_cast<PyObject *>(qmlAttachedType);
     Py_INCREF(obQmlAttachedType);
-    PyModule_AddObject(module, "QmlAttached", obQmlAttachedType);
+    PepModule_AddType(module, qmlAttachedType);
 }
 
 PySide::Qml::QmlExtensionInfo qmlAttachedInfo(PyTypeObject *t,

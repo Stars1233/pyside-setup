@@ -911,21 +911,21 @@ void init(PyObject *module)
         return;
     auto *obMetaSignalType = reinterpret_cast<PyObject *>(metaSignalType);
     Py_INCREF(obMetaSignalType);
-    PyModule_AddObject(module, "MetaSignal", obMetaSignalType);
+    PepModule_AddType(module, metaSignalType);
 
     auto *signalType = PySideSignal_TypeF();
     if (InitSignatureStrings(signalType, Signal_SignatureStrings) < 0)
         return;
     auto *obSignalType = reinterpret_cast<PyObject *>(signalType);
     Py_INCREF(obSignalType);
-    PyModule_AddObject(module, "Signal", obSignalType);
+    PepModule_AddType(module, signalType);
 
     auto *signalInstanceType = PySideSignalInstance_TypeF();
     if (InitSignatureStrings(signalInstanceType, SignalInstance_SignatureStrings) < 0)
         return;
     auto *obSignalInstanceType = reinterpret_cast<PyObject *>(signalInstanceType);
     Py_INCREF(obSignalInstanceType);
-    PyModule_AddObject(module, "SignalInstance", obSignalInstanceType);
+    PepModule_AddType(module, signalInstanceType);
 }
 
 bool checkType(PyObject *pyObj)

@@ -25,5 +25,5 @@ const auto size = %CPPSELF.byteCount();
 // @snippet qtaudio-namespace-compatibility-alias
 auto *obType = reinterpret_cast<PyObject *>(pyType);
 Py_INCREF(obType);
-PyModule_AddObject(module, "QtAudio", obType);
+PepModule_AddType(module, pyType);
 // @snippet qtaudio-namespace-compatibility-alias

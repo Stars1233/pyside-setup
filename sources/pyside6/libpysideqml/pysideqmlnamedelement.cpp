@@ -41,7 +41,7 @@ PyTypeObject *createPySideQmlNamedElementType(void)
         PySide::ClassDecorator::Methods<PySideQmlNamedElementPrivate>::typeSlots();
 
     PyType_Spec PySideQmlNamedElementType_spec = {
-        "2:PySide6.QtCore.qmlNamedElement",
+        "2:PySide6.QtCore.QmlNamedElement",
         sizeof(PySideClassDecorator),
         0,
         Py_TPFLAGS_DEFAULT,
@@ -71,5 +71,5 @@ void initQmlNamedElement(PyObject *module)
 
     auto *obQmlNamedElementType = reinterpret_cast<PyObject *>(qmlNamedElementType);
     Py_INCREF(obQmlNamedElementType);
-    PyModule_AddObject(module, "QmlNamedElement", obQmlNamedElementType);
+    PepModule_AddType(module, qmlNamedElementType);
 }

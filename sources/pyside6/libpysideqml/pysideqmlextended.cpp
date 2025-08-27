@@ -55,7 +55,7 @@ static PyTypeObject *createPySideQmlExtendedType()
         PySide::ClassDecorator::Methods<PySideQmlExtendedPrivate>::typeSlots();
 
     PyType_Spec PySideQmlExtendedType_spec = {
-        "2:PySide6.QtCore.qmlExtended",
+        "2:PySide6.QtCore.QmlExtended",
         sizeof(PySideClassDecorator),
         0,
         Py_TPFLAGS_DEFAULT,
@@ -127,7 +127,7 @@ void initQmlExtended(PyObject *module)
 
     auto *obQmlExtendedType = reinterpret_cast<PyObject *>(qmlExtendedType);
     Py_INCREF(obQmlExtendedType);
-    PyModule_AddObject(module, "QmlExtended", obQmlExtendedType);
+    PepModule_AddType(module, qmlExtendedType);
 }
 
 PySide::Qml::QmlExtensionInfo qmlExtendedInfo(PyObject *t,

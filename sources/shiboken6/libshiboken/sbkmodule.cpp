@@ -139,9 +139,8 @@ static PyTypeObject *incarnateType(PyObject *module, const char *name,
     initSelectableFeature(saveFeature);
 
     // - assign this object to the name in the module
-    auto *res = reinterpret_cast<PyObject *>(type);
-    Py_INCREF(res);
-    PyModule_AddObject(module, name, res);   // steals reference
+    Py_INCREF(type);
+    PepModule_AddType(module, type);   // steals reference
     // - remove the entry, if not by something cleared.
     if (!nameToFunc.empty())
         nameToFunc.erase(funcIter);
