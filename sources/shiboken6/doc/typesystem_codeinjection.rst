@@ -338,7 +338,7 @@ Code injections to the class Python initialization function.
             return;
 
         Py_INCREF(&PyInjectCode_Type);
-        PyModule_AddObject(module, "InjectCode",
+        PyModule_Add(module, "InjectCode",
             ((PyObject*)&PyInjectCode_Type));
 
         // INJECT-CODE: <value/object-type><inject-code class="target" position="end">

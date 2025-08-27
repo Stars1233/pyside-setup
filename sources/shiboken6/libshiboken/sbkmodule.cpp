@@ -500,7 +500,7 @@ PyObject *create(const char * /* modName */, PyModuleDef *moduleData)
     auto *moduleDirTemplate = PyCFunction_NewEx(module_methods, nullptr, nullptr);
     // Turn this function into a bound object, so we have access to the module.
     auto *moduleDir = PyObject_CallFunctionObjArgs(partial, moduleDirTemplate, module, nullptr);
-    PyModule_AddObject(module, module_methods->ml_name, moduleDir);  // steals reference
+    PepModule_Add(module, module_methods->ml_name, moduleDir);  // steals reference
     // Insert an initial empty table for the module.
     NameToTypeFunctionMap empty;
     moduleToFuncs.insert(std::make_pair(module, empty));

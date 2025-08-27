@@ -1182,6 +1182,20 @@ int PepModule_AddType(PyObject *module, PyTypeObject *type)
 #endif
 }
 
+int PepModule_Add(PyObject *module, const char *name, PyObject *value)
+{
+    // PyModule_Add (added to stable ABI in 3.13) is the replacement for PyModule_AddObject()
+    // (deprecated in 3.13).
+#if !defined(PYPY_VERSION) && ((!defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030D0000) || (defined(Py_LIMITED_API) && Py_LIMITED_API >= 0x030D0000))
+    return PyModule_Add(module, name, value);
+#else
+    int result = PyModule_AddObject(module, name, value);
+    if (result != 0)
+        Py_XDECREF(value);
+    return result;
+#endif
+}
+
 /***************************************************************************
  *
  * PYSIDE-535: The enum/flag error

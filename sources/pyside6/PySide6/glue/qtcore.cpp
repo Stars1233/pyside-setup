@@ -280,7 +280,7 @@ QList<QByteArray> version = QByteArray(qVersion()).split('.');
 PyObject *pyQtVersion = PyTuple_New(3);
 for (int i = 0; i < 3; ++i)
     PyTuple_SetItem(pyQtVersion, i, PyLong_FromLong(version[i].toInt()));
-PyModule_AddObject(module, "__version_info__", pyQtVersion);
+PepModule_Add(module, "__version_info__", pyQtVersion);
 PyModule_AddStringConstant(module, "__version__", qVersion());
 // @snippet qt-version
 

@@ -117,7 +117,7 @@ PyTuple_SetItem(version, 1, PyLong_FromLong(SHIBOKEN_MINOR_VERSION));
 PyTuple_SetItem(version, 2, PyLong_FromLong(SHIBOKEN_MICRO_VERSION));
 PyTuple_SetItem(version, 3, Shiboken::String::fromCString(SHIBOKEN_RELEASE_LEVEL));
 PyTuple_SetItem(version, 4, PyLong_FromLong(SHIBOKEN_SERIAL));
-PyModule_AddObject(module, "__version_info__", version);
+PepModule_Add(module, "__version_info__", version);
 PyModule_AddStringConstant(module, "__version__", SHIBOKEN_VERSION);
 VoidPtr::addVoidPtrToModule(module);
 Shiboken::initShibokenSupport(module);

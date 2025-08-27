@@ -454,7 +454,7 @@ void init(PyObject *module)
         "Returns the current count of PyCapsule objects"   // docstring
     };
 
-    PyModule_AddObject(module, "getCapsuleCount", PyCFunction_New(&get_capsule_count_def, nullptr));
+    PepModule_Add(module, "getCapsuleCount", PyCFunction_New(&get_capsule_count_def, nullptr));
 }
 
 } // namespace PySide::RemoteObjects

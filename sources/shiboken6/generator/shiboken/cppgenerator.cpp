@@ -5610,7 +5610,7 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
                     << indent << (isSigned ? "PyLong_FromLongLong" : "PyLong_FromUnsignedLongLong")
                     << "(" << pyValue << "));\n" << outdent;
             } else {
-                s << "PyModule_AddObject(module, \"" << mangledName << "\",\n" << indent
+                s << "PepModule_Add(module, \"" << mangledName << "\",\n" << indent
                     << (isSigned ? "PyLong_FromLongLong" : "PyLong_FromUnsignedLongLong") << "("
                     << pyValue << "));\n" << outdent;
             }
@@ -6412,7 +6412,7 @@ static void writeSubModuleHandling(TextStream &s, const QString &moduleName,
         << subModuleOf << "\"));\n"
         << "if (parentModule.isNull())\n" << indent
         << "return nullptr;\n" << outdent
-        << "if (PyModule_AddObject(parentModule.object(), \"" << moduleName
+        << "if (PepModule_Add(parentModule.object(), \"" << moduleName
         << "\", module) < 0)\n"
         << indent << "return nullptr;\n" << outdent << outdent << "}\n";
 }

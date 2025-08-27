@@ -513,6 +513,8 @@ LIBSHIBOKEN_API PyObject *PepEval_GetFrameBuiltins();
 
 LIBSHIBOKEN_API int PepModule_AddType(PyObject *module, PyTypeObject *type);
 
+LIBSHIBOKEN_API int PepModule_Add(PyObject *module, const char *name, PyObject *value);
+
 /*****************************************************************************
  *
  * Module Initialization
