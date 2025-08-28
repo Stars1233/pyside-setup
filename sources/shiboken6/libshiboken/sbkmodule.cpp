@@ -8,6 +8,7 @@
 #include "sbkstring.h"
 #include "sbkcppstring.h"
 #include "sbkconverter_p.h"
+#include "sbkpep.h"
 
 #include <unordered_map>
 #include <unordered_set>

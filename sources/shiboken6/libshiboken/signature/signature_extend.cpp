@@ -22,6 +22,7 @@
 //             Shiboken.ObjectType and Shiboken.EnumMeta have new getsets, instead.
 
 #include "autodecref.h"
+#include "sbkpep.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"

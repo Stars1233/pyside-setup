@@ -15,6 +15,7 @@
 #include <bindingmanager.h>
 #include <gilstate.h>
 #include <sbkconverter.h>
+#include <sbkpep.h>
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
 #include <sbkerrors.h>

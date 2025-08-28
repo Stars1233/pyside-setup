@@ -101,12 +101,7 @@ struct LIBSHIBOKEN_API debugPyTypeObject
     PyTypeObject *m_object;
 };
 
-struct LIBSHIBOKEN_API debugPyBuffer
-{
-    explicit debugPyBuffer(const Py_buffer &b);
-
-    const Py_buffer &m_buffer;
-};
+struct debugPyBuffer;
 
 struct debugPyArrayObject
 {

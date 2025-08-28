@@ -50,6 +50,9 @@ PSF LICENSE AGREEMENT FOR PYTHON 3.7.0
 #ifndef BUFFER_REENABLE_H
 #define BUFFER_REENABLE_H
 
+#include "sbkpython.h"
+#include "shibokenmacros.h"
+
 #ifdef Py_LIMITED_API
 
 // The buffer interface has been added to limited API in 3.11, (abstract.h, PYSIDE-1960,

@@ -4,6 +4,7 @@
 #include "pysidedynamiccommon_p.h"
 #include "pysidedynamicenum_p.h"
 
+#include <sbkpep.h>
 #include <sbkstring.h>
 
 #include <QtCore/qmetaobject.h>

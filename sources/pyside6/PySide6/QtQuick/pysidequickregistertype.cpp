@@ -8,6 +8,7 @@
 #include <pyside_p.h>
 #include <sbkpython.h>
 #include <sbkconverter.h>
+#include <sbkpep.h>
 
 #include <QtQuick/QQuickPaintedItem>
 

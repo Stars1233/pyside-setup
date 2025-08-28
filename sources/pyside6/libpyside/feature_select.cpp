@@ -8,6 +8,7 @@
 
 #include <autodecref.h>
 #include <sbkfeature_base.h>
+#include <sbkpep.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 #include <signature_p.h>

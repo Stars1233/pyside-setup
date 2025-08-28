@@ -6,7 +6,7 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QVariant>
 
-#include <sbkpython.h>
+#include <sbkpep.h>
 #include <autodecref.h>
 #include <basewrapper.h>
 #include <bindingmanager.h>

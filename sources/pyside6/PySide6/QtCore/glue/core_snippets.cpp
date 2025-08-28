@@ -7,6 +7,7 @@
 
 #include "sbkpython.h"
 #include "sbkconverter.h"
+#include "sbkpep.h"
 #ifndef Py_LIMITED_API
 #  include <datetime.h>
 #endif

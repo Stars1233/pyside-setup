@@ -3,6 +3,7 @@
 
 #include "sbksmartpointer.h"
 #include "sbkstring.h"
+#include "sbkpep.h"
 #include "autodecref.h"
 
 #include <unordered_set>

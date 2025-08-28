@@ -4,12 +4,11 @@
 #ifndef PEP384IMPL_H
 #define PEP384IMPL_H
 
+#include "sbkpython.h"
 #include "shibokenmacros.h"
 
 extern "C"
 {
-
-#include "bufferprocs_py37.h"
 
 /*****************************************************************************
  *

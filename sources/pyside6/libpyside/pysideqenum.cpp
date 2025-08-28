@@ -6,6 +6,7 @@
 #include <autodecref.h>
 #include <sbkconverter.h>
 #include <sbkenum.h>
+#include <sbkpep.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 

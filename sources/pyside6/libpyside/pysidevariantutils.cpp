@@ -8,6 +8,7 @@
 
 #include <autodecref.h>
 #include <sbkconverter.h>
+#include <sbkpep.h>
 #include <basewrapper.h>
 
 using namespace Qt::StringLiterals;

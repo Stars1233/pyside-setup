@@ -9,6 +9,7 @@
 #include "helper.h"
 #include "sbkfeature_base.h"
 #include "sbkmodule.h"
+#include "sbkpep.h"
 #include "sbkstaticstrings.h"
 #include "sbkstring.h"
 

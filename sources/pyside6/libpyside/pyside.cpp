@@ -31,6 +31,7 @@
 #include <helper.h>
 #include <sbkconverter.h>
 #include <sbkerrors.h>
+#include <sbkpep.h>
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
 #include <sbkfeature_base.h>
@@ -1215,10 +1216,6 @@ QDebug operator<<(QDebug debug, const debugPyObject &o)
     return debug;
 }
 
-debugPyBuffer::debugPyBuffer(Py_buffer *b) noexcept : m_buffer(b)
-{
-}
-
 static void formatPy_ssizeArray(QDebug &debug, const char *name, const Py_ssize_t *array, int len)
 {
     debug << ", " << name << '=';
@@ -1230,6 +1227,11 @@ static void formatPy_ssizeArray(QDebug &debug, const char *name, const Py_ssize_
     } else {
         debug << '0';
     }
+}
+
+#if !defined(Py_LIMITED_API) || Py_LIMITED_API >= 0x030B0000
+debugPyBuffer::debugPyBuffer(Py_buffer *b) noexcept : m_buffer(b)
+{
 }
 
 PYSIDE_API QDebug operator<<(QDebug debug, const debugPyBuffer &b)
@@ -1257,5 +1259,6 @@ PYSIDE_API QDebug operator<<(QDebug debug, const debugPyBuffer &b)
     debug << ')';
     return debug;
 }
+#endif // !Py_LIMITED_API || >= 3.11
 
 } // namespace PySide

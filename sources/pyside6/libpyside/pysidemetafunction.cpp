@@ -9,6 +9,7 @@
 #include <autodecref.h>
 #include <basewrapper.h>
 #include <sbkconverter.h>
+#include <sbkpep.h>
 #include <sbktypefactory.h>
 #include <signature.h>
 

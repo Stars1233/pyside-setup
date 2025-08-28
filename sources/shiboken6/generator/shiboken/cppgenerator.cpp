@@ -528,7 +528,7 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
                                "type_traits"}; // enum/underlying type
     // headers
     s << "// default includes\n";
-    s << "#include <shiboken.h>\n";
+    s << "#include <shiboken.h>\n#include <sbkpep.h>\n#include <sbkpepbuffer.h>\n";
     if (wrapperDiagnostics()) {
         s << "#include <helper.h>\n";
         cppIncludes << "iostream";
@@ -6543,7 +6543,7 @@ bool CppGenerator::finishGeneration()
 
     // write license comment
     s << licenseComment() << R"(
-#include <sbkpython.h>
+#include <sbkpep.h>
 #include <shiboken.h>
 #include <algorithm>
 #include <signature.h>

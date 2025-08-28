@@ -6,6 +6,8 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qhash.h>
 
+#include <sbkpep.h>
+
 #include <algorithm>
 
 namespace PySide::Qml {

@@ -3,7 +3,7 @@
 
 #define PEP384_INTERN
 
-#include "sbkpython.h"
+#include "pep384impl.h"
 #include "autodecref.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"

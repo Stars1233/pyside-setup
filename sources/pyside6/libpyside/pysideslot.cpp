@@ -7,6 +7,7 @@
 
 #include <autodecref.h>
 #include <basewrapper.h>
+#include <sbkpep.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 #include <sbktypefactory.h>

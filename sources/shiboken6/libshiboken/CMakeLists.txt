@@ -78,6 +78,8 @@ sbkfeature_base.cpp sbkfeature_base.h
 sbkmodule.cpp sbkmodule.h
 sbknumpy.cpp sbknumpycheck.h
 sbknumpyview.h
+sbkpep.h
+sbkpepbuffer.h
 sbkpython.h
 sbksmartpointer.cpp sbksmartpointer.h
 sbkstaticstrings.cpp sbkstaticstrings.h sbkstaticstrings_p.h
@@ -181,6 +183,8 @@ install(FILES
         shibokenmacros.h
         threadstatesaver.h
         shibokenbuffer.h
+        sbkpep.h
+        sbkpepbuffer.h
         sbkpython.h
         sbkwindows.h
         pep384impl.h

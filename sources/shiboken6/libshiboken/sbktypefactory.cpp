@@ -3,6 +3,8 @@
 
 #include "sbktypefactory.h"
 #include "autodecref.h"
+#include "sbkpep.h"
+#include "sbkpepbuffer.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 

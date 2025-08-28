@@ -9,6 +9,8 @@
 #include <basewrapper.h>
 #include <bindingmanager.h>
 #include <sbkconverter.h>
+#include <sbkpep.h>
+
 
 // Part of the static plugin linked to the QtUiLoader Python module,
 // allowing it to create a custom widget written in Python.

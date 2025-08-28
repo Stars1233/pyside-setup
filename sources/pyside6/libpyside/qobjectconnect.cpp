@@ -10,6 +10,7 @@
 #include "signalmanager.h"
 
 #include <sbkstring.h>
+#include <sbkpep.h>
 #include <sbkstaticstrings.h>
 #include "basewrapper.h"
 #include "autodecref.h"

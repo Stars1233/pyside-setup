@@ -10,6 +10,7 @@
 #include "pysiderephandler_p.h"
 
 #include <basewrapper.h>
+#include <sbkpep.h>
 #include <sbkconverter.h>
 #include <sbkstring.h>
 

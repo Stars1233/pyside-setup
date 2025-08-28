@@ -13,6 +13,7 @@
 #include <autodecref.h>
 #include <gilstate.h>
 #include <sbkconverter.h>
+#include <sbkpep.h>
 #include <sbkstring.h>
 #include <sbktypefactory.h>
 #include <signature.h>

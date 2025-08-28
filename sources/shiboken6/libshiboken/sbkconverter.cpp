@@ -9,6 +9,7 @@
 #include "bindingmanager.h"
 #include "autodecref.h"
 #include "helper.h"
+#include "sbkpep.h"
 #include "voidptr.h"
 
 #include <string>

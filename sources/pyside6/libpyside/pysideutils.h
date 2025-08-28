@@ -57,6 +57,7 @@ struct debugPyObject
 
 PYSIDE_API QDebug operator<<(QDebug debug, const debugPyObject &o);
 
+#if !defined(Py_LIMITED_API) || Py_LIMITED_API >= 0x030B0000
 struct debugPyBuffer
 {
     PYSIDE_API explicit debugPyBuffer(Py_buffer *b) noexcept;
@@ -65,6 +66,7 @@ struct debugPyBuffer
 };
 
 PYSIDE_API QDebug operator<<(QDebug debug, const debugPyBuffer &b);
+#endif // !Py_LIMITED_API || >= 3.11
 
 } //namespace PySide
 

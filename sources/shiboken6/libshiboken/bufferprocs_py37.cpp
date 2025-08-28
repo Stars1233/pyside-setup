@@ -9,9 +9,11 @@
  *
  */
 
+#include "bufferprocs_py37.h"
+#include "sbkpep.h"
+
 #if defined(Py_LIMITED_API) && Py_LIMITED_API < 0x030B0000
 
-#include "sbkpython.h"
 // Buffer C-API for Python 3.0 (copy of cpython/Objects/abstract.c:426)
 
 int

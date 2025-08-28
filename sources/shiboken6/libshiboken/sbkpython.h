@@ -4,8 +4,6 @@
 #ifndef SBKPYTHON_H
 #define SBKPYTHON_H
 
-#include "sbkversion.h"
-
 // PYSIDE-2701: This definition is needed for all Python formats with "#".
 #define PY_SSIZE_T_CLEAN
 
@@ -21,10 +19,6 @@ extern "C" {
 }
 
 #  include <structmember.h>
-// Now we have the usual variables from Python.h .
-#  include "shibokenmacros.h"
-// "pep384impl.h" may nowhere be included but in this file.
-#  include "pep384impl.h"
 #  pragma pop_macro("slots")
 
 #else
@@ -34,10 +28,6 @@ extern "C" {
 }
 
 #  include <structmember.h>
-// Now we have the usual variables from Python.h .
-#  include "shibokenmacros.h"
-// "pep384impl.h" may nowhere be included but in this file.
-#  include "pep384impl.h"
 #endif
 
 // In Python 3, Py_TPFLAGS_DEFAULT contains Py_TPFLAGS_HAVE_VERSION_TAG,

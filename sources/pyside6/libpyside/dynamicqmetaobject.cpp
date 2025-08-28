@@ -13,6 +13,7 @@
 
 #include <autodecref.h>
 #include <gilstate.h>
+#include <sbkpep.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 
