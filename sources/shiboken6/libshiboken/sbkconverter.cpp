@@ -183,7 +183,7 @@ SbkConverter *createConverterObject(PyTypeObject *type,
     auto *converter = new SbkConverter;
     converter->pythonType = type;
     // PYSIDE-595: All types are heaptypes now, so provide reference.
-    Py_XINCREF(type);
+    Py_XINCREF(reinterpret_cast<PyObject *>(type));
 
     converter->pointerToPython = pointerToPythonFunc;
     converter->copyToPython = copyToPythonFunc;
@@ -465,7 +465,7 @@ void *cppPointer(PyTypeObject *desiredType, SbkObject *pyIn)
                   << " requested, falling back to pass-through.\n";
         return pyIn;
     }
-    auto *inType = Py_TYPE(pyIn);
+    auto *inType = Shiboken::pyType(pyIn);
     if (ObjectType::hasCast(inType))
         return ObjectType::cast(inType, pyIn, desiredType);
     return Object::cppPointer(pyIn, desiredType);
