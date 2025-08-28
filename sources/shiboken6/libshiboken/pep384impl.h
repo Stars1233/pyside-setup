@@ -9,16 +9,7 @@
 extern "C"
 {
 
-/*****************************************************************************
- *
- * RESOLVED: memoryobject.h
- *
- */
-
-// Extracted into bufferprocs27.h
-#ifdef Py_LIMITED_API
 #include "bufferprocs_py37.h"
-#endif
 
 /*****************************************************************************
  *
@@ -294,48 +285,6 @@ using PyCFunctionObject = struct _pycfunc;
 #ifdef Py_LIMITED_API
 LIBSHIBOKEN_API PyObject *PyRun_String(const char *, int, PyObject *, PyObject *);
 #endif
-
-/*****************************************************************************
- *
- * RESOLVED: abstract.h
- *
- */
-#ifdef Py_LIMITED_API
-
-// This definition breaks the limited API a little, because it re-enables the
-// buffer functions.
-// But this is no problem as we check it's validity for every version.
-
-// PYSIDE-1960 The buffer interface is since Python 3.11 part of the stable
-// API and we do not need to check the compatibility by hand anymore.
-
-typedef struct {
-     getbufferproc bf_getbuffer;
-     releasebufferproc bf_releasebuffer;
-} PyBufferProcs;
-
-typedef struct _Pepbuffertype {
-    PyVarObject ob_base;
-    void *skip[17];
-    PyBufferProcs *tp_as_buffer;
-} PepBufferType;
-
-#define PepType_AS_BUFFER(type)   \
-    reinterpret_cast<PepBufferType *>(type)->tp_as_buffer
-
-#define PyObject_CheckBuffer(obj) \
-    ((PepType_AS_BUFFER(Py_TYPE(obj)) != NULL) &&  \
-     (PepType_AS_BUFFER(Py_TYPE(obj))->bf_getbuffer != NULL))
-
-LIBSHIBOKEN_API int PyObject_GetBuffer(PyObject *ob, Pep_buffer *view, int flags);
-LIBSHIBOKEN_API void PyBuffer_Release(Pep_buffer *view);
-
-#else
-
-#define Pep_buffer                          Py_buffer
-#define PepType_AS_BUFFER(type)             ((type)->tp_as_buffer)
-
-#endif /* Py_LIMITED_API */
 
 /*****************************************************************************
  *
