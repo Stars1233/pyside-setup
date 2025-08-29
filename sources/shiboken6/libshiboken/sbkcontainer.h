@@ -13,6 +13,8 @@
 #include <optional>
 #include <utility>
 
+// Opaque container helpers
+
 extern "C"
 {
 struct LIBSHIBOKEN_API ShibokenContainer
@@ -48,8 +50,20 @@ public:
     enum { value = sizeof(test<T>(nullptr)) == sizeof(YesType) };
 };
 
+class ShibokenSequenceContainerPrivateBase
+{
+public:
+    static constexpr const char *msgModifyConstContainer =
+        "Attempt to modify a constant container.";
+
+protected:
+    LIBSHIBOKEN_API static ShibokenContainer *allocContainer(PyTypeObject *subtype);
+    LIBSHIBOKEN_API static void freeSelf(PyObject *pySelf);
+};
+
+// Helper for sequence type containers
 template <class SequenceContainer>
-class ShibokenSequenceContainerPrivate // Helper for sequence type containers
+class ShibokenSequenceContainerPrivate : public ShibokenSequenceContainerPrivateBase
 {
 public:
     using value_type = typename SequenceContainer::value_type;
@@ -58,13 +72,10 @@ public:
     SequenceContainer *m_list{};
     bool m_ownsList = false;
     bool m_const = false;
-    static constexpr const char *msgModifyConstContainer =
-        "Attempt to modify a constant container.";
 
     static PyObject *tpNew(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
     {
-        allocfunc allocFunc = reinterpret_cast<allocfunc>(PepType_GetSlot(subtype, Py_tp_alloc));
-        auto *me = reinterpret_cast<ShibokenContainer *>(allocFunc(subtype, 0));
+        auto *me = allocContainer(subtype);
         auto *d = new ShibokenSequenceContainerPrivate;
         d->m_list = new SequenceContainer;
         d->m_ownsList = true;
@@ -91,9 +102,7 @@ public:
         if (d->m_ownsList)
             delete d->m_list;
         delete d;
-        auto freeFunc = reinterpret_cast<freefunc>(PepType_GetSlot(Py_TYPE(pySelf)->tp_base,
-                                                                   Py_tp_free));
-        freeFunc(self);
+        freeSelf(pySelf);
     }
 
     static Py_ssize_t sqLen(PyObject *self)
