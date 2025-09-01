@@ -22,6 +22,7 @@
 #include <clang-c/Index.h>
 
 #include <algorithm>
+#include <cstring>
 #include <iterator>
 #include <string_view>
 
@@ -706,7 +707,7 @@ const char *languageLevelOption(LanguageLevel l)
 LanguageLevel languageLevelFromOption(const char *o)
 {
     for (const LanguageLevelMapping &m : languageLevelMapping) {
-        if (!strcmp(m.option, o))
+        if (!std::strcmp(m.option, o))
             return m.level;
     }
     return LanguageLevel::Default;

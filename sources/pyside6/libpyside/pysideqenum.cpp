@@ -9,11 +9,12 @@
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 
-#include <map>
-
 #include <QtCore/qmetatype.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/qlist.h>
+
+#include <map>
+#include <cstring>
 
 ///////////////////////////////////////////////////////////////
 //
@@ -99,7 +100,7 @@ static bool is_module_code()
     if (ob_name.isNull())
         return false;
     const char *codename = Shiboken::String::toCString(ob_name);
-    return strcmp(codename, "<module>") == 0;
+    return std::strcmp(codename, "<module>") == 0;
 }
 
 } // extern "C"
