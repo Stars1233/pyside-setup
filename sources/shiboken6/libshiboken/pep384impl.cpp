@@ -783,6 +783,22 @@ PepType_GetNameStr(PyTypeObject *type)
     return nodots != nullptr ? nodots + 1 : ret;
 }
 
+const char *PepType_GetFullyQualifiedNameStr(PyTypeObject *type)
+{
+#if 0
+    // Should look like the below code for Limited API >= 3.13, however, it crashes for heap types
+    //  since PyType_GetFullyQualifiedName() calls type_qualname() at Objects/typeobject.c:1402
+    // which expects a PyHeapTypeObject (struct _heaptypeobject).
+    Shiboken::AutoDecRef name(PyType_GetFullyQualifiedName(type));
+    Py_ssize_t size{};
+    const char *result = PyUnicode_AsUTF8AndSize(name.object(), &size);
+    assert(result != nullptr && size > 0);
+    return result;
+#else
+    return type->tp_name;
+#endif
+}
+
 // PYSIDE-2264: Find the _functools or functools module and retrieve the
 //              partial function. This can be tampered with, check carefully.
 PyObject *

@@ -161,7 +161,13 @@ struct SbkQFlagsTypePrivate;
 /*****************************************************************************/
 
 // functions used everywhere
+
+/// (convenience) Return the unqualified type name
 LIBSHIBOKEN_API const char *PepType_GetNameStr(PyTypeObject *type);
+
+/// (convenience) Return the fully qualified type name(PepType_GetFullyQualifiedNameStr())
+/// as C-string
+LIBSHIBOKEN_API const char *PepType_GetFullyQualifiedNameStr(PyTypeObject *type);
 
 LIBSHIBOKEN_API PyObject *Pep_GetPartialFunction(void);
 

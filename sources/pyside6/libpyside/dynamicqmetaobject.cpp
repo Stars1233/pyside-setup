@@ -313,9 +313,9 @@ QMetaPropertyBuilder
     auto *typeObject = Property::getTypeObject(property);
     if (typeObject != nullptr && PyType_Check(typeObject)) {
         auto *pyTypeObject = reinterpret_cast<PyTypeObject *>(typeObject);
-        if (qstrncmp(pyTypeObject->tp_name, "PySide", 6) != 0
+        if (qstrncmp(PepType_GetFullyQualifiedNameStr(pyTypeObject), "PySide", 6) != 0
             && PySide::isQObjectDerived(pyTypeObject, false)) {
-            const QByteArray pyType(pyTypeObject->tp_name);
+            const QByteArray pyType(PepType_GetFullyQualifiedNameStr(pyTypeObject));
             const auto metaType = QMetaType::fromName(pyType + '*');
             if (metaType.isValid()) {
                 return builder->addProperty(propertyName, pyType,

@@ -235,7 +235,7 @@ struct ReplicaDefs
             PyObject *name = nullptr;
             static PyTypeObject *nodeType = Shiboken::Conversions::getPythonTypeObject("QRemoteObjectNode");
             if (!PyArg_UnpackTuple(args, "Replica.__init__", 2, 3, &node, &constructorType, &name) ||
-                !PySide::inherits(Py_TYPE(node), nodeType->tp_name)) {
+                !PySide::inherits(Py_TYPE(node), PepType_GetFullyQualifiedNameStr(nodeType))) {
                 PyErr_SetString(PyExc_TypeError,
                                 "Replicas can be initialized with no arguments or by node.acquire only");
                 return -1;

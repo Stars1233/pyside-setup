@@ -78,8 +78,9 @@ static PyObject *_PyType_FromSpecWithBasesHack(PyType_Spec *spec,
                 if (keepMeta != nullptr) {
                     std::cerr << "Warning: " << __FUNCTION__
                         << ": multiple meta classes found for " << spec->name << " at "
-                        << idx << ": " << base->tp_name << " in addition to "
-                        << keepMeta->tp_name << '\n';
+                        << idx << ": " << PepType_GetFullyQualifiedNameStr(base)
+                        << " in addition to "
+                        << PepType_GetFullyQualifiedNameStr(keepMeta) << '\n';
                 }
                 assert(keepMeta == nullptr);
                 keepMeta = meta;

@@ -1939,7 +1939,7 @@
         </add-function>
         <add-function signature="__repr__" return-type="str">
             <inject-code class="target" position="beginning">
-            ByteArray b(Py_TYPE(%PYSELF)->tp_name);
+            ByteArray b(PepType_GetFullyQualifiedNameStr(Py_TYPE(%PYSELF)));
             PyObject* aux = Shiboken::String::fromStringAndSize(%CPPSELF.data(), %CPPSELF.size());
             if (PyUnicode_CheckExact(aux)) {
                 PyObject* tmp = PyUnicode_AsASCIIString(aux);

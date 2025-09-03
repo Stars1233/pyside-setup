@@ -74,7 +74,7 @@ struct PodDefs
     static PyObject *tp_repr(PyObject *self)
     {
         auto *type = Py_TYPE(self);
-        std::string repr(type->tp_name);
+        std::string repr(PepType_GetFullyQualifiedNameStr(type));
         repr += "(";
         for (Py_ssize_t i = 0; i < PyTuple_Size(self); ++i) {
             if (i > 0)
@@ -245,7 +245,8 @@ PyTypeObject *createPodType(QMetaObject *meta)
     if (set_cleanup_capsule_attr_for_pointer(type, "_converter_capsule", converter) < 0)
         return nullptr;
     Shiboken::Conversions::registerConverterName(converter, meta->className());
-    Shiboken::Conversions::registerConverterName(converter, type->tp_name);
+    Shiboken::Conversions::registerConverterName(converter,
+                                                 PepType_GetFullyQualifiedNameStr(type));
     Shiboken::Conversions::addPythonToCppValueConversion(converter, pythonToCpp_Tuple_POD,
                                                          is_Tuple_PythonToCpp_POD_Convertible);
 

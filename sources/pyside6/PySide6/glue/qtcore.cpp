@@ -33,7 +33,7 @@ QArgData qArgDataFromPyType(PyObject *t)
     const char *typeName{};
     if (PyType_Check(t)) {
         auto *pyType = reinterpret_cast<PyTypeObject *>(t);
-        typeName = pyType->tp_name;
+        typeName = PepType_GetFullyQualifiedNameStr(pyType);
         result.metaType = PySide::qMetaTypeFromPyType(pyType);
     } else if (PyUnicode_Check(t)) {
         typeName = Shiboken::String::toCString(t);
@@ -2231,7 +2231,7 @@ if (%CPPSELF.next()) {
 // @snippet qdirlistingiterator-next
 
 // @snippet qdirlisting-direntry-repr
-QByteArray result = '<' + QByteArray(Py_TYPE(%PYSELF)->tp_name)
+QByteArray result = '<' + QByteArray(PepType_GetFullyQualifiedNameStr(Py_TYPE(%PYSELF)))
                     + " object at 0x"
                     + QByteArray::number(quintptr(%PYSELF), 16) + " (\""
                     + %CPPSELF.absoluteFilePath().toUtf8() + "\")>";

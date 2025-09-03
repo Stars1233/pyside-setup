@@ -472,7 +472,8 @@ void BindingManager::dumpWrapperMap()
         auto *ob = reinterpret_cast<PyObject *>(it.second);
         std::cerr << "key: " << it.first << ", value: "
             << static_cast<const void *>(ob) << " ("
-            << (Py_TYPE(ob))->tp_name << ", refcnt: " << Py_REFCNT(ob) << ")\n";
+            << PepType_GetFullyQualifiedNameStr(Py_TYPE(ob)) << ", refcnt: "
+            << Py_REFCNT(ob) << ")\n";
     }
     std::cerr << "-------------------------------\n";
 }
@@ -504,7 +505,7 @@ static bool _callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
     /* No need to check the last one: it's gonna be skipped anyway.  */
     for ( ; idx + 1 < n; ++idx) {
         auto *lookType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
-        if (className == lookType->tp_name)
+        if (className == PepType_GetFullyQualifiedNameStr(lookType))
             break;
     }
     // We are now at the first non-Python class `QObject`.

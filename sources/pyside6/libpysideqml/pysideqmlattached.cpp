@@ -107,7 +107,7 @@ static QObject *attachedFactoryHelper(PyTypeObject *attachingType, QObject *o)
 
     if (PyType_IsSubtype(pyResult->ob_type, qObjectType()) == 0) {
         qWarning("QmlAttached: Attached objects must inherit QObject, got %s.",
-                 pyResult->ob_type->tp_name);
+                 PepType_GetFullyQualifiedNameStr(Py_TYPE(pyResult)));
         return nullptr;
     }
 
@@ -182,7 +182,7 @@ PySide::Qml::QmlExtensionInfo qmlAttachedInfo(PyTypeObject *t,
     if (!info || info->attachedType == nullptr)
         return result;
 
-    const auto *name = reinterpret_cast<PyTypeObject *>(t)->tp_name;
+    const auto *name = PepType_GetFullyQualifiedNameStr(reinterpret_cast<PyTypeObject *>(t));
     if (nextAttachingType >= MAX_ATTACHING_TYPES) {
         qWarning("Unable to initialize attached type \"%s\": "
                  "The limit %d of  attached types has been reached.",
@@ -209,7 +209,8 @@ QObject *qmlAttachedPropertiesObject(PyObject *typeObject, QObject *obj, bool cr
     auto *end = attachingTypes + nextAttachingType;
     auto *typePtr = std::find(attachingTypes, end, type);
     if (typePtr == end) {
-        qWarning("%s: Attaching type \"%s\" not found.", __FUNCTION__, type->tp_name);
+        qWarning("%s: Attaching type \"%s\" not found.", __FUNCTION__,
+                 PepType_GetFullyQualifiedNameStr(type));
         return nullptr;
     }
 

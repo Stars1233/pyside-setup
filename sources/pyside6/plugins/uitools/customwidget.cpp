@@ -14,7 +14,7 @@
 // allowing it to create a custom widget written in Python.
 PyCustomWidget::PyCustomWidget(PyObject *objectType) :
     m_pyObject(objectType),
-    m_name(QString::fromUtf8(reinterpret_cast<PyTypeObject *>(objectType)->tp_name))
+    m_name(QString::fromUtf8(PepType_GetFullyQualifiedNameStr(reinterpret_cast<PyTypeObject *>(objectType))))
 {
 }
 

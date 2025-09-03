@@ -41,9 +41,9 @@ PYSIDE_API bool isCompiledMethod(PyObject *callback);
 
 struct debugPyTypeObject
 {
-    PYSIDE_API explicit debugPyTypeObject(const PyTypeObject *o) noexcept;
+    PYSIDE_API explicit debugPyTypeObject(PyTypeObject *o) noexcept;
 
-    const PyTypeObject *m_object;
+    PyTypeObject *m_object;
 };
 
 PYSIDE_API QDebug operator<<(QDebug debug, const debugPyTypeObject &o);

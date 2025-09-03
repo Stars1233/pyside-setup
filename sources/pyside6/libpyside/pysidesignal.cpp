@@ -99,7 +99,7 @@ static bool connection_Check(PyObject *o)
     static QByteArray typeName = QByteArrayLiteral("PySide")
         + QByteArray::number(QT_VERSION_MAJOR)
         + QByteArrayLiteral(".QtCore.QMetaObject.Connection");
-    return std::strcmp(o->ob_type->tp_name, typeName.constData()) == 0;
+    return std::strcmp(PepType_GetFullyQualifiedNameStr(Py_TYPE(o)), typeName.constData()) == 0;
 }
 
 static std::optional<QByteArrayList> parseArgumentNames(PyObject *argArguments)
@@ -450,7 +450,7 @@ static FunctionArgumentsResult extractFunctionArgumentsFromSlot(PyObject *slot)
         // it being actually being that.
         if (ret.objCode == nullptr)
             ret.function = nullptr;
-    } else if (std::strcmp(Py_TYPE(slot)->tp_name, "compiled_function") == 0) {
+    } else if (std::strcmp(PepType_GetFullyQualifiedNameStr(Py_TYPE(slot)), "compiled_function") == 0) {
         ret.isMethod = false;
         ret.function = slot;
 
@@ -541,7 +541,8 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
         return nullptr;
 
     Qt::ConnectionType connectionType = Qt::AutoConnection;
-    if (type != nullptr && qstrcmp(Py_TYPE(type)->tp_name, "ConnectionType") == 0) {
+    if (type != nullptr
+        && qstrcmp(PepType_GetFullyQualifiedNameStr(Py_TYPE(type)), "ConnectionType") == 0) {
         static SbkConverter *connectionTypeConv =
             Shiboken::Conversions::getConverter("Qt::ConnectionType");
         Q_ASSERT(connectionTypeConv);

@@ -43,11 +43,11 @@ QDebug operator<<(QDebug d, const QmlTypeInfo &i)
     d.nospace();
     d << "QmlTypeInfo(" << i.flags;
     if (i.foreignType)
-        d << ", foreignType=" << i.foreignType->tp_name;
+        d << ", foreignType=" << PepType_GetFullyQualifiedNameStr(i.foreignType);
     if (i.attachedType)
-        d << ", attachedType=" << i.attachedType->tp_name;
+        d << ", attachedType=" << PepType_GetFullyQualifiedNameStr(i.attachedType);
     if (i.extensionType)
-        d << ", extensionType=" << i.extensionType->tp_name;
+        d << ", extensionType=" << PepType_GetFullyQualifiedNameStr(i.extensionType);
     d << ')';
     return d;
 }

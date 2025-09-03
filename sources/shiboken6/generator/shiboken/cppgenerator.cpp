@@ -1080,8 +1080,8 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
     if (func->type().isPrimitive())
         return u'"' + func->type().name() + u'"';
 
-    return u"Shiboken::SbkType< "_s
-        + typeEntry->qualifiedCppName() + u" >()->tp_name"_s;
+    return u"PepType_GetFullyQualifiedNameStr(Shiboken::SbkType< "_s
+        + typeEntry->qualifiedCppName() + u" >())"_s;
 }
 
 void CppGenerator::writeVirtualMethodCppCall(TextStream &s,

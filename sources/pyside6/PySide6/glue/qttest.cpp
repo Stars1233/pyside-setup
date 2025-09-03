@@ -15,7 +15,7 @@ if (!signature.isEmpty())
 
 if (emitter == nullptr || signature.isEmpty()) {
     QByteArray error = QByteArrayLiteral("Wrong parameter (")
-        + (%PYARG_1)->ob_type->tp_name
+        + PepType_GetFullyQualifiedNameStr(Py_TYPE(%PYARG_1))
         + QByteArrayLiteral(") passed, QSignalSpy requires a signal.");
     PyErr_SetString(PyExc_ValueError, error.constData());
     return -1;

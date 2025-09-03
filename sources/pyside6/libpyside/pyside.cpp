@@ -678,7 +678,7 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
 
 bool inherits(PyTypeObject *objType, const char *class_name)
 {
-    if (std::strcmp(objType->tp_name, class_name) == 0)
+    if (std::strcmp(PepType_GetFullyQualifiedNameStr(objType), class_name) == 0)
         return true;
 
     PyTypeObject *base = objType->tp_base;
@@ -1063,10 +1063,10 @@ QMetaType qMetaTypeFromPyType(PyTypeObject *pyType)
         return QMetaType(QMetaType::Int);
     if (Shiboken::ObjectType::checkType(pyType))
         return QMetaType::fromName(Shiboken::ObjectType::getOriginalName(pyType));
-    return QMetaType::fromName(pyType->tp_name);
+    return QMetaType::fromName(PepType_GetFullyQualifiedNameStr(pyType));
 }
 
-debugPyTypeObject::debugPyTypeObject(const PyTypeObject *o) noexcept
+debugPyTypeObject::debugPyTypeObject(PyTypeObject *o) noexcept
     : m_object(o)
 {
 }
@@ -1078,7 +1078,7 @@ QDebug operator<<(QDebug debug, const debugPyTypeObject &o)
     debug.nospace();
     debug << "PyTypeObject(";
     if (o.m_object)
-        debug << '"' << o.m_object->tp_name << '"';
+        debug << '"' << PepType_GetFullyQualifiedNameStr(o.m_object) << '"';
     else
         debug << '0';
     debug << ')';

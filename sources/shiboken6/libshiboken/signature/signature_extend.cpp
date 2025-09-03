@@ -125,7 +125,7 @@ static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
     bool isModule = PyModule_Check(ob_type_mod.object());
     const char *name = isModule
         ? PyModule_GetName(ob_type_mod.object())
-        : reinterpret_cast<PyTypeObject *>(ob_type_mod.object())->tp_name;
+        : PepType_GetFullyQualifiedNameStr(reinterpret_cast<PyTypeObject *>(ob_type_mod.object()));
     PyObject *res{};
 
     if (handle_doc_in_progress || name == nullptr

@@ -368,7 +368,7 @@ bool instantiateFromDefaultValue(QVariant &variant, const QString &defaultValue)
     static PyObject *pyLocals = PyDict_New();
 
     // Create the Python expression to evaluate
-    std::string code = std::string(pyType->tp_name) + '('
+    std::string code = std::string(PepType_GetFullyQualifiedNameStr(pyType)) + '('
                        + defaultValue.toUtf8().constData() + ')';
     PyObject *pyResult = PyRun_String(code.c_str(), Py_eval_input, pyLocals, pyLocals);
 

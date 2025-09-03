@@ -46,14 +46,14 @@ static bool verbose = false;
 
 static void formatTypeTuple(PyObject *t, const char *what, std::ostream &str);
 
-static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str, bool verbose)
+static void formatPyTypeObject(PyTypeObject *obj, std::ostream &str, bool verbose)
 {
     if (obj == nullptr) {
         str << '0';
         return;
     }
 
-    str << '"' << obj->tp_name << '"';
+    str << '"' << PepType_GetFullyQualifiedNameStr(obj) << '"';
     if (verbose) {
         bool immutableType = false;
         str << ", 0x" << std::hex << obj->tp_flags << std::dec;
@@ -110,7 +110,7 @@ static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str, bool 
             if (!immutableType) {
                 auto *underlying = reinterpret_cast<const PyObject *>(obj)->ob_type;
                 if (underlying != nullptr && underlying != obj) {
-                    str << ", underlying=\"" << underlying->tp_name << '"';
+                    str << ", underlying=\"" << PepType_GetFullyQualifiedNameStr(underlying) << '"';
                 }
             }
         }
@@ -126,10 +126,12 @@ static void formatTypeTuple(PyObject *t, const char *what, std::ostream &str)
             if (i != 0)
                 str << ", ";
             Shiboken::AutoDecRef item(PyTuple_GetItem(t, i));
-            if (item.isNull())
+            if (item.isNull()) {
                 str << '0'; // Observed with non-ready types
-            else
-                str << '"' << reinterpret_cast<PyTypeObject *>(item.object())->tp_name << '"';
+            } else {
+                str << '"' << PepType_GetFullyQualifiedNameStr(reinterpret_cast<PyTypeObject *>(item.object()))
+                    << '"';
+            }
         }
         str << '}';
     }
@@ -386,7 +388,7 @@ debugSbkObject::debugSbkObject(SbkObject *o) : m_object(o)
 {
 }
 
-debugPyTypeObject::debugPyTypeObject(const PyTypeObject *o) : m_object(o)
+debugPyTypeObject::debugPyTypeObject(PyTypeObject *o) : m_object(o)
 {
 }
 

@@ -251,7 +251,7 @@ PYSIDE_API QDebug operator<<(QDebug debug, const PyObjectWrapper &myObj)
     debug << '<';
     if (PyObject *ob = myObj) {
         const auto refs = Py_REFCNT(ob);
-        debug << Py_TYPE(ob)->tp_name << " at " << ob;
+        debug << PepType_GetFullyQualifiedNameStr(Py_TYPE(ob)) << " at " << ob;
         if (refs == UINT_MAX) // _Py_IMMORTAL_REFCNT
             debug << ", immortal";
         else

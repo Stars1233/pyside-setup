@@ -95,7 +95,8 @@ static QObject *extensionFactory(QObject *o)
     auto *pyObjType = Py_TYPE(pyObj);
     const auto info = qmlTypeInfo(reinterpret_cast<PyObject *>(pyObjType));
     if (!info || info->extensionType == nullptr) {
-        qWarning("QmlExtended: Cannot find extension of %s.", pyObjType->tp_name);
+        qWarning("QmlExtended: Cannot find extension of %s.",
+                 PepType_GetFullyQualifiedNameStr(pyObjType));
         return nullptr;
     }
 
@@ -110,7 +111,7 @@ static QObject *extensionFactory(QObject *o)
 
     if (PyType_IsSubtype(pyResult->ob_type, qObjectType()) == 0) {
         qWarning("QmlExtended: Extension objects must inherit QObject, got %s.",
-                 pyResult->ob_type->tp_name);
+                 PepType_GetFullyQualifiedNameStr(pyResult->ob_type));
         return nullptr;
     }
 
@@ -140,7 +141,7 @@ PySide::Qml::QmlExtensionInfo qmlExtendedInfo(PyObject *t,
             result.factory = extensionFactory;
         } else {
             qWarning("Unable to retrieve meta object for %s",
-                     reinterpret_cast<PyTypeObject *>(t)->tp_name);
+                     PepType_GetFullyQualifiedNameStr(reinterpret_cast<PyTypeObject *>(t)));
         }
     }
     return result;

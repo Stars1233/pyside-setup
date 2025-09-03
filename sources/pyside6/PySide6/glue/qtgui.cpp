@@ -1067,7 +1067,7 @@ return %CONVERTTOPYTHON[QRect](cppResult);
 // @snippet qpainterstateguard-restore
 
 // @snippet qmatrix-repr-code
-QByteArray format(Py_TYPE(%PYSELF)->tp_name);
+QByteArray format(PepType_GetFullyQualifiedNameStr(Py_TYPE(%PYSELF)));
 format += QByteArrayLiteral("((");
 %MATRIX_TYPE data[%MATRIX_SIZE];
 %CPPSELF.copyDataTo(data);

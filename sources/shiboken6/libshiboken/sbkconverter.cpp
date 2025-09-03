@@ -84,9 +84,9 @@ static void dumpPyTypeObject(std::ostream &str, PyTypeObject *t)
         str << "<None>";
         return;
     }
-    str << '"' << t->tp_name << '"';
+    str << '"' << PepType_GetFullyQualifiedNameStr(t) << '"';
     if (t->tp_base != nullptr && t->tp_base != &PyBaseObject_Type)
-        str << '(' << t->tp_base->tp_name << ')';
+        str << '(' << PepType_GetFullyQualifiedNameStr(t->tp_base) << ')';
 }
 
 static void dumpSbkConverter(std::ostream &str, const SbkConverter *c)
@@ -461,7 +461,8 @@ void *cppPointer(PyTypeObject *desiredType, SbkObject *pyIn)
 {
     assert(pyIn);
     if (!ObjectType::checkType(desiredType)) {
-        std::cerr << __FUNCTION__ << ": Conversion to non SbkObject type " << desiredType->tp_name
+        std::cerr << __FUNCTION__ << ": Conversion to non SbkObject type "
+                  << PepType_GetFullyQualifiedNameStr(desiredType)
                   << " requested, falling back to pass-through.\n";
         return pyIn;
     }
@@ -502,7 +503,7 @@ static void _pythonToCppCopy(const SbkConverter *converter, PyObject *pyIn, void
     } else {
         std::cerr << __FUNCTION__ << ": Cannot copy-convert " << pyIn;
         if (pyIn)
-            std::cerr << " (" << Py_TYPE(pyIn)->tp_name << ')';
+            std::cerr << " (" << PepType_GetFullyQualifiedNameStr(Py_TYPE(pyIn)) << ')';
         std::cerr << " to C++.\n";
     }
 }

@@ -158,7 +158,7 @@
 
     <template name="repr_code">
         QString format = QString::asprintf("%s(%REPR_FORMAT)",
-            Py_TYPE(%PYSELF)->tp_name, %REPR_ARGS);
+            PepType_GetFullyQualifiedNameStr(Py_TYPE(%PYSELF)), %REPR_ARGS);
         %PYARG_0 = Shiboken::String::fromCString(qPrintable(format));
     </template>
 

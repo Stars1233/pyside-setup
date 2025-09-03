@@ -214,7 +214,7 @@ static int qmlRegisterType(PyObject *pyObj,
     // there's no way to unregister a QML type.
     Py_INCREF(pyObj);
 
-    const QByteArray typeName(pyObjType->tp_name);
+    const QByteArray typeName(PepType_GetFullyQualifiedNameStr(pyObjType));
     QByteArray ptrType = typeName + '*';
     QByteArray listType = QByteArrayLiteral("QQmlListProperty<") + typeName + '>';
     const auto typeId = QMetaType(new QQmlMetaTypeInterface(ptrType));
@@ -657,8 +657,10 @@ static std::optional<SingletonQObjectCreation>
     Shiboken::AutoDecRef tpDict(PepType_GetDict(pyObjType));
     auto *create = PyDict_GetItemString(tpDict.object(), "create");
     // Method decorated by "@staticmethod"
-    if (create == nullptr || std::strcmp(Py_TYPE(create)->tp_name, "staticmethod") != 0)
+    if (create == nullptr
+        || std::strcmp(PepType_GetFullyQualifiedNameStr(Py_TYPE(create)), "staticmethod") != 0) {
         return std::nullopt;
+    }
     // 3.10: "__wrapped__"
     Shiboken::AutoDecRef function(PyObject_GetAttrString(create, "__func__"));
     if (function.isNull()) {
