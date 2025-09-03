@@ -130,6 +130,7 @@ private:
         QString registrationCode;
         bool hasQVariantConversion = false;
     };
+    using OpaqueContainerTypeHash = QHash<AbstractMetaType, OpaqueContainerData>;
 
     OpaqueContainerData
         writeOpaqueContainerConverterFunctions(TextStream &s,
@@ -480,7 +481,9 @@ private:
     void writeRichCompareFunction(TextStream &s, TextStream &t, const GeneratorContext &context) const;
     void writeSmartPointerRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
 
-    static void writeEnumsInitialization(TextStream &s, AbstractMetaEnumList &enums);
+    static void writeEnumsInitialization(TextStream &s, const AbstractMetaEnumList &enums);
+    static void writeEnumsInitFunc(TextStream &s, const QString &funcName,
+                                   const AbstractMetaEnumList &enums);
     static bool writeEnumInitialization(TextStream &s, const AbstractMetaEnum &metaEnum);
 
     static void writeSignalInitialization(TextStream &s, const AbstractMetaClassCPtr &metaClass);
@@ -506,6 +509,25 @@ private:
     static void writeExtendedConverterInitialization(TextStream &s,
                                                      const TypeEntryCPtr &externalType,
                                                      const AbstractMetaClassCList &conversions);
+
+    void writeModuleInitFunction(TextStream &s, const QString &moduleDef,
+                                 const QString &execFunc, const QString &convInitFunc,
+                                 const QString &containerConvInitFunc,
+                                 const QString &qtEnumRegisterMetaTypeFunc);
+    void writeModuleExecFunction(TextStream &s, const QString &name,
+                                 const QString &opaqueContainerRegisterFunc,
+                                 const QString &enumRegisterFunc,
+                                 const QString &classPythonDefines,
+                                 const AbstractMetaClassCList &classesWithStaticFields);
+    static void writeConverterInitFunc(TextStream &s, const QString &funcName,
+                                       const QList<CustomConversionPtr> &typeConversions,
+                                       const ExtendedConverterData &extendedConverters);
+    void writeContainerConverterInitFunc(TextStream &s, const QString &funcName,
+                                         const OpaqueContainerTypeHash &opaqueContainers) const;
+    static void writeOpaqueContainerConverterRegisterFunc(TextStream &s, const QString &funcName,
+                                                          const OpaqueContainerTypeHash &opaqueContainers);
+    static void writeQtEnumRegisterMetaTypeFunction(TextStream &s, const QString &name,
+                                                    const AbstractMetaEnumList &globalEnums);
 
     void writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                     bool usesPyArgs,

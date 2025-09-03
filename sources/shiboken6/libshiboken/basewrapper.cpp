@@ -886,7 +886,7 @@ namespace Conversions { void init(); }
 void init()
 {
     static bool shibokenAlreadInitialised = false;
-    if (shibokenAlreadInitialised)
+    if (shibokenAlreadInitialised) // Leave guard in place until fully ported to multi phase init
         return;
 
     _initMainThreadId();

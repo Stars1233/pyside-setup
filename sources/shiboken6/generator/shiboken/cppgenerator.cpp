@@ -5475,14 +5475,14 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
     }
 }
 
-void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList &enums)
+void CppGenerator::writeEnumsInitialization(TextStream &s, const AbstractMetaEnumList &enums)
 {
     if (enums.isEmpty())
         return;
     bool preambleWritten = false;
     bool etypeUsed = false;
 
-    for (const AbstractMetaEnum &cppEnum : std::as_const(enums)) {
+    for (const AbstractMetaEnum &cppEnum : enums) {
         if (cppEnum.isPrivate())
             continue;
         if (!preambleWritten) {
@@ -5496,6 +5496,14 @@ void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList 
     }
     if (preambleWritten && !etypeUsed)
         s << sbkUnusedVariableCast("EType");
+}
+
+void CppGenerator::writeEnumsInitFunc(TextStream &s, const QString &funcName,
+                                      const AbstractMetaEnumList &enums)
+{
+     s << "static void " << funcName << "(PyObject *module)\n{\n" << indent;
+     writeEnumsInitialization(s, enums);
+     s << outdent << "}\n\n";
 }
 
 static qsizetype maxLineLength(const QStringList &list)
@@ -6678,7 +6686,7 @@ bool CppGenerator::finishGeneration()
         s << '\n';
     }
 
-    QHash<AbstractMetaType, OpaqueContainerData> opaqueContainers;
+    OpaqueContainerTypeHash opaqueContainers;
     const auto &containers = api().instantiatedContainers();
     QSet<AbstractMetaType> valueConverters;
     if (!containers.isEmpty()) {
@@ -6697,94 +6705,94 @@ bool CppGenerator::finishGeneration()
     }
 
     const QString &modName =  moduleName();
-    const QString moduleDef = writeModuleDef(s, modName);
 
     // PYSIDE-510: Create a signatures string for the introspection feature.
     writeSignatureStrings(s, signatureStream.toString(), moduleName(), "global functions");
 
     writeInitInheritance(s);
 
-    // Write module init function
-    const QString globalModuleVar = pythonModuleObjectName();
-    s << "extern \"C\" LIBSHIBOKEN_EXPORT PyObject *PyInit_"
-        << moduleName() << "()\n{\n" << indent;
-    // Guard against repeated invocation
-    s << "if (" << globalModuleVar << " != nullptr)\n"
-        << indent << "return " << globalModuleVar << ";\n" << outdent;
-
-    // module inject-code target/beginning
-    writeModuleCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning,
-                         TypeSystem::TargetLangCode);
-
-    for (const QString &requiredModule : requiredModules) {
-        s << "{\n" << indent
-             << "Shiboken::AutoDecRef requiredModule(Shiboken::Module::import(\"" << requiredModule << "\"));\n"
-             << "if (requiredModule.isNull())\n" << indent
-             << "return nullptr;\n" << outdent
-             << cppApiVariableName(requiredModule)
-             << " = Shiboken::Module::getTypes(requiredModule);\n"
-             << convertersVariableName(requiredModule)
-             << " = Shiboken::Module::getTypeConverters(requiredModule);\n" << outdent
-             << "}\n\n";
+    const QString convInitFunc = "initConverters_"_L1 + modName;
+    writeConverterInitFunc(s, convInitFunc, typeConversions, extendedConverters);
+    const QString containerConvInitFunc = "initContainerConverters_"_L1 + modName;
+    writeContainerConverterInitFunc(s, containerConvInitFunc, opaqueContainers);
+    QString opaqueContainerRegisterFunc;
+    if (!opaqueContainers.isEmpty()) {
+        opaqueContainerRegisterFunc = "registerOpaqueContainers_"_L1 + modName;
+        writeOpaqueContainerConverterRegisterFunc(s, opaqueContainerRegisterFunc,
+                                                  opaqueContainers);
+    }
+    QString enumRegisterFunc;
+    QString qtEnumRegisterMetaTypeFunc;
+    if (!globalEnums.isEmpty()) {
+        enumRegisterFunc = "registerEnums_"_L1 + modName;
+        writeEnumsInitFunc(s, enumRegisterFunc, globalEnums);
+        if (usePySideExtensions()) {
+            qtEnumRegisterMetaTypeFunc = "registerEnumMetaTypes_"_L1 + modName;
+            writeQtEnumRegisterMetaTypeFunction(s, qtEnumRegisterMetaTypeFunc, globalEnums);
+        }
     }
 
-    int maxTypeIndex = getMaxTypeIndex() + api().instantiatedSmartPointers().size();
-    if (maxTypeIndex) {
-        s << "// Create an array of wrapper types/names for the current module.\n"
-            << "static Shiboken::Module::TypeInitStruct cppApi[] = {\n" << indent;
+    const QString execFunc = "exec_"_L1 + modName;
+    writeModuleExecFunction(s, execFunc, opaqueContainerRegisterFunc, enumRegisterFunc,
+                            s_classPythonDefines.toString(), classesWithStaticFields);
 
-        // Windows did not like an array of QString.
-        QStringList typeNames;
-        for (int idx = 0; idx < maxTypeIndex; ++idx)
-            typeNames.append("+++ unknown entry #"_L1 + QString::number(idx)
-                             + " in "_L1 + moduleName());
+    const QString moduleDef = writeModuleDef(s, modName);
 
-        collectFullTypeNamesArray(typeNames);
+    writeModuleInitFunction(s, moduleDef, execFunc, convInitFunc, containerConvInitFunc, qtEnumRegisterMetaTypeFunc);
 
-        for (const auto &typeName : typeNames)
-            s << "{nullptr, \"" << typeName << "\"},\n";
+    file.done();
+    return true;
+}
 
-        s << "{nullptr, nullptr}\n" << outdent << "};\n"
-            << "// The new global structure consisting of (type, name) pairs.\n"
-            << cppApiVariableName() << " = cppApi;\n";
-        if (usePySideExtensions())
-            s << "QT_WARNING_PUSH\nQT_WARNING_DISABLE_DEPRECATED\n";
-        s << "// The backward compatible alias with upper case indexes.\n"
-            << cppApiVariableNameOld() << " = reinterpret_cast<PyTypeObject **>(cppApi);\n";
-        if (usePySideExtensions())
-            s << "QT_WARNING_POP\n";
-        s << '\n';
-    }
-
-    s << "// Create an array of primitive type converters for the current module.\n"
-        << "static SbkConverter *sbkConverters[SBK_" << moduleName()
-        << "_CONVERTERS_IDX_COUNT" << "];\n"
-        << convertersVariableName() << " = sbkConverters;\n\n"
-        << "PyObject *module = Shiboken::Module::create(\""  << moduleName()
-        << "\", &" << moduleDef << ");\n"
-        << "#ifdef Py_GIL_DISABLED\n"
-        << "PyUnstable_Module_SetGIL(module, Py_MOD_GIL_NOT_USED);\n"
-        << "#endif\n"
-        << "\n// Make module available from global scope\n"
-        << globalModuleVar << " = module;\n\n";
-
-    const QString subModuleOf = typeDb->defaultTypeSystemType()->subModuleOf();
-    if (!subModuleOf.isEmpty())
-        writeSubModuleHandling(s,  moduleName(), subModuleOf);
-
-    s << "// Initialize classes in the type system\n"
-        << s_classPythonDefines.toString();
+void CppGenerator::writeConverterInitFunc(TextStream &s,
+                                          const QString &funcName,
+                                          const QList<CustomConversionPtr> &typeConversions,
+                                          const ExtendedConverterData &extendedConverters)
+{
+    s << "static void " << funcName << "()\n{\n" << indent;
 
     if (!typeConversions.isEmpty()) {
-        s << '\n';
+        s << "// Type conversions.\n";
         for (const auto &conversion : typeConversions) {
             writePrimitiveConverterInitialization(s, conversion);
             s << '\n';
         }
     }
 
-    if (!containers.isEmpty()) {
+    if (!extendedConverters.isEmpty()) {
         s << '\n';
+        for (auto it = extendedConverters.cbegin(), end = extendedConverters.cend(); it != end; ++it) {
+            writeExtendedConverterInitialization(s, it.key(), it.value());
+            s << '\n';
+        }
+    }
+
+    const PrimitiveTypeEntryCList &primitiveTypeList = primitiveTypes();
+    if (!primitiveTypeList.isEmpty()) {
+        s << "// Register primitive types converters.\n";
+        for (const auto &pte : primitiveTypeList) {
+            if (!pte->generateCode() || !isCppPrimitive(pte))
+                continue;
+            if (!pte->referencesType())
+                continue;
+            TypeEntryCPtr referencedType = basicReferencedTypeEntry(pte);
+            s << registerConverterName(pte->qualifiedCppName(), converterObject(referencedType),
+                                       registerConverterName::Alias
+                                       | registerConverterName::PartiallyQualifiedAliases) << '\n';
+        }
+    }
+
+    s << outdent << "}\n\n";
+}
+
+void CppGenerator::writeContainerConverterInitFunc(TextStream &s,
+                                                   const QString &funcName,
+                                                   const OpaqueContainerTypeHash &opaqueContainers) const
+{
+    s << "static void " << funcName << "()\n{\n" << indent;
+
+    const auto &containers = api().instantiatedContainers();
+    if (!containers.isEmpty()) {
         for (const AbstractMetaType &container : containers) {
             const QString converterObj = writeContainerConverterInitialization(s, container, api());
             const auto it = opaqueContainers.constFind(container);
@@ -6797,48 +6805,150 @@ bool CppGenerator::finishGeneration()
         }
     }
 
-    if (!opaqueContainers.isEmpty()) {
-        s << "\n// Opaque container type registration\n";
-        if (usePySideExtensions()) {
-            const bool hasQVariantConversion =
-                std::any_of(opaqueContainers.cbegin(), opaqueContainers.cend(),
-                            [](const OpaqueContainerData &d) { return d.hasQVariantConversion; });
-            if (hasQVariantConversion) {
-                const char qVariantConverterVar[] = "qVariantConverter";
-                s << "auto *" << qVariantConverterVar
-                  << " = Shiboken::Conversions::getConverter(\"QVariant\");\n"
-                  << "Q_ASSERT(" << qVariantConverterVar << " != nullptr);\n";
-            }
-        }
-        for (const auto &d : opaqueContainers)
-            s << d.registrationCode;
-        s << '\n';
-    }
+    s << outdent << "}\n\n";
+}
 
-    if (!extendedConverters.isEmpty()) {
-        s << '\n';
-        for (ExtendedConverterData::const_iterator it = extendedConverters.cbegin(), end = extendedConverters.cend(); it != end; ++it) {
-            writeExtendedConverterInitialization(s, it.key(), it.value());
-            s << '\n';
+void CppGenerator::writeOpaqueContainerConverterRegisterFunc(TextStream &s, const QString &funcName,
+                                                             const OpaqueContainerTypeHash &opaqueContainers)
+{
+    s << "static void " << funcName << "(PyObject *module)\n{\n" << indent;
+    if (usePySideExtensions()) {
+        const bool hasQVariantConversion =
+            std::any_of(opaqueContainers.cbegin(), opaqueContainers.cend(),
+                        [](const OpaqueContainerData &d) { return d.hasQVariantConversion; });
+        if (hasQVariantConversion) {
+            const char qVariantConverterVar[] = "qVariantConverter";
+            s << "auto *" << qVariantConverterVar
+                << " = Shiboken::Conversions::getConverter(\"QVariant\");\n"
+                << "Q_ASSERT(" << qVariantConverterVar << " != nullptr);\n";
         }
     }
+    for (const auto &d : opaqueContainers)
+        s << d.registrationCode;
+    s << outdent << "}\n\n";
+}
 
-    writeEnumsInitialization(s, globalEnums);
+void CppGenerator::writeModuleInitFunction(TextStream &s, const QString &moduleDef,
+                                           const QString &execFunc, const QString &convInitFunc,
+                                           const QString &containerConvInitFunc,
+                                           const QString &qtEnumRegisterMetaTypeFunc)
+{
+     const QString globalModuleVar = pythonModuleObjectName();
+     s << "extern \"C\" LIBSHIBOKEN_EXPORT PyObject *PyInit_"
+         << moduleName() << "()\n{\n" << indent
+         << "Shiboken::init();\n\n";
 
-    s << "// Register primitive types converters.\n";
-    const PrimitiveTypeEntryCList &primitiveTypeList = primitiveTypes();
-    for (const auto &pte : primitiveTypeList) {
-        if (!pte->generateCode() || !isCppPrimitive(pte))
-            continue;
-        if (!pte->referencesType())
-            continue;
-        TypeEntryCPtr referencedType = basicReferencedTypeEntry(pte);
-        s << registerConverterName(pte->qualifiedCppName(), converterObject(referencedType),
-                                   registerConverterName::Alias
-                                   | registerConverterName::PartiallyQualifiedAliases);
+     // Static initialization: Create converter/type arrays and retrieve arrays
+     // of the required modules for initializing the converters.
+     const int maxTypeIndex = getMaxTypeIndex() + api().instantiatedSmartPointers().size();
+     if (maxTypeIndex) {
+         s << "// Create an array of wrapper types/names for the current module.\n"
+             << "static Shiboken::Module::TypeInitStruct cppApi[] = {\n" << indent;
+
+         // Windows did not like an array of QString.
+         QStringList typeNames;
+         for (int idx = 0; idx < maxTypeIndex; ++idx)
+             typeNames.append("+++ unknown entry #"_L1 + QString::number(idx)
+                              + " in "_L1 + moduleName());
+
+         collectFullTypeNamesArray(typeNames);
+
+         for (const auto &typeName : typeNames)
+             s << "{nullptr, \"" << typeName << "\"},\n";
+
+         s << "{nullptr, nullptr}\n" << outdent << "};\n"
+             << "// The new global structure consisting of (type, name) pairs.\n"
+             << cppApiVariableName() << " = cppApi;\n";
+         if (usePySideExtensions())
+             s << "QT_WARNING_PUSH\nQT_WARNING_DISABLE_DEPRECATED\n";
+         s << "// The backward compatible alias with upper case indexes.\n"
+             << cppApiVariableNameOld() << " = reinterpret_cast<PyTypeObject **>(cppApi);\n";
+         if (usePySideExtensions())
+             s << "QT_WARNING_POP\n";
+         s << '\n';
+     }
+
+     s << "// Create an array of primitive type converters for the current module.\n"
+         << "static SbkConverter *sbkConverters[SBK_" << moduleName()
+         << "_CONVERTERS_IDX_COUNT" << "];\n"
+         << convertersVariableName() << " = sbkConverters;\n\n";
+
+     const TypeDatabase *typeDb = TypeDatabase::instance();
+     const CodeSnipList snips = typeDb->defaultTypeSystemType()->codeSnips();
+
+     writeModuleCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning,
+                          TypeSystem::TargetLangCode);
+
+     const QStringList &requiredModules = typeDb->requiredTargetImports();
+     for (const QString &requiredModule : requiredModules) {
+         s << "{\n" << indent
+              << "Shiboken::AutoDecRef requiredModule(Shiboken::Module::import(\"" << requiredModule << "\"));\n"
+              << "if (requiredModule.isNull())\n" << indent
+              << "return nullptr;\n" << outdent
+              << cppApiVariableName(requiredModule)
+              << " = Shiboken::Module::getTypes(requiredModule);\n"
+              << convertersVariableName(requiredModule)
+              << " = Shiboken::Module::getTypeConverters(requiredModule);\n" << outdent
+              << "}\n\n";
+     }
+
+     s << convInitFunc << "();\n" << containerConvInitFunc << "();\n";
+     if (!qtEnumRegisterMetaTypeFunc.isEmpty())
+         s << qtEnumRegisterMetaTypeFunc << "();\n";
+     s << '\n';
+
+     s << "PyObject *module = Shiboken::Module::create(\""  << moduleName()
+         << "\", &" << moduleDef << ");\n"
+         << "if (module == nullptr)\n" << indent << "return nullptr;\n" << outdent
+         << "#ifdef Py_GIL_DISABLED\n"
+         << "PyUnstable_Module_SetGIL(module, Py_MOD_GIL_NOT_USED);\n"
+         << "#endif\n"
+         << "\n// Make module available from global scope\n"
+         << globalModuleVar << " = module;\n\n";
+
+     s << "if (" << execFunc << "(module) != 0)\n" << indent << "return nullptr;\n" << outdent
+         << "return module;\n" << outdent << "}\n\n";
+}
+
+void CppGenerator::writeQtEnumRegisterMetaTypeFunction(TextStream &s,
+                                                       const QString &name,
+                                                       const AbstractMetaEnumList &globalEnums)
+{
+    s << "static void " << name << "()\n{\n" << indent;
+    for (const AbstractMetaEnum &metaEnum : globalEnums) {
+        if (!metaEnum.isAnonymous()) {
+            ConfigurableScope configScope(s, metaEnum.typeEntry());
+            s << "qRegisterMetaType< " << Generator::getFullTypeName(metaEnum.typeEntry())
+              << " >(\"" << metaEnum.name() << "\");\n";
+        }
     }
+    s << outdent << "}\n\n";
+}
 
+void CppGenerator::writeModuleExecFunction(TextStream &s, const QString &name,
+                                           const QString &opaqueContainerRegisterFunc,
+                                           const QString &enumRegisterFunc,
+                                           const QString &classPythonDefines,
+                                           const AbstractMetaClassCList &classesWithStaticFields)
+{
+    // Code to run in an module instance of a subinterpreter (Py_mod_exec)
+    s << "extern \"C\" {\nstatic int " << name << "(PyObject *module)\n{\n" << indent;
+    // module inject-code target/beginning
+    const TypeDatabase *typeDb = TypeDatabase::instance();
+    const CodeSnipList snips = typeDb->defaultTypeSystemType()->codeSnips();
+
+    const QString subModuleOf = typeDb->defaultTypeSystemType()->subModuleOf();
+    if (!subModuleOf.isEmpty())
+        writeSubModuleHandling(s,  moduleName(), subModuleOf);
+
+    s << "// Initialize classes in the type system\n" << classPythonDefines << '\n';
+    if (!opaqueContainerRegisterFunc.isEmpty())
+        s << opaqueContainerRegisterFunc << "(module);\n";
+    if (!enumRegisterFunc.isEmpty())
+        s << enumRegisterFunc << "(module);\n";
     s << '\n';
+
+    const int maxTypeIndex = getMaxTypeIndex() + api().instantiatedSmartPointers().size();
     if (maxTypeIndex)
         s << "Shiboken::Module::registerTypes(module, " << cppApiVariableName() << ");\n";
     s << "Shiboken::Module::registerTypeConverters(module, " << convertersVariableName() << ");\n";
@@ -6865,29 +6975,17 @@ bool CppGenerator::finishGeneration()
     // module inject-code native/end
     writeModuleCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode);
 
-    if (usePySideExtensions()) {
-        for (const AbstractMetaEnum &metaEnum : std::as_const(globalEnums))
-            if (!metaEnum.isAnonymous()) {
-                ConfigurableScope configScope(s, metaEnum.typeEntry());
-                s << "qRegisterMetaType< " << getFullTypeName(metaEnum.typeEntry())
-                  << " >(\"" << metaEnum.name() << "\");\n";
-            }
-
-        // cleanup staticMetaObject attribute
+    if (usePySideExtensions()) // cleanup staticMetaObject attribute
         s << "PySide::registerCleanupFunction(cleanTypesAttributes);\n\n";
-    }
 
     // finish the rest of get_signature() initialization.
     s << outdent << "#if PYSIDE6_COMOPT_COMPRESS == 0\n" << indent
         << "FinishSignatureInitialization(module, " << moduleName() << "_SignatureStrings);\n"
         << outdent << "#else\n" << indent
         << "if (FinishSignatureInitBytes(module, " << moduleName() << "_SignatureBytes, "
-        << moduleName() << "_SignatureByteSize) < 0)\n" << indent << "return {};\n" << outdent
+        << moduleName() << "_SignatureByteSize) < 0)\n" << indent << "return -1;\n" << outdent
         << outdent << "#endif\n" << indent
-        << "\nreturn module;\n" << outdent << "}\n";
-
-    file.done();
-    return true;
+        << "\nreturn 0;\n" << outdent << "}\n} // extern \"C\"\n\n";
 }
 
 static ArgumentOwner getArgumentOwner(const AbstractMetaFunctionCPtr &func, int argIndex)
