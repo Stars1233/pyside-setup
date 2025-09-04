@@ -127,6 +127,7 @@ class QAccessibleTest(UsesQApplication):
         QAccessible.installFactory(accessible_factory)
         window = Window()  # noqa: F841
 
+    @unittest.skipUnless(QAccessible.isActive(), "Accessibility is not active")
     def testLineEdits(self):
         window = Window()
         window.show()
