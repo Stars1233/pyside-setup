@@ -70,7 +70,7 @@ communicating with the QML layer.
 <details>
 <summary class="prominent-summary">audio_engine.py</summary>
 
-```{literalinclude} ../../../../../../../../../examples/tutorials/drumpad/final_project/Python/audio/audio_engine.py
+```{literalinclude} ../../../../../../../../examples/tutorials/drumpad/final_project/Python/audio/audio_engine.py
 ---
 language: python
 caption: audio_engine.py
@@ -87,7 +87,7 @@ files are used in this case.
 <details>
 <summary class="prominent-summary">audio_files_model.py</summary>
 
-```{literalinclude} ../../../../../../../../../examples/tutorials/drumpad/final_project/Python/audio/audio_files_model.py
+```{literalinclude} ../../../../../../../../examples/tutorials/drumpad/final_project/Python/audio/audio_files_model.py
 ---
 language: python
 caption: audio_files_model.py
@@ -103,7 +103,7 @@ and display the waveform. The graph is drawn using [QPainter].
 <details>
 <summary class="prominent-summary">waveform_item.py</summary>
 
-```{literalinclude} ../../../../../../../../../examples/tutorials/drumpad/final_project/Python/audio/waveform_item.py
+```{literalinclude} ../../../../../../../../examples/tutorials/drumpad/final_project/Python/audio/waveform_item.py
 ---
 language: python
 caption: waveform_item.py
