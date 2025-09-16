@@ -370,6 +370,24 @@ instructions:
             property: host.arch
             equals_value: ARM64
 
+    - type: ExecuteCommand
+      command: "sudo yum -y install python3.11-devel python3.11-pip"
+      maxTimeInSeconds: 14400
+      maxTimeBetweenOutput: 1200
+      enable_if:
+          condition: property
+          property: host.osVersion
+          equals_value: RHEL_9_4
+      userMessageOnFailure: >
+          Failed to install python 3.11
+
+    - type: EnvironmentVariable
+      variableName: interpreter
+      variableValue: "python3.11"
+      enable_if:
+          condition: property
+          property: host.osVersion
+          equals_value: RHEL_9_4
 
     # ToDo: can be removed after 3.11 is available on qt5#3.8 on macOS
     # start of ToDo
