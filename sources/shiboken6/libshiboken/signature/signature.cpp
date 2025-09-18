@@ -42,7 +42,7 @@ static PyObject *CreateSignature(PyObject *props, PyObject *key)
      * This is so much simpler than using all the attributes explicitly
      * to support '_signature_is_functionlike()'.
      */
-    return PyObject_CallFunction(pyside_globals->create_signature_func,
+    return PyObject_CallFunction(signatureGlobals()->create_signature_func,
                                  "(OO)", props, key);
 }
 
@@ -97,11 +97,11 @@ PyObject *GetTypeKey(PyObject *ob)
     return Py_BuildValue("(OO)", module_name.object(), class_name.object());
 }
 
-static PyObject *empty_dict = nullptr;
-
 PyObject *TypeKey_to_PropsDict(PyObject *type_key)
 {
-    PyObject *dict = PyDict_GetItem(pyside_globals->arg_dict, type_key);
+    auto *globals = signatureGlobals();
+    PyObject *&empty_dict = globals->empty_dict;
+    PyObject *dict = PyDict_GetItem(globals->arg_dict, type_key);
     if (dict == nullptr) {
         if (empty_dict == nullptr)
             empty_dict = PyDict_New();
@@ -299,6 +299,7 @@ static PyObject *make_snake_case_name(PyObject * /* self */, PyObject *arg)
 
 static PyObject *feature_import(PyObject * /* self */, PyObject *args, PyObject *kwds)
 {
+    auto *pyside_globals = signatureGlobals();
     PyObject *ret = PyObject_Call(pyside_globals->feature_import_func, args, kwds);
     if (ret != Py_None)
         return ret;
@@ -363,6 +364,7 @@ PyMethodDef signature_methods[] = {
 
 static int PySide_BuildSignatureArgs(PyObject *obtype_mod, const char *signatures[])
 {
+    auto *pyside_globals = signatureGlobals();
     AutoDecRef type_key(GetTypeKey(obtype_mod));
     /*
      * PYSIDE-996: Avoid string overflow in MSVC, which has a limit of
@@ -385,6 +387,7 @@ static int PySide_BuildSignatureArgs(PyObject *obtype_mod, const char *signature
 static int PySide_BuildSignatureArgsByte(PyObject *obtype_mod, const uint8_t *signatures,
                                          size_t size)
 {
+    auto *pyside_globals = signatureGlobals();
     AutoDecRef type_key(GetTypeKey(obtype_mod));
     AutoDecRef numkey(PyTuple_New(2));
     PyTuple_SetItem(numkey.object(), 0, PyLong_FromVoidPtr(const_cast<uint8_t *>(signatures)));
@@ -461,6 +464,7 @@ PyObject *PySide_BuildSignatureProps(PyObject *type_key)
      */
     if (type_key == nullptr)
         return nullptr;
+    auto *pyside_globals = signatureGlobals();
     AutoDecRef strings{};
     PyObject *numkey = PyDict_GetItem(pyside_globals->arg_dict, type_key);
     if (PyTuple_Check(numkey)) {
@@ -484,6 +488,7 @@ PyObject *PySide_BuildSignatureProps(PyObject *type_key)
     if (dict == nullptr) {
         if (PyErr_Occurred())
             return nullptr;
+        PyObject *&empty_dict = pyside_globals->empty_dict;
         // No error: return an empty dict.
         if (empty_dict == nullptr)
             empty_dict = PyDict_New();
@@ -521,6 +526,7 @@ static int _finishSignaturesCommon(PyObject *module)
      * to the PyCFunction attributes. Therefore I simplified things
      * and always use our own mapping.
      */
+    auto *pyside_globals = signatureGlobals();
     PyObject *key{};
     PyObject *func{};
     PyObject *obdict = PyModule_GetDict(module);
@@ -774,7 +780,7 @@ void SetError_Argument(PyObject *args, const char *func_name, PyObject *info)
     }
     if (info == nullptr)
         info = Py_None;
-    AutoDecRef res(PyObject_CallFunctionObjArgs(pyside_globals->seterror_argument_func,
+    AutoDecRef res(PyObject_CallFunctionObjArgs(signatureGlobals()->seterror_argument_func,
                                                 args, new_func_name.object(), info, nullptr));
     if (res.isNull()) {
         PyErr_Print();
@@ -809,7 +815,7 @@ PyObject *Sbk_TypeGet___doc__(PyObject *ob)
 PyObject *GetFeatureDict()
 {
     init_shibokensupport_module();
-    return pyside_globals->feature_dict;
+    return signatureGlobals()->feature_dict;
 }
 
 } //extern "C"

@@ -131,6 +131,7 @@ static PyObject *_func_with_new_name(PyTypeObject *type,
 
 static int build_name_key_to_func(PyObject *obtype)
 {
+    auto *pyside_globals = signatureGlobals();
     auto *type = reinterpret_cast<PyTypeObject *>(obtype);
     PyMethodDef *meth = type->tp_methods;
 
@@ -167,6 +168,7 @@ PyObject *name_key_to_func(PyObject *ob)
      * This could also be computed directly, but the Limited API
      * makes this impossible. So we always build our own mapping.
      */
+    auto *pyside_globals = signatureGlobals();
     AutoDecRef name_key(compute_name_key(ob));
     if (name_key.isNull())
         Py_RETURN_NONE;
@@ -242,6 +244,7 @@ PyObject *_get_class_of_cf(PyObject *ob_cf)
 {
     PyObject *selftype = PyCFunction_GetSelf(ob_cf);
     if (selftype == nullptr) {
+        auto *pyside_globals = signatureGlobals();
         selftype = PyDict_GetItem(pyside_globals->map_dict, ob_cf);
         if (selftype == nullptr) {
             // This must be an overloaded function that we handled special.
@@ -333,6 +336,7 @@ int _build_func_to_type(PyObject *obtype)
     if (meth == nullptr)
         return 0;
 
+    auto *pyside_globals = signatureGlobals();
     for (; meth->ml_name != nullptr; meth++) {
         /*
          * It is possible that a method is overwritten by another

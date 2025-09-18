@@ -31,13 +31,9 @@ static const unsigned char PySide_SignatureLoader[] = {
 #include "embed/signature_bootstrap_inc.h"
     };
 
-static safe_globals_struc *init_phase_1()
+static void init_phase_1(safe_globals_struc *p)
 {
     do {
-        auto *p = reinterpret_cast<safe_globals_struc *>
-                                    (malloc(sizeof(safe_globals_struc)));
-        if (p == nullptr)
-            break;
         /*
          * Initializing module signature_bootstrap.
          * Since we now have an embedding script, we can do this without any
@@ -126,13 +122,12 @@ static safe_globals_struc *init_phase_1()
         // This function will be disabled until phase 2 is done.
         p->finish_import_func = nullptr;
 
-        return p;
+        return;
 
     } while (false);
 
     PyErr_Print();
     Py_FatalError("libshiboken/signature: could not initialize part 1");
-    return nullptr;
 }
 
 static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
@@ -242,16 +237,21 @@ static void handler(int sig) {
 ////////////////////////////////////////////////////////////////////////////
 #endif // _WIN32
 
-safe_globals_struc *pyside_globals = nullptr;
+safe_globals_struc *signatureGlobals()
+{
+    static safe_globals_struc result;
+    return &result;
+}
 
 void init_shibokensupport_module(void)
 {
     static int init_done = 0;
 
     if (!init_done) {
-        pyside_globals = init_phase_1();
-        if (pyside_globals != nullptr)
-            init_done = 1;
+        init_done = 1;
+
+        auto *pyside_globals = signatureGlobals();
+        init_phase_1(pyside_globals);
 
 #ifndef _WIN32
         // We enable the stack trace in CI, only.

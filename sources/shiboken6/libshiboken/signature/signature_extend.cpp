@@ -51,7 +51,7 @@ static PyObject *_get_written_signature(signaturefunc sf, PyObject *ob, PyObject
      * a computed value exists and then forbid writing.
      * See pyside_set___signature
      */
-    PyObject *ret = PyDict_GetItem(pyside_globals->value_dict, ob);
+    PyObject *ret = PyDict_GetItem(signatureGlobals()->value_dict, ob);
     if (ret == nullptr)
         return ob == nullptr ? nullptr : sf(ob, modifier);
     Py_INCREF(ret);
@@ -134,7 +134,7 @@ static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
         res = PyObject_CallMethodObjArgs(old_descr, PyMagicName::get(), ob, nullptr);
     } else {
         handle_doc_in_progress++;
-        res = PyObject_CallFunction(pyside_globals->make_helptext_func, "(O)", ob);
+        res = PyObject_CallFunction(signatureGlobals()->make_helptext_func, "(O)", ob);
         handle_doc_in_progress--;
     }
 
