@@ -131,6 +131,8 @@ def get_architecture(ci):
 
 def get_python_version(ci):
     python_ver = "3"
+    if ci.HOST_OS_VER in ["macos_13", "macos_14"]:
+        python_ver = "3.11"
     if ci.TARGET_OS == "Linux" and ci.HOST_ARCH != "aarch64":
         python_ver = "3.11"
     elif ci.TARGET_OS == "Windows":

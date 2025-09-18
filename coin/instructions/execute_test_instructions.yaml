@@ -15,7 +15,7 @@ instructions:
     userMessageOnFailure: >
          Failed to install requirements-coin.txt on macOS
   - type: ExecuteCommand
-    command: "python3 -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=ARM64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
+    command: "python3 -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=ARM64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --osVer={{.Env.HOST_OSVERSION_COIN}}"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     enable_if:
