@@ -272,7 +272,7 @@ static PyObject *lookupUnqualifiedOrOldEnum(PyTypeObject *type, PyObject *name)
     // Quick Check: Avoid "__..", "_slots", etc.
     if (std::isalpha(Shiboken::String::toCString(name)[0]) == 0)
         return nullptr;
-    static PyTypeObject *const EnumMeta = getPyEnumMeta();
+    PyTypeObject *const EnumMeta = getPyEnumMeta();
     static PyObject *const _member_map_ = String::createStaticString("_member_map_");
     // This is similar to `find_name_in_mro`, but instead of looking directly into
     // tp_dict, we also search for the attribute in local classes of that dict (Part 2).
@@ -370,7 +370,6 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
     static getattrofunc const type_getattro = PepExt_Type_GetGetAttroSlot(&PyType_Type);
     static PyObject *const ignAttr1 = PyName::qtStaticMetaObject();
     static PyObject *const ignAttr2 = PyMagicName::get();
-    static PyTypeObject *const EnumMeta = getPyEnumMeta();
 
     if (SelectFeatureSet != nullptr)
         SelectFeatureSet(type);
@@ -386,7 +385,7 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
     //      Qt.AlignLeft instead of Qt.Alignment.AlignLeft, is still implemented but
     //      no longer advertized in PYI files or line completion.
 
-    if (ret && Py_TYPE(ret) == EnumMeta && currentOpcode_Is_CallMethNoArgs()) {
+    if (ret && Py_TYPE(ret) == getPyEnumMeta() && currentOpcode_Is_CallMethNoArgs()) {
         bool useZeroDefault = !(Enum::enumOption & Enum::ENOPT_NO_ZERODEFAULT);
         if (useZeroDefault) {
             // We provide a zero argument for compatibility if it is a call with no args.

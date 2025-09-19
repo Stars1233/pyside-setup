@@ -31,47 +31,81 @@ static bool _init_enum()
     return !shibo.isNull();
 }
 
-static PyObject *PyEnumModule{};
-static PyObject *PyEnumMeta{};
-static PyObject *PyEnum{};
-static PyObject *PyIntEnum{};
-static PyObject *PyFlag{};
-static PyObject *PyIntFlag{};
-static PyObject *PyFlag_KEEP{};
+struct EnumGlobalData
+{
+    PyObject *PyEnumModule{};
+    PyTypeObject *PyEnumMeta{};
+    PyObject *PyEnum{};
+    PyObject *PyIntEnum{};
+    PyObject *PyFlag{};
+    PyObject *PyIntFlag{};
+    PyObject *PyFlag_KEEP{};
+};
+
+EnumGlobalData *enumGlobals()
+{
+    static EnumGlobalData result;
+    return &result;
+}
 
 bool PyEnumMeta_Check(PyObject *ob)
 {
-    return Py_TYPE(ob) == reinterpret_cast<PyTypeObject *>(PyEnumMeta);
+    return Py_TYPE(ob) == enumGlobals()->PyEnumMeta;
+}
+
+static bool initEnumGlobals(EnumGlobalData *globals)
+{
+    auto *mod = PyImport_ImportModule("enum");
+    if (mod == nullptr)
+        return false;
+    globals->PyEnumModule = mod;
+    auto *PyEnumMeta = PyObject_GetAttrString(mod, "EnumMeta");
+    if (PyEnumMeta == nullptr || PyType_Check(PyEnumMeta) == 0)
+        return false;
+    globals->PyEnumMeta = reinterpret_cast<PyTypeObject *>(PyEnumMeta);
+    globals->PyEnum = PyObject_GetAttrString(mod, "Enum");
+    if (globals->PyEnum == nullptr || PyType_Check(globals->PyEnum) == 0)
+        return false;
+    globals->PyIntEnum = PyObject_GetAttrString(mod, "IntEnum");
+    if (globals->PyIntEnum == nullptr || PyType_Check(globals->PyIntEnum) == 0)
+        return false;
+    globals->PyFlag = PyObject_GetAttrString(mod, "Flag");
+    if (globals->PyFlag == nullptr || PyType_Check(globals->PyFlag) == 0)
+        return false;
+    globals->PyIntFlag = PyObject_GetAttrString(mod, "IntFlag");
+    if (globals->PyIntFlag == nullptr || PyType_Check(globals->PyIntFlag) == 0)
+        return false;
+    // KEEP is defined from Python 3.11 on.
+    globals->PyFlag_KEEP = PyObject_GetAttrString(mod, "KEEP");
+    PyErr_Clear();
+    return true;
 }
 
 PyTypeObject *getPyEnumMeta()
 {
-    if (PyEnumMeta)
-        return reinterpret_cast<PyTypeObject *>(PyEnumMeta);
-
-    static auto *mod = PyImport_ImportModule("enum");
-    if (mod) {
-        PyEnumModule = mod;
-        PyEnumMeta = PyObject_GetAttrString(mod, "EnumMeta");
-        if (PyEnumMeta && PyType_Check(PyEnumMeta))
-            PyEnum = PyObject_GetAttrString(mod, "Enum");
-        if (PyEnum && PyType_Check(PyEnum))
-            PyIntEnum = PyObject_GetAttrString(mod, "IntEnum");
-        if (PyIntEnum && PyType_Check(PyIntEnum))
-            PyFlag = PyObject_GetAttrString(mod, "Flag");
-        if (PyFlag && PyType_Check(PyFlag))
-            PyIntFlag = PyObject_GetAttrString(mod, "IntFlag");
-        if (PyIntFlag && PyType_Check(PyIntFlag)) {
-            // KEEP is defined from Python 3.11 on.
-            PyFlag_KEEP = PyObject_GetAttrString(mod, "KEEP");
-            PyErr_Clear();
-            return reinterpret_cast<PyTypeObject *>(PyEnumMeta);
-        }
+    auto *globals = enumGlobals();
+    if (globals->PyEnumMeta == nullptr && !initEnumGlobals(globals)) {
+        PyErr_Print();
+        Py_FatalError("libshiboken: Python module 'enum' not found");
+        return nullptr;
     }
-    Py_FatalError("libshiboken: Python module 'enum' not found");
-    return nullptr;
+    return globals->PyEnumMeta;
 }
 
+// PYSIDE-1735: Determine whether we should use the old or the new enum implementation.
+static int enumOption()
+{
+    if (PyObject *option = PySys_GetObject("pyside6_option_python_enum")) {
+        if (PyLong_Check(option) != 0) {
+            int ignoreOver{};
+            return PyLong_AsLongAndOverflow(option, &ignoreOver);
+        }
+    }
+    PyErr_Clear();
+    return 1;
+}
+
+// Called from init_shibokensupport_module().
 void init_enum()
 {
     static bool isInitialized = false;
@@ -80,14 +114,7 @@ void init_enum()
     if (!(isInitialized || _init_enum()))
         Py_FatalError("libshiboken: could not init enum");
 
-    // PYSIDE-1735: Determine whether we should use the old or the new enum implementation.
-    static PyObject *option = PySys_GetObject("pyside6_option_python_enum");
-    if (!option || !PyLong_Check(option)) {
-        PyErr_Clear();
-        option = PyLong_FromLong(1);
-    }
-    int ignoreOver{};
-    Enum::enumOption = PyLong_AsLongAndOverflow(option, &ignoreOver);
+    Enum::enumOption = enumOption();
     getPyEnumMeta();
     isInitialized = true;
 }
@@ -97,14 +124,15 @@ int enumIsFlag(PyObject *ob_type)
 {
     init_enum();
 
+    auto *globals = enumGlobals();
     auto *metatype = Py_TYPE(ob_type);
-    if (metatype != reinterpret_cast<PyTypeObject *>(PyEnumMeta))
+    if (metatype != globals->PyEnumMeta)
         return -1;
     auto *mro = reinterpret_cast<PyTypeObject *>(ob_type)->tp_mro;
     const Py_ssize_t n = PyTuple_Size(mro);
     for (Py_ssize_t idx = 0; idx < n; ++idx) {
         auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
-        if (sub_type == reinterpret_cast<PyTypeObject *>(PyFlag))
+        if (sub_type == reinterpret_cast<PyTypeObject *>(globals->PyFlag))
             return 1;
     }
     return 0;
@@ -224,8 +252,7 @@ bool checkType(PyTypeObject *pyTypeObj)
 {
     init_enum();
 
-    static PyTypeObject *meta = getPyEnumMeta();
-    return Py_TYPE(reinterpret_cast<PyObject *>(pyTypeObj)) == meta;
+    return Py_TYPE(reinterpret_cast<PyObject *>(pyTypeObj)) == getPyEnumMeta();
 }
 
 PyObject *getEnumItemFromValue(PyTypeObject *enumType, EnumValueType itemValue)
@@ -321,15 +348,16 @@ static PyTypeObject *createEnumForPython(PyObject *scopeOrModule,
     }
 
     SBK_UNUSED(getPyEnumMeta()); // enforce PyEnumModule creation
-    assert(PyEnumModule != nullptr);
-    AutoDecRef PyEnumType(PyObject_GetAttr(PyEnumModule, enumName));
+    auto *globals = enumGlobals();
+    assert(globals->PyEnumModule != nullptr);
+    AutoDecRef PyEnumType(PyObject_GetAttr(globals->PyEnumModule, enumName));
     assert(PyEnumType.object());
-    bool isFlag = PyObject_IsSubclass(PyEnumType, PyFlag);
+    bool isFlag = PyObject_IsSubclass(PyEnumType, globals->PyFlag);
 
     // See if we should use the Int versions of the types, again
     bool useIntInheritance = Enum::enumOption & Enum::ENOPT_INHERIT_INT;
     if (useIntInheritance) {
-        auto *surrogate = PyObject_IsSubclass(PyEnumType, PyFlag) ? PyIntFlag : PyIntEnum;
+        auto *surrogate = PyObject_IsSubclass(PyEnumType, globals->PyFlag) ? globals->PyIntFlag : globals->PyIntEnum;
         Py_INCREF(surrogate);
         PyEnumType.reset(surrogate);
     }
@@ -343,8 +371,8 @@ static PyTypeObject *createEnumForPython(PyObject *scopeOrModule,
     AutoDecRef callArgs(Py_BuildValue("(OO)", pyName, pyEnumItems));
     AutoDecRef callDict(PyDict_New());
     static PyObject *boundary = String::createStaticString("boundary");
-    if (PyFlag_KEEP)
-        PyDict_SetItem(callDict, boundary, PyFlag_KEEP);
+    if (globals->PyFlag_KEEP)
+        PyDict_SetItem(callDict, boundary, globals->PyFlag_KEEP);
     auto *obNewType = PyObject_Call(PyEnumType, callArgs, callDict);
     if (!obNewType || PyObject_SetAttr(scopeOrModule, pyName, obNewType) < 0)
         return nullptr;
@@ -468,7 +496,7 @@ PyTypeObject *createPythonEnum(const char *fullName, PyObject *pyEnumItems,
 {
     SBK_UNUSED(getPyEnumMeta());
     AutoDecRef PyEnumTypeName(Shiboken::String::fromCString(enumTypeName));
-    AutoDecRef PyEnumType(PyObject_GetAttr(PyEnumModule, PyEnumTypeName));
+    AutoDecRef PyEnumType(PyObject_GetAttr(enumGlobals()->PyEnumModule, PyEnumTypeName));
     if (!PyEnumType) {
         PyErr_Format(PyExc_RuntimeError, "Failed to get enum type %s", enumTypeName);
         return nullptr;
