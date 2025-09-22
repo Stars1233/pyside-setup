@@ -6041,6 +6041,7 @@ void CppGenerator::writeStaticFieldInitialization(TextStream &s,
         s << "\nPyTypeObject *" << getSimpleClassStaticFieldsInitFunctionName(metaClass)
             << "(PyObject *module)\n{\n" << indent
             << "Shiboken::AutoDecRef obType(PyObject_GetAttrString(module, \"" << metaClass->name() << "\"));\n"
+            << "assert(!obType.isNull());\n"
             << "auto *type = reinterpret_cast<PyTypeObject *>(obType.object());\n"
             << "Shiboken::AutoDecRef dict(PepType_GetDict(type));\n";
     } else {
