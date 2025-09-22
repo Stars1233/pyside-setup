@@ -6431,6 +6431,33 @@ void CppGenerator::writeInitFuncCall(TextStream &callStr,
     }
 }
 
+void CppGenerator::writeLazyTypeCreationFunc(TextStream &s, const QString &funcName) const
+{
+    s << "static void " << funcName << "(PyObject *module)\n{\n" << indent;
+    for (const auto &cls : api().classes()){
+        auto te = cls->typeEntry();
+        if (shouldGenerate(te)) {
+            const bool hasConfigCondition = te->hasConfigCondition();
+            if (hasConfigCondition)
+                s << te->configCondition() << '\n';
+            writeInitFuncCall(s, initFuncPrefix + getSimpleClassInitFunctionName(cls),
+                              targetLangEnclosingEntry(te), cls->name());
+            if (hasConfigCondition)
+                s << "#endif\n";
+        }
+    }
+
+    for (const auto &smp : api().instantiatedSmartPointers()) {
+        GeneratorContext context = contextForSmartPointer(smp.specialized, smp.type);
+        const auto enclosingClass = context.metaClass()->enclosingClass();
+        auto enclosingTypeEntry = targetLangEnclosingEntry(smp.specialized->typeEntry());
+        writeInitFuncCall(s, initFuncPrefix + getInitFunctionName(context),
+                          enclosingTypeEntry, smp.specialized->name());
+    }
+
+    s << outdent << "}\n\n";
+}
+
 static void writeSubModuleHandling(TextStream &s, const QString &moduleName,
                                    const QString &subModuleOf)
 {
@@ -6507,40 +6534,31 @@ bool CppGenerator::finishGeneration()
     }
 
     AbstractMetaClassCList classesWithStaticFields;
+    bool hasClasses = false;
     for (const auto &cls : api().classes()){
         auto te = cls->typeEntry();
         if (shouldGenerate(te)) {
+            hasClasses = true;
             const bool hasConfigCondition = te->hasConfigCondition();
-            if (hasConfigCondition) {
+            if (hasConfigCondition)
                 s_classInitDecl << te->configCondition() << '\n';
-                s_classPythonDefines << te->configCondition() << '\n';
-            }
-            const QString initFunc = initFuncPrefix + getSimpleClassInitFunctionName(cls);
-            writeInitFuncDecl(s_classInitDecl, initFunc);
-            writeInitFuncCall(s_classPythonDefines, initFunc,
-                              targetLangEnclosingEntry(te), cls->name());
+            writeInitFuncDecl(s_classInitDecl,
+                              initFuncPrefix + getSimpleClassInitFunctionName(cls));
             if (cls->hasStaticFields()) {
                 s_classInitDecl << "PyTypeObject *"
                     << getSimpleClassStaticFieldsInitFunctionName(cls) << "(PyObject *module);\n";
                 classesWithStaticFields.append(cls);
             }
-            if (hasConfigCondition) {
+            if (hasConfigCondition)
                 s_classInitDecl << "#endif\n";
-                s_classPythonDefines << "#endif\n";
-            }
         }
     }
 
     // Initialize smart pointer types.
     for (const auto &smp : api().instantiatedSmartPointers()) {
         GeneratorContext context = contextForSmartPointer(smp.specialized, smp.type);
-        const auto enclosingClass = context.metaClass()->enclosingClass();
-        auto enclosingTypeEntry = targetLangEnclosingEntry(smp.specialized->typeEntry());
-
-        const QString initFunc = initFuncPrefix + getInitFunctionName(context);
-        writeInitFuncDecl(s_classInitDecl, initFunc);
-        writeInitFuncCall(s_classPythonDefines,
-                          initFunc, enclosingTypeEntry, smp.specialized->name());
+        writeInitFuncDecl(s_classInitDecl,
+                          initFuncPrefix + getInitFunctionName(context));
         includes.insert(smp.type.instantiations().constFirst().typeEntry()->include());
     }
 
@@ -6741,6 +6759,12 @@ bool CppGenerator::finishGeneration()
 
     writeInitInheritance(s);
 
+    QString lazyTypeCreationFunc;
+    if (hasClasses)  {
+        lazyTypeCreationFunc = "initTypes_"_L1 + modName;
+        writeLazyTypeCreationFunc(s, lazyTypeCreationFunc);
+    }
+
     const QString convInitFunc = "initConverters_"_L1 + modName;
     writeConverterInitFunc(s, convInitFunc, typeConversions, extendedConverters);
     const QString containerConvInitFunc = "initContainerConverters_"_L1 + modName;
@@ -6763,7 +6787,9 @@ bool CppGenerator::finishGeneration()
     }
 
     const QString execFunc = "exec_"_L1 + modName;
-    writeModuleExecFunction(s, execFunc, opaqueContainerRegisterFunc, enumRegisterFunc,
+    writeModuleExecFunction(s, execFunc,
+                            lazyTypeCreationFunc,
+                            opaqueContainerRegisterFunc, enumRegisterFunc,
                             s_classPythonDefines.toString(), classesWithStaticFields);
 
     const QString moduleDef = writeModuleDef(s, modName, execFunc);
@@ -6961,6 +6987,7 @@ void CppGenerator::writeQtEnumRegisterMetaTypeFunction(TextStream &s,
 }
 
 void CppGenerator::writeModuleExecFunction(TextStream &s, const QString &name,
+                                           const QString &lazyTypeCreationFunc,
                                            const QString &opaqueContainerRegisterFunc,
                                            const QString &enumRegisterFunc,
                                            const QString &classPythonDefines,
@@ -6978,7 +7005,10 @@ void CppGenerator::writeModuleExecFunction(TextStream &s, const QString &name,
     if (!subModuleOf.isEmpty())
         writeSubModuleHandling(s,  moduleName(), subModuleOf);
 
-    s << "// Initialize classes in the type system\n" << classPythonDefines << '\n';
+    s << "// Initialize classes in the type system\n";
+    if (!lazyTypeCreationFunc.isEmpty())
+        s << lazyTypeCreationFunc << "(module);\n";
+    s << classPythonDefines << '\n';
     if (!opaqueContainerRegisterFunc.isEmpty())
         s << opaqueContainerRegisterFunc << "(module);\n";
     if (!enumRegisterFunc.isEmpty())

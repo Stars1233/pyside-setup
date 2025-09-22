@@ -67,6 +67,7 @@ private:
                                   const QString &functionName,
                                   const TypeEntryCPtr &enclosingEntry,
                                   const QString &pythonName, bool lazy = true);
+    void writeLazyTypeCreationFunc(TextStream &s, const QString &funcName) const;
     static void writeCacheResetNative(TextStream &s, const GeneratorContext &classContext);
     void writeConstructorNative(TextStream &s, const GeneratorContext &classContext,
                                 const AbstractMetaFunctionCPtr &func) const;
@@ -515,6 +516,7 @@ private:
                                  const QString &containerConvInitFunc,
                                  const QString &qtEnumRegisterMetaTypeFunc);
     void writeModuleExecFunction(TextStream &s, const QString &name,
+                                 const QString &lazyTypeCreationFunc,
                                  const QString &opaqueContainerRegisterFunc,
                                  const QString &enumRegisterFunc,
                                  const QString &classPythonDefines,
