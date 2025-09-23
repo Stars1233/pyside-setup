@@ -135,13 +135,15 @@ static PyTypeObject *incarnateType(PyObject *module, const char *name,
     // PYSIDE-2404: Make sure that no switching happens during type creation.
     auto saveFeature = initSelectableFeature(nullptr);
     PyTypeObject *type = initFunc(modOrType);
+
+    // - assign this object to the name in the module (for adding subtypes)
+    Py_INCREF(reinterpret_cast<PyObject *>(type));
+    PepModule_AddType(module, type);   // steals reference
+
     if (!tcStruct.subtypeNames.empty())
         incarnateSubtypes(module, tcStruct.subtypeNames, nameToFunc);
     initSelectableFeature(saveFeature);
 
-    // - assign this object to the name in the module
-    Py_INCREF(reinterpret_cast<PyObject *>(type));
-    PepModule_AddType(module, type);   // steals reference
     // - remove the entry, if not by something cleared.
     if (!nameToFunc.empty())
         nameToFunc.erase(funcIter);
