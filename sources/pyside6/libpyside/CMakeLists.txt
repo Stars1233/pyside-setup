@@ -27,6 +27,7 @@ set(libpyside_HEADERS # installed below
     pysidemetatype.h
     pyside_numpy.h
     pyside_p.h
+    pysideglobals_p.h
     pysideproperty.h
     pysideproperty_p.h
     pysideqapp.h
@@ -54,6 +55,7 @@ set(libpyside_SRC
     signalmanager.cpp
     pysideclassdecorator.cpp
     pysideclassinfo.cpp
+    pysideglobals.cpp
     pysideqenum.cpp
     pysideqslotobject_p.cpp
     pysidemetafunction.cpp

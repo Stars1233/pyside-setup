@@ -11,6 +11,7 @@
 #include "pyside_p.h"
 #include "signalmanager.h"
 #include "pysideclassinfo_p.h"
+#include "pysideglobals_p.h"
 #include "pysideproperty_p.h"
 #include "class_property.h"
 #include "pysideproperty.h"
@@ -1020,18 +1021,16 @@ bool registerInternalQtConf()
     return isRegistered;
 }
 
-static PyTypeObject *qObjType = nullptr;
-
 PyTypeObject *qObjectType()
 {
-    PyTypeObject *result = qObjType;
+    PyTypeObject *result = globals()->qobjectType;
     Q_ASSERT(result);
     return result;
 }
 
 void setQObjectType(PyTypeObject *t)
 {
-    qObjType = t;
+    globals()->qobjectType = t;
 }
 
 bool isQObjectDerived(PyTypeObject *pyType, bool raiseError)

@@ -7,6 +7,7 @@
 #include "pysideproperty.h"
 #include "pysideproperty_p.h"
 #include "pyside_p.h"
+#include "pysideglobals_p.h"
 #include "dynamicqmetaobject.h"
 #include "pysidemetafunction_p.h"
 
@@ -196,7 +197,7 @@ QDataStream &operator<<(QDataStream &out, const PyObjectWrapper &myObj)
         return out;
     }
 
-    static PyObject *reduce_func = nullptr;
+    PyObject *&reduce_func = PySide::globals()->pickleReduceFunc;
 
     Shiboken::GilState gil;
     if (!reduce_func) {
@@ -228,7 +229,7 @@ QDataStream &operator>>(QDataStream &in, PyObjectWrapper &myObj)
         return in;
     }
 
-    static PyObject *eval_func = nullptr;
+    PyObject *&eval_func = PySide::globals()->pickleEvalFunc;
 
     Shiboken::GilState gil;
     if (!eval_func) {

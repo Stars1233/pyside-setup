@@ -4,6 +4,7 @@
 #include "pysidesignal_p.h"
 #include "pysideslot_p.h"
 #include "pysidestaticstrings.h"
+#include "pysideglobals_p.h"
 
 #include <autodecref.h>
 #include <basewrapper.h>
@@ -74,12 +75,12 @@ static PyTypeObject *PySideSlot_TypeF()
 
 int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
 {
-    static PyObject *emptyTuple = nullptr;
     static const char *kwlist[] = {"name", "result", "tag", nullptr};
     char *argName = nullptr;
     PyObject *argResult = nullptr;
     char *tag = nullptr;
 
+    PyObject *& emptyTuple = PySide::globals()->emptyTuple;
     if (emptyTuple == nullptr)
         emptyTuple = PyTuple_New(0);
 

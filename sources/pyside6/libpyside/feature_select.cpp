@@ -5,6 +5,7 @@
 #include "basewrapper.h"
 #include "pysidestaticstrings.h"
 #include "class_property.h"
+#include "pysideglobals_p.h"
 
 #include <autodecref.h>
 #include <sbkfeature_base.h>
@@ -119,15 +120,17 @@ createDerivedDictType()
     return reinterpret_cast<PyTypeObject *>(ChameleonDict);
 }
 
-static PyTypeObject *new_dict_type = nullptr;
-
-static void ensureNewDictType()
+static PyTypeObject *ensureNewDictType()
 {
-    if (new_dict_type == nullptr) {
-        new_dict_type = createDerivedDictType();
-        if (new_dict_type == nullptr)
+    auto *globals = PySide::globals();
+    if (globals->newFeatureDictType == nullptr) {
+        globals->newFeatureDictType = createDerivedDictType();
+        if (globals->newFeatureDictType == nullptr) {
+            PyErr_Print();
             Py_FatalError("libshiboken: Problem creating ChameleonDict");
+        }
     }
+    return globals->newFeatureDictType;
 }
 
 static inline PyObject *nextInCircle(PyObject *dict)
@@ -165,9 +168,8 @@ static bool replaceClassDict(PyTypeObject *type)
      * Replace the type dict by the derived ChameleonDict.
      * This is mandatory for all type dicts when they are touched.
      */
-    ensureNewDictType();
+    auto *ob_ndt = reinterpret_cast<PyObject *>(ensureNewDictType());
     AutoDecRef dict(PepType_GetDict(type));
-    auto *ob_ndt = reinterpret_cast<PyObject *>(new_dict_type);
     auto *new_dict = PyObject_CallObject(ob_ndt, nullptr);
     if (new_dict == nullptr || PyDict_Update(new_dict, dict) < 0)
         return false;
@@ -190,7 +192,7 @@ static bool addNewDict(PyTypeObject *type, int select_id)
      */
     AutoDecRef dict(PepType_GetDict(type));
     AutoDecRef orig_dict(PyObject_GetAttr(dict, PySideName::orig_dict()));
-    auto *ob_ndt = reinterpret_cast<PyObject *>(new_dict_type);
+    auto *ob_ndt = reinterpret_cast<PyObject *>(ensureNewDictType());
     auto *new_dict = PyObject_CallObject(ob_ndt, nullptr);
     if (new_dict == nullptr)
         return false;
@@ -293,13 +295,16 @@ static inline void SelectFeatureSetSubtype(PyTypeObject *type, int select_id)
     }
  }
 
-static PyObject *cached_globals{};
-static int last_select_id{};
-
 static inline int getFeatureSelectId()
 {
     static auto *undef = PyLong_FromLong(-1);
-    static auto *feature_dict = GetFeatureDict();
+
+    auto *libGlobals = PySide::globals();
+    PyObject *&feature_dict = PySide::globals()->featureDict;
+    if (feature_dict == nullptr)
+        feature_dict = GetFeatureDict();
+    PyObject *&cached_globals = libGlobals->cachedFeatureGlobals;
+    int &last_select_id = libGlobals->lastSelectedFeatureId;
 
     Shiboken::AutoDecRef globals(PepEval_GetFrameGlobals());
     if (globals.isNull() || globals.object() == cached_globals)
@@ -342,7 +347,7 @@ static inline void SelectFeatureSet(PyTypeObject *type)
 
     int select_id = getFeatureSelectId();
     static int last_select_id{};
-    static PyTypeObject *last_type{};
+    PyTypeObject *&last_type = PySide::globals()->lastFeatureType;
 
     // PYSIDE-2029: Implement a very simple but effective cache that cannot fail.
     if (type == last_type && select_id == last_select_id)
@@ -415,9 +420,11 @@ void init()
         patch_property_impl();
         is_initialized = true;
     }
-    last_select_id = 0;
+
     // Reset the cache. This is called at any "from __feature__ import".
-    cached_globals = nullptr;
+    auto *globals = PySide::globals();
+    globals->lastSelectedFeatureId = 0;
+    globals->cachedFeatureGlobals = nullptr;
 }
 
 void Enable(bool enable)
