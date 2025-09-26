@@ -81,39 +81,68 @@ LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct)
     return typeStruct.type;
 }
 
-static void incarnateHelper(PyObject *module, const std::string_view names,
-                            const NameToTypeFunctionMap &nameToFunc)
+// For a subtype like "Namespace.OuterClass.InnerClass" find the "OuterClass"
+// type by walking the dictionaries from the module looking up the attributes.
+// For main types, it will return the module passed in.
+static PyObject *getEnclosingObject(PyObject *modOrType, std::string_view namePath)
 {
-    auto dotPos = names.find('.');
+    auto dotPos = namePath.find('.');
     std::string::size_type startPos = 0;
-    auto *modOrType{module};
     while (dotPos != std::string::npos) {
-        auto typeName = names.substr(startPos, dotPos - startPos);
+        auto typeName = namePath.substr(startPos, dotPos - startPos);
         AutoDecRef obTypeName(String::fromCppStringView(typeName));
-        modOrType = PyObject_GetAttr(modOrType, obTypeName);
+        auto *next = PyObject_GetAttr(modOrType, obTypeName.object());
+        assert(next);
+        modOrType = next;
         startPos = dotPos + 1;
-        dotPos = names.find('.', startPos);
+        dotPos = namePath.find('.', startPos);
     }
-    // now we have the type to create. (May be done already)
-    auto funcIter = nameToFunc.find(std::string(names));
-    if (funcIter == nameToFunc.end())
-        return;
-    // - call this function that returns a PyTypeObject
-    auto tcStruct = funcIter->second;
-    auto initFunc = tcStruct.func;
-    PyTypeObject *type = initFunc(modOrType);
-    auto name = names.substr(startPos);
-    AutoDecRef nameP(PyUnicode_FromStringAndSize(name.data(), name.size()));
-    PyObject_SetAttr(modOrType, nameP, reinterpret_cast<PyObject *>(type));
+    return modOrType;
 }
 
-static void incarnateSubtypes(PyObject *module,
+static void incarnateHelper(PyObject *enclosing, std::string_view names,
+                            const TypeCreationStruct &tcStruct)
+{
+    PyTypeObject *type = tcStruct.func(enclosing);
+    assert(type != nullptr);
+    auto *obType = reinterpret_cast<PyObject *>(type);
+    if (PyModule_Check(enclosing) != 0) {
+        Py_INCREF(obType);
+        PepModule_AddType(enclosing, type); // steals reference
+    } else {
+        const auto dotPos = names.rfind('.');
+        const std::string_view name = dotPos != std::string::npos ? names.substr(dotPos + 1) : names;
+        AutoDecRef nameP(String::fromCppStringView(name));
+        PyObject_SetAttr(enclosing, nameP, obType);
+    }
+}
+
+// Called by checkIfShouldLoadImmediately()
+static void incarnateHelper(PyObject *module, std::string_view names,
+                            const NameToTypeFunctionMap &nameToFunc)
+{
+    // now we have the type to create. (May be done already)
+    auto funcIter = nameToFunc.find(std::string(names));
+    if (funcIter != nameToFunc.end())
+        incarnateHelper(getEnclosingObject(module, names), names, funcIter->second);
+}
+
+static void incarnateSubtypes(PyObject *obMainType,
                               const std::vector<std::string> &nameList,
                               NameToTypeFunctionMap &nameToFunc)
 {
-    for (auto const & tableIter : nameList) {
-        std::string_view names(tableIter);
-        incarnateHelper(module, names, nameToFunc);
+    for (const auto &name : nameList) {
+        auto funcIter = nameToFunc.find(name);
+        if (funcIter != nameToFunc.end()) {
+            // We skip the look up of the main type from the module,
+            // passing the the main type as enclosing type.
+            const auto dotPos = name.find('.');
+            assert(dotPos != std::string::npos);
+            auto subTypeName = std::string_view{name}.substr(dotPos + 1);
+            auto *enclosing = getEnclosingObject(obMainType, subTypeName);
+            incarnateHelper(enclosing, subTypeName, funcIter->second);
+            nameToFunc.erase(funcIter);
+        }
     }
 }
 
@@ -137,11 +166,12 @@ static PyTypeObject *incarnateType(PyObject *module, const char *name,
     PyTypeObject *type = initFunc(modOrType);
 
     // - assign this object to the name in the module (for adding subtypes)
-    Py_INCREF(reinterpret_cast<PyObject *>(type));
+    auto *obType = reinterpret_cast<PyObject *>(type);
+    Py_INCREF(obType);
     PepModule_AddType(module, type);   // steals reference
 
     if (!tcStruct.subtypeNames.empty())
-        incarnateSubtypes(module, tcStruct.subtypeNames, nameToFunc);
+        incarnateSubtypes(obType, tcStruct.subtypeNames, nameToFunc);
     initSelectableFeature(saveFeature);
 
     // - remove the entry, if not by something cleared.
