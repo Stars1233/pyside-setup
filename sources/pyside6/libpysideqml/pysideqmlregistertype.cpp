@@ -51,14 +51,6 @@ static void createInto(void *memory, void *type)
     PySide::setNextQObjectMemoryAddr(nullptr);
 }
 
-PyTypeObject *qObjectType()
-{
-    static PyTypeObject *const result =
-        Shiboken::Conversions::getPythonTypeObject("QObject*");
-    assert(result);
-    return result;
-}
-
 static PyTypeObject *qQmlEngineType()
 {
     static PyTypeObject *const result =
@@ -403,13 +395,14 @@ QObject *SingletonQObjectCreationBase::handleReturnValue(PyObject *retVal)
         PyErr_Format(PyExc_TypeError, "Callback returns 0 value.");
         return nullptr;
     }
-    if (isPythonToCppPointerConvertible(qObjectType(), retVal) == nullptr) {
+    auto *qobjType = PySide::qObjectType();
+    if (isPythonToCppPointerConvertible(qobjType, retVal) == nullptr) {
         PyErr_Format(PyExc_TypeError, "Callback returns invalid value (%S).", retVal);
         return nullptr;
     }
 
     QObject *obj = nullptr;
-    Shiboken::Conversions::pythonToCppPointer(qObjectType(), retVal, &obj);
+    Shiboken::Conversions::pythonToCppPointer(qobjType, retVal, &obj);
     return obj;
 }
 

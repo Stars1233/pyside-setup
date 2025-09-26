@@ -19,6 +19,13 @@ QT_FORWARD_DECLARE_CLASS(QMutex)
 namespace PySide
 {
 
+/// Return PyTypeObject for QObject
+/// \return type object
+PYSIDE_API PyTypeObject *qObjectType();
+
+/// Set the PyTypeObject for QObject to \a t (called from QtCore module).
+PYSIDE_API void setQObjectType(PyTypeObject *t);
+
 /// Fill QObject properties and do signal connections using the values found in \p kwds dictionary.
 /// \param qObj PyObject fot the QObject.
 /// \param metaObj QMetaObject of \p qObj.

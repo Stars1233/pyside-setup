@@ -7,6 +7,7 @@
 
 #include <pyside_p.h>
 #include <pysideclassdecorator_p.h>
+#include <pysideqobject.h>
 
 #include <autodecref.h>
 #include <gilstate.h>
@@ -110,7 +111,7 @@ static QObject *extensionFactory(QObject *o)
         return nullptr;
     }
 
-    if (PyType_IsSubtype(pyResult->ob_type, qObjectType()) == 0) {
+    if (PyType_IsSubtype(pyResult->ob_type, PySide::qObjectType()) == 0) {
         qWarning("QmlExtended: Extension objects must inherit QObject, got %s.",
                  PepType_GetFullyQualifiedNameStr(pyResult->ob_type));
         return nullptr;

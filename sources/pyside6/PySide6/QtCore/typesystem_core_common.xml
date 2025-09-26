@@ -1830,6 +1830,8 @@
     </extra-includes>
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
                  snippet="core-snippets-p-h"/>
+    <inject-code class="target" position="end" file="../glue/qtcore.cpp"
+                 snippet="libpyside-set-qobject-type"/>
     <modify-function signature="metaObject()const">
       <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-metaobject"/>
       <modify-argument index="return">

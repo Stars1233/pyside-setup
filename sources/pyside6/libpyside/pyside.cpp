@@ -436,7 +436,7 @@ void destroyQCoreApplication()
 
     Shiboken::BindingManager &bm = Shiboken::BindingManager::instance();
     SbkObject *pyQApp = bm.retrieveWrapper(app);
-    PyTypeObject *pyQObjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
+    PyTypeObject *pyQObjectType = PySide::qObjectType();
     assert(pyQObjectType);
 
     void *data[2] = {pyQApp, pyQObjectType};
@@ -507,7 +507,7 @@ const QMetaObject *retrieveMetaObject(PyObject *pyObj)
 
 void initQObjectSubType(PyTypeObject *type, PyObject *args, PyObject * /* kwds */)
 {
-    PyTypeObject *qObjType = Shiboken::Conversions::getPythonTypeObject("QObject*");
+    PyTypeObject *qObjType = PySide::qObjectType();
 
     PyObject *bases = PyTuple_GetItem(args, 1);
 
@@ -1020,18 +1020,26 @@ bool registerInternalQtConf()
     return isRegistered;
 }
 
-static PyTypeObject *qobjectType()
+static PyTypeObject *qObjType = nullptr;
+
+PyTypeObject *qObjectType()
 {
-    static PyTypeObject * const result = Shiboken::Conversions::getPythonTypeObject("QObject*");
+    PyTypeObject *result = qObjType;
+    Q_ASSERT(result);
     return result;
+}
+
+void setQObjectType(PyTypeObject *t)
+{
+    qObjType = t;
 }
 
 bool isQObjectDerived(PyTypeObject *pyType, bool raiseError)
 {
-    const bool result = PyType_IsSubtype(pyType, qobjectType());
+    const bool result = PyType_IsSubtype(pyType, qObjectType());
     if (!result && raiseError) {
         PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
-                     qobjectType()->tp_name, pyType->tp_name);
+                     qObjectType()->tp_name, pyType->tp_name);
     }
     return result;
 }
@@ -1048,7 +1056,7 @@ QObject *convertToQObject(PyObject *object, bool raiseError)
         return nullptr;
 
     auto *sbkObject = reinterpret_cast<SbkObject*>(object);
-    auto *ptr = Shiboken::Object::cppPointer(sbkObject, qobjectType());
+    auto *ptr = Shiboken::Object::cppPointer(sbkObject, qObjectType());
     if (ptr == nullptr) {
         if (raiseError) {
             PyErr_Format(PyExc_TypeError, "Conversion of %s to QObject failed.",

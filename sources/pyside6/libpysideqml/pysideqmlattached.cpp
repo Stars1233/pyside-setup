@@ -7,6 +7,7 @@
 #include "pysideqmlregistertype_p.h"
 
 #include <signalmanager.h>
+#include <pysideqobject.h>
 #include <pyside_p.h>
 #include <pysideclassdecorator_p.h>
 
@@ -106,7 +107,7 @@ static QObject *attachedFactoryHelper(PyTypeObject *attachingType, QObject *o)
         return nullptr;
     }
 
-    if (PyType_IsSubtype(pyResult->ob_type, qObjectType()) == 0) {
+    if (PyType_IsSubtype(pyResult->ob_type, PySide::qObjectType()) == 0) {
         qWarning("QmlAttached: Attached objects must inherit QObject, got %s.",
                  PepType_GetFullyQualifiedNameStr(Py_TYPE(pyResult)));
         return nullptr;

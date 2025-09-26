@@ -8,9 +8,6 @@
 
 #include <QtCore/qbytearray.h>
 
-PyTypeObject *qObjectType();
-
-
 namespace PySide::Qml {
 
 PyObject *qmlNamedElementMacro(PyObject *pyObj, const QByteArray &typeName);

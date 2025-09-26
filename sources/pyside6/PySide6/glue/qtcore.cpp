@@ -15,6 +15,10 @@
 #include "glue/core_snippets_p.h"
 // @snippet core-snippets-p-h
 
+// @snippet libpyside-set-qobject-type
+PySide::setQObjectType(pyType);
+// @snippet libpyside-set-qobject-type
+
 // @snippet qarg_helper
 
 // Helper for the Q_ARG/Q_RETURN_ARG functions, creating a meta type

@@ -51,16 +51,9 @@ PyObject *propertiesAttr()
 
 struct SourceDefs
 {
-    static PyTypeObject *getSbkType()
-    {
-        static PyTypeObject *sbkType =
-            Shiboken::Conversions::getPythonTypeObject("QObject");
-        return sbkType;
-    }
-
     static PyObject *getBases()
     {
-        static PyObject *bases = PyTuple_Pack(1, getSbkType());
+        static PyObject *bases = PyTuple_Pack(1, PySide::qObjectType());
         return bases;
     }
 
@@ -71,8 +64,8 @@ struct SourceDefs
 
     static int tp_init(PyObject *self, PyObject *args, PyObject *kwds)
     {
-        static initproc initFunc = reinterpret_cast<initproc>(PyType_GetSlot(getSbkType(),
-                                                                             Py_tp_init));
+        static initproc initFunc =
+            reinterpret_cast<initproc>(PyType_GetSlot(PySide::qObjectType(), Py_tp_init));
         int res = initFunc(self, args, kwds);
         if (res < 0) {
             PyErr_Print();

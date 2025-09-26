@@ -1083,7 +1083,7 @@ static void instanceInitialize(PySideSignalInstance *self, PyObject *name,
 
 PySideSignalInstance *initialize(PySideSignal *self, PyObject *name, PyObject *object)
 {
-    static PyTypeObject *pyQObjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
+    PyTypeObject *pyQObjectType = PySide::qObjectType();
     assert(pyQObjectType);
 
     if (!PyObject_TypeCheck(object, pyQObjectType)) {
