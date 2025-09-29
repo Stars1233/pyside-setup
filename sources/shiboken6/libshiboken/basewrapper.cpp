@@ -37,6 +37,19 @@ namespace {
     void _destroyParentInfo(SbkObject *obj, bool keepReference);
 }
 
+struct BaseWrapperGlobals
+{
+    PyTypeObject *sbkObjectType = nullptr;
+    PyTypeObject *sbkObjectMetaType = nullptr;
+    PyObject *qAppLast = nullptr;
+};
+
+static BaseWrapperGlobals *baseWrapperGlobals()
+{
+    static BaseWrapperGlobals result;
+    return &result;
+}
+
 namespace Shiboken
 {
 // Walk through the first level of non-user-type Sbk base classes relevant for
@@ -240,8 +253,10 @@ static PyTypeObject *createObjectTypeType()
 
 PyTypeObject *SbkObjectType_TypeF(void)
 {
-    static auto *type = createObjectTypeType();
-    return type;
+    auto *globals = baseWrapperGlobals();
+    if (globals->sbkObjectMetaType == nullptr)
+        globals->sbkObjectMetaType = createObjectTypeType();
+    return globals->sbkObjectMetaType;
 }
 
 static PyObject *SbkObjectGetDict(PyObject *pObj, void *)
@@ -335,8 +350,10 @@ static PyTypeObject *createObjectType()
 
 PyTypeObject *SbkObject_TypeF(void)
 {
-    static auto *type = createObjectType();    // bufferprocs
-    return type;
+    auto *globals = baseWrapperGlobals();
+    if (globals->sbkObjectType == nullptr)
+        globals->sbkObjectType = createObjectType();    // bufferprocs
+    return globals->sbkObjectType;
 }
 
 static const char *SbkObject_SignatureStrings[] = {
@@ -514,7 +531,7 @@ void SbkObjectType_tp_dealloc(PyTypeObject *sbkType)
 
 PyObject *MakeQAppWrapper(PyTypeObject *type)
 {
-    static PyObject *qApp_last = nullptr;
+    PyObject *&qApp_last = baseWrapperGlobals()->qAppLast;
 
     // protecting from multiple application instances
     if (type != nullptr && qApp_last != Py_None) {
@@ -707,7 +724,7 @@ PyObject *FallbackRichCompare(PyObject *self, PyObject *other, int op)
 
 bool SbkObjectType_Check(PyTypeObject *type)
 {
-    static auto *meta = SbkObjectType_TypeF();
+    auto *meta = SbkObjectType_TypeF();
     auto *obType = reinterpret_cast<PyObject *>(type);
     return Py_TYPE(obType) == meta || PyType_IsSubtype(Py_TYPE(obType), meta);
 }

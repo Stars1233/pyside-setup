@@ -139,7 +139,7 @@ QString qObjectTr(PyTypeObject *type, const char *sourceText, const char *disamb
     auto len = PyTuple_Size(mro);
     QString result = QString::fromUtf8(sourceText);
     QString oldResult = result;
-    static auto *sbkObjectType = reinterpret_cast<PyTypeObject *>(SbkObject_TypeF());
+    auto *sbkObjectType = reinterpret_cast<PyTypeObject *>(SbkObject_TypeF());
     for (Py_ssize_t idx = 0; idx < len - 1; ++idx) {
         // Skip the last class which is `object`.
         auto *type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
