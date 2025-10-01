@@ -18,7 +18,7 @@ class DynamicSlot
 {
     Q_DISABLE_COPY_MOVE(DynamicSlot)
 public:
-    enum SlotType
+    enum SlotType : std::uint8_t
     {
         Callable,
         Method,

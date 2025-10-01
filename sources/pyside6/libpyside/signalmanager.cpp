@@ -493,7 +493,7 @@ int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, 
 }
 
 // Helper for calling a Python pyCallable matching a Qt signal / slot.
-enum CallResult : int
+enum CallResult : std::uint8_t
 {
     CallOk,
     CallOtherError, // Python error set

@@ -44,7 +44,7 @@ public:
 
 protected:
     /// Check mode for the arguments of the call operator
-    enum class CheckMode { None, WrappedType, QObjectType };
+    enum class CheckMode : std::uint8_t { None, WrappedType, QObjectType };
 
     DecoratorPrivate() noexcept;
     static DecoratorPrivate *getPrivate(PyObject *o);
