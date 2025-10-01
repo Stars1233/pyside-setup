@@ -245,7 +245,7 @@ LIBSHIBOKEN_API void *_PepUnicode_DATA(PyObject *str);
 
 #else
 
-enum PepUnicode_Kind {
+enum PepUnicode_Kind : uint8_t {
 #if PY_VERSION_HEX < 0x030C0000
     PepUnicode_WCHAR_KIND = PyUnicode_WCHAR_KIND,
 #endif

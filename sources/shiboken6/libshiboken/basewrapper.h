@@ -215,7 +215,7 @@ LIBSHIBOKEN_API MultipleInheritanceInitFunction getMultipleInheritanceFunction(P
 
 LIBSHIBOKEN_API void setDestructorFunction(PyTypeObject *self, ObjectDestructor func);
 
-enum WrapperFlags
+enum WrapperFlags : uint8_t
 {
     InnerClass = 0x1,
     DeleteInMainThread = 0x2,

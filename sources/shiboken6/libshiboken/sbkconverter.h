@@ -83,7 +83,7 @@ namespace Conversions {
 class LIBSHIBOKEN_API SpecificConverter
 {
 public:
-    enum Type
+    enum Type : uint8_t
     {
         InvalidConversion,
         CopyConversion,
@@ -199,7 +199,7 @@ LIBSHIBOKEN_API PyObject *copyToPython(const SbkConverter *converter, const void
 
 struct PythonToCppConversion
 {
-    enum Type {Invalid, Pointer, Value};
+    enum Type : uint8_t {Invalid, Pointer, Value};
 
     operator bool() const { return type != Invalid; }
 

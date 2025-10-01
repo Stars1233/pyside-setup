@@ -36,7 +36,7 @@ LIBSHIBOKEN_API int enumIsFlag(PyObject *ob_enum);
 
 namespace Shiboken::Enum {
 
-enum : int {
+enum : uint8_t {
     ENOPT_OLD_ENUM        = 0x00,   // PySide 6.6: no longer supported
     ENOPT_NEW_ENUM        = 0x01,
     ENOPT_INHERIT_INT     = 0x02,
