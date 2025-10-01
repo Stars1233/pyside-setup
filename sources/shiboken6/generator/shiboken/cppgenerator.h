@@ -511,6 +511,7 @@ private:
                                                      const TypeEntryCPtr &externalType,
                                                      const AbstractMetaClassCList &conversions);
 
+    void writeTypeArrays(TextStream &s);
     void writeModuleInitFunction(TextStream &s, const QString &moduleDef,
                                  const QString &execFunc, const QString &convInitFunc,
                                  const QString &containerConvInitFunc,

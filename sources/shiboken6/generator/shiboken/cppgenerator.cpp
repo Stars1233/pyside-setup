@@ -6786,6 +6786,8 @@ bool CppGenerator::finishGeneration()
         }
     }
 
+    writeTypeArrays(s);
+
     const QString execFunc = "exec_"_L1 + modName;
     writeModuleExecFunction(s, execFunc,
                             lazyTypeCreationFunc,
@@ -6885,35 +6887,46 @@ void CppGenerator::writeOpaqueContainerConverterRegisterFunc(TextStream &s, cons
     s << outdent << "}\n\n";
 }
 
+void CppGenerator::writeTypeArrays(TextStream &s)
+{
+    // Static initialization: converter/type arrays
+    const int maxTypeIndex = getMaxTypeIndex() + api().instantiatedSmartPointers().size();
+    if (maxTypeIndex > 0) {
+        s << "// Create an array of wrapper types/names for the current module.\n"
+            << "static Shiboken::Module::TypeInitStruct cppApi[] = {\n" << indent;
+
+        // Windows did not like an array of QString.
+        QStringList typeNames;
+        for (int idx = 0; idx < maxTypeIndex; ++idx)
+            typeNames.append("+++ unknown entry #"_L1 + QString::number(idx)
+                             + " in "_L1 + moduleName());
+
+        collectFullTypeNamesArray(typeNames);
+
+        for (const auto &typeName : std::as_const(typeNames))
+            s << "{nullptr, \"" << typeName << "\"},\n";
+
+        s << "{nullptr, nullptr}\n" << outdent << "};\n\n";
+    }
+
+    s << "// Create an array of primitive type converters for the current module.\n"
+        << "static SbkConverter *sbkConverters[SBK_" << moduleName()
+        << "_CONVERTERS_IDX_COUNT" << "];\n\n";
+}
+
 void CppGenerator::writeModuleInitFunction(TextStream &s, const QString &moduleDef,
                                            const QString &execFunc, const QString &convInitFunc,
                                            const QString &containerConvInitFunc,
                                            const QString &qtEnumRegisterMetaTypeFunc)
 {
+
      s << "extern \"C\" LIBSHIBOKEN_EXPORT PyObject *PyInit_"
          << moduleName() << "()\n{\n" << indent
          << "Shiboken::init();\n\n";
 
-     // Static initialization: Create converter/type arrays and retrieve arrays
-     // of the required modules for initializing the converters.
      const int maxTypeIndex = getMaxTypeIndex() + api().instantiatedSmartPointers().size();
-     if (maxTypeIndex) {
-         s << "// Create an array of wrapper types/names for the current module.\n"
-             << "static Shiboken::Module::TypeInitStruct cppApi[] = {\n" << indent;
-
-         // Windows did not like an array of QString.
-         QStringList typeNames;
-         for (int idx = 0; idx < maxTypeIndex; ++idx)
-             typeNames.append("+++ unknown entry #"_L1 + QString::number(idx)
-                              + " in "_L1 + moduleName());
-
-         collectFullTypeNamesArray(typeNames);
-
-         for (const auto &typeName : typeNames)
-             s << "{nullptr, \"" << typeName << "\"},\n";
-
-         s << "{nullptr, nullptr}\n" << outdent << "};\n"
-             << "// The new global structure consisting of (type, name) pairs.\n"
+     if (maxTypeIndex > 0) {
+         s << "// The new global structure consisting of (type, name) pairs.\n"
              << cppApiVariableName() << " = cppApi;\n";
          if (usePySideExtensions())
              s << "QT_WARNING_PUSH\nQT_WARNING_DISABLE_DEPRECATED\n";
@@ -6924,10 +6937,7 @@ void CppGenerator::writeModuleInitFunction(TextStream &s, const QString &moduleD
          s << '\n';
      }
 
-     s << "// Create an array of primitive type converters for the current module.\n"
-         << "static SbkConverter *sbkConverters[SBK_" << moduleName()
-         << "_CONVERTERS_IDX_COUNT" << "];\n"
-         << convertersVariableName() << " = sbkConverters;\n\n";
+     s << convertersVariableName() << " = sbkConverters;\n\n";
 
      const TypeDatabase *typeDb = TypeDatabase::instance();
      const CodeSnipList snips = typeDb->defaultTypeSystemType()->codeSnips();
