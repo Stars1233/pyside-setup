@@ -61,7 +61,7 @@ static QList<qsizetype> lcsLength(const QByteArrayList &a, const QByteArrayList 
     return res;
 }
 
-enum Type {
+enum Type : std::uint8_t {
     Add,
     Delete,
     Unchanged

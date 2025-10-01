@@ -648,7 +648,7 @@ QString TypeSystemEntityResolver::resolveUndeclaredEntity(const QString &name)
 }
 
 // State depending on element stack
-enum class ParserState
+enum class ParserState : std::uint8_t
 {
     None,
     PrimitiveTypeNativeToTargetConversion,

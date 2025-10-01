@@ -25,7 +25,7 @@ struct PyMethodDefEntry;
 class CppGenerator : public ShibokenGenerator
 {
 public:
-    enum class ErrorReturn {
+    enum class ErrorReturn : std::uint8_t {
         Default, // "{}"
         Zero,
         MinusOne,
@@ -33,7 +33,7 @@ public:
         Void
     };
 
-    enum CppSelfDefinitionFlag {
+    enum CppSelfDefinitionFlag : std::uint8_t {
         HasStaticOverload = 0x1,
         HasClassMethodOverload = 0x2,
         CppSelfAsReference = 0x4

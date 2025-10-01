@@ -358,7 +358,7 @@ static const IntTypeNormalizationEntries &intTypeNormalizationEntries()
 }
 
 // Normalization helpers
-enum CharCategory { Space, Identifier, Other };
+enum CharCategory : std::uint8_t { Space, Identifier, Other };
 
 static CharCategory charCategory(QChar c)
 {

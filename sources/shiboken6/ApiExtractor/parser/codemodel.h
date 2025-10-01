@@ -33,7 +33,7 @@ class CodeModel
 public:
     Q_DISABLE_COPY_MOVE(CodeModel)
 
-    enum FunctionType {
+    enum FunctionType : std::uint8_t {
         Normal,
         Constructor,
         CopyConstructor,
@@ -60,7 +60,7 @@ public:
     };
     Q_ENUM(FunctionType)
 
-    enum ClassType {
+    enum ClassType : std::uint8_t {
         Class,
         Struct,
         Union
@@ -94,7 +94,7 @@ class _CodeModelItem
 public:
     Q_DISABLE_COPY_MOVE(_CodeModelItem)
 
-    enum Kind {
+    enum Kind : std::uint16_t {
         /* These are bit-flags resembling inheritance */
         Kind_Scope = 0x1,
         Kind_Namespace = 0x2 | Kind_Scope,

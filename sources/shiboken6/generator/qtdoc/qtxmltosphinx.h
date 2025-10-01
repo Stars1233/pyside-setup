@@ -22,7 +22,7 @@ struct QtXmlToSphinxParameters;
 struct QtXmlToSphinxLink;
 struct QtXmlToSphinxImage;
 
-enum class WebXmlTag;
+enum class WebXmlTag : std::uint8_t;
 
 class QtXmlToSphinx
 {
@@ -185,7 +185,7 @@ private:
 
     struct Snippet
     {
-        enum Result {
+        enum Result : std::uint8_t {
             Converted, // C++ converted to Python
             Resolved, // Otherwise resolved in snippet paths
             Fallback, // Fallback from  XML

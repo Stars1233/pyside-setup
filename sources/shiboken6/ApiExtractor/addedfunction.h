@@ -23,7 +23,7 @@ struct AddedFunction
     using AddedFunctionPtr = std::shared_ptr<AddedFunction>;
 
     /// Function access types.
-    enum Access {
+    enum Access : std::uint8_t {
         Protected = 0x1,
         Public =    0x2
     };

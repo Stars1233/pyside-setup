@@ -507,7 +507,7 @@ void QtDocGenerator::writeDetailedDescription(TextStream &s,
                              parsedImages);
 }
 
-enum ClassDescriptionMode
+enum ClassDescriptionMode : std::uint8_t
 {
     NoDescription,
     BriefOnly,

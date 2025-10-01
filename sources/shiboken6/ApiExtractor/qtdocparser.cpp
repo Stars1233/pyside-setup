@@ -34,7 +34,7 @@
 
 using namespace Qt::StringLiterals;
 
-enum { debugFunctionSearch = 0 };
+enum : std::uint8_t { debugFunctionSearch = 0 };
 
 constexpr auto briefStartElement = "<brief>"_L1;
 constexpr auto briefEndElement = "</brief>"_L1;

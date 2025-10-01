@@ -15,7 +15,7 @@ QT_FORWARD_DECLARE_CLASS(QTextStream)
 class EnumValue
 {
 public:
-    enum Type
+    enum Type : std::uint8_t
     {
         Signed,
         Unsigned

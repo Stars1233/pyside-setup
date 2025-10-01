@@ -35,7 +35,7 @@ public:
     Q_DISABLE_COPY_MOVE(Generator)
 
     /// Options used around the generator code
-    enum Option {
+    enum Option : std::uint16_t {
         NoOption                 = 0x00000000,
         ExcludeConst             = 0x00000001,
         ExcludeReference         = 0x00000002,
@@ -51,13 +51,13 @@ public:
     };
     Q_DECLARE_FLAGS(Options, Option)
 
-    enum FileNameFlag {
+    enum FileNameFlag : std::uint8_t {
         UnqualifiedName = 0x1,
         KeepCase = 0x2
     };
     Q_DECLARE_FLAGS(FileNameFlags, FileNameFlag)
 
-    enum CodeOptimizationFlag {
+    enum CodeOptimizationFlag : std::uint8_t {
         RemoveFullnameField         = 0x00000001,
         CompressSignatureStrings    = 0x00000002,
         FoldCommonTailCode          = 0x00000004,

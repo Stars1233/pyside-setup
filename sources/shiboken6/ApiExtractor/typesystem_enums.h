@@ -4,9 +4,11 @@
 #ifndef TYPESYSTEM_ENUMS_H
 #define TYPESYSTEM_ENUMS_H
 
+#include <cstdint>
+
 namespace TypeSystem
 {
-enum Language {
+enum Language : std::uint8_t {
     TargetLangCode      = 0x0001,
     NativeCode          = 0x0002,
     ShellCode           = 0x0004,
@@ -17,21 +19,21 @@ enum Language {
     TargetLangAndNativeCode   = TargetLangCode | NativeCode
 };
 
-enum class AllowThread {
+enum class AllowThread : std::uint8_t {
     Unspecified,
     Allow,
     Disallow,
     Auto
 };
 
-enum Ownership {
+enum Ownership : std::uint8_t {
     UnspecifiedOwnership,
     DefaultOwnership,
     TargetLangOwnership,
     CppOwnership
 };
 
-enum CodeSnipPosition {
+enum CodeSnipPosition : std::uint8_t {
     CodeSnipPositionBeginning,
     CodeSnipPositionEnd,
     CodeSnipPositionDeclaration,
@@ -40,19 +42,19 @@ enum CodeSnipPosition {
     CodeSnipPositionAny
 };
 
-enum DocModificationMode {
+enum DocModificationMode : std::uint8_t {
     DocModificationAppend,
     DocModificationPrepend,
     DocModificationReplace,
     DocModificationXPathReplace
 };
 
-enum class DocMode {
+enum class DocMode : std::uint8_t {
     Nested,
     Flat
 };
 
-enum class ExceptionHandling {
+enum class ExceptionHandling : std::uint8_t {
     Unspecified,
     Off,
     AutoDefaultToOff,
@@ -60,27 +62,27 @@ enum class ExceptionHandling {
     On
 };
 
-enum class SnakeCase {
+enum class SnakeCase : std::uint8_t {
     Unspecified,
     Disabled,
     Enabled,
     Both
 };
 
-enum Visibility { // For namespaces
+enum Visibility : std::uint8_t { // For namespaces
     Unspecified,
     Visible,
     Invisible,
     Auto
 };
 
-enum class BoolCast { // Generate nb_bool (overriding command line)
+enum class BoolCast : std::uint8_t { // Generate nb_bool (overriding command line)
     Unspecified,
     Disabled,
     Enabled
 };
 
-enum class CPythonType
+enum class CPythonType : std::uint8_t
 {
     Bool,
     Float,
@@ -89,7 +91,7 @@ enum class CPythonType
     Other
 };
 
-enum class QtMetaTypeRegistration
+enum class QtMetaTypeRegistration : std::uint8_t
 {
     Unspecified,
     Enabled,
@@ -97,14 +99,14 @@ enum class QtMetaTypeRegistration
     Disabled
 };
 
-enum class SmartPointerType {
+enum class SmartPointerType : std::uint8_t {
     Shared,
     Unique,
     Handle,
     ValueHandle
 };
 
-enum class PythonEnumType {
+enum class PythonEnumType : std::uint8_t {
     Unspecified,
     Enum,
     IntEnum,

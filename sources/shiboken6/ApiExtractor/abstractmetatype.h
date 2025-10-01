@@ -29,7 +29,7 @@ class AbstractMetaType
 public:
     using Indirections = QList<Indirection>;
 
-    enum TypeUsagePattern {
+    enum TypeUsagePattern : std::uint8_t {
         PrimitivePattern,
         FlagsPattern,
         EnumPattern,

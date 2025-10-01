@@ -31,9 +31,9 @@ class TypeSystemTypeEntry;
 class ValueTypeEntry;
 class EnumTypeEntry;
 
-enum class ParserState;
+enum class ParserState : std::uint8_t;
 
-enum class StackElement {
+enum class StackElement : std::uint8_t {
             None,
 
             // Type tags

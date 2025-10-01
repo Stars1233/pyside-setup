@@ -30,7 +30,7 @@ class TypeEntry
 public:
     Q_DISABLE_COPY_MOVE(TypeEntry)
 
-    enum Type {
+    enum Type : std::uint8_t {
         PrimitiveType,
         VoidType,
         VarargsType,
@@ -53,7 +53,7 @@ public:
     };
     Q_ENUM(Type)
 
-    enum CodeGeneration {
+    enum CodeGeneration : std::uint8_t {
         GenerateNothing,     // Rejection, private type, ConstantValueTypeEntry or similar
         GenerationDisabled,  // generate='no' in type system
         GenerateCode,        // Generate code

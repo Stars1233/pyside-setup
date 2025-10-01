@@ -13,7 +13,7 @@ Q_DECLARE_LOGGING_CATEGORY(lcShibokenDoc)
 class ReportHandler
 {
 public:
-    enum DebugLevel { NoDebug, SparseDebug, MediumDebug, FullDebug };
+    enum DebugLevel : std::uint8_t { NoDebug, SparseDebug, MediumDebug, FullDebug };
 
     static void install();
     static void startTimer();

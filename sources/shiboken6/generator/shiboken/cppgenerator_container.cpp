@@ -56,7 +56,7 @@ static void writeSlot(TextStream &s, const QString &privateObjType,
 // Write creation function from C++ reference, used by field accessors
 // and getters which are within extern "C"
 
-enum ContainerCreationFlag
+enum ContainerCreationFlag : std::uint8_t
 {
     None = 0,
     Const = 0x1,

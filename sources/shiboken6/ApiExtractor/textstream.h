@@ -15,12 +15,12 @@ public:
 
     using ManipulatorFunc = void(TextStream &);
 
-    enum class Language
+    enum class Language : std::uint8_t
     {
         None, Cpp
     };
 
-    enum class CharClass
+    enum class CharClass : std::uint8_t
     {
         Other, NewLine, Space, Hash, BackSlash
     };

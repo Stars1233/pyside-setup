@@ -18,7 +18,7 @@ class TextStream;
 class Include
 {
 public:
-    enum IncludeType {
+    enum IncludeType : std::uint8_t {
         IncludePath,
         LocalPath,
         TargetLangImport

@@ -6,46 +6,46 @@
 
 #include <QtCore/qflags.h>
 
-enum ReferenceType {
+enum ReferenceType : std::uint8_t {
     NoReference,
     LValueReference,
     RValueReference
 };
 
-enum EnumKind {
+enum EnumKind : std::uint8_t {
     CEnum,         // Standard C: enum Foo { value1, value2 }
     AnonymousEnum, //             enum { value1, value2 }
     EnumClass      // C++ 11    : enum class Foo { value1, value2 }
 };
 
-enum class Indirection
+enum class Indirection : std::uint8_t
 {
     Pointer, // int *
     ConstPointer // int *const
 };
 
-enum class ExceptionSpecification
+enum class ExceptionSpecification : std::uint8_t
 {
     Unknown,
     NoExcept,
     Throws
 };
 
-enum class NamespaceType
+enum class NamespaceType : std::uint8_t
 {
     Default,
     Anonymous,
     Inline
 };
 
-enum class Access
+enum class Access : std::uint8_t
 {
     Private,
     Protected,
     Public
 };
 
-enum class FunctionAttribute {
+enum class FunctionAttribute : std::uint8_t {
     Abstract   = 0x00000001,
     Static     = 0x00000002,
     Virtual    = 0x00000004,

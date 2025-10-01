@@ -68,7 +68,7 @@ CXString getFileNameFromLocation(const CXSourceLocation &location);
 SourceRange getCursorRange(const CXCursor &cursor);
 
 struct Diagnostic {
-    enum  Source { Clang, Other };
+    enum  Source : std::uint8_t { Clang, Other };
 
     Diagnostic() = default;
     // Clang

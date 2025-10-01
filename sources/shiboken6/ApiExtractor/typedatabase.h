@@ -39,7 +39,7 @@ struct VersionRange
 
 struct TypeRejection
 {
-    enum MatchType
+    enum MatchType : std::uint8_t
     {
         ExcludeClass,                // Match className only
         Function,                    // Match className and function name

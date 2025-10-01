@@ -13,7 +13,7 @@ using namespace Qt::StringLiterals;
 class Scanner
 {
 public:
-    enum Token {
+    enum Token : std::uint8_t {
         StarToken,
         AmpersandToken,
         LessThanToken,

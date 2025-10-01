@@ -70,7 +70,7 @@ public:
     void setConditions(const QStringList &newConditions);
 
 private:
-    enum class PiTokens { None, If, Endif, EntityDefinition };
+    enum class PiTokens : std::uint8_t { None, If, Endif, EntityDefinition };
 
     using ExtendedToken = std::pair<TokenType, PiTokens>;
     ExtendedToken readNextInternal();

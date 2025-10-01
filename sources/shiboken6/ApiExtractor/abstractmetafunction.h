@@ -34,7 +34,7 @@ class AbstractMetaFunction
 public:
     Q_DISABLE_COPY_MOVE(AbstractMetaFunction)
 
-    enum FunctionType {
+    enum FunctionType : std::uint8_t {
         ConstructorFunction,
         CopyConstructorFunction,
         MoveConstructorFunction,
@@ -66,13 +66,13 @@ public:
     };
     Q_ENUM(FunctionType)
 
-    enum ComparisonOperatorType {
+    enum ComparisonOperatorType : std::uint8_t {
         OperatorEqual, OperatorNotEqual, OperatorLess, OperatorLessEqual,
         OperatorGreater, OperatorGreaterEqual
     };
     Q_ENUM(ComparisonOperatorType)
 
-    enum CompareResultFlag {
+    enum CompareResultFlag : std::uint16_t {
         EqualName            = 0x0001,
         EqualModifiedName    = 0x0002,
         EqualVirtual         = 0x0004,
@@ -120,7 +120,7 @@ public:
     void setCppAttributes(FunctionAttributes a);
     void setCppAttribute(FunctionAttribute a, bool on = true);
 
-    enum class Flag { // Internal flags not relevant for comparing functions
+    enum class Flag : std::uint8_t { // Internal flags not relevant for comparing functions
         // Binary operator whose leading/trailing argument was removed by metabuilder
         OperatorLeadingClassArgumentRemoved = 0x1,
         OperatorTrailingClassArgumentRemoved = 0x2,

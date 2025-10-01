@@ -9,7 +9,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QString)
 
-enum class LanguageLevel {
+enum class LanguageLevel : std::uint8_t {
     Default,
     Cpp11,
     Cpp14,
@@ -18,13 +18,13 @@ enum class LanguageLevel {
     Cpp1Z
 };
 
-enum class Compiler {
+enum class Compiler : std::uint8_t {
     Msvc,
     Gpp,
     Clang
 };
 
-enum class Platform {
+enum class Platform : std::uint8_t {
     Unix,
     Linux,
     Windows,
@@ -33,7 +33,7 @@ enum class Platform {
     iOS
 };
 
-enum class Architecture {
+enum class Architecture : std::uint8_t {
     Other,
     X64,
     X86,

@@ -49,12 +49,12 @@ struct ReferenceCount
 
 struct ArgumentOwner
 {
-    enum Action {
+    enum Action : std::uint8_t {
         Invalid     = 0x00,
         Add         = 0x01,
         Remove      = 0x02
     };
-    enum {
+    enum : std::int8_t {
         InvalidIndex = -2,
         ThisIndex = -1,
         ReturnIndex = 0,

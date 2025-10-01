@@ -31,7 +31,7 @@ class AbstractMetaBuilder
 public:
     Q_DISABLE_COPY_MOVE(AbstractMetaBuilder)
 
-    enum RejectReason {
+    enum RejectReason : std::uint8_t {
         NotInTypeSystem,
         GenerationDisabled,
         RedefinedToNotClass,
@@ -78,7 +78,7 @@ public:
 
     void setApiExtractorFlags(ApiExtractorFlags flags);
 
-    enum TranslateTypeFlag {
+    enum TranslateTypeFlag : std::uint8_t {
         DontResolveType = 0x1,
         TemplateArgument = 0x2,
         NoClassScopeLookup = 0x4

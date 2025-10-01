@@ -2067,7 +2067,7 @@ void AbstractMetaBuilderPrivate::rejectFunction(const FunctionModelItem &functio
 }
 
 // Check for special Qt argument types which should be ignored.
-enum class QtSpecialArgument
+enum class QtSpecialArgument : std::uint8_t
 {
     None,
     PrivateSignal,

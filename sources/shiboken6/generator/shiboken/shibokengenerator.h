@@ -50,7 +50,7 @@ public:
     /// Besides the actual bindings (see AbstractMetaFunction::generateBinding(),
     /// some functions need to be generated into the wrapper class
     /// (virtual method/avoid protected hack expose).
-    enum class FunctionGenerationFlag
+    enum class FunctionGenerationFlag : std::uint8_t
     {
         None = 0x0,
         /// Virtual method overridable in Python
@@ -68,7 +68,7 @@ public:
     };
     Q_DECLARE_FLAGS(FunctionGeneration, FunctionGenerationFlag);
 
-    enum class AttroCheckFlag
+    enum class AttroCheckFlag : std::uint8_t
     {
         None                   = 0x0,
         GetattroOverloads      = 0x01,
@@ -450,7 +450,7 @@ private:
                                    TypeSystem::CodeSnipPosition position,
                                    TypeSystem::Language language);
 
-    enum TypeSystemConverterVariable {
+    enum TypeSystemConverterVariable : std::uint8_t {
         TypeSystemCheckFunction = 0,
         TypeSystemIsConvertibleFunction,
         TypeSystemToCppFunction,

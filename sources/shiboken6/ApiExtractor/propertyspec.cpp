@@ -189,7 +189,7 @@ void QPropertySpec::setGenerateGetSetDef(bool generateGetSetDef)
 TypeSystemProperty QPropertySpec::typeSystemPropertyFromQ_Property(const QString &declarationIn,
                                                                    QString *errorMessage)
 {
-    enum class PropertyToken { None, Read, Write, Designable, Reset, Notify, Member };
+    enum class PropertyToken : std::uint8_t { None, Read, Write, Designable, Reset, Notify, Member };
 
     static const QHash<QString, PropertyToken> tokenLookup = {
         {"READ"_L1, PropertyToken::Read},

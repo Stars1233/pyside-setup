@@ -17,7 +17,7 @@ struct GeneratorArgument
     Q_GADGET
 
 public:
-    enum class Type {
+    enum class Type : std::uint8_t {
         Other,
         Primitive,
         Enum,
@@ -27,7 +27,7 @@ public:
     };
     Q_ENUM(Type)
 
-    enum class Conversion {
+    enum class Conversion : std::uint8_t {
         Default,
         CppPrimitiveArray, // Similar to Default except default values
         Pointer,
@@ -35,7 +35,7 @@ public:
     };
     Q_ENUM(Conversion)
 
-    enum class Flag {
+    enum class Flag : std::uint8_t {
         TreatAsPointer = 0x1,
         PointerOrObjectType = 0x2,
         MayHaveImplicitConversion = 0x4,

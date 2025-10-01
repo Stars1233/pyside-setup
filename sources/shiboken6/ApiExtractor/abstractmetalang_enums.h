@@ -6,7 +6,7 @@
 
 #include <QtCore/qflags.h>
 
-enum class FunctionQueryOption {
+enum class FunctionQueryOption : std::uint32_t {
     AnyConstructor               = 0x0000001, // Any constructor (copy/move)
     Constructors                 = 0x0000002, // Constructors except copy/move
     DefaultConstructor           = 0x0000004, // Only Default constructors
@@ -33,7 +33,7 @@ enum class FunctionQueryOption {
 Q_DECLARE_FLAGS(FunctionQueryOptions, FunctionQueryOption)
 Q_DECLARE_OPERATORS_FOR_FLAGS(FunctionQueryOptions)
 
-enum class OperatorQueryOption {
+enum class OperatorQueryOption : std::uint16_t {
     ArithmeticOp            = 0x01, // Arithmetic: +, -, *, /, %, +=, -=, *=, /=, %=, unary+, unary-
     IncDecrementOp          = 0x02, // ++, --
     BitwiseOp               = 0x04, // Bitwise: <<, <<=, >>, >>=, ~, &, &=, |, |=, ^, ^=

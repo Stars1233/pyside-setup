@@ -152,7 +152,7 @@ static constexpr auto converterVar = "converter"_L1;
 class registerConverterName
 {
 public:
-    enum Flag
+    enum Flag : std::uint8_t
     {
         Indirections = 0x1, // Also register "Type*", "Type&"
         PartiallyQualifiedAliases = 0x2, // Also register "B" when passed "A::B"
@@ -6065,7 +6065,7 @@ void CppGenerator::writeStaticFieldInitialization(TextStream &s,
     s << "return type;\n" << outdent << "}\n";
 }
 
-enum class QtRegisterMetaType
+enum class QtRegisterMetaType : std::uint8_t
 {
     None, Pointer, Value
 };

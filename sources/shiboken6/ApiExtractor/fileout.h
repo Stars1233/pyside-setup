@@ -16,7 +16,7 @@ class FileOut
 public:
     Q_DISABLE_COPY_MOVE(FileOut)
 
-    enum State { Unchanged, Success };
+    enum State : std::uint8_t { Unchanged, Success };
 
     explicit FileOut(QString name);
     ~FileOut();

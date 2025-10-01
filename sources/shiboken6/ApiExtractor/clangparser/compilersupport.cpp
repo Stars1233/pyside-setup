@@ -31,7 +31,7 @@ using namespace Qt::StringLiterals;
 namespace clang {
 
 // The command line options set
-enum OptionSetFlag : unsigned
+enum OptionSetFlag : std::uint8_t
 {
     CompilerOption = 0x1,
     CompilerPathOption = 0x2,

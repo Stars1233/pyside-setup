@@ -11,7 +11,7 @@ QT_FORWARD_DECLARE_CLASS(QDebug);
 class DefaultValue
 {
 public:
-    enum Type
+    enum Type : std::uint8_t
     {
         Boolean,
         CppScalar, // A C++ scalar type (int,..) specified by value()

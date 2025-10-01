@@ -15,7 +15,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
-enum class Access;
+enum class Access : std::uint8_t;
 class AbstractMetaClassPrivate;
 class ComplexTypeEntry;
 class Documentation;
@@ -30,14 +30,14 @@ class AbstractMetaClass : public EnclosingClassMixin
 public:
     Q_DISABLE_COPY_MOVE(AbstractMetaClass)
 
-    enum CppWrapperFlag {
+    enum CppWrapperFlag : std::uint8_t {
         NoCppWrapper = 0x0,
         CppProtectedHackWrapper = 0x1,// Make protected functions accessible
         CppVirtualMethodWrapper = 0x2 // Need C++ wrapper for calling Python overrides
     };
     Q_DECLARE_FLAGS(CppWrapper, CppWrapperFlag)
 
-    enum Attribute {
+    enum Attribute : std::uint16_t {
         None                          = 0x00000000,
 
         Abstract                      = 0x00000001,
@@ -272,7 +272,7 @@ public:
     void setPropertyDocumentation(const QString &name, const Documentation &doc);
 
     // Helpers to search whether a functions is a property setter/getter/reset
-    enum class PropertyFunction
+    enum class PropertyFunction : std::uint8_t
     {
         Read,
         Write,

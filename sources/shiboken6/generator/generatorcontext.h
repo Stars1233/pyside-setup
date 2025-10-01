@@ -27,7 +27,7 @@ class GeneratorContext {
     friend class ShibokenGenerator;
     friend class Generator;
 public:
-    enum Type { Class, WrappedClass, SmartPointer,
+    enum Type : std::uint8_t { Class, WrappedClass, SmartPointer,
                 GlobalFunction // No class contained
               };
 

@@ -193,7 +193,7 @@ TextStream &operator<<(TextStream &str, const QtXmlToSphinxLink &linkContext)
     return str;
 }
 
-enum class WebXmlTag {
+enum class WebXmlTag : std::uint8_t {
     Unknown,
     heading, brief, para, italic, bold, see_also, snippet, dots, codeline,
     table, header, row, item, argument, teletype, link, inlineimage, image,
@@ -566,7 +566,7 @@ static QString resolveFile(const QStringList &locations, const QString &path)
     return {};
 }
 
-enum class SnippetType
+enum class SnippetType : std::uint8_t
 {
     Other, // .qdoc, .qml,...
     CppSource, CppHeader // Potentially converted to Python
@@ -1041,7 +1041,7 @@ void QtXmlToSphinx::handleRowTag(QXmlStreamReader& reader)
         m_tables.back().appendRow({});
 }
 
-enum ListType { BulletList, OrderedList, EnumeratedList };
+enum ListType : std::uint8_t { BulletList, OrderedList, EnumeratedList };
 
 static inline ListType webXmlListType(QStringView t)
 {

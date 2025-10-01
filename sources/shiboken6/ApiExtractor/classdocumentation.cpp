@@ -81,7 +81,7 @@ qsizetype ClassDocumentation::indexOfProperty(const QString &name) const
     return -1;
 }
 
-enum class WebXmlCodeTag
+enum class WebXmlCodeTag : std::uint8_t
 {
     Class, Description, Enum, Function, Header, Parameter, Property, Typedef, Other
 };

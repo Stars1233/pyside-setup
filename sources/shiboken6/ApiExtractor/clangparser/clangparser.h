@@ -14,7 +14,7 @@
 #include <string_view>
 #include <utility>
 
-enum class LanguageLevel;
+enum class LanguageLevel : std::uint8_t;
 
 namespace clang {
 
@@ -33,7 +33,7 @@ private:
     FileNameCache m_fileNameCache;
 };
 
-enum class LocationType
+enum class LocationType : std::uint8_t
 {
     Main, // Main header parsed for bindings
     Other, // A header parsed for bindings
@@ -46,7 +46,7 @@ class BaseVisitor {
 public:
     using Diagnostics = QList<Diagnostic>;
 
-    enum StartTokenResult { Error, Skip, Recurse };
+    enum StartTokenResult : std::uint8_t { Error, Skip, Recurse };
 
     BaseVisitor();
     virtual ~BaseVisitor();

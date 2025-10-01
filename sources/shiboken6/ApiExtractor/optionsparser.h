@@ -11,7 +11,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QTextStream)
 
-enum class OptionSource
+enum class OptionSource : std::uint8_t
 {
     CommandLine, // "--option"
     CommandLineSingleDash, // "-o"

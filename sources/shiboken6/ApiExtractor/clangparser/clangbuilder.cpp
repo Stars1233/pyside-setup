@@ -112,7 +112,7 @@ class BuilderPrivate {
 public:
     Q_DISABLE_COPY_MOVE(BuilderPrivate)
 
-    enum class SpecialSystemHeader {
+    enum class SpecialSystemHeader : std::uint8_t {
         None,
         Types,
         OpenGL,

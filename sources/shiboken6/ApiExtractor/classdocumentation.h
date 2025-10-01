@@ -47,7 +47,7 @@ using FunctionDocumentationList = QList<FunctionDocumentation>;
 /// A WebXML/doxygen document
 struct ClassDocumentation
 {
-    enum Type {
+    enum Type : std::uint8_t {
         Class, // <class>, class/namespace
         Header // <header>, grouped global functions/enums
     };
