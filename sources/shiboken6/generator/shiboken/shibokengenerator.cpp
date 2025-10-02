@@ -2707,11 +2707,6 @@ QString ShibokenGenerator::moduleCppPrefix(const QString &moduleName)
     return result;
 }
 
-QString ShibokenGenerator::cppApiVariableNameOld(const QString &moduleName)
-{
-    return "Sbk"_L1 + moduleCppPrefix(moduleName) + "Types"_L1;
-}
-
 QString ShibokenGenerator::cppApiVariableName(const QString &moduleName)
 {
     return "Sbk"_L1 + moduleCppPrefix(moduleName) + "TypeStructs"_L1;

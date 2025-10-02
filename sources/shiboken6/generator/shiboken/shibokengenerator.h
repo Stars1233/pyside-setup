@@ -330,7 +330,6 @@ protected:
     static bool useOperatorBoolAsNbBool();
     /// Generate implicit conversions of function arguments
     static bool generateImplicitConversions();
-    static QString cppApiVariableNameOld(const QString &moduleName = {});
     static QString cppApiVariableName(const QString &moduleName = QString());
     static QString pythonModuleObjectName(const QString &moduleName = QString());
     static QString convertersVariableName(const QString &moduleName = QString());

@@ -21,10 +21,7 @@ extern "C" PyObject *PyInit_AppLib();
 static const char moduleName[] = "AppLib";
 
 // This variable stores all Python types exported by this module.
-extern PyTypeObject **SbkAppLibTypes;
-
-// This variable stores all type converters exported by this module.
-extern SbkConverter **SbkAppLibTypeConverters;
+extern Shiboken::Module::TypeInitStruct *SbkAppLibTypeStructs;
 
 namespace PythonUtils {
 
@@ -87,7 +84,7 @@ bool bindAppObject(const QString &moduleName, const QString &name,
 {
     if (init() != AppModuleLoaded)
         return false;
-    PyTypeObject *typeObject = SbkAppLibTypes[index];
+    PyTypeObject *typeObject = SbkAppLibTypeStructs[index].type;
 
     PyObject *po = Shiboken::Conversions::pointerToPython(typeObject, o);
     if (!po) {

@@ -6590,11 +6590,8 @@ bool CppGenerator::finishGeneration()
         s << '\n';
     }
 
-    // FIXME PYSIDE-7: Remove backwards compatible structure
     s << "// Current module's type array.\n"
        << "Shiboken::Module::TypeInitStruct *" << cppApiVariableName() << " = nullptr;\n"
-       << "// Backwards compatible structure with identical indexing.\n"
-       << "PyTypeObject **" << cppApiVariableNameOld() << " = nullptr;\n"
        << "// Current module's converter array.\n"
        << "SbkConverter **" << convertersVariableName() << " = nullptr;\n\n";
 
@@ -6873,14 +6870,8 @@ void CppGenerator::writeModuleInitFunction(TextStream &s, const QString &moduleD
 
      const int maxTypeIndex = getMaxTypeIndex() + api().instantiatedSmartPointers().size();
      if (maxTypeIndex > 0) {
-         s << "// The new global structure consisting of (type, name) pairs.\n"
+         s << "// The global structure consisting of (type, name) pairs.\n"
              << cppApiVariableName() << " = cppApi;\n";
-         if (usePySideExtensions())
-             s << "QT_WARNING_PUSH\nQT_WARNING_DISABLE_DEPRECATED\n";
-         s << "// The backward compatible alias with upper case indexes.\n"
-             << cppApiVariableNameOld() << " = reinterpret_cast<PyTypeObject **>(cppApi);\n";
-         if (usePySideExtensions())
-             s << "QT_WARNING_POP\n";
          s << '\n';
      }
 

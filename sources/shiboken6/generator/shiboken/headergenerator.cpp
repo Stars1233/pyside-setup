@@ -742,13 +742,6 @@ static IndexValue indexUpper(IndexValue ti) // converter indexes (old macro comp
     return ti;
 }
 
-static IndexValue typeIndexUpper(const IndexValue &ti) // type indexes (PYSIDE-2404)
-{
-    IndexValue result = indexUpper(ti);
-    result.value *= 2;
-    return result;
-}
-
 bool HeaderGenerator::finishGeneration()
 {
     // Generate the main header for this module. This header should be included
@@ -770,11 +763,6 @@ bool HeaderGenerator::finishGeneration()
 
     const auto typeIndexes = collectTypeIndexes(classList);
 
-    macrosStream << "\n// Type indices\nenum [[deprecated]] : int {\n";
-    for (const auto &ti : typeIndexes)
-        macrosStream << typeIndexUpper(ti);
-    macrosStream << "};\n";
-
     macrosStream << "\n// Type indices\nenum : int {\n";
     for (const auto &ti : typeIndexes)
         macrosStream << ti;
@@ -783,9 +771,6 @@ bool HeaderGenerator::finishGeneration()
     // FIXME: Remove backwards compatible variable in PySide 7.
     macrosStream << "// This variable stores all Python types exported by this module.\n";
     macrosStream << "extern Shiboken::Module::TypeInitStruct *" << cppApiVariableName() << ";\n\n";
-    macrosStream << "// This variable stores all Python types exported by this module ";
-    macrosStream << "in a backwards compatible way with identical indexing.\n";
-    macrosStream << "[[deprecated]] extern PyTypeObject **" << cppApiVariableNameOld() << ";\n\n";
     macrosStream << "// This variable stores the Python module object exported by this module.\n";
     macrosStream << "extern PyObject *" << pythonModuleObjectName() << ";\n\n";
     macrosStream << "// This variable stores all type converters exported by this module.\n";
