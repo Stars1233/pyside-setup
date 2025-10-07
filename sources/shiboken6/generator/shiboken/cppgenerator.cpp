@@ -719,7 +719,8 @@ void CppGenerator::generateClass(TextStream &s,
 
     s  << '\n';
 
-    writeClassTypeFunction(s, classContext.metaClass());
+    if (!metaClass->isNamespace())
+        writeClassTypeFunction(s, metaClass);
 
     // class inject-code native/beginning
     if (!typeEntry->codeSnips().isEmpty()) {
@@ -5493,7 +5494,9 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
     }
 }
 
-void CppGenerator::writeEnumsInitialization(TextStream &s, const AbstractMetaEnumList &enums)
+void CppGenerator::writeEnumsInitialization(TextStream &s,
+                                            const char *enclosing,
+                                            const AbstractMetaEnumList &enums)
 {
     if (enums.isEmpty())
         return;
@@ -5510,7 +5513,7 @@ void CppGenerator::writeEnumsInitialization(TextStream &s, const AbstractMetaEnu
             preambleWritten = true;
         }
         ConfigurableScope configScope(s, cppEnum.typeEntry());
-        etypeUsed |= writeEnumInitialization(s, cppEnum);
+        etypeUsed |= writeEnumInitialization(s, enclosing, cppEnum);
     }
     if (preambleWritten && !etypeUsed)
         s << sbkUnusedVariableCast("EType");
@@ -5520,7 +5523,7 @@ void CppGenerator::writeEnumsInitFunc(TextStream &s, const QString &funcName,
                                       const AbstractMetaEnumList &enums)
 {
      s << "static void " << funcName << "(PyObject *module)\n{\n" << indent;
-     writeEnumsInitialization(s, enums);
+     writeEnumsInitialization(s, "module", enums);
      s << outdent << "}\n\n";
 }
 
@@ -5534,19 +5537,11 @@ static qsizetype maxLineLength(const QStringList &list)
     return result;
 }
 
-bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum &cppEnum)
+bool CppGenerator::writeEnumInitialization(TextStream &s, const char *enclosing,
+                                           const AbstractMetaEnum &cppEnum)
 {
     const auto enclosingClass = cppEnum.targetLangEnclosingClass();
-    const bool hasUpperEnclosingClass = enclosingClass
-                                        && enclosingClass->targetLangEnclosingClass();
     EnumTypeEntryCPtr enumTypeEntry = cppEnum.typeEntry();
-    QString enclosingObjectVariable;
-    if (enclosingClass)
-        enclosingObjectVariable = cpythonTypeName(enclosingClass);
-    else if (hasUpperEnclosingClass)
-        enclosingObjectVariable = u"enclosingClass"_s;
-    else
-        enclosingObjectVariable = u"module"_s;
 
     s << "// Initialization of ";
     s << (cppEnum.isAnonymous() ? "anonymous enum identified by enum value" : "enum");
@@ -5629,9 +5624,9 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
         for (const auto &enumValue : enumValues) {
             const QString mangledName = mangleName(enumValue.name());
             const QString pyValue = initializerValues + u'[' + QString::number(idx++) + u']';
-            if (enclosingClass || hasUpperEnclosingClass) {
+            if (enclosingClass) {
                 s << "tpDict.reset(PepType_GetDict(reinterpret_cast<PyTypeObject *>("
-                    << enclosingObjectVariable << ")));\n"
+                    << enclosing << ")));\n"
                     << "PyDict_SetItemString(tpDict.object(), \"" << mangledName << "\",\n"
                     << indent << (isSigned ? "PyLong_FromLongLong" : "PyLong_FromUnsignedLongLong")
                     << "(" << pyValue << "));\n" << outdent;
@@ -5650,7 +5645,7 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
         auto packageLevel = packageName().count(u'.') + 1;
         s << "EType = Shiboken::Enum::"
             << "createPythonEnum"
-            << '(' << enclosingObjectVariable << ",\n" << indent
+            << '(' << enclosing << ",\n" << indent
             << '"' << packageLevel << ':' << getClassTargetFullName(cppEnum) << "\",\n"
             << initializerName << ", " << initializerValues << ");\n" << outdent
             << enumVarTypeObj << " = EType;\n";
@@ -5895,7 +5890,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     const QString typePtr = u"_"_s + chopType(pyTypeName)
         + u"_Type"_s;
 
-    s << typePtr << " = Shiboken::ObjectType::introduceWrapperType(\n" << indent;
+    s << "PyTypeObject *pyType = Shiboken::ObjectType::introduceWrapperType(\n" << indent;
     // 1:enclosingObject
     s << enclosingObjectVariable << ",\n";
 
@@ -5940,9 +5935,10 @@ void CppGenerator::writeClassRegister(TextStream &s,
     else
         s << wrapperFlags.join(" | ");
 
-    s << outdent << ");\nauto *pyType = " << pyTypeName << "; // references "
-        << typePtr << "\n"
-        << outdent << "#if PYSIDE6_COMOPT_COMPRESS == 0\n" << indent
+    s << outdent << ");\n";
+    if (!metaClass->isNamespace())
+        s << typePtr << " = pyType;\n";
+    s << outdent << "#if PYSIDE6_COMOPT_COMPRESS == 0\n" << indent
         << "InitSignatureStrings(pyType, " << initFunctionName << "_SignatureStrings);\n"
         << outdent << "#else\n" << indent
         << "InitSignatureBytes(pyType, " << initFunctionName << "_SignatureBytes, "
@@ -5987,9 +5983,8 @@ void CppGenerator::writeClassRegister(TextStream &s,
 
     // Set typediscovery struct or fill the struct of another one
     if (needsTypeDiscoveryFunction(metaClass)) {
-        s << "Shiboken::ObjectType::setTypeDiscoveryFunctionV2(\n" << indent
-            << cpythonTypeName(metaClass)
-            << ", &" << cpythonBaseName(metaClass) << "_typeDiscovery);" << outdent << "\n\n";
+        s << "Shiboken::ObjectType::setTypeDiscoveryFunctionV2(pyType, &" << cpythonBaseName(metaClass)
+            << "_typeDiscovery);\n\n";
     }
 
     AbstractMetaEnumList classEnums = metaClass->enums();
@@ -5999,7 +5994,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
         s << "// Pass the ..._EnumFlagInfo to the class.\n"
             << "SbkObjectType_SetEnumFlagInfo(pyType, " << chopType(pyTypeName)
             << "_EnumFlagInfo);\n\n";
-    writeEnumsInitialization(s, classEnums);
+    writeEnumsInitialization(s, "pyType", classEnums);
 
     if (metaClass->hasSignals())
         writeSignalInitialization(s, metaClass);

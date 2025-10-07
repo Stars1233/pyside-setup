@@ -482,10 +482,12 @@ private:
     void writeRichCompareFunction(TextStream &s, TextStream &t, const GeneratorContext &context) const;
     void writeSmartPointerRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
 
-    static void writeEnumsInitialization(TextStream &s, const AbstractMetaEnumList &enums);
+    static void writeEnumsInitialization(TextStream &s, const char *enclosing,
+                                         const AbstractMetaEnumList &enums);
     static void writeEnumsInitFunc(TextStream &s, const QString &funcName,
                                    const AbstractMetaEnumList &enums);
-    static bool writeEnumInitialization(TextStream &s, const AbstractMetaEnum &metaEnum);
+    static bool writeEnumInitialization(TextStream &s, const char *enclosing,
+                                        const AbstractMetaEnum &metaEnum);
 
     static void writeSignalInitialization(TextStream &s, const AbstractMetaClassCPtr &metaClass);
 
