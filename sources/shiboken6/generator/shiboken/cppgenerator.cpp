@@ -353,15 +353,6 @@ static QString compilerOptionOptimize()
     return result;
 }
 
-QString CppGenerator::chopType(QString s)
-{
-    if (s.endsWith(u"_Type"))
-        s.chop(5);
-    else if (s.endsWith(u"_TypeF()"))
-        s.chop(8);
-    return s;
-}
-
 static bool isStdSetterName(const QString &setterName, const QString &propertyName)
 {
    return setterName.size() == propertyName.size() + 3
@@ -832,7 +823,7 @@ void CppGenerator::generateClass(TextStream &s,
     const QString methodsDefinitions = md.toString();
     const QString singleMethodDefinitions = smd.toString();
 
-    const QString className = chopType(cpythonTypeName(metaClass));
+    const QString className = cpythonBaseName(metaClass);
 
     // Write single method definitions
     s << singleMethodDefinitions;
@@ -4625,7 +4616,7 @@ static QString docString(const AbstractMetaClassCPtr &metaClass)
 void CppGenerator::writeClassTypeFunction(TextStream &s,
                                           const AbstractMetaClassCPtr &metaClass)
 {
-    const QString className = chopType(cpythonTypeName(metaClass));
+    const QString className = cpythonBaseName(metaClass);
     const QString typePtr = u"_"_s + className + u"_Type"_s;
     s << openExternC << "static PyTypeObject *" << typePtr << " = nullptr;\n"
         << "static PyTypeObject *" << className << "_TypeF(void)\n"
@@ -4641,7 +4632,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     QString tp_dealloc;
     QString tp_hash;
     QString tp_call;
-    const QString className = chopType(cpythonTypeName(metaClass));
+    const QString className = cpythonBaseName(metaClass);
 
     bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
 
@@ -4996,7 +4987,7 @@ QString CppGenerator::writeCopyFunction(TextStream &s,
                                         const GeneratorContext &context)
 {
     const auto &metaClass = context.metaClass();
-    const QString className = chopType(cpythonTypeName(metaClass));
+    const QString className = cpythonBaseName(metaClass);
     const QString funcName = className + u"__copy__"_s;
 
     // PYSIDE-3135 replace _Self by Self when the minimum Python version is 3.11
@@ -5860,7 +5851,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     AbstractMetaClassCPtr enc = metaClass->targetLangEnclosingClass();
     QString enclosingObjectVariable = enc ? u"enclosingClass"_s : u"module"_s;
 
-    QString pyTypeName = cpythonTypeName(metaClass);
+    QString pyTypePrefix = cpythonBaseName(metaClass);
     QString initFunctionName = getInitFunctionName(classContext);
 
     // PYSIDE-510: Create a signatures string for the introspection feature.
@@ -5875,7 +5866,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
         << "return " << globalTypeVarExpr << ";\n\n" << outdent;
 
     // Multiple inheritance
-    QString pyTypeBasesVariable = chopType(pyTypeName) + u"_Type_bases"_s;
+    QString pyTypeBasesVariable = pyTypePrefix + u"_Type_bases"_s;
     const QStringList pyBases = pyBaseTypes(metaClass);
     s << "Shiboken::AutoDecRef " << pyTypeBasesVariable << "(PyTuple_Pack("
         << pyBases.size() << ",\n" << indent;
@@ -5887,8 +5878,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     s << "));\n\n" << outdent;
 
     // Create type and insert it in the module or enclosing class.
-    const QString typePtr = u"_"_s + chopType(pyTypeName)
-        + u"_Type"_s;
+    const QString typePtr = u"_"_s + pyTypePrefix + u"_Type"_s;
 
     s << "PyTypeObject *pyType = Shiboken::ObjectType::introduceWrapperType(\n" << indent;
     // 1:enclosingObject
@@ -5909,7 +5899,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
 
     s << "\",\n";
     // 4:typeSpec
-    s << '&' << chopType(pyTypeName) << "_spec,\n";
+    s << '&' << pyTypePrefix << "_spec,\n";
 
     // 5:cppObjDtor
     QString dtorClassName = destructorClassName(metaClass, classContext);
@@ -5947,7 +5937,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
 
     if (usePySideExtensions() && !classContext.forSmartPointer())
         s << "SbkObjectType_SetPropertyStrings(pyType, "
-                    << chopType(pyTypeName) << "_PropertyStrings);\n";
+            << pyTypePrefix << "_PropertyStrings);\n";
     s << globalTypeVarExpr << " = pyType;\n\n";
 
     // Register conversions for the type.
@@ -5992,7 +5982,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
 
     if (!classContext.forSmartPointer() && !classEnums.isEmpty())
         s << "// Pass the ..._EnumFlagInfo to the class.\n"
-            << "SbkObjectType_SetEnumFlagInfo(pyType, " << chopType(pyTypeName)
+            << "SbkObjectType_SetEnumFlagInfo(pyType, " << pyTypePrefix
             << "_EnumFlagInfo);\n\n";
     writeEnumsInitialization(s, "pyType", classEnums);
 
