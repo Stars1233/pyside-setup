@@ -741,18 +741,6 @@ QString ShibokenGenerator::converterObject(const TypeEntryCPtr &type)
            + u'[' + getTypeIndexVariableName(type) + u']';
 }
 
-QString ShibokenGenerator::cpythonTypeNameExtSet(const TypeEntryCPtr &type)
-{
-    return cppApiVariableName(type->targetLangPackage()) + u'['
-            + getTypeIndexVariableName(type) + "].type"_L1;
-}
-
-QString ShibokenGenerator::cpythonTypeNameExtSet(const AbstractMetaType &type)
-{
-    return cppApiVariableName(type.typeEntry()->targetLangPackage()) + u'['
-           + getTypeIndexVariableName(type) + "].type"_L1;
-}
-
 QString ShibokenGenerator::cpythonTypeNameExt(const TypeEntryCPtr &type)
 {
     return "Shiboken::Module::get("_L1 + cppApiVariableName(type->targetLangPackage())

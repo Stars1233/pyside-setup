@@ -269,8 +269,6 @@ protected:
     static QString cpythonBaseName(const AbstractMetaClassCPtr &metaClass);
     static QString cpythonBaseName(const ComplexTypeEntryCPtr &type);
     static QString containerCpythonBaseName(const ContainerTypeEntryCPtr &ctype);
-    static QString cpythonTypeNameExtSet(const TypeEntryCPtr &type);
-    static QString cpythonTypeNameExtSet(const AbstractMetaType &type);
     static QString cpythonTypeNameExt(const TypeEntryCPtr &type);
     static QString cpythonTypeNameExt(const AbstractMetaType &type);
     static QString cpythonCheckFunction(TypeEntryCPtr type);

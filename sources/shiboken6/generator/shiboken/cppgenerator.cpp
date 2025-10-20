@@ -5631,7 +5631,6 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const char *enclosing,
 
     bool etypeUsed = false;
 
-    QString enumVarTypeObj = cpythonTypeNameExtSet(enumTypeEntry);
     if (!cppEnum.isAnonymous()) {
         auto packageLevel = packageName().count(u'.') + 1;
         s << "EType = Shiboken::Enum::"
@@ -5639,13 +5638,13 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const char *enclosing,
             << '(' << enclosing << ",\n" << indent
             << '"' << packageLevel << ':' << getClassTargetFullName(cppEnum) << "\",\n"
             << initializerName << ", " << initializerValues << ");\n" << outdent
-            << enumVarTypeObj << " = EType;\n";
+            << typeInitStruct(enumTypeEntry) << ".type = EType;\n";
         etypeUsed = true;
     }
 
     if (cppEnum.typeEntry()->flags()) {
         s << "// PYSIDE-1735: Mapping the flags class to the same enum class.\n"
-            << cpythonTypeNameExtSet(cppEnum.typeEntry()->flags()) << " =\n"
+            << typeInitStruct(cppEnum.typeEntry()->flags()) << ".type =\n"
             << indent << "EType;\n" << outdent;
     }
     writeEnumConverterInitialization(s, cppEnum);
@@ -5859,11 +5858,9 @@ void CppGenerator::writeClassRegister(TextStream &s,
     s << "PyTypeObject *init_" << initFunctionName
         << "(PyObject *" << enclosingObjectVariable << ")\n{\n" << indent;
 
-    const QString globalTypeVarExpr = !classContext.forSmartPointer()
-                                      ? cpythonTypeNameExtSet(classTypeEntry)
-                                      : cpythonTypeNameExtSet(classContext.preciseType());
-    s << "if (" << globalTypeVarExpr << " != nullptr)\n" << indent
-        << "return " << globalTypeVarExpr << ";\n\n" << outdent;
+    s << "auto &typeStruct = " << typeInitStruct(classContext) << ";\n"
+       << "if (typeStruct.type != nullptr)\n" << indent
+       << "return typeStruct.type;\n\n" << outdent;
 
     // Multiple inheritance
     QString pyTypeBasesVariable = pyTypePrefix + u"_Type_bases"_s;
@@ -5938,7 +5935,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     if (usePySideExtensions() && !classContext.forSmartPointer())
         s << "SbkObjectType_SetPropertyStrings(pyType, "
             << pyTypePrefix << "_PropertyStrings);\n";
-    s << globalTypeVarExpr << " = pyType;\n\n";
+    s << "typeStruct.type = pyType;\n\n";
 
     // Register conversions for the type.
     writeConverterRegister(s, metaClass, classContext);
