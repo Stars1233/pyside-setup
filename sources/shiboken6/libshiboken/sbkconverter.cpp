@@ -183,8 +183,9 @@ SbkConverter *createConverterObject(PyTypeObject *type,
 {
     auto *converter = new SbkConverter;
     converter->pythonType = type;
-    // PYSIDE-595: All types are heaptypes now, so provide reference.
-    Py_XINCREF(reinterpret_cast<PyObject *>(type));
+    // PYSIDE-595: Provide reference for heaptypes
+    if (type != nullptr && (type->tp_flags & Py_TPFLAGS_HEAPTYPE) != 0)
+        Py_INCREF(reinterpret_cast<PyObject *>(type));
 
     converter->pointerToPython = pointerToPythonFunc;
     converter->copyToPython = copyToPythonFunc;
