@@ -58,9 +58,7 @@ public:
     Q_DECLARE_FLAGS(FileNameFlags, FileNameFlag)
 
     enum CodeOptimizationFlag : std::uint8_t {
-        RemoveFullnameField         = 0x00000001,
-        CompressSignatureStrings    = 0x00000002,
-        FoldCommonTailCode          = 0x00000004,
+        CompressSignatureStrings    = 0x00000001,
 
         AllCodeOptimizations        = 0x000000ff
     };

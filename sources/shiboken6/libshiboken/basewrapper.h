@@ -151,16 +151,20 @@ LIBSHIBOKEN_API void setErrorAboutWrongArguments(PyObject *args, const char *fun
 
 /// Return values for the different return variants.
 /// This is used instead of goto.
-/// Either funcname should contain the full function name, or the module and class
-/// are taken from the TypeInitStruct.
-LIBSHIBOKEN_API PyObject *returnWrongArguments(PyObject *args, const char *funcName, PyObject *info,
-                                               Module::TypeInitStruct initStruct = {nullptr, nullptr});
+LIBSHIBOKEN_API PyObject *returnWrongArguments(PyObject *args, const char *memberName,
+                                               PyObject *info, Module::TypeInitStruct initStruct);
+LIBSHIBOKEN_API PyObject *returnWrongArguments(PyObject *args, const char *globalFuncName,
+                                               PyObject *info);
 
-LIBSHIBOKEN_API int returnWrongArguments_Zero(PyObject *args, const char *funcName, PyObject *info,
-                                              Module::TypeInitStruct initStruct = {nullptr, nullptr});
+LIBSHIBOKEN_API int returnWrongArguments_Zero(PyObject *args, const char *memberName,
+                                              PyObject *info, Module::TypeInitStruct initStruct);
+LIBSHIBOKEN_API int returnWrongArguments_Zero(PyObject *args, const char *globalFuncName,
+                                              PyObject *info);
 
-LIBSHIBOKEN_API int returnWrongArguments_MinusOne(PyObject *args, const char *funcName, PyObject *info,
-                                                  Module::TypeInitStruct initStruct = {nullptr, nullptr});
+LIBSHIBOKEN_API int returnWrongArguments_MinusOne(PyObject *args, const char *memberName,
+                                                  PyObject *info, Module::TypeInitStruct initStruct);
+LIBSHIBOKEN_API int returnWrongArguments_MinusOne(PyObject *args, const char *globalFuncName,
+                                                  PyObject *info);
 
 /// A simple special version for the end of rich comparison.
 LIBSHIBOKEN_API PyObject *returnFromRichCompare(PyObject *result);

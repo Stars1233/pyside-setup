@@ -938,27 +938,42 @@ void setErrorAboutWrongArguments(PyObject *args, const char *funcName, PyObject 
     SetError_Argument(args, funcName, info);
 }
 
-PyObject *returnWrongArguments(PyObject *args, const char *funcName, PyObject *info,
+PyObject *returnWrongArguments(PyObject *args, const char *memberName, PyObject *info,
                                Module::TypeInitStruct initStruct)
 {
-    const auto *className = initStruct.fullName ? initStruct.fullName : nullptr;
-    setErrorAboutWrongArguments(args, funcName, info, className);
+    setErrorAboutWrongArguments(args, memberName, info, initStruct.fullName);
     return {};
 }
 
-int returnWrongArguments_Zero(PyObject *args, const char *funcName, PyObject *info,
+PyObject *returnWrongArguments(PyObject *args, const char *globalFuncName, PyObject *info)
+{
+    setErrorAboutWrongArguments(args, globalFuncName, info);
+    return {};
+}
+
+int returnWrongArguments_Zero(PyObject *args, const char *memberName, PyObject *info,
                               Module::TypeInitStruct initStruct)
 {
-    const auto *className = initStruct.fullName ? initStruct.fullName : nullptr;
-    setErrorAboutWrongArguments(args, funcName, info, className);
+    setErrorAboutWrongArguments(args, memberName, info, initStruct.fullName);
     return 0;
 }
 
-int returnWrongArguments_MinusOne(PyObject *args, const char *funcName, PyObject *info,
+int returnWrongArguments_Zero(PyObject *args, const char *globalFuncName, PyObject *info)
+{
+    setErrorAboutWrongArguments(args, globalFuncName, info);
+    return 0;
+}
+
+int returnWrongArguments_MinusOne(PyObject *args, const char *memberName, PyObject *info,
                                   Module::TypeInitStruct initStruct)
 {
-    const auto *className = initStruct.fullName ? initStruct.fullName : nullptr;
-    setErrorAboutWrongArguments(args, funcName, info, className);
+    setErrorAboutWrongArguments(args, memberName, info, initStruct.fullName);
+    return -1;
+}
+
+int returnWrongArguments_MinusOne(PyObject *args, const char *globalFuncName, PyObject *info)
+{
+    setErrorAboutWrongArguments(args, globalFuncName, info);
     return -1;
 }
 

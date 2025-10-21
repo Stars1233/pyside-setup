@@ -486,8 +486,8 @@ static bool isPythonType(PyTypeObject *type)
     return !ObjectType::checkType(type) || ObjectType::isUserType(type);
 }
 
-static bool _callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
-                               std::string_view className)
+bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
+                       Module::TypeInitStruct typeStruct)
 {
     using Shiboken::AutoDecRef;
 
@@ -504,9 +504,10 @@ static bool _callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
     Py_ssize_t idx = 0;
     const Py_ssize_t n = PyTuple_Size(mro);
     /* No need to check the last one: it's gonna be skipped anyway.  */
+    const char *className = typeStruct.fullName;
     for ( ; idx + 1 < n; ++idx) {
         auto *lookType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
-        if (className == PepType_GetFullyQualifiedNameStr(lookType))
+        if (std::strcmp(className, PepType_GetFullyQualifiedNameStr(lookType)) == 0)
             break;
     }
     // We are now at the first non-Python class `QObject`.
@@ -538,25 +539,6 @@ static bool _callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
     // Note: This can fail, so please always check the error status.
     AutoDecRef result(PyObject_Call(func, newArgs, kwds));
     return true;
-}
-
-bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
-                       const char *fullName)
-{
-    // fullName is the full dotted name of module, class and function.
-    // We need to cut off the rightmost field to get the module.class name.
-    auto className = std::string_view(fullName);
-    auto pos = className.rfind('.');
-    assert(pos != std::string_view::npos);
-    className = className.substr(0, pos);
-    return _callInheritedInit(self, args, kwds, className);
-}
-
-bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
-                       Module::TypeInitStruct typeStruct)
-{
-    // TypeInitStruct must contain the module.class name.
-    return _callInheritedInit(self, args, kwds, typeStruct.fullName);
 }
 
 } // namespace Shiboken

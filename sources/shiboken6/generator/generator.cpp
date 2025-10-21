@@ -136,12 +136,8 @@ bool GeneratorOptionsParser::handleOption(const QString & key, const QString & v
     if (key == DISABLED_OPTIMIZATIONS) {
         const auto tokens = QStringView{value}.split(u',');
         for (const auto &tok : tokens) {
-            if (tok == "fullname"_L1)
-                m_options->optimizations.setFlag(Generator::RemoveFullnameField, false);
-            else if (tok == "compression"_L1)
+            if (tok == "compression"_L1)
                 m_options->optimizations.setFlag(Generator::CompressSignatureStrings, false);
-            else if (tok == "folding"_L1)
-                m_options->optimizations.setFlag(Generator::FoldCommonTailCode, false);
             else if (tok == "all"_L1)
                 m_options->optimizations = Generator::CodeOptimization(0);
             else
