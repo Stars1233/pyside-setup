@@ -191,27 +191,39 @@ struct OnePrimitive
     static PyObject *toPython(const void *) { return nullptr; }
     static PythonToCppFunc isConvertible(PyObject *) { return nullptr; }
     static void toCpp(PyObject *, void *) {}
-    static SbkConverter *createConverter()
+
+    static SbkConverter *createConverter(PyTypeObject *type)
     {
-        SbkConverter *converter = Shiboken::Conversions::createConverter(Shiboken::SbkType<T>(),
+        SbkConverter *converter = Shiboken::Conversions::createConverter(type,
                                                                          Primitive<T>::toPython);
         Shiboken::Conversions::addPythonToCppValueConversion(converter,
                                                              Primitive<T>::toCpp,
                                                              Primitive<T>::isConvertible);
         return converter;
     }
+    static SbkConverter *createConverter()
+    {
+        return createConverter(Shiboken::SbkType<T>());
+    }
+
 };
 template <typename T>
 struct TwoPrimitive : OnePrimitive<T>
 {
     static PythonToCppFunc isOtherConvertible(PyObject *) { return nullptr; }
     static void otherToCpp(PyObject *, void *) {}
-    static SbkConverter *createConverter()
+
+    static SbkConverter *createConverter(PyTypeObject *type)
     {
-        SbkConverter *converter = OnePrimitive<T>::createConverter();
+        SbkConverter *converter = OnePrimitive<T>::createConverter(type);
         Shiboken::Conversions::addPythonToCppValueConversion(converter, Primitive<T>::otherToCpp, Primitive<T>::isOtherConvertible);
         return converter;
     }
+    static SbkConverter *createConverter()
+    {
+        return createConverter(Shiboken::SbkType<T>());
+    }
+
 };
 
 // Integers --------------------------------------------------------------------------------
