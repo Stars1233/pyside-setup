@@ -6380,15 +6380,10 @@ static void writeInitFuncDecl(TextStream &declStr,
 void CppGenerator::writeInitFuncCall(TextStream &callStr,
                                      const QString &functionName,
                                      const TypeEntryCPtr &enclosingEntry,
-                                     const QString &pythonName, bool lazy)
+                                     const QString &pythonName)
 {
     const bool hasParent = enclosingEntry && enclosingEntry->type() != TypeEntry::TypeSystemType;
-    if (!lazy) {
-        const QString enclosing = hasParent
-            ? "reinterpret_cast<PyObject *>("_L1 + cpythonTypeNameExt(enclosingEntry) + u')'
-            : "module"_L1;
-        callStr << functionName << '(' << enclosing << ");\n";
-    } else if (hasParent) {
+    if (hasParent) {
         const QString &enclosingName = enclosingEntry->targetLangName();
         const auto parts = QStringView{enclosingName}.split(u".", Qt::SkipEmptyParts);
         callStr << "Shiboken::Module::AddTypeCreationFunction("
