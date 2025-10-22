@@ -376,6 +376,10 @@ protected:
 
     static QString stdMove(const QString &c);
 
+    /// Write a piece of per class code enclosed in the config scope, if there is any
+    template <class F> // Function taking (TextStream, AbstractMetaClassCPtr)
+    bool writeClassCode(TextStream &s, F f) const;
+
 private:
     static QString getModuleHeaderFileBaseName(const QString &moduleName = QString());
     static QString cpythonGetterFunctionName(const QString &name,

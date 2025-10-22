@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "cppgenerator.h"
+#include "shibokengenerator_tpl.h"
 #include "anystringview_helpers.h"
 #include "configurablescope.h"
 #include "generatorargument.h"
@@ -6399,18 +6400,12 @@ void CppGenerator::writeInitFuncCall(TextStream &callStr,
 void CppGenerator::writeLazyTypeCreationFunc(TextStream &s, const QString &funcName) const
 {
     s << "static void " << funcName << "(PyObject *module)\n{\n" << indent;
-    for (const auto &cls : api().classes()){
-        auto te = cls->typeEntry();
-        if (shouldGenerate(te)) {
-            const bool hasConfigCondition = te->hasConfigCondition();
-            if (hasConfigCondition)
-                s << te->configCondition() << '\n';
-            writeInitFuncCall(s, initFuncPrefix + getSimpleClassInitFunctionName(cls),
-                              targetLangEnclosingEntry(te), cls->name());
-            if (hasConfigCondition)
-                s << "#endif\n";
-        }
-    }
+
+    auto classFunc = [](TextStream &s, const AbstractMetaClassCPtr &cls) {
+        CppGenerator::writeInitFuncCall(s, initFuncPrefix + getSimpleClassInitFunctionName(cls),
+                                        targetLangEnclosingEntry(cls->typeEntry()), cls->name());
+    };
+    writeClassCode(s, classFunc);
 
     for (const auto &smp : api().instantiatedSmartPointers()) {
         GeneratorContext context = contextForSmartPointer(smp.specialized, smp.type);
@@ -6499,25 +6494,16 @@ bool CppGenerator::finishGeneration()
     }
 
     AbstractMetaClassCList classesWithStaticFields;
-    bool hasClasses = false;
-    for (const auto &cls : api().classes()){
-        auto te = cls->typeEntry();
-        if (shouldGenerate(te)) {
-            hasClasses = true;
-            const bool hasConfigCondition = te->hasConfigCondition();
-            if (hasConfigCondition)
-                s_classInitDecl << te->configCondition() << '\n';
-            writeInitFuncDecl(s_classInitDecl,
-                              initFuncPrefix + getSimpleClassInitFunctionName(cls));
-            if (cls->hasStaticFields()) {
-                s_classInitDecl << "PyTypeObject *"
-                    << getSimpleClassStaticFieldsInitFunctionName(cls) << "(PyObject *module);\n";
-                classesWithStaticFields.append(cls);
-            }
-            if (hasConfigCondition)
-                s_classInitDecl << "#endif\n";
+    auto writeInit = [&classesWithStaticFields](TextStream &s_classInitDecl, const AbstractMetaClassCPtr &cls) {
+        writeInitFuncDecl(s_classInitDecl,
+                          initFuncPrefix + getSimpleClassInitFunctionName(cls));
+        if (cls->hasStaticFields()) {
+            s_classInitDecl << "PyTypeObject *"
+                << getSimpleClassStaticFieldsInitFunctionName(cls) << "(PyObject *module);\n";
+            classesWithStaticFields.append(cls);
         }
-    }
+    };
+    const bool hasClasses = writeClassCode(s_classInitDecl, writeInit);
 
     // Initialize smart pointer types.
     for (const auto &smp : api().instantiatedSmartPointers()) {
