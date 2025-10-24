@@ -321,7 +321,8 @@ struct Primitive<unsigned PY_LONG_LONG> : OnePrimitive<unsigned PY_LONG_LONG>
             *reinterpret_cast<unsigned PY_LONG_LONG * >(cppOut) = result;
         }
         else {
-            PyErr_SetString(PyExc_TypeError, "Invalid type for unsigned long long conversion");
+            PyErr_SetString(PyExc_TypeError,
+                            "libshiboken: Invalid type for unsigned long long conversion");
         }
     }
     static PythonToCppFunc isConvertible(PyObject *pyIn)

@@ -63,8 +63,9 @@ LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct)
     AutoDecRef modName(String::fromCppStringView(names.substr(0, dotPos)));
     auto *modOrType = PyDict_GetItem(sysModules, modName);
     if (modOrType == nullptr) {
-        PyErr_Format(PyExc_SystemError, "Module \"%U\" should already be in sys.modules",
-                                        modName.object());
+        PyErr_Format(PyExc_SystemError,
+                     "libshiboken: Error instantiating \"%s\": Module \"%U\" should already be in sys.modules",
+                     typeStruct.fullName, modName.object());
         return nullptr;
     }
 
@@ -485,8 +486,10 @@ PyObject *import(const char *moduleName)
     else
         module = PyImport_ImportModule(moduleName);
 
-    if (module == nullptr)
-        PyErr_Format(PyExc_ImportError, "could not import module '%s'", moduleName);
+    if (module == nullptr) {
+        PyErr_Format(PyExc_ImportError,
+                     "libshiboken: could not import module '%s'", moduleName);
+    }
 
     return module;
 }

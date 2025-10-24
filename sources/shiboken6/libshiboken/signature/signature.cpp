@@ -284,7 +284,7 @@ static PyObject *get_signature(PyObject * /* self */, PyObject *args)
 static PyObject *make_snake_case_name(PyObject * /* self */, PyObject *arg)
 {
     if (!PyUnicode_Check(arg))
-        return PyErr_Format(PyExc_TypeError, "%S is not a string");
+        return PyErr_Format(PyExc_TypeError, "libshiboken: %S is not a string");
     return Shiboken::String::getSnakeCaseName(arg, true);
 }
 

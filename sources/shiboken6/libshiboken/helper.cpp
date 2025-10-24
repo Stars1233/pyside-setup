@@ -561,7 +561,7 @@ int *sequenceToIntArray(PyObject *obj, bool zeroTerminated)
     for (Py_ssize_t i = 0; i < size; i++) {
         Shiboken::AutoDecRef item(PySequence_GetItem(seq.object(), i));
         if (!PyLong_Check(item)) {
-            PyErr_SetString(PyExc_TypeError, "Sequence of ints expected");
+            PyErr_SetString(PyExc_TypeError, "libshiboken: Sequence of ints expected");
             delete[] array;
             return nullptr;
         }

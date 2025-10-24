@@ -158,7 +158,7 @@ PyObject *toBytes(PyObject *self, PyObject * /* args */)
 {
     auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(self);
     if (sbkObject->size < 0)
-        return PyErr_Format(PyExc_IndexError, "VoidPtr does not have a size set.");
+        return PyErr_Format(PyExc_IndexError, "libshiboken: VoidPtr does not have a size set.");
 
     PyObject *bytes = PyBytes_FromStringAndSize(reinterpret_cast<const char *>(sbkObject->cptr),
                                                 sbkObject->size);
@@ -175,7 +175,7 @@ static Py_ssize_t SbkVoidPtrObject_length(PyObject *v)
 {
     auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     if (sbkObject->size < 0) {
-        PyErr_SetString(PyExc_IndexError, "VoidPtr does not have a size set.");
+        PyErr_SetString(PyExc_IndexError, "libshiboken: VoidPtr does not have a size set.");
         return -1;
     }
 

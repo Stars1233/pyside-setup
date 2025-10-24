@@ -538,8 +538,9 @@ PyObject *MakeQAppWrapper(PyTypeObject *type)
         const char *res_name = qApp_last != nullptr
             ? PepType_GetNameStr(Py_TYPE(qApp_last)) : "<Unknown>";
         const char *type_name = PepType_GetNameStr(type);
-        PyErr_Format(PyExc_RuntimeError, "Please destroy the %s singleton before"
-            " creating a new %s instance.", res_name, type_name);
+        PyErr_Format(PyExc_RuntimeError,
+                     "libshiboken: Please destroy the %s singleton before"
+                     " creating a new %s instance.", res_name, type_name);
         return nullptr;
     }
 
@@ -1044,7 +1045,8 @@ bool canCallConstructor(PyTypeObject *myType, PyTypeObject *ctorType)
 {
     auto findBasePred = [ctorType](PyTypeObject *type) { return type == ctorType; };
     if (!walkThroughBases(myType, findBasePred)) {
-        PyErr_Format(PyExc_TypeError, "%s isn't a direct base class of %s", ctorType->tp_name, myType->tp_name);
+        PyErr_Format(PyExc_TypeError,
+                     "libshiboken: %s isn't a direct base class of %s", ctorType->tp_name, myType->tp_name);
         return false;
     }
     return true;
@@ -1495,11 +1497,13 @@ bool setCppPointer(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr)
         idx = getTypeIndexOnHierarchy(type, desiredType);
 
     const bool alreadyInitialized = sbkObj->d->cptr[idx] != nullptr;
-    if (alreadyInitialized)
-        PyErr_Format(PyExc_RuntimeError, "You can't initialize an %s object in class %s twice!",
-                                         desiredType->tp_name, type->tp_name);
-    else
+    if (alreadyInitialized) {
+        PyErr_Format(PyExc_RuntimeError,
+                     "libshiboken: You can't initialize an %s object in class %s twice!",
+                     desiredType->tp_name, type->tp_name);
+    } else {
         sbkObj->d->cptr[idx] = cptr;
+    }
 
     sbkObj->d->cppObjectCreated = true;
     return !alreadyInitialized;
@@ -1517,13 +1521,15 @@ bool isValid(PyObject *pyObj)
     auto *priv = reinterpret_cast<SbkObject *>(pyObj)->d;
 
     if (!priv->cppObjectCreated && isUserType(pyObj)) {
-        PyErr_Format(PyExc_RuntimeError, "'__init__' method of object's base class (%s) not called.",
+        PyErr_Format(PyExc_RuntimeError,
+                     "libshiboken: '__init__' method of object's base class (%s) not called.",
                      Py_TYPE(pyObj)->tp_name);
         return false;
     }
 
     if (!priv->validCppObject) {
-        PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.",
+        PyErr_Format(PyExc_RuntimeError,
+                     "libshiboken: Internal C++ object (%s) already deleted.",
                      Py_TYPE(pyObj)->tp_name);
         return false;
     }
@@ -1540,14 +1546,16 @@ bool isValid(SbkObject *pyObj, bool throwPyError)
     auto *ob = reinterpret_cast<PyObject *>(pyObj);
     if (!priv->cppObjectCreated && isUserType(ob)) {
         if (throwPyError)
-            PyErr_Format(PyExc_RuntimeError, "Base constructor of the object (%s) not called.",
+            PyErr_Format(PyExc_RuntimeError,
+                         "libshiboken: Base constructor of the object (%s) not called.",
                          Py_TYPE(ob)->tp_name);
         return false;
     }
 
     if (!priv->validCppObject) {
         if (throwPyError)
-            PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.",
+            PyErr_Format(PyExc_RuntimeError,
+                         "libshiboken: Internal C++ object (%s) already deleted.",
                          (Py_TYPE(ob))->tp_name);
         return false;
     }

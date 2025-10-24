@@ -928,7 +928,8 @@ PyObject *SpecificConverter::toPython(const void *cppIn)
     case ReferenceConversion:
         return referenceToPython(m_converter, cppIn);
     default:
-        PyErr_SetString(PyExc_RuntimeError, "tried to use invalid converter in 'C++ to Python' conversion");
+        PyErr_SetString(PyExc_RuntimeError,
+                        "libshiboken: tried to use invalid converter in 'C++ to Python' conversion");
     }
     return nullptr;
 }
@@ -946,7 +947,8 @@ void SpecificConverter::toCpp(PyObject *pyIn, void *cppOut)
         pythonToCppPointer(m_converter, pyIn, &cppOut);
         break;
     default:
-        PyErr_SetString(PyExc_RuntimeError, "tried to use invalid converter in 'Python to C++' conversion");
+        PyErr_SetString(PyExc_RuntimeError,
+                        "libshiboken: tried to use invalid converter in 'Python to C++' conversion");
     }
 }
 

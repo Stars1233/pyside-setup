@@ -498,7 +498,7 @@ PyTypeObject *createPythonEnum(const char *fullName, PyObject *pyEnumItems,
     AutoDecRef PyEnumTypeName(Shiboken::String::fromCString(enumTypeName));
     AutoDecRef PyEnumType(PyObject_GetAttr(enumGlobals()->PyEnumModule, PyEnumTypeName));
     if (!PyEnumType) {
-        PyErr_Format(PyExc_RuntimeError, "Failed to get enum type %s", enumTypeName);
+        PyErr_Format(PyExc_RuntimeError, "libshiboken: Failed to get enum type %s", enumTypeName);
         return nullptr;
     }
 
