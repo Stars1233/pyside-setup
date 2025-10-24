@@ -709,7 +709,7 @@ void CppGenerator::generateClass(TextStream &s,
     s  << '\n';
 
     if (!metaClass->isNamespace())
-        writeClassTypeFunction(s, metaClass);
+        writeClassTypeFunction(s, classContext);
 
     // class inject-code native/beginning
     if (!typeEntry->codeSnips().isEmpty()) {
@@ -4604,14 +4604,13 @@ static QString docString(const AbstractMetaClassCPtr &metaClass)
 }
 
 void CppGenerator::writeClassTypeFunction(TextStream &s,
-                                          const AbstractMetaClassCPtr &metaClass)
+                                          const GeneratorContext &classContext)
 {
-    const QString className = cpythonBaseName(metaClass);
-    const QString typePtr = u"_"_s + className + u"_Type"_s;
-    s << openExternC << "static PyTypeObject *" << typePtr << " = nullptr;\n"
-        << "static PyTypeObject *" << className << "_TypeF(void)\n"
-        << "{\n" << indent << "return " << typePtr << ";\n" << outdent << "}\n"
-        << closeExternC;
+    const QString className = cpythonBaseName(classContext.metaClass());
+    s << openExternC << "static PyTypeObject *" << className << "_TypeF(void)\n"
+        << "{\n" << indent
+        << "return " << typeInitStruct(classContext) << ".type;\n"
+        << outdent << "}\n" << closeExternC;
 }
 
 void CppGenerator::writeClassDefinition(TextStream &s,
@@ -5865,9 +5864,8 @@ void CppGenerator::writeClassRegister(TextStream &s,
     s << "));\n\n" << outdent;
 
     // Create type and insert it in the module or enclosing class.
-    const QString typePtr = u"_"_s + pyTypePrefix + u"_Type"_s;
-
     s << "PyTypeObject *pyType = Shiboken::ObjectType::introduceWrapperType(\n" << indent;
+
     // 1:enclosingObject
     s << enclosingObjectVariable << ",\n";
 
@@ -5913,8 +5911,6 @@ void CppGenerator::writeClassRegister(TextStream &s,
         s << wrapperFlags.join(" | ");
 
     s << outdent << ");\n";
-    if (!metaClass->isNamespace())
-        s << typePtr << " = pyType;\n";
     s << outdent << "#if PYSIDE6_COMOPT_COMPRESS == 0\n" << indent
         << "InitSignatureStrings(pyType, " << initFunctionName << "_SignatureStrings);\n"
         << outdent << "#else\n" << indent

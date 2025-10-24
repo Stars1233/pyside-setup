@@ -426,7 +426,7 @@ private:
                               const AbstractMetaClassCPtr &metaClass,
                               const GeneratorContext &classContext);
     static void writeClassTypeFunction(TextStream &s,
-                                       const AbstractMetaClassCPtr &metaClass);
+                                       const GeneratorContext &classContext);
     QByteArrayList methodDefinitionParameters(const OverloadData &overloadData) const;
     QList<PyMethodDefEntry> methodDefinitionEntries(const OverloadData &overloadData) const;
 
