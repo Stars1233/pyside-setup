@@ -58,19 +58,15 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     auto *data = static_cast<QmlListPropertyPrivate *>(pySelf->d);
 
     char *doc{};
+    PyObject *append{}, *count{}, *at{}, *clear{}, *replace{}, *removeLast{}, *notify{};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
                                      "O|OOOOOOsObbbbbb:QtQml.ListProperty",
                                      const_cast<char **>(kwlist),
                                      &data->type,
-                                     &data->append,
-                                     &data->count,
-                                     &data->at,
-                                     &data->clear,
-                                     &data->replace,
-                                     &data->removeLast,
+                                     &append, &count, &at, &clear, &replace, &removeLast,
                                      /*s*/   &doc,
-                                     /*O*/   &(data->notify), // PySideProperty
+                                     /*O*/   &notify, // PySideProperty
                                      /*bbb*/ &(data->designable),
                                              &(data->scriptable),
                                              &(data->stored),
@@ -79,6 +75,18 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                                              &(data->final))) {
         return -1;
     }
+
+    if (!PySidePropertyPrivate::assignCheckCallable(append, "append", &data->append)
+        || !PySidePropertyPrivate::assignCheckCallable(count, "count", &data->count)
+        || !PySidePropertyPrivate::assignCheckCallable(at, "at", &data->at)
+        || !PySidePropertyPrivate::assignCheckCallable(clear, "clear", &data->clear)
+        || !PySidePropertyPrivate::assignCheckCallable(replace, "replace", &data->replace)
+        || !PySidePropertyPrivate::assignCheckCallable(removeLast, "removeLast", &data->removeLast)) {
+        return -1;
+    }
+
+    if (notify != nullptr && notify != Py_None)
+        data->notify = notify;
 
     if (doc)
         data->doc = doc;
@@ -90,16 +98,6 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     if (!PySequence_Contains(data->type->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
         PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
                      qobjectType->tp_name, data->type->tp_name);
-        return -1;
-    }
-
-    if ((data->append && data->append != Py_None && !PyCallable_Check(data->append)) ||
-        (data->count && data->count != Py_None && !PyCallable_Check(data->count)) ||
-        (data->at && data->at != Py_None && !PyCallable_Check(data->at)) ||
-        (data->clear && data->clear != Py_None && !PyCallable_Check(data->clear)) ||
-        (data->replace && data->replace != Py_None && !PyCallable_Check(data->replace)) ||
-        (data->removeLast && data->removeLast != Py_None && !PyCallable_Check(data->removeLast))) {
-        PyErr_Format(PyExc_TypeError, "Non-callable parameter given");
         return -1;
     }
 
@@ -274,12 +272,12 @@ void QmlListPropertyPrivate::metaCall(PyObject *source, QMetaObject::Call call, 
     Shiboken::Conversions::pythonToCppPointer(qobjectType, source, &qobj);
     QQmlListProperty<QObject> declProp(
         qobj, this,
-        append && append != Py_None ? &propListAppender : nullptr,
-        count && count != Py_None ? &propListCount : nullptr,
-        at && at != Py_None ? &propListAt : nullptr,
-        clear && clear != Py_None ? &propListClear : nullptr,
-        replace && replace != Py_None ? &propListReplace : nullptr,
-        removeLast && removeLast != Py_None ? &propListRemoveLast : nullptr);
+        append != nullptr ? &propListAppender : nullptr,
+        count != nullptr ? &propListCount : nullptr,
+        at != nullptr ? &propListAt : nullptr,
+        clear != nullptr ? &propListClear : nullptr,
+        replace != nullptr ? &propListReplace : nullptr,
+        removeLast != nullptr ? &propListRemoveLast : nullptr);
 
     // Copy the data to the memory location requested by the meta call
     void *v = args[0];

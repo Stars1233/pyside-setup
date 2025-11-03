@@ -99,6 +99,22 @@ PyTypeObject *PySideProperty_TypeF(void)
     return type;
 }
 
+// Helper to check a callable function passed to a property instance.
+bool PySidePropertyPrivate::assignCheckCallable(PyObject *source, const char *name,
+                                                PyObject **target)
+{
+    if (source != nullptr && source != Py_None) {
+        if (PyCallable_Check(source) == 0) {
+            PyErr_Format(PyExc_TypeError, "Non-callable parameter given for \"%s\".", name);
+            return false;
+        }
+        *target = source;
+    } else {
+        *target = nullptr;
+    }
+    return true;
+}
+
 PySidePropertyPrivate::PySidePropertyPrivate() noexcept = default;
 PySidePropertyPrivate::~PySidePropertyPrivate() = default;
 
@@ -115,7 +131,7 @@ PyObject *PySidePropertyPrivate::getValue(PyObject *source) const
 
 int PySidePropertyPrivate::setValue(PyObject *source, PyObject *value)
 {
-    if (fset != nullptr && fset != Py_None && value != nullptr) {
+    if (fset != nullptr && value != nullptr) {
         Shiboken::AutoDecRef args(PyTuple_New(2));
         PyTuple_SetItem(args, 0, source);
         PyTuple_SetItem(args, 1, value);
@@ -124,7 +140,7 @@ int PySidePropertyPrivate::setValue(PyObject *source, PyObject *value)
         Shiboken::AutoDecRef result(PyObject_CallObject(fset, args));
         return (result.isNull() ? -1 : 0);
     }
-    if (fdel != nullptr && fdel != Py_None) {
+    if (fdel != nullptr) {
         Shiboken::AutoDecRef args(PyTuple_New(1));
         PyTuple_SetItem(args, 0, source);
         Py_INCREF(source);
@@ -137,7 +153,7 @@ int PySidePropertyPrivate::setValue(PyObject *source, PyObject *value)
 
 int PySidePropertyPrivate::reset(PyObject *source)
 {
-    if (freset != nullptr && freset != Py_None) {
+    if (freset != nullptr) {
         Shiboken::AutoDecRef args(PyTuple_New(1));
         Py_INCREF(source);
         PyTuple_SetItem(args, 0, source);
@@ -199,7 +215,6 @@ static PyObject *qpropertyTpNew(PyTypeObject *subtype, PyObject * /* args */, Py
 
 static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 {
-    PyObject *type{};
     auto *data = reinterpret_cast<PySideProperty *>(self);
     PySidePropertyPrivate *pData = data->d;
 
@@ -207,25 +222,30 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                                    "designable", "scriptable", "stored",
                                    "user", "constant", "final", nullptr};
     char *doc{};
-
-    Py_CLEAR(pData->pyTypeObject);
-    Py_CLEAR(pData->fget);
-    Py_CLEAR(pData->fset);
-    Py_CLEAR(pData->freset);
-    Py_CLEAR(pData->fdel);
-    Py_CLEAR(pData->notify);
+    PyObject *type{}, *fget{}, *fset{}, *freset{}, *fdel{}, *notify{};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
                                      "O|OOOOsObbbbbb:QtCore.Property",
                                      const_cast<char **>(kwlist),
-                                     /*OO*/     &type, &(pData->fget),
-                                     /*OOO*/    &(pData->fset), &(pData->freset), &(pData->fdel),
+                                     /*OO*/     &type, &fget,
+                                     /*OOO*/    &fset, &freset, &fdel,
                                      /*s*/      &doc,
-                                     /*O*/      &(pData->notify),
+                                     /*O*/      &notify,
                                      /*bbb*/    &(pData->designable), &(pData->scriptable), &(pData->stored),
                                      /*bbb*/    &(pData->user), &(pData->constant), &(pData->final))) {
         return -1;
     }
+
+    if (!PySidePropertyPrivate::assignCheckCallable(fget, "fget", &pData->fget)
+        || !PySidePropertyPrivate::assignCheckCallable(fset, "fset", &pData->fset)
+        || !PySidePropertyPrivate::assignCheckCallable(freset, "freset", &pData->freset)
+        || !PySidePropertyPrivate::assignCheckCallable(fdel, "fdel", &pData->fdel)) {
+        pData->fget = pData->fset = pData->freset = pData->fdel = pData->notify = nullptr;
+        return -1;
+    }
+
+    if (notify != nullptr && notify != Py_None)
+        pData->notify = notify;
 
     // PYSIDE-1019: Fetching the default `__doc__` from fget would fail for inherited functions
     // because we don't initialize the mro with signatures (and we will not!).
@@ -242,24 +262,22 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 
     if (type == Py_None || pData->typeName.isEmpty())
         PyErr_SetString(PyExc_TypeError, "Invalid property type or type name.");
-    else if (pData->constant && ((pData->fset && pData->fset != Py_None)
-                                 || (pData->notify && pData->notify != Py_None)))
-        PyErr_SetString(PyExc_TypeError, "A constant property cannot have a WRITE method or a "
-                                         "NOTIFY signal.");
-    if (!PyErr_Occurred()) {
-        Py_XINCREF(pData->fget);
-        Py_XINCREF(pData->fset);
-        Py_XINCREF(pData->freset);
-        Py_XINCREF(pData->fdel);
-        Py_XINCREF(pData->notify);
-        return 0;
+    else if (pData->constant && pData->fset != nullptr)
+        PyErr_SetString(PyExc_TypeError, "A constant property cannot have a WRITE method.");
+    else if (pData->constant && pData->notify != nullptr)
+        PyErr_SetString(PyExc_TypeError, "A constant property cannot have a NOTIFY signal.");
+
+    if (PyErr_Occurred() != nullptr) {
+        pData->fget = pData->fset = pData->freset = pData->fdel = pData->notify = nullptr;
+        return -1;
     }
-    pData->fget = nullptr;
-    pData->fset = nullptr;
-    pData->freset = nullptr;
-    pData->fdel = nullptr;
-    pData->notify = nullptr;
-    return -1;
+
+    Py_XINCREF(pData->fget);
+    Py_XINCREF(pData->fset);
+    Py_XINCREF(pData->freset);
+    Py_XINCREF(pData->fdel);
+    Py_XINCREF(pData->notify);
+    return 0;
 }
 
 static void qpropertyDeAlloc(PyObject *self)
@@ -560,12 +578,12 @@ bool isReadable(const PySideProperty * /* self */)
 
 bool isWritable(const PySideProperty *self)
 {
-    return self->d->fset != nullptr && self->d->fset != Py_None;
+    return self->d->fset != nullptr;
 }
 
 bool hasReset(const PySideProperty *self)
 {
-    return self->d->freset != nullptr && self->d->freset != Py_None;
+    return self->d->freset != nullptr;
 }
 
 bool isDesignable(const PySideProperty *self)

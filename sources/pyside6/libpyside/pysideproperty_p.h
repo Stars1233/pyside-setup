@@ -30,6 +30,8 @@ public:
     int setValue(PyObject *source, PyObject *value);
     int reset(PyObject *source);
 
+    static bool assignCheckCallable(PyObject *source, const char *name, PyObject **target);
+
     QByteArray typeName;
     // Type object: A real PyTypeObject ("@Property(int)") or a string
     // "@Property('QVariant')".
