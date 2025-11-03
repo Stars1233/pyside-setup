@@ -319,6 +319,9 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 {
     auto *pData = propertyPrivate(self);
 
+    if (!pData->typeName().isEmpty()) // Cloned copy, already initialized
+        return 0;
+
     static const char *kwlist[] = {"type", "fget", "fset", "freset", "fdel", "doc", "notify",
                                    "designable", "scriptable", "stored",
                                    "user", "constant", "final", dataCapsuleKeyName, nullptr};
@@ -402,80 +405,73 @@ static void qpropertyDeAlloc(PyObject *self)
 }
 
 // Create a copy of the property to prevent the @property.setter from modifying
-// the property in place and avoid strange side effects in derived classes
-// (cf https://bugs.python.org/issue1620).
-static PyObject *
-_property_copy(PyObject *old, PyObject *get, PyObject *set, PyObject *reset, PyObject *del)
+// the property in place and avoid strange side effects when modifying the
+// property in derived classes (cf https://bugs.python.org/issue1620,
+// pysidetest/property_python_test.py).
+static PyObject *copyProperty(PyObject *old)
 {
-    auto *pData = propertyPrivate(old);
-
     AutoDecRef type(PyObject_Type(old));
-    QByteArray doc{};
-    if (type.isNull())
-        return nullptr;
-
-    if (get == nullptr || get == Py_None) {
-        Py_XDECREF(get);
-        get = pData->fget ? pData->fget : Py_None;
-    }
-    if (set == nullptr || set == Py_None) {
-        Py_XDECREF(set);
-        set = pData->fset ? pData->fset : Py_None;
-    }
-    if (reset == nullptr || reset == Py_None) {
-        Py_XDECREF(reset);
-        reset = pData->freset ? pData->freset : Py_None;
-    }
-    if (del == nullptr || del == Py_None) {
-        Py_XDECREF(del);
-        del = pData->fdel ? pData->fdel : Py_None;
-    }
-    // make _init use __doc__ from getter
-    if ((pData->getter_doc && get != Py_None) || pData->doc().isEmpty())
-        doc.clear();
-    else
-        doc = pData->doc();
-
-    auto *notify = pData->notify() ? pData->notify() : Py_None;
-
-    const auto flags = pData->flags();
-    PyObject *obNew =
-        PyObject_CallFunction(type, "OOOOOsO" "bbb" "bbb",
-                              pData->pyTypeObject(), get, set, reset, del, doc.data(), notify,
-                              flags.testFlag(PySide::Property::PropertyFlag::Designable),
-                              flags.testFlag(PySide::Property::PropertyFlag::Scriptable),
-                              flags.testFlag(PySide::Property::PropertyFlag::Stored),
-                              flags.testFlag(PySide::Property::PropertyFlag::User),
-                              flags.testFlag(PySide::Property::PropertyFlag::Constant),
-                              flags.testFlag(PySide::Property::PropertyFlag::Final));
-
-    return obNew;
+    Shiboken::AutoDecRef kwds(PyDict_New());
+    addDataCapsuleToKwArgs(kwds, propertyPrivate(old)->clone());
+    Shiboken::AutoDecRef args(PyTuple_New(0));
+    return PyObject_Call(type.object(), args.object(), kwds.object());
 }
 
 static PyObject *qPropertyGetter(PyObject *self, PyObject *getter)
 {
-    return _property_copy(self, getter, nullptr, nullptr, nullptr);
+    PyObject *result = copyProperty(self);
+    if (result != nullptr) {
+        auto *data = propertyPrivate(result);
+        auto *old = std::exchange(data->fget, getter);
+        Py_XINCREF(data->fget);
+        Py_XDECREF(old);
+        data->setFlag(PySide::Property::PropertyFlag::Readable);
+    }
+    return result;
 }
 
 static PyObject *qPropertySetter(PyObject *self, PyObject *setter)
 {
-    return _property_copy(self, nullptr, setter, nullptr, nullptr);
+    PyObject *result = copyProperty(self);
+    if (result != nullptr) {
+        auto *data = propertyPrivate(result);
+        auto *old = std::exchange(data->fset, setter);
+        Py_XINCREF(data->fset);
+        Py_XDECREF(old);
+        data->setFlag(PySide::Property::PropertyFlag::Writable);
+    }
+    return result;
 }
 
 static PyObject *qPropertyResetter(PyObject *self, PyObject *resetter)
 {
-    return _property_copy(self, nullptr, nullptr, resetter, nullptr);
+    PyObject *result = copyProperty(self);
+    if (result != nullptr) {
+        auto *data = propertyPrivate(result);
+        auto *old = std::exchange(data->freset, resetter);
+        Py_XINCREF(data->freset);
+        Py_XDECREF(old);
+        data->setFlag(PySide::Property::PropertyFlag::Resettable);
+    }
+    return result;
 }
 
 static PyObject *qPropertyDeleter(PyObject *self, PyObject *deleter)
 {
-    return _property_copy(self, nullptr, nullptr, nullptr, deleter);
+    PyObject *result = copyProperty(self);
+    if (result != nullptr) {
+        auto *data = propertyPrivate(result);
+        auto *old = std::exchange(data->fdel, deleter);
+        Py_XINCREF(data->fdel);
+        Py_XDECREF(old);
+    }
+    return result;
 }
 
 static PyObject *qPropertyCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
     PyObject *getter = PyTuple_GetItem(args, 0);
-    return _property_copy(self, getter, nullptr, nullptr, nullptr);
+    return qPropertyGetter(self, getter);
 }
 
 // PYSIDE-1019: Provide the same getters as Pythons `PyProperty`.
