@@ -336,15 +336,16 @@ int MetaObjectBuilderPrivate::addProperty(const QByteArray &propertyName,
     auto newProperty = createProperty(property, propertyName);
 
     // Adding property attributes
-    newProperty.setReadable(PySide::Property::isReadable(property));
-    newProperty.setWritable(PySide::Property::isWritable(property));
-    newProperty.setResettable(PySide::Property::hasReset(property));
-    newProperty.setDesignable(PySide::Property::isDesignable(property));
-    newProperty.setScriptable(PySide::Property::isScriptable(property));
-    newProperty.setStored(PySide::Property::isStored(property));
-    newProperty.setUser(PySide::Property::isUser(property));
-    newProperty.setConstant(PySide::Property::isConstant(property));
-    newProperty.setFinal(PySide::Property::isFinal(property));
+    const auto &flags = property->d->flags;
+    newProperty.setReadable(flags.testFlag(PySide::Property::PropertyFlag::Readable));
+    newProperty.setWritable(flags.testFlag(PySide::Property::PropertyFlag::Writable));
+    newProperty.setResettable(flags.testFlag(PySide::Property::PropertyFlag::Resettable));
+    newProperty.setDesignable(flags.testFlag(PySide::Property::PropertyFlag::Designable));
+    newProperty.setScriptable(flags.testFlag(PySide::Property::PropertyFlag::Scriptable));
+    newProperty.setStored(flags.testFlag(PySide::Property::PropertyFlag::Stored));
+    newProperty.setUser(flags.testFlag(PySide::Property::PropertyFlag::User));
+    newProperty.setConstant(flags.testFlag(PySide::Property::PropertyFlag::Constant));
+    newProperty.setFinal(flags.testFlag(PySide::Property::PropertyFlag::Final));
 
     index = newProperty.index() + m_baseObject->propertyCount();
     m_dirty = true;

@@ -20,6 +20,8 @@ using namespace Shiboken;
 
 using namespace Qt::StringLiterals;
 
+Q_DECLARE_OPERATORS_FOR_FLAGS(PySide::Property::PropertyFlags)
+
 extern "C"
 {
 
@@ -223,6 +225,8 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                                    "user", "constant", "final", nullptr};
     char *doc{};
     PyObject *type{}, *fget{}, *fset{}, *freset{}, *fdel{}, *notify{};
+    bool designable{true}, scriptable{true}, stored{true};
+    bool user{false}, constant{false}, finalProp{false};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
                                      "O|OOOOsObbbbbb:QtCore.Property",
@@ -231,8 +235,8 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                                      /*OOO*/    &fset, &freset, &fdel,
                                      /*s*/      &doc,
                                      /*O*/      &notify,
-                                     /*bbb*/    &(pData->designable), &(pData->scriptable), &(pData->stored),
-                                     /*bbb*/    &(pData->user), &(pData->constant), &(pData->final))) {
+                                     /*bbb*/    &designable, &scriptable, &stored,
+                                     /*bbb*/    &user, &constant, &finalProp)) {
         return -1;
     }
 
@@ -260,11 +264,22 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     Py_XINCREF(pData->pyTypeObject);
     pData->typeName = PySide::Signal::getTypeName(type);
 
+    auto &flags = pData->flags;
+    flags.setFlag(PySide::Property::PropertyFlag::Readable, pData->fget != nullptr);
+    flags.setFlag(PySide::Property::PropertyFlag::Writable, pData->fset != nullptr);
+    flags.setFlag(PySide::Property::PropertyFlag::Resettable, pData->freset != nullptr);
+    flags.setFlag(PySide::Property::PropertyFlag::Designable, designable);
+    flags.setFlag(PySide::Property::PropertyFlag::Scriptable, scriptable);
+    flags.setFlag(PySide::Property::PropertyFlag::Stored, stored);
+    flags.setFlag(PySide::Property::PropertyFlag::User, user);
+    flags.setFlag(PySide::Property::PropertyFlag::Constant, constant);
+    flags.setFlag(PySide::Property::PropertyFlag::Final, finalProp);
+
     if (type == Py_None || pData->typeName.isEmpty())
         PyErr_SetString(PyExc_TypeError, "Invalid property type or type name.");
-    else if (pData->constant && pData->fset != nullptr)
+    else if (constant && pData->fset != nullptr)
         PyErr_SetString(PyExc_TypeError, "A constant property cannot have a WRITE method.");
-    else if (pData->constant && pData->notify != nullptr)
+    else if (constant && pData->notify != nullptr)
         PyErr_SetString(PyExc_TypeError, "A constant property cannot have a NOTIFY signal.");
 
     if (PyErr_Occurred() != nullptr) {
@@ -328,10 +343,16 @@ _property_copy(PyObject *old, PyObject *get, PyObject *set, PyObject *reset, PyO
 
     auto *notify = pData->notify ? pData->notify : Py_None;
 
-    PyObject *obNew = PyObject_CallFunction(type, const_cast<char *>("OOOOOsO" "bbb" "bbb"),
-        pData->pyTypeObject, get, set, reset, del, doc.data(), notify,
-        pData->designable, pData->scriptable, pData->stored,
-        pData->user, pData->constant, pData->final);
+    const auto &flags = pData->flags;
+    PyObject *obNew =
+        PyObject_CallFunction(type, "OOOOOsO" "bbb" "bbb",
+                              pData->pyTypeObject, get, set, reset, del, doc.data(), notify,
+                              flags.testFlag(PySide::Property::PropertyFlag::Designable),
+                              flags.testFlag(PySide::Property::PropertyFlag::Scriptable),
+                              flags.testFlag(PySide::Property::PropertyFlag::Stored),
+                              flags.testFlag(PySide::Property::PropertyFlag::User),
+                              flags.testFlag(PySide::Property::PropertyFlag::Constant),
+                              flags.testFlag(PySide::Property::PropertyFlag::Final));
 
     return obNew;
 }
@@ -569,51 +590,6 @@ PySideProperty *getObject(PyObject *source, PyObject *name)
         PyErr_Clear(); //Clear possible error caused by PyObject_GenericGetAttr
 
     return nullptr;
-}
-
-bool isReadable(const PySideProperty * /* self */)
-{
-    return true;
-}
-
-bool isWritable(const PySideProperty *self)
-{
-    return self->d->fset != nullptr;
-}
-
-bool hasReset(const PySideProperty *self)
-{
-    return self->d->freset != nullptr;
-}
-
-bool isDesignable(const PySideProperty *self)
-{
-    return self->d->designable;
-}
-
-bool isScriptable(const PySideProperty *self)
-{
-    return self->d->scriptable;
-}
-
-bool isStored(const PySideProperty *self)
-{
-    return self->d->stored;
-}
-
-bool isUser(const PySideProperty *self)
-{
-    return self->d->user;
-}
-
-bool isConstant(const PySideProperty *self)
-{
-    return self->d->constant;
-}
-
-bool isFinal(const PySideProperty *self)
-{
-    return self->d->final;
 }
 
 const char *getNotifyName(PySideProperty *self)

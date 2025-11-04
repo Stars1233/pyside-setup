@@ -59,6 +59,8 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 
     char *doc{};
     PyObject *append{}, *count{}, *at{}, *clear{}, *replace{}, *removeLast{}, *notify{};
+    bool designable{true}, scriptable{true}, stored{true};
+    bool user{false}, constant{false}, finalProp{false};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
                                      "O|OOOOOOsObbbbbb:QtQml.ListProperty",
@@ -67,12 +69,8 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                                      &append, &count, &at, &clear, &replace, &removeLast,
                                      /*s*/   &doc,
                                      /*O*/   &notify, // PySideProperty
-                                     /*bbb*/ &(data->designable),
-                                             &(data->scriptable),
-                                             &(data->stored),
-                                     /*bbb*/ &(data->user),
-                                             &(data->constant),
-                                             &(data->final))) {
+                                     /*bbb*/ &designable, &scriptable, &stored,
+                                     /*bbb*/ &user, &constant, &finalProp)) {
         return -1;
     }
 
@@ -102,6 +100,15 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     }
 
     data->typeName = QByteArrayLiteral("QQmlListProperty<QObject>");
+
+    auto &flags = data->flags;
+    flags.setFlag(PySide::Property::PropertyFlag::Readable, true);
+    flags.setFlag(PySide::Property::PropertyFlag::Designable, designable);
+    flags.setFlag(PySide::Property::PropertyFlag::Scriptable, scriptable);
+    flags.setFlag(PySide::Property::PropertyFlag::Stored, stored);
+    flags.setFlag(PySide::Property::PropertyFlag::User, user);
+    flags.setFlag(PySide::Property::PropertyFlag::Constant, constant);
+    flags.setFlag(PySide::Property::PropertyFlag::Final, finalProp);
 
     return 0;
 }

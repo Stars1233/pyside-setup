@@ -11,9 +11,27 @@
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qtclasshelpermacros.h>
+#include <QtCore/qflags.h>
 #include <QtCore/qmetaobject.h>
 
 struct PySideProperty;
+
+namespace PySide::Property {
+
+enum class PropertyFlag {
+    Readable    = 0x001,
+    Writable    = 0x002,
+    Resettable  = 0x004,
+    Designable  = 0x008,
+    Scriptable  = 0x010,
+    Stored      = 0x020,
+    User        = 0x040,
+    Constant    = 0x080,
+    Final       = 0x100
+};
+Q_DECLARE_FLAGS(PropertyFlags, PropertyFlag)
+
+} // namespace PySide::Property
 
 class PYSIDE_API PySidePropertyPrivate
 {
@@ -44,12 +62,7 @@ public:
     bool getter_doc = false;
     QByteArray notifySignature;
     QByteArray doc;
-    bool designable = true;
-    bool scriptable = true;
-    bool stored = true;
-    bool user = false;
-    bool constant = false;
-    bool final = false;
+    PySide::Property::PropertyFlags flags;
 };
 
 namespace PySide::Property {
@@ -78,87 +91,6 @@ int reset(PySideProperty* self, PyObject* source);
  * @return  Return the property type name
  **/
 const char* getTypeName(const PySideProperty* self);
-
-/**
- * This function check if property has read function
- * This function does not check the property object type
- *
- * @param   self The property object
- * @return  Return a boolean value
- **/
-bool isReadable(const PySideProperty* self);
-
-/**
- * This function check if property has write function
- * This function does not check the property object type
- *
- * @param   self The property object
- * @return  Return a boolean value
- **/
-bool isWritable(const PySideProperty* self);
-
-/**
- * This function check if property has reset function
- * This function does not check the property object type
- *
- * @param   self The property object
- * @return  Return a boolean value
- **/
-bool hasReset(const PySideProperty* self);
-
-/**
- * This function check if property has the flag DESIGNABLE setted
- * This function does not check the property object type
- *
- * @param   self The property object
- * @return  Return a boolean value
- **/
-bool isDesignable(const PySideProperty* self);
-
-/**
- * This function check if property has the flag SCRIPTABLE setted
- * This function does not check the property object type
- *
- * @param   self The property object
- * @return  Return a boolean value
- **/
-bool isScriptable(const PySideProperty* self);
-
-/**
- * This function check if property has the flag STORED setted
- * This function does not check the property object type
- *
- * @param   self The property object
- * @return  Return a boolean value
- **/
-bool isStored(const PySideProperty* self);
-
-/**
- * This function check if property has the flag USER setted
- * This function does not check the property object type
- *
- * @param   self The property object
- * @return  Return a boolean value
- **/
-bool isUser(const PySideProperty* self);
-
-/**
- * This function check if property has the flag CONSTANT setted
- * This function does not check the property object type
- *
- * @param   self The property object
- * @return  Return a boolean value
- **/
-bool isConstant(const PySideProperty* self);
-
-/**
- * This function check if property has the flag FINAL setted
- * This function does not check the property object type
- *
- * @param   self The property object
- * @return  Return a boolean value
- **/
-bool isFinal(const PySideProperty* self);
 
 /// This function returns the type object of the property. It is either a real
 /// PyTypeObject ("@Property(int)") or a string "@Property('QVariant')".
