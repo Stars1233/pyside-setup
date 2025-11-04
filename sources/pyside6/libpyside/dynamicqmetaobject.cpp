@@ -275,7 +275,7 @@ void MetaObjectBuilder::removeMethod(QMetaMethod::MethodType mtype, int index)
 int MetaObjectBuilderPrivate::getPropertyNotifyId(PySideProperty *property) const
 {
     int notifyId = -1;
-    if (property->d->notify) {
+    if (property->d->notify()) {
         if (const char *signalNotify = PySide::Property::getNotifyName(property))
             notifyId = indexOfMethod(QMetaMethod::Signal, signalNotify);
     }
@@ -316,13 +316,14 @@ QMetaPropertyBuilder
             }
         }
     }
-    const auto metaType = QMetaType::fromName(property->d->typeName);
+    const QByteArray &typeName = property->d->typeName();
+    const auto metaType = QMetaType::fromName(typeName);
     if (!metaType.isValid()) {
         const auto &msg = msgInvalidPropertyType(m_builder->className(), propertyName,
-                                                 property->d->typeName);
+                                                 typeName);
          PyErr_WarnEx(PyExc_RuntimeWarning, msg.constData(), 0);
     }
-    return builder->addProperty(propertyName, property->d->typeName, metaType, propertyNotifyId);
+    return builder->addProperty(propertyName, typeName, metaType, propertyNotifyId);
 }
 
 int MetaObjectBuilderPrivate::addProperty(const QByteArray &propertyName,
@@ -336,7 +337,7 @@ int MetaObjectBuilderPrivate::addProperty(const QByteArray &propertyName,
     auto newProperty = createProperty(property, propertyName);
 
     // Adding property attributes
-    const auto &flags = property->d->flags;
+    const auto flags = property->d->flags();
     newProperty.setReadable(flags.testFlag(PySide::Property::PropertyFlag::Readable));
     newProperty.setWritable(flags.testFlag(PySide::Property::PropertyFlag::Writable));
     newProperty.setResettable(flags.testFlag(PySide::Property::PropertyFlag::Resettable));

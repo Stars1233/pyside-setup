@@ -404,7 +404,7 @@ int SignalManagerPrivate::qtPropertyMetacall(QObject *object,
             PyErr_WarnFormat(PyExc_RuntimeWarning, 0,
                 ign ? "Unknown property type '%s' of QObject '%s' used in fset"
                     : "Unknown property type '%s' of QObject '%s' used in fget with %R",
-                pp->d->typeName.constData(), metaObject->className(), errorStash.getException());
+                pp->d->typeName().constData(), metaObject->className(), errorStash.getException());
             if (PyErr_Occurred())
                 Shiboken::Errors::storeErrorOrPrint();
             errorStash.release();

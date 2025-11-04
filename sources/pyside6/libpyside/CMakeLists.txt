@@ -29,6 +29,7 @@ set(libpyside_HEADERS # installed below
     pyside_p.h
     pysideglobals_p.h
     pysideproperty.h
+    pysidepropertybase_p.h
     pysideproperty_p.h
     pysideqapp.h
     pysideqenum.h

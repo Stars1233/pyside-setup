@@ -10,7 +10,7 @@
 
 #include <QtCore/qmetaobject.h>
 
-class PySidePropertyPrivate;
+class PySidePropertyBase;
 
 extern "C"
 {
@@ -19,7 +19,7 @@ extern "C"
     struct PYSIDE_API PySideProperty
     {
         PyObject_HEAD
-        PySidePropertyPrivate* d;
+        PySidePropertyBase* d;
     };
 };
 
@@ -71,12 +71,12 @@ PYSIDE_API void setTypeName(PySideProperty *self, const char *typeName);
 /// Create a property from type, getter, setter and notification signature.
 PYSIDE_API PyObject *create(const char *typeName, PyObject *getter,
                             PyObject *setter, PyObject *notifySignature,
-                            PySidePropertyPrivate *data = nullptr);
+                            PySidePropertyBase *data = nullptr);
 /// Create a property from type, getter, optional setter and notification signature.
 PYSIDE_API PyObject *create(const char *typeName, PyObject *getter,
                             PyObject *setter = nullptr,
                             const char *notifySignature = nullptr,
-                            PySidePropertyPrivate *data = nullptr);
+                            PySidePropertyBase *data = nullptr);
 
 } //namespace PySide::Property
 

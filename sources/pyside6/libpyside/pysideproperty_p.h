@@ -7,6 +7,7 @@
 #include <sbkpython.h>
 
 #include "pysideproperty.h"
+#include "pysidepropertybase_p.h"
 #include <pysidemacros.h>
 
 #include <QtCore/qbytearray.h>
@@ -16,53 +17,34 @@
 
 struct PySideProperty;
 
-namespace PySide::Property {
-
-enum class PropertyFlag {
-    Readable    = 0x001,
-    Writable    = 0x002,
-    Resettable  = 0x004,
-    Designable  = 0x008,
-    Scriptable  = 0x010,
-    Stored      = 0x020,
-    User        = 0x040,
-    Constant    = 0x080,
-    Final       = 0x100
-};
-Q_DECLARE_FLAGS(PropertyFlags, PropertyFlag)
-
-} // namespace PySide::Property
-
-class PYSIDE_API PySidePropertyPrivate
+class PYSIDE_API PySidePropertyPrivate : public PySidePropertyBase
 {
 public:
+    PySidePropertyPrivate(const PySidePropertyPrivate &) = default;
+    PySidePropertyPrivate &operator=(const PySidePropertyPrivate &) = delete;
+    PySidePropertyPrivate(PySidePropertyPrivate &&) = delete;
+    PySidePropertyPrivate &operator=(PySidePropertyPrivate &&) = delete;
 
-    Q_DISABLE_COPY_MOVE(PySidePropertyPrivate)
+    PySidePropertyPrivate() : PySidePropertyBase(Type::Property) {}
+    ~PySidePropertyPrivate() override = default;
 
-    PySidePropertyPrivate() noexcept;
-    virtual ~PySidePropertyPrivate();
+    [[nodiscard]] PySidePropertyPrivate *clone() const override;
 
-    virtual void metaCall(PyObject *source, QMetaObject::Call call, void **args);
+    void metaCall(PyObject *source, QMetaObject::Call call, void **args) override;
+
+    void tp_clear();
+    int tp_traverse(visitproc visit, void *arg);
+    void incref();
 
     PyObject *getValue(PyObject *source) const;
     int setValue(PyObject *source, PyObject *value);
     int reset(PyObject *source);
 
-    static bool assignCheckCallable(PyObject *source, const char *name, PyObject **target);
-
-    QByteArray typeName;
-    // Type object: A real PyTypeObject ("@Property(int)") or a string
-    // "@Property('QVariant')".
-    PyObject *pyTypeObject = nullptr;
     PyObject *fget = nullptr;
     PyObject *fset = nullptr;
     PyObject *freset = nullptr;
     PyObject *fdel = nullptr;
-    PyObject *notify = nullptr;
     bool getter_doc = false;
-    QByteArray notifySignature;
-    QByteArray doc;
-    PySide::Property::PropertyFlags flags;
 };
 
 namespace PySide::Property {

@@ -15,16 +15,27 @@
 #include <sbktypefactory.h>
 
 #include <pysideproperty.h>
-#include <pysideproperty_p.h>
+#include <pysidepropertybase_p.h>
 #include <pysideqobject.h>
 
 #include <QtCore/qobject.h>
 #include <QtQml/qqmllist.h>
 
+#include <utility>
+
+using namespace Qt::StringLiterals;
+
 // This is the user data we store in the property.
-class QmlListPropertyPrivate : public PySidePropertyPrivate, public QmlListPropertyMixin
+class QmlListPropertyPrivate : public PySidePropertyBase, public QmlListPropertyMixin
 {
 public:
+    QmlListPropertyPrivate(const QmlListPropertyPrivate &) = delete;
+    QmlListPropertyPrivate& operator=(const QmlListPropertyPrivate &) = delete;
+    QmlListPropertyPrivate(QmlListPropertyPrivate &&) = delete;
+    QmlListPropertyPrivate& operator=(QmlListPropertyPrivate &&) = delete;
+
+    QmlListPropertyPrivate() : PySidePropertyBase(Type::ListProperty) {}
+
     void metaCall(PyObject *source, QMetaObject::Call call, void **args) override
     { handleMetaCall(source, call, args); }
 
@@ -36,7 +47,11 @@ public:
     void replace(QQmlListProperty<QObject> *propList, qsizetype index, QObject *value) override;
     void removeLast(QQmlListProperty<QObject> *propList) override;
 
-    PyTypeObject *elementType = nullptr;
+    void tp_clear();
+    int tp_traverse(visitproc visit, void *arg);
+    void incref();
+
+    PyObject *obElementType = nullptr;
     PyObject *obAppend = nullptr;
     PyObject *obCount = nullptr;
     PyObject *obAt = nullptr;
@@ -44,6 +59,50 @@ public:
     PyObject *obReplace = nullptr;
     PyObject *obRemoveLast = nullptr;
 };
+
+void QmlListPropertyPrivate::tp_clear()
+{
+    PySidePropertyBase::tp_clearBase();
+    Py_CLEAR(obElementType);
+    Py_CLEAR(obAppend);
+    Py_CLEAR(obCount);
+    Py_CLEAR(obAt);
+    Py_CLEAR(obClear);
+    Py_CLEAR(obReplace);
+    Py_CLEAR(obRemoveLast);
+}
+
+int QmlListPropertyPrivate::tp_traverse(visitproc visit, void *arg)
+{
+    Py_VISIT(obElementType);
+    Py_VISIT(obAppend);
+    Py_VISIT(obCount);
+    Py_VISIT(obAt);
+    Py_VISIT(obClear);
+    Py_VISIT(obReplace);
+    Py_VISIT(obRemoveLast);
+    return PySidePropertyBase::tp_traverseBase(visit, arg);
+}
+
+void QmlListPropertyPrivate::incref()
+{
+    PySidePropertyBase::increfBase();
+    Py_XINCREF(obElementType);
+    Py_XINCREF(obAppend);
+    Py_XINCREF(obCount);
+    Py_XINCREF(obAt);
+    Py_XINCREF(obClear);
+    Py_XINCREF(obReplace);
+    Py_XINCREF(obRemoveLast);
+}
+
+static inline QmlListPropertyPrivate *qmlListProperty(PyObject *self)
+{
+    auto *data = reinterpret_cast<PySideProperty *>(self);
+    Q_ASSERT(data->d != nullptr);
+    Q_ASSERT(data->d->type() == PySidePropertyBase::Type::ListProperty);
+    return static_cast<QmlListPropertyPrivate *>(data->d);
+}
 
 extern "C"
 {
@@ -75,7 +134,7 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
                                      "O|OOOOOOsObbbbbb:QtQml.ListProperty",
                                      const_cast<char **>(kwlist),
-                                     &data->elementType,
+                                     &data->obElementType,
                                      &append, &count, &at, &clear, &replace, &removeLast,
                                      /*s*/   &doc,
                                      /*O*/   &notify, // PySideProperty
@@ -84,12 +143,12 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
-    if (!PySidePropertyPrivate::assignCheckCallable(append, "append", &data->obAppend)
-        || !PySidePropertyPrivate::assignCheckCallable(count, "count", &data->obCount)
-        || !PySidePropertyPrivate::assignCheckCallable(at, "at", &data->obAt)
-        || !PySidePropertyPrivate::assignCheckCallable(clear, "clear", &data->obClear)
-        || !PySidePropertyPrivate::assignCheckCallable(replace, "replace", &data->obReplace)
-        || !PySidePropertyPrivate::assignCheckCallable(removeLast, "removeLast", &data->obRemoveLast)) {
+    if (!PySidePropertyBase::assignCheckCallable(append, "append", &data->obAppend)
+        || !PySidePropertyBase::assignCheckCallable(count, "count", &data->obCount)
+        || !PySidePropertyBase::assignCheckCallable(at, "at", &data->obAt)
+        || !PySidePropertyBase::assignCheckCallable(clear, "clear", &data->obClear)
+        || !PySidePropertyBase::assignCheckCallable(replace, "replace", &data->obReplace)
+        || !PySidePropertyBase::assignCheckCallable(removeLast, "removeLast", &data->obRemoveLast)) {
         return -1;
     }
 
@@ -101,24 +160,22 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     data->setMethodFlag(QmlListPropertyMixin::MethodFlag::RemoveLast, data->obRemoveLast != nullptr);
 
     if (notify != nullptr && notify != Py_None)
-        data->notify = notify;
+        data->setNotify(notify);
 
-    if (doc)
-        data->doc = doc;
-    else
-        data->doc.clear();
+    data->setDoc(doc != nullptr ? QByteArray(doc) : QByteArray{});
 
     PyTypeObject *qobjectType = PySide::qObjectType();
 
-    if (!PySequence_Contains(data->elementType->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
+    auto *elementType = reinterpret_cast<PyTypeObject *>(data->obElementType);
+    if (!PySequence_Contains(elementType->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
         PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
-                     qobjectType->tp_name, data->elementType->tp_name);
+                     qobjectType->tp_name, elementType->tp_name);
         return -1;
     }
 
-    data->typeName = QByteArrayLiteral("QQmlListProperty<QObject>");
+    data->setTypeName("QQmlListProperty<QObject>"_ba);
 
-    auto &flags = data->flags;
+    PySide::Property::PropertyFlags flags;
     flags.setFlag(PySide::Property::PropertyFlag::Readable, true);
     flags.setFlag(PySide::Property::PropertyFlag::Designable, designable);
     flags.setFlag(PySide::Property::PropertyFlag::Scriptable, scriptable);
@@ -126,8 +183,40 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     flags.setFlag(PySide::Property::PropertyFlag::User, user);
     flags.setFlag(PySide::Property::PropertyFlag::Constant, constant);
     flags.setFlag(PySide::Property::PropertyFlag::Final, finalProp);
+    data->setFlags(flags);
+
+    data->incref();
 
     return 0;
+}
+
+static int tp_propListTraverse(PyObject *self, visitproc visit, void *arg)
+{
+    auto *pData = qmlListProperty(self);
+    return pData != nullptr ? pData->tp_traverse(visit, arg) : 0;
+}
+
+static int tp_propListClear(PyObject *self)
+{
+    auto *data = reinterpret_cast<PySideProperty *>(self);
+    if (data->d == nullptr)
+        return 0;
+
+    auto *baseData = std::exchange(data->d, nullptr);
+    Q_ASSERT(baseData->type() == PySidePropertyBase::Type::ListProperty);
+    static_cast<QmlListPropertyPrivate *>(baseData)->tp_clear();
+    delete baseData;
+    return 0;
+}
+
+static void tp_propListDeAlloc(PyObject *self)
+{
+    tp_propListClear(self);
+    // PYSIDE-939: Handling references correctly.
+    // This was not needed before Python 3.8 (Python issue 35810)
+    Py_DECREF(Py_TYPE(self));
+    PyObject_GC_UnTrack(self);
+    PepExt_TypeCallFree(self);
 }
 
 static PyTypeObject *createPropertyListType()
@@ -135,6 +224,10 @@ static PyTypeObject *createPropertyListType()
     PyType_Slot PropertyListType_slots[] = {
         {Py_tp_new, reinterpret_cast<void *>(propList_tp_new)},
         {Py_tp_init, reinterpret_cast<void *>(propListTpInit)},
+        {Py_tp_dealloc, reinterpret_cast<void *>(tp_propListDeAlloc)},
+        {Py_tp_traverse, reinterpret_cast<void *>(tp_propListTraverse)},
+        {Py_tp_clear, reinterpret_cast<void *>(tp_propListClear)},
+        {Py_tp_del, reinterpret_cast<void *>(PyObject_GC_Del)},
         {0, nullptr}
     };
 
@@ -142,7 +235,7 @@ static PyTypeObject *createPropertyListType()
         "2:PySide6.QtQml.ListProperty",
         sizeof(PySideProperty),
         0,
-        Py_TPFLAGS_DEFAULT,
+        Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,
         PropertyListType_slots,
     };
 
@@ -219,6 +312,7 @@ QObject *QmlListPropertyPrivate::at(QQmlListProperty<QObject> *propList, qsizety
     Shiboken::AutoDecRef retVal(PyObject_CallObject(obAt, args));
 
     QObject *result = nullptr;
+    auto *elementType = reinterpret_cast<PyTypeObject *>(obElementType);
     if (PyErr_Occurred())
         PyErr_Print();
     else if (PyType_IsSubtype(Py_TYPE(retVal), elementType))
