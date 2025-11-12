@@ -1169,6 +1169,8 @@ void ShibokenGenerator::writeFunctionArguments(TextStream &s,
 
         if (argUsed != 0)
             s << ", ";
+        if (options.testFlag(PythonOverrideImplementation))
+            s << "[[maybe_unused]] ";
         writeArgument(s, func, arg, options);
         argUsed++;
     }
