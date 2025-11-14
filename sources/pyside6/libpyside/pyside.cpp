@@ -1228,6 +1228,7 @@ QDebug operator<<(QDebug debug, const debugPyObject &o)
     return debug;
 }
 
+#if !defined(Py_LIMITED_API) || Py_LIMITED_API >= 0x030B0000
 static void formatPy_ssizeArray(QDebug &debug, const char *name, const Py_ssize_t *array, int len)
 {
     debug << ", " << name << '=';
@@ -1241,7 +1242,6 @@ static void formatPy_ssizeArray(QDebug &debug, const char *name, const Py_ssize_
     }
 }
 
-#if !defined(Py_LIMITED_API) || Py_LIMITED_API >= 0x030B0000
 debugPyBuffer::debugPyBuffer(Py_buffer *b) noexcept : m_buffer(b)
 {
 }
