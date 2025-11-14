@@ -9,6 +9,7 @@
 #include "pysidecapsulemethod_p.h"
 #include "pysiderephandler_p.h"
 
+#include <autodecref.h>
 #include <basewrapper.h>
 #include <sbkpep.h>
 #include <sbkconverter.h>
@@ -407,16 +408,14 @@ PyTypeObject *createDynamicClassImpl(QMetaObject *meta)
         METH_VARARGS,
         nullptr
     };
+
+    auto *obType = reinterpret_cast<PyObject *>(type);
     for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
         // Create a PropertyCapsule for each property to store the info needed for
         // the handler. Assign the __get__ and (if needed) __set__ attributes to a
         // PySideProperty which becomes the attribute set on the new type.
         auto metaProperty = meta->property(i);
-        PyObject *kwds = PyDict_New();
         auto metaType = metaProperty.metaType();
-        auto *pyPropertyType = PyUnicode_FromString(metaType.name());
-        PyDict_SetItemString(kwds, "type", pyPropertyType);
-        Py_DECREF(pyPropertyType);
 
         method.ml_name = metaProperty.name();
         auto *pc = new PropertyCapsule{metaProperty.name(), i, i - meta->propertyOffset()};
@@ -425,25 +424,22 @@ PyTypeObject *createDynamicClassImpl(QMetaObject *meta)
         });
         auto capsulePropObject = make_capsule_property(&method, capsule,
                                                        metaProperty.isWritable());
-        PyObject *fget = PyObject_GetAttrString(capsulePropObject, "__get__");
-        PyDict_SetItemString(kwds, "fget", fget);
+        Shiboken::AutoDecRef fget(PyObject_GetAttrString(capsulePropObject, "__get__"));
+        Shiboken::AutoDecRef fset;
+        Shiboken::AutoDecRef notifySignature;
         if (metaProperty.isWritable()) {
-            PyObject *fset = PyObject_GetAttrString(capsulePropObject, "__set__");
-            PyDict_SetItemString(kwds, "fset", fset);
+            fset.reset(PyObject_GetAttrString(capsulePropObject, "__set__"));
             if (metaProperty.hasNotifySignal()) {
                 auto nameString = metaProperty.notifySignal().name();
-                auto *notify = PyObject_GetAttrString(reinterpret_cast<PyObject *>(type),
-                                                      nameString.constData());
-                PyDict_SetItemString(kwds, "notify", notify);
+                notifySignature.reset(PyObject_GetAttrString(obType, nameString.constData()));
             }
         }
-        PyObject *pyProperty = PyObject_Call(reinterpret_cast<PyObject *>(PySideProperty_TypeF()),
-                                             PyTuple_New(0), kwds);
-        if (PyObject_SetAttrString(reinterpret_cast<PyObject *>(type),
-                                   metaProperty.name(), pyProperty) < 0) {
+        Shiboken::AutoDecRef pyProperty(PySide::Property::create(metaType.name(), fget, fset, notifySignature));
+        if (pyProperty.isNull()
+            || PyObject_SetAttrString(obType, metaProperty.name(), pyProperty.object()) < 0) {
+            PyErr_Print();
             return nullptr;
         }
-        Py_DECREF(pyProperty);
     }
     for (int i = meta->methodOffset(); i < meta->methodCount(); ++i) {
         // Create a CapsuleMethod for each Slot method to store the info needed

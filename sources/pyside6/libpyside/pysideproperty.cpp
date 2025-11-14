@@ -619,4 +619,36 @@ PyObject *getTypeObject(const PySideProperty *self)
     return self->d->pyTypeObject;
 }
 
+PyObject *create(const char *typeName, PyObject *getter,
+                 PyObject *setter, PyObject *notifySignature)
+{
+    Shiboken::AutoDecRef kwds(PyDict_New());
+    PyDict_SetItemString(kwds.object(), "type", PyUnicode_FromString(typeName));
+    if (getter != nullptr && getter != Py_None)
+        PyDict_SetItemString(kwds.object(), "fget", getter);
+    if (setter != nullptr && getter != Py_None)
+        PyDict_SetItemString(kwds.object(), "fset", setter);
+    if (notifySignature != nullptr && notifySignature != Py_None)
+        PyDict_SetItemString(kwds.object(), "notify", notifySignature);
+
+    // Create PySideProperty
+    Shiboken::AutoDecRef args(PyTuple_New(0));
+    PyObject *result = PyObject_Call(reinterpret_cast<PyObject *>(PySideProperty_TypeF()),
+                                     args, kwds.object());
+    if (result == nullptr || PyErr_Occurred() != nullptr)
+        return nullptr;
+    return result;
+}
+
+PyObject *create(const char *typeName, PyObject *getter,
+                 PyObject *setter, const char *notifySignature)
+{
+
+    PyObject *obNotifySignature = notifySignature != nullptr
+        ? PyUnicode_FromString(notifySignature) : nullptr;
+    PyObject *result = create(typeName, getter, setter, obNotifySignature);
+    Py_XDECREF(obNotifySignature);
+    return result;
+}
+
 } //namespace PySide::Property
