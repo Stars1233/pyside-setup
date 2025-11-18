@@ -284,17 +284,17 @@ static void setupTarget(CXTranslationUnit translationUnit)
 {
     const CXTargetInfo targetInfo = clang_getTranslationUnitTargetInfo(translationUnit);
     const auto tripleCS = clang_TargetInfo_getTriple(targetInfo);
-    clang::setPointerSize(clang_TargetInfo_getPointerWidth(targetInfo));
-    clang::setTargetTriple(QString::fromUtf8(clang_getCString(tripleCS)));
+    const int pointerSize = clang_TargetInfo_getPointerWidth(targetInfo);
+    const QByteArray targetTriple = clang_getCString(tripleCS);
     clang_disposeString(tripleCS);
 
     QString message;
     {
         QTextStream str(&message);
         str << "CLANG v" << CINDEX_VERSION_MAJOR << '.' << CINDEX_VERSION_MINOR
-            << " targeting \"" << targetTriple() << "\"/"
+            << " targeting \"" << targetTriple << "\"/"
             << clang::compilerTripletValue(clang::compiler())
-            << ", " << pointerSize() << "bit";
+            << ", " << pointerSize << "bit";
         if (clang::isCrossCompilation())
             str << ", (cross build)";
         str << '.';

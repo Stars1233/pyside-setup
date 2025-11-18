@@ -90,9 +90,6 @@ bool setCompiler(const QString &name)
 QString _compilerPath; // Pre-defined compiler path (from command line)
 QStringList _compilerArguments; // Arguments
 
-static unsigned _pointerSize = QT_POINTER_SIZE * 8;
-static QString _targetTriple;
-
 const QString &compilerPath()
 {
     return _compilerPath;
@@ -711,26 +708,6 @@ LanguageLevel languageLevelFromOption(const char *o)
             return m.level;
     }
     return LanguageLevel::Default;
-}
-
-unsigned pointerSize()
-{
-    return _pointerSize;
-}
-
-void setPointerSize(unsigned ps)
-{
-    _pointerSize = ps;
-}
-
-QString targetTriple()
-{
-    return _targetTriple;
-
-}
-void setTargetTriple(const QString &t)
-{
-    _targetTriple = t;
 }
 
 bool isCrossCompilation()

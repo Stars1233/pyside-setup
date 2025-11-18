@@ -74,12 +74,6 @@ const char *compilerTripletValue(Compiler c);
 Architecture architecture();
 bool setArchitecture(const QString &name);
 
-unsigned pointerSize(); // (bit)
-void setPointerSize(unsigned ps); // Set by parser
-
-QString targetTriple();
-void setTargetTriple(const QString &t); // Updated by clang parser while parsing
-
 bool isCrossCompilation();
 
 // Are there any options specifying a target
