@@ -5883,14 +5883,14 @@ void CppGenerator::writeClassRegister(TextStream &s,
     // Multiple inheritance
     QString pyTypeBasesVariable = pyTypePrefix + u"_Type_bases"_s;
     const QStringList pyBases = pyBaseTypes(metaClass);
+    for (qsizetype i = 0, size = pyBases.size(); i < size; ++i)
+        s << "auto *base" << (i + 1) << " = " << pyBases.at(i) << ";\n";
     s << "Shiboken::AutoDecRef " << pyTypeBasesVariable << "(PyTuple_Pack("
-        << pyBases.size() << ",\n" << indent;
+        << pyBases.size();
     for (qsizetype i = 0, size = pyBases.size(); i < size; ++i) {
-        if (i)
-            s << ",\n";
-        s << pyBases.at(i);
+        s << ", base" << (i + 1);
     }
-    s << "));\n\n" << outdent;
+    s << "));\n\n";
 
     // Create type and insert it in the module or enclosing class.
     s << "PyTypeObject *pyType = Shiboken::ObjectType::introduceWrapperType(\n" << indent;
