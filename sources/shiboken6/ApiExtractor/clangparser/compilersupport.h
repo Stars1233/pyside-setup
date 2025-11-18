@@ -4,6 +4,8 @@
 #ifndef COMPILERSUPPORT_H
 #define COMPILERSUPPORT_H
 
+#include "triplet.h"
+
 #include <QtCore/qbytearraylist.h>
 #include <QtCore/qversionnumber.h>
 
@@ -18,29 +20,6 @@ enum class LanguageLevel : std::uint8_t {
     Cpp1Z
 };
 
-enum class Compiler : std::uint8_t {
-    Msvc,
-    Gpp,
-    Clang
-};
-
-enum class Platform : std::uint8_t {
-    Unix,
-    Linux,
-    Windows,
-    macOS,
-    Android,
-    iOS
-};
-
-enum class Architecture : std::uint8_t {
-    Other,
-    X64,
-    X86,
-    Arm64,
-    Arm32
-};
-
 namespace clang {
 QVersionNumber libClangVersion();
 
@@ -52,27 +31,21 @@ LanguageLevel languageLevelFromOption(const char *);
 
 QByteArrayList detectVulkan();
 
-Compiler compiler();
-bool setCompiler(const QString &name);
+// The triplet set by options and heuristics and setters
+const Triplet &optionsTriplet();
 
-QString compilerFromCMake();
+bool setArchitecture(QStringView name);
+bool setCompiler(QStringView name);
+bool setPlatform(QStringView name);
+bool setPlatformVersion(QAnyStringView name);
+
+bool isCrossCompilation();
 
 const QString &compilerPath();
 void setCompilerPath(const QString &name);
 void addCompilerArgument(const QString &arg);
 
-Platform platform();
-bool setPlatform(const QString &name);
-
-QVersionNumber platformVersion();
-bool setPlatformVersion(const QString &name);
-
-QByteArray targetTripletForPlatform(Platform p, Architecture a, Compiler c,
-                                    const QVersionNumber &platformVersion = {});
-const char *compilerTripletValue(Compiler c);
-
-Architecture architecture();
-bool setArchitecture(const QString &name);
+QString compilerFromCMake();
 
 bool isCrossCompilation();
 

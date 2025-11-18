@@ -96,7 +96,7 @@ TextStream &operator<<(TextStream &s, const IndexValue &iv)
 
 static bool alwaysGenerateDestructorDeclaration()
 {
-    return  clang::compiler() == Compiler::Msvc;
+    return clang::optionsTriplet().compiler() == Compiler::Msvc;
 }
 
 const char *HeaderGenerator::protectedHackDefine = R"(// Workaround to access protected functions

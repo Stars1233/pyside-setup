@@ -850,7 +850,7 @@ BuilderPrivate::SpecialSystemHeader
         return SpecialSystemHeader::OpenGL;
     }
 
-    switch (clang::platform()) {
+    switch (clang::optionsTriplet().platform()) {
     case Platform::Linux:
     case Platform::Unix:
         if (fileName == u"/usr/include/stdlib.h"
