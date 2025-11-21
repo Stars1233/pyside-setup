@@ -293,7 +293,7 @@ static void setupTarget(CXTranslationUnit translationUnit)
         QTextStream str(&message);
         str << "CLANG v" << CINDEX_VERSION_MAJOR << '.' << CINDEX_VERSION_MINOR
             << " targeting \"" << targetTriple << "\"/"
-            << clang::compilerTripletValue(clang::compiler())
+            << optionsTriplet().compilerTripletValue()
             << ", " << pointerSize << "bit";
         if (clang::isCrossCompilation())
             str << ", (cross build)";

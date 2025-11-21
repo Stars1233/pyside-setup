@@ -438,7 +438,7 @@ static QStringList platformKeywords()
 {
     static constexpr auto unixKeyword = "unix"_L1;
     static constexpr auto linuxKeyword = "linux"_L1;
-    switch (clang::platform()) {
+    switch (clang::optionsTriplet().platform()) {
     case Platform::Unix:
         return {unixKeyword};
     case Platform::Linux:
@@ -451,6 +451,8 @@ static QStringList platformKeywords()
         return {unixKeyword, linuxKeyword, "android"_L1};
     case Platform::iOS:
         return {unixKeyword, "ios"_L1};
+    case Platform::Unknown:
+        break;
     }
     return {};
 }

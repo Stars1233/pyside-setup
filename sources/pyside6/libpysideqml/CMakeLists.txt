@@ -12,6 +12,7 @@ set(libpysideqml_HEADERS # installed below
     pysideqmlforeign_p.h
     pysideqml.h
     pysideqmllistproperty_p.h
+    pysideqmllistpropertymixin.h
     pysideqmlmacros.h
     pysideqmlmetacallerror_p.h
     pysideqmlnamedelement_p.h
@@ -29,6 +30,7 @@ set(libpysideqml_SRC
     pysideqmlregistertype.cpp
     pysideqmlmetacallerror.cpp
     pysideqmllistproperty.cpp
+    pysideqmllistpropertymixin.cpp
     pysideqmlnamedelement.cpp
     pysideqmluncreatable.cpp
     pysideqmltypeinfo.cpp

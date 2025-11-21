@@ -462,18 +462,14 @@ FileModelItem AbstractMetaBuilderPrivate::buildDom(QByteArrayList arguments,
                           + clang::languageLevelOption(level));
         // Add target for qsystemdetection.h to set the right Q_OS_ definitions
         if (clang::isCrossCompilation() && !clang::hasTargetOption(arguments)) {
-            const auto triplet = clang::targetTripletForPlatform(clang::platform(),
-                                                                 clang::architecture(),
-                                                                 clang::compiler(),
-                                                                 clang::platformVersion());
-            if (triplet.isEmpty()) {
-                qCWarning(lcShiboken,
-                          "Unable to determine a cross compilation target triplet (%d/%d/%d).",
-                          int(clang::platform()), int(clang::architecture()), int(clang::compiler()));
-            } else {
-                arguments.prepend("--target="_ba + triplet);
-                const auto msg = "Setting clang target: "_L1 + QLatin1StringView(triplet);
+            const auto &triplet = clang::optionsTriplet();
+            if (triplet.isValid()) {
+                const auto ba = triplet.toByteArray();
+                arguments.prepend("--target="_ba + ba);
+                const auto msg = "Setting clang target: "_L1 + QLatin1StringView(ba);
                 ReportHandler::addGeneralMessage(msg);
+            } else {
+                qCWarning(lcShiboken, "Unable to determine a cross compilation target triplet.");
             }
         }
     }

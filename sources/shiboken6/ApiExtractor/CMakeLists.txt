@@ -79,6 +79,7 @@ clangparser/clangdebugutils.cpp clangparser/clangdebugutils.h
 clangparser/clangparser.cpp clangparser/clangparser.h
 clangparser/clangutils.cpp clangparser/clangutils.h
 clangparser/compilersupport.cpp clangparser/compilersupport.h
+clangparser/triplet.cpp clangparser/triplet.h
 # Old parser
 parser/codemodel.cpp parser/codemodel.h parser/codemodel_fwd.h parser/codemodel_enums.h
 parser/enumvalue.cpp parser/enumvalue.h

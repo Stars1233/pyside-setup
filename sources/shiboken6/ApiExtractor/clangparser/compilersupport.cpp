@@ -50,41 +50,18 @@ QVersionNumber libClangVersion()
     return QVersionNumber(CINDEX_VERSION_MAJOR, CINDEX_VERSION_MINOR);
 }
 
-static Compiler hostCompiler()
+static const Triplet _hostTriplet = Triplet::fromHost();
+static Triplet _optionsTriplet = _hostTriplet;
+
+const Triplet &optionsTriplet()
 {
-#if defined (Q_CC_CLANG)
-    return Compiler::Clang;
-#elif defined (Q_CC_MSVC)
-    return Compiler::Msvc;
-#else
-    return Compiler::Gpp;
-#endif
+    return _optionsTriplet;
 }
 
-static Compiler _compiler = hostCompiler();
-
-Compiler compiler() { return _compiler; }
-
-// CMAKE_CXX_COMPILER_ID or triplet name
-bool parseCompiler(QStringView name, Compiler *c)
-{
-    bool result = true;
-    *c = hostCompiler();
-    if (name.compare("msvc"_L1, Qt::CaseInsensitive) == 0)
-        *c = Compiler::Msvc;
-    else if (name.compare("g++"_L1, Qt::CaseInsensitive) == 0 || name.compare("gnu"_L1, Qt::CaseInsensitive) == 0)
-        *c = Compiler::Gpp;
-    else if (name.compare("clang"_L1, Qt::CaseInsensitive) == 0)
-        *c = Compiler::Clang;
-    else
-        result = false;
-    return result;
-}
-
-bool setCompiler(const QString &name)
+bool setCompiler(QStringView name)
 {
     setOptions.setFlag(CompilerOption);
-    return parseCompiler(name, &_compiler);
+    return _optionsTriplet.setCompilerString(name);
 }
 
 QString _compilerPath; // Pre-defined compiler path (from command line)
@@ -106,241 +83,26 @@ void addCompilerArgument(const QString &arg)
     _compilerArguments.append(arg);
 }
 
-static Platform hostPlatform()
-{
-#if defined (Q_OS_DARWIN)
-    return Platform::macOS;
-#elif defined (Q_OS_WIN)
-    return Platform::Windows;
-#elif defined (Q_OS_LINUX)
-    return Platform::Linux;
-#else
-    return Platform::Unix;
-#endif
-}
-
-static Platform _platform = hostPlatform();
-
-Platform platform() { return _platform; }
-
-// from CMAKE_SYSTEM_NAME / legacy lower case name or target triplet
-static bool parsePlatform(QStringView name, Platform *p)
-{
-    *p = hostPlatform();
-    bool result = true;
-    if (name.compare("unix"_L1, Qt::CaseInsensitive) == 0) {
-        *p = Platform::Unix;
-    } else if (name.compare("linux"_L1, Qt::CaseInsensitive) == 0) {
-        *p = Platform::Linux;
-    } else if (name.compare("windows"_L1, Qt::CaseInsensitive) == 0) {
-        *p = Platform::Windows;
-    } else if (name.compare("darwin"_L1, Qt::CaseInsensitive) == 0
-               || name.compare("macosx"_L1, Qt::CaseInsensitive) == 0) {
-        *p = Platform::macOS;
-    } else if (name.startsWith("android"_L1, Qt::CaseInsensitive)) {
-        *p = Platform::Android; // "androideabi"
-    } else if (name.compare("ios"_L1, Qt::CaseInsensitive) == 0) {
-        *p = Platform::iOS;
-    } else {
-        result = false;
-    }
-    return result;
-}
-
-bool setPlatform(const QString &name)
+bool setPlatform(QStringView name)
 {
     setOptions.setFlag(PlatformOption);
-    return parsePlatform(name, &_platform);
+    return _optionsTriplet.setPlatformString(name);
 }
 
-static QVersionNumber hostPlatformVersion()
-{
-    auto ov = QOperatingSystemVersion::current();
-    return ov.type() != QOperatingSystemVersionBase::Unknown ? ov.version() : QVersionNumber{};
-}
-
-// Version is not initialized from host since it is optional and the host version
-// should not interfere with cross build targets
-static QVersionNumber _platformVersion;
-
-QVersionNumber platformVersion()
-{
-    return _platformVersion;
-}
-
-bool setPlatformVersion(const QString &name)
+bool setPlatformVersion(QAnyStringView name)
 {
     auto v = QVersionNumber::fromString(name);
     setOptions.setFlag(PlatformVersionOption);
     const bool result = !v.isNull();
     if (result)
-        _platformVersion = v;
+        _optionsTriplet.setPlatformVersion(v);
     return result;
 }
 
-static Architecture hostArchitecture()
-{
-    // src/corelib/global/archdetect.cpp, "Qt 6.9.2 (x86_64-little_endian-lp64..."
-    std::string_view build = QLibraryInfo::build();
-    auto startPos = build.find('(');
-    auto dashPos = build.find('-');
-    if (startPos != std::string_view::npos && dashPos != std::string_view::npos) {
-        ++startPos;
-        build = build.substr(startPos, dashPos - startPos);
-        if (build == "x86_64")
-            return Architecture::X64;
-        if (build == "i386")
-            return Architecture::X86;
-        if (build == "arm64")
-            return Architecture::Arm64;
-        if (build == "arm")
-            return Architecture::Arm32;
-    }
-    return Architecture::Other;
-}
-
-// from CMAKE_SYSTEM_PROCESSOR or target triplet
-static Architecture parseArchitecture(QStringView a)
-{
-    if (a == "AMD64"_L1 || a == "IA64"_L1 // Windows
-        || a == "x86_64"_L1)
-        return Architecture::X64;
-    if (a.compare("x86"_L1, Qt::CaseInsensitive) == 0
-        || a.compare("i386"_L1, Qt::CaseInsensitive) == 0
-        || a.compare("i486"_L1, Qt::CaseInsensitive) == 0
-        || a.compare("i586"_L1, Qt::CaseInsensitive) == 0
-        || a.compare("i686"_L1, Qt::CaseInsensitive) == 0) {
-        return Architecture::X86;
-    }
-    if (a.startsWith("armv7"_L1, Qt::CaseInsensitive))
-        return Architecture::Arm32;
-    if (a.startsWith("arm"_L1, Qt::CaseInsensitive)
-        || a.startsWith("aarch64"_L1, Qt::CaseInsensitive)) {
-        return Architecture::Arm64;
-    }
-    return Architecture::Other;
-}
-
-static Architecture _architecture = hostArchitecture();
-
-Architecture architecture()
-{
-    return _architecture;
-}
-
-bool setArchitecture(const QString &name)
+bool setArchitecture(QStringView name)
 {
     setOptions.setFlag(ArchitectureOption);
-    auto newArchitecture = parseArchitecture(name);
-    const bool result = newArchitecture != Architecture::Other;
-    if (result)
-        _architecture = newArchitecture;
-    return result;
-}
-
-// Parsing triplets
-static inline bool isVersionChar(QChar c)
-{
-    return c.isDigit() || c == u'.';
-}
-
-// "macosx15.0" -> "macosx"
-QStringView stripTrailingVersion(QStringView s)
-{
-    while (!s.isEmpty() && isVersionChar(s.at(s.size() - 1)))
-        s.chop(1);
-    return s;
-}
-
-bool parseTriplet(QStringView name, Architecture *a, Platform *p, Compiler *c,
-                  QVersionNumber *version)
-{
-    *a = hostArchitecture();
-    *p = hostPlatform();
-    *c = hostCompiler();
-    *version = hostPlatformVersion();
-    auto values = name.split(u'-');
-    if (values.size() < 2)
-        return false;
-    *a = parseArchitecture(values.constFirst());
-    if (*a == Architecture::Other)
-        return false;
-    // Try a trailing compiler?
-    Compiler comp{};
-    if (parseCompiler(stripTrailingVersion(values.constLast()), &comp)) {
-        *c = comp;
-        values.removeLast();
-    }
-    const QStringView &fullPlatform = values.constLast();
-    QStringView platformName = stripTrailingVersion(fullPlatform);
-    if (platformName.size() < fullPlatform.size()) {
-        if (auto vn = QVersionNumber::fromString(fullPlatform.sliced(platformName.size())); !vn.isNull())
-            *version = vn;
-    }
-    return parsePlatform(platformName, p);
-}
-
-const char *compilerTripletValue(Compiler c)
-{
-    switch (c) {
-    case Compiler::Clang:
-        return "clang";
-    case Compiler::Msvc:
-        return "msvc";
-    case Compiler::Gpp:
-        break;
-    }
-    return "gnu";
-}
-
-QByteArray targetTripletForPlatform(Platform p, Architecture a, Compiler c,
-                                    const QVersionNumber &platformVersion)
-{
-    QByteArray result;
-    if (p == Platform::Unix || a == Architecture::Other)
-        return result; // too unspecific
-
-    switch (a) {
-    case Architecture::Other:
-        break;
-    case Architecture::X64:
-        result += "x86_64";
-        break;
-    case Architecture::X86:
-        result += "i586";
-        break;
-    case Architecture::Arm32:
-        result += "armv7a";
-        break;
-    case Architecture::Arm64:
-        result += p == Platform::Android ? "aarch64" : "arm64";
-        break;
-    }
-
-    result += '-';
-
-    const QByteArray platformVersionB = platformVersion.isNull()
-        ? QByteArray{} : platformVersion.toString().toUtf8();
-    switch (p) {
-    case Platform::Unix:
-        break;
-    case Platform::Linux:
-        result += "unknown-linux"_ba + platformVersionB + '-' + compilerTripletValue(c);
-        break;
-    case Platform::Windows:
-        result += "pc-windows"_ba + platformVersionB + '-' + compilerTripletValue(c);
-        break;
-    case Platform::macOS:
-        result += "apple-macosx"_ba + platformVersionB;
-        break;
-    case Platform::Android:
-        result += "unknown-linux-android"_ba + platformVersionB;
-        break;
-    case Platform::iOS:
-        result += "apple-ios"_ba + platformVersionB;
-        break;
-    }
-    return result;
+    return _optionsTriplet.setArchitectureString(name);
 }
 
 // 3/2024: Use a recent MSVC2022 for libclang 18.X
@@ -455,7 +217,7 @@ static HeaderPaths gppInternalIncludePaths(const QString &compiler,
         }
     }
 
-    if (platform() == Platform::macOS)
+    if (_optionsTriplet.platform() == Platform::macOS)
         filterHomebrewHeaderPaths(result);
 
     QString message;
@@ -500,7 +262,7 @@ QByteArrayList detectVulkan()
 
 static bool needsClangBuiltinIncludes()
 {
-    return platform() != Platform::macOS;
+    return _optionsTriplet.platform() != Platform::macOS;
 }
 
 static QString queryLlvmConfigDir(const QString &arg)
@@ -590,7 +352,7 @@ static QString compilerFromCMake(const QString &defaultCompiler)
     // Exclude macOS since cmakeCompiler returns the full path instead of the
     // /usr/bin/clang shim, which results in the default SDK sysroot path
     // missing (PYSIDE-1032)
-    if (platform() == Platform::macOS)
+    if (_optionsTriplet.platform() == Platform::macOS)
         return defaultCompiler;
     QString cmakeCompiler = compilerFromCMake();
     if (cmakeCompiler.isEmpty())
@@ -629,7 +391,7 @@ QByteArrayList emulatedCompilerOptions(LanguageLevel level)
 {
     QByteArrayList result;
     HeaderPaths headerPaths;
-    switch (compiler()) {
+    switch (_optionsTriplet.compiler()) {
     case Compiler::Msvc:
         result.append("-fms-compatibility-version="_ba + msvcCompatVersion());
         if (level < LanguageLevel::Cpp20)
@@ -645,7 +407,7 @@ QByteArrayList emulatedCompilerOptions(LanguageLevel level)
         headerPaths.append(gppInternalIncludePaths(compilerFromCMake(u"clang++"_s),
                                                    _compilerArguments));
         break;
-    case Compiler::Gpp:
+    case Compiler::Gpp: {
         if (needsClangBuiltinIncludes())
             appendClangBuiltinIncludes(&headerPaths);
 
@@ -657,6 +419,9 @@ QByteArrayList emulatedCompilerOptions(LanguageLevel level)
             if (h.path.contains("c++") || h.path.contains("sysroot"))
                 headerPaths.append(h);
         }
+    }
+        break;
+    case Compiler::Unknown:
         break;
     }
 
@@ -705,8 +470,7 @@ LanguageLevel languageLevelFromOption(const char *o)
 
 bool isCrossCompilation()
 {
-    return platform() != hostPlatform() || architecture() != hostArchitecture()
-           || compiler() != hostCompiler();
+    return _optionsTriplet != _hostTriplet;
 }
 
 static const char targetOptionC[] = "--target=";
@@ -734,31 +498,29 @@ void setHeuristicOptions(const QByteArrayList &clangOptions)
     if (!setOptions.testFlag(CompilerOption) && setOptions.testFlag(CompilerPathOption)) {
         const QString name = QFileInfo(_compilerPath).baseName().toLower();
         if (name.contains("clang"_L1))
-            _compiler = Compiler::Clang;
+            _optionsTriplet.setCompiler(Compiler::Clang);
         else if (name.contains("cl"_L1))
-            _compiler = Compiler::Msvc;
+            _optionsTriplet.setCompiler(Compiler::Msvc);
         else if (name.contains("gcc"_L1) || name.contains("g++"_L1))
-            _compiler = Compiler::Gpp;
+            _optionsTriplet.setCompiler(Compiler::Gpp);
     }
 
     // Figure out platform/arch from "--target" triplet
     if (!setOptions.testFlag(PlatformOption) && !setOptions.testFlag(ArchitectureOption)) {
         auto it = std::find_if(clangOptions.cbegin(), clangOptions.cend(), isTargetOption);
         if (it != clangOptions.cend()) {
-            const QString triplet = QLatin1StringView(it->sliced(qstrlen(targetOptionC)));
-            Architecture arch{};
-            Platform platform{};
-            Compiler comp{};
-            QVersionNumber platformVersion;
-            if (parseTriplet(triplet, &arch, &platform, &comp, &platformVersion)) {
+            const QString tripletString = QLatin1StringView(it->sliced(qstrlen(targetOptionC)));
+            auto tripletO = Triplet::fromString(tripletString);
+            if (tripletO.has_value()) {
+                const auto &triplet = tripletO.value();
                 if (!setOptions.testFlag(ArchitectureOption))
-                    _architecture = arch;
+                    _optionsTriplet.setArchitecture(triplet.architecture());
                 if (!setOptions.testFlag(PlatformOption))
-                    _platform = platform;
-                if (!setOptions.testFlag(PlatformVersionOption))
-                    _platformVersion = platformVersion;
+                    _optionsTriplet.setPlatform(triplet.platform());
+                if (!setOptions.testFlag(PlatformVersionOption) && triplet.hasPlatformVersion())
+                    _optionsTriplet.setPlatformVersion(triplet.platformVersion());
             } else {
-                qCWarning(lcShiboken, "Unable to parse triplet \"%s\".", qPrintable(triplet));
+                qCWarning(lcShiboken, "Unable to parse triplet \"%s\".", qPrintable(tripletString));
             }
         }
     }
