@@ -269,6 +269,11 @@ static PyObject *lookupUnqualifiedOrOldEnum(PyTypeObject *type, PyObject *name)
     // MRO has been observed to be 0 in case of errors with QML decorators
     if (type == nullptr || type->tp_mro == nullptr)
         return nullptr;
+    // Quick Check: Disabled?
+    const bool useFakeRenames = (Enum::enumOption & Enum::ENOPT_NO_FAKERENAMES) == 0;
+    const bool useFakeShortcuts = (Enum::enumOption & Enum::ENOPT_NO_FAKESHORTCUT) == 0;
+    if (!useFakeRenames && !useFakeShortcuts)
+        return nullptr;
     // Quick Check: Avoid "__..", "_slots", etc.
     if (std::isalpha(Shiboken::String::toCString(name)[0]) == 0)
         return nullptr;
@@ -291,7 +296,6 @@ static PyObject *lookupUnqualifiedOrOldEnum(PyTypeObject *type, PyObject *name)
             continue;
         if (!sotp->enumFlagsDict)
             initEnumFlagsDict(type_base);
-        bool useFakeRenames = !(Enum::enumOption & Enum::ENOPT_NO_FAKERENAMES);
         if (useFakeRenames) {
             auto *rename = PyDict_GetItem(sotp->enumFlagsDict, name);
             if (rename) {
@@ -322,7 +326,6 @@ static PyObject *lookupUnqualifiedOrOldEnum(PyTypeObject *type, PyObject *name)
                 return flagType;
             }
         }
-        bool useFakeShortcuts = !(Enum::enumOption & Enum::ENOPT_NO_FAKESHORTCUT);
         if (useFakeShortcuts) {
             AutoDecRef tpDict(PepType_GetDict(type_base));
             auto *dict = tpDict.object();
