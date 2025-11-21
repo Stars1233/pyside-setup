@@ -70,11 +70,13 @@ PYSIDE_API void setTypeName(PySideProperty *self, const char *typeName);
 
 /// Create a property from type, getter, setter and notification signature.
 PYSIDE_API PyObject *create(const char *typeName, PyObject *getter,
-                            PyObject *setter, PyObject *notifySignature);
+                            PyObject *setter, PyObject *notifySignature,
+                            PySidePropertyPrivate *data = nullptr);
 /// Create a property from type, getter, optional setter and notification signature.
 PYSIDE_API PyObject *create(const char *typeName, PyObject *getter,
                             PyObject *setter = nullptr,
-                            const char *notifySignature = nullptr);
+                            const char *notifySignature = nullptr,
+                            PySidePropertyPrivate *data = nullptr);
 
 } //namespace PySide::Property
 

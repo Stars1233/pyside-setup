@@ -208,10 +208,38 @@ void PySidePropertyPrivate::metaCall(PyObject *source, QMetaObject::Call call, v
     }
 }
 
-static PyObject *qpropertyTpNew(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
+// Helpers & name for passing the the PySidePropertyPrivate
+// as a capsule when constructing.
+static const char dataCapsuleName[] = "PropertyPrivate";
+static const char dataCapsuleKeyName[] = "_PropertyPrivate"; // key in keyword args
+
+static PySidePropertyPrivate *getDataFromKwArgs(PyObject *kwds)
+{
+    if (kwds != nullptr && PyDict_Check(kwds) != 0) {
+        static PyObject *key = PyUnicode_InternFromString(dataCapsuleKeyName);
+        if (PyDict_Contains(kwds, key) != 0) {
+            Shiboken::AutoDecRef data(PyDict_GetItem(kwds, key));
+            if (PyCapsule_CheckExact(data.object()) != 0) {
+                if (void *p = PyCapsule_GetPointer(data.object(), dataCapsuleName))
+                    return reinterpret_cast<PySidePropertyPrivate *>(p);
+            }
+        }
+    }
+    return nullptr;
+}
+
+static void addDataCapsuleToKwArgs(const AutoDecRef &kwds, PySidePropertyPrivate *data)
+{
+    auto *capsule = PyCapsule_New(data, dataCapsuleName, nullptr);
+    PyDict_SetItemString(kwds.object(), dataCapsuleKeyName, capsule);
+}
+
+static PyObject *qpropertyTpNew(PyTypeObject *subtype, PyObject * /* args */, PyObject *kwds)
 {
     auto *me = PepExt_TypeCallAlloc<PySideProperty>(subtype, 0);
-    me->d = new PySidePropertyPrivate;
+    me->d = getDataFromKwArgs(kwds);
+    if (me->d == nullptr)
+        me->d = new PySidePropertyPrivate;
     return reinterpret_cast<PyObject *>(me);
 }
 
@@ -222,21 +250,23 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 
     static const char *kwlist[] = {"type", "fget", "fset", "freset", "fdel", "doc", "notify",
                                    "designable", "scriptable", "stored",
-                                   "user", "constant", "final", nullptr};
+                                   "user", "constant", "final", dataCapsuleKeyName, nullptr};
     char *doc{};
     PyObject *type{}, *fget{}, *fset{}, *freset{}, *fdel{}, *notify{};
+    PyObject *dataCapsule{};
     bool designable{true}, scriptable{true}, stored{true};
     bool user{false}, constant{false}, finalProp{false};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
-                                     "O|OOOOsObbbbbb:QtCore.Property",
+                                     "O|OOOOsObbbbbbO:QtCore.Property",
                                      const_cast<char **>(kwlist),
                                      /*OO*/     &type, &fget,
                                      /*OOO*/    &fset, &freset, &fdel,
                                      /*s*/      &doc,
                                      /*O*/      &notify,
                                      /*bbb*/    &designable, &scriptable, &stored,
-                                     /*bbb*/    &user, &constant, &finalProp)) {
+                                     /*bbb*/    &user, &constant, &finalProp,
+                                     /*O*/      &dataCapsule)) {
         return -1;
     }
 
@@ -614,10 +644,13 @@ PyObject *getTypeObject(const PySideProperty *self)
 }
 
 PyObject *create(const char *typeName, PyObject *getter,
-                 PyObject *setter, PyObject *notifySignature)
+                 PyObject *setter, PyObject *notifySignature,
+                 PySidePropertyPrivate *data)
 {
     Shiboken::AutoDecRef kwds(PyDict_New());
     PyDict_SetItemString(kwds.object(), "type", PyUnicode_FromString(typeName));
+    if (data != nullptr)
+        addDataCapsuleToKwArgs(kwds, data);
     if (getter != nullptr && getter != Py_None)
         PyDict_SetItemString(kwds.object(), "fget", getter);
     if (setter != nullptr && getter != Py_None)
@@ -635,12 +668,13 @@ PyObject *create(const char *typeName, PyObject *getter,
 }
 
 PyObject *create(const char *typeName, PyObject *getter,
-                 PyObject *setter, const char *notifySignature)
+                 PyObject *setter, const char *notifySignature,
+                 PySidePropertyPrivate *data)
 {
 
     PyObject *obNotifySignature = notifySignature != nullptr
         ? PyUnicode_FromString(notifySignature) : nullptr;
-    PyObject *result = create(typeName, getter, setter, obNotifySignature);
+    PyObject *result = create(typeName, getter, setter, obNotifySignature, data);
     Py_XDECREF(obNotifySignature);
     return result;
 }
