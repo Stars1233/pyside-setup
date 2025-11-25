@@ -192,11 +192,9 @@ LIBSHIBOKEN_API int Pep_GetVerboseFlag(void);
 
 // pyerrors.h
 #ifdef PEP_OLD_ERR_API
-LIBSHIBOKEN_API PyObject *PepErr_GetRaisedException();
 LIBSHIBOKEN_API PyObject *PepException_GetArgs(PyObject *ex);
 LIBSHIBOKEN_API void PepException_SetArgs(PyObject *ex, PyObject *args);
 #else
-inline PyObject *PepErr_GetRaisedException() { return PyErr_GetRaisedException(); }
 inline PyObject *PepException_GetArgs(PyObject *ex) { return PyException_GetArgs(ex); }
 inline void PepException_SetArgs(PyObject *ex, PyObject *args)
 { PyException_SetArgs(ex, args); }

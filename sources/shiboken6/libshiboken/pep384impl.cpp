@@ -391,18 +391,6 @@ Pep_GetVerboseFlag()
 // Support for pyerrors.h
 
 #ifdef PEP_OLD_ERR_API
-// Emulate PyErr_GetRaisedException() using the deprecated PyErr_Fetch()/PyErr_Store()
-PyObject *PepErr_GetRaisedException()
-{
-    PyObject *type{};
-    PyObject *value{};
-    PyObject *traceback{};
-    PyErr_Fetch(&type, &value, &traceback);
-    Py_XINCREF(value);
-    PyErr_Restore(type, value, traceback);
-    return value;
-}
-
 struct PepException_HEAD
 {
     PyObject_HEAD

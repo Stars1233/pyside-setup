@@ -869,10 +869,10 @@ static std::string msgFailedToInitializeType(const char *description)
 {
     std::ostringstream stream;
     stream << "libshiboken: Failed to initialize " << description;
-    if (auto *error = PepErr_GetRaisedException()) {
-        if (auto *str = PyObject_Str(error))
+    if (PyErr_Occurred() != nullptr) {
+        Shiboken::Errors::Stash stash;
+        if (auto *str = PyObject_Str(stash.getException()))
             stream << ": " << Shiboken::String::toCString(str);
-        Py_DECREF(error);
     }
     stream << '.';
     return stream.str();

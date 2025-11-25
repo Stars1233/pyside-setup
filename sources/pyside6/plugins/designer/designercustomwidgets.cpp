@@ -68,7 +68,7 @@ static QString pyErrorMessage()
 #else // <3.11
     if (PyObject *pvalue = PyErr_GetRaisedException()) {
         result = pyStr(pvalue);
-        Py_DECREF(pvalue);
+        PyErr_SetRaisedException(pvalue);
     }
 #endif
     return result;
