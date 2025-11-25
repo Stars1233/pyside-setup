@@ -170,6 +170,21 @@ static inline bool warnAboutConstMismatch(const AbstractMetaFunctionCPtr &functi
 
 // Check whether a function modification can be found in a class, else
 // warn with candidates.
+
+static QStringList modificationCandidates(QStringView name,
+                                          const AbstractMetaFunctionCList &functions)
+{
+    QStringList result;
+    const bool isOperator = name.startsWith(u"operator");
+    for (const auto &function : functions) {
+        if (!function->isUserAdded() && !function->isUserDeclared()
+            && (isOperator ? function->isOperatorOverload() : function-> originalName() == name)) {
+            result.append(msgModificationCandidates(function));
+        }
+    }
+    return result;
+}
+
 static void checkModification(const FunctionModification &modification,
                               const AbstractMetaClassPtr &clazz)
 
@@ -191,17 +206,10 @@ static void checkModification(const FunctionModification &modification,
 
     const auto name = QStringView{signature}.left(signature.indexOf(u'(')).trimmed();
 
-    QStringList possibleSignatures;
-    for (const auto &function : functions) {
-        if (!function->isUserAdded() && !function->isUserDeclared()
-            && function->originalName() == name) {
-            possibleSignatures.append(msgModificationCandidates(function));
-        }
-    }
-
     const QString msg = msgNoFunctionForModification(clazz, signature,
                                                      modification.originalSignature(),
-                                                     possibleSignatures, clazz->functions());
+                                                     modificationCandidates(name, functions),
+                                                     clazz->functions());
     qCWarning(lcShiboken, "%s", qPrintable(msg));
 }
 
