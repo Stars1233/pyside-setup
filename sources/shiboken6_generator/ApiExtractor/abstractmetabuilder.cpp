@@ -276,11 +276,12 @@ void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelI
     }
 }
 
-void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelItem &item,
-                                                          const AbstractMetaClassPtr &currentClass)
+// Traverse free operator functions (global/namespace)
+void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionModelItem &item,
+                                                              const AbstractMetaClassPtr &currentClass)
 {
-    if (item->accessPolicy() != Access::Public)
-        return;
+    Q_ASSERT(!currentClass || currentClass->isNamespace());
+    Q_ASSERT(item->accessPolicy() == Access::Public);
 
     const ArgumentList &itemArguments = item->arguments();
     bool firstArgumentIsSelf = true;
@@ -322,6 +323,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
         return;
 
     auto flags = metaFunction->flags();
+    // Add free comparison operators to their classes, stripping the first argument.
     // Strip away first argument, since that is the containing object
     AbstractMetaArgumentList arguments = metaFunction->arguments();
     if (firstArgumentIsSelf || unaryOperator) {
@@ -676,11 +678,11 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
         case CodeModel::ArithmeticOperator:
         case CodeModel::BitwiseOperator:
         case CodeModel::LogicalOperator:
-            traverseOperatorFunction(func, nullptr);
+            traverseFreeOperatorFunction(func, {});
             break;
         case CodeModel::ShiftOperator:
-            if (!traverseStreamOperator(func, nullptr))
-                traverseOperatorFunction(func, nullptr);
+            if (!traverseStreamOperator(func, {}))
+                traverseFreeOperatorFunction(func, {});
         default:
             break;
         }
@@ -1464,13 +1466,14 @@ AbstractMetaFunctionList
     const bool isNamespace = currentClass->isNamespace();
     for (const FunctionModelItem &function : scopeFunctionList) {
         if (isNamespace && function->isOperator()) {
-            traverseOperatorFunction(function, currentClass);
+            traverseFreeOperatorFunction(function, currentClass);
         } else if (function->isSpaceshipOperator() && !function->isDeleted()) {
             if (currentClass)
                 AbstractMetaClass::addSynthesizedComparisonOperators(currentClass);
         } else if (auto metaFunction = traverseFunction(function, currentClass)) {
             result.append(metaFunction);
         } else if (!function->isDeleted() && function->functionType() == CodeModel::Constructor) {
+            // traverseFunction() failed: mark rejected constructors
             auto arguments = function->arguments();
             *constructorAttributes |= AbstractMetaClass::HasRejectedConstructor;
             if (arguments.isEmpty() || arguments.constFirst()->defaultValue())

@@ -111,8 +111,8 @@ public:
     void traverseFields(const ScopeModelItem &item, const AbstractMetaClassPtr &parent);
     bool traverseStreamOperator(const FunctionModelItem &functionItem,
                                 const AbstractMetaClassPtr &currentClass);
-    void traverseOperatorFunction(const FunctionModelItem &item,
-                                  const AbstractMetaClassPtr &currentClass);
+    void traverseFreeOperatorFunction(const FunctionModelItem &item,
+                                      const AbstractMetaClassPtr &currentClass);
     AbstractMetaFunctionPtr
         traverseAddedFunctionHelper(const AddedFunctionPtr &addedFunc,
                                     const AbstractMetaClassPtr &metaClass,
