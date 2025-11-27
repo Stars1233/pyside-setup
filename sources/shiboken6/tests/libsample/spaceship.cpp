@@ -8,6 +8,13 @@ SpaceshipComparisonTester::SpaceshipComparisonTester(int v) noexcept
 {
 }
 
+#if __cplusplus >= 202002 || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002)
+std::strong_ordering SpaceshipComparisonTester::operator<=>(int rhs) const
+{
+    return m_value <=> rhs;
+}
+#endif // C++ 20
+
 FreeSpaceshipComparisonTester::FreeSpaceshipComparisonTester(int v) noexcept
     : m_value(v)
 {

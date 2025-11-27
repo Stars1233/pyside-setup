@@ -278,6 +278,23 @@ void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelI
     }
 }
 
+static ComparisonOperators synthesizedSpaceshipComparison(const AbstractMetaClassCPtr &currentClass,
+                                                          const FunctionModelItem &item)
+{
+    const auto te = currentClass->typeEntry();
+    // operator "<", ">" not for non-pair type containers
+    if (te->isContainer()) {
+        auto cTe = std::static_pointer_cast<const ContainerTypeEntry>(te);
+        if (cTe->containerKind() != ContainerTypeEntry::PairContainer)
+            return ComparisonOperatorType::EqualityMask;
+    }
+
+    // An == operator function is declared implicitly for each operator<=>
+    // defined as defaulted.
+    return item->attributes().testFlag(FunctionAttribute::Defaulted)
+        ? ComparisonOperatorType::AllMask : ComparisonOperatorType::OrderingMask;
+}
+
 // Traverse free operator functions (global/namespace)
 void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionModelItem &item,
                                                               const AbstractMetaClassPtr &currentClass)
@@ -312,12 +329,6 @@ void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionMode
     if (!baseoperandClass) {
         rejectFunction(item, currentClass, AbstractMetaBuilder::UnmatchedOperator,
                        u"base operand class not found."_s);
-        return;
-    }
-
-    if (item->isSpaceshipOperator() && !item->isDeleted()) {
-        AbstractMetaClass::addSynthesizedComparisonOperators(baseoperandClass,
-                                                             InternalFunctionFlag::OperatorCpp20Spaceship);
         return;
     }
 
@@ -359,6 +370,16 @@ void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionMode
     if (metaFunction->isComparisonOperator())
         metaFunction->setConstant(true);
     metaFunction->setAccess(Access::Public);
+    if (item->isSpaceshipOperator()) {
+        // For spaceship, the traverse mechanism is only used to handle rejections
+        // and get the argument type.
+        const auto ops = synthesizedSpaceshipComparison(baseoperandClass, item);
+        flags.setFlag(InternalFunctionFlag::OperatorCpp20Spaceship);
+        AbstractMetaClass::addSynthesizedComparisonOperators(baseoperandClass,
+                                                             metaFunction->arguments(),
+                                                             ops, flags);
+        return;
+    }
     AbstractMetaClass::addFunction(baseoperandClass, metaFunction);
     ReportHandler::addGeneralMessage(msgSynthesizedFunction(metaFunction, item));
     if (!metaFunction->arguments().isEmpty()) {
@@ -1549,7 +1570,18 @@ void AbstractMetaBuilderPrivate::traverseClassFunction(const ScopeModelItem& sco
                                                        const AbstractMetaClassPtr &metaClass) const
 {
     Q_UNUSED(scopeItem)
-    Q_UNUSED(function)
+    if (function->isSpaceshipOperator()) {
+        // For spaceship, the traverse mechanism is only used to handle rejections
+        // and get the argument type.
+        if (!function->isDeleted()) {
+            const auto ops = synthesizedSpaceshipComparison(metaClass, function);
+            AbstractMetaClass::addSynthesizedComparisonOperators(metaClass,
+                                                                 metaFunction->arguments(),
+                                                                 ops, InternalFunctionFlag::OperatorCpp20Spaceship);
+        }
+        return;
+    }
+
     traverseClassFunction(metaFunction, metaClass);
 }
 
@@ -1559,10 +1591,7 @@ void AbstractMetaBuilderPrivate::traverseClassFunctions(const ScopeModelItem& sc
     Q_ASSERT(metaClass);
     AbstractMetaClass::Attributes constructorAttributes;
     for (const FunctionModelItem &function : scopeItem->functions()) {
-        if (function->isSpaceshipOperator() && !function->isDeleted()) {
-            AbstractMetaClass::addSynthesizedComparisonOperators(metaClass,
-                                                                 InternalFunctionFlag::OperatorCpp20Spaceship);
-        } else if (auto metaFunction = traverseFunction(function, metaClass)) {
+        if (auto metaFunction = traverseFunction(function, metaClass)) {
             traverseClassFunction(scopeItem, function, metaFunction, metaClass);
         } else if (!function->isDeleted() && function->functionType() == CodeModel::Constructor) {
             // traverseFunction() failed: mark rejected constructors

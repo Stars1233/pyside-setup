@@ -31,6 +31,12 @@ class SpaceshipTest(unittest.TestCase):
         self.assertFalse(t1 > t2)
 
     @unittest.skipUnless(SpaceshipComparisonTester.Enabled.HasSpaceshipOperator, "< C++ 20")
+    def testNonHomogeneousSpaceshipOperator(self):
+        t = SpaceshipComparisonTester(42)
+        self.assertTrue(t < 43)
+        self.assertTrue(t > 41)
+
+    @unittest.skipUnless(SpaceshipComparisonTester.Enabled.HasSpaceshipOperator, "< C++ 20")
     def testFreeSpaceshipOperator(self):
         """Test a free operator<=>(). It does not provide equality
            as it is not defaulted."""

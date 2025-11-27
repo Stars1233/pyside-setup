@@ -1739,6 +1739,17 @@ void TypeDatabasePrivate::addBuiltInPrimitiveTypes()
                                          root, rootPackage,
                                          pyUnicodeCustomEntry);
     }
+
+    // Prevent rejection of operator<=>() due to mismatched return type.
+    if (clang::emulatedCompilerLanguageLevel() >= LanguageLevel::Cpp20) {
+        for (const QString &ordering : {u"std::strong_ordering"_s, u"std::partial_ordering"_s}) {
+            if (!m_entries.contains(ordering)) {
+                    auto entry = std::make_shared<CustomTypeEntry>(ordering, QVersionNumber{}, root);
+                    entry->setTargetLangPackage(rootPackage);
+                    m_entries.insert(ordering, entry);
+            }
+        }
+    }
 }
 
 QDebug operator<<(QDebug d, const TypeDatabase &db)

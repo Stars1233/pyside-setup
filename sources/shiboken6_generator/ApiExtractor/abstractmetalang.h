@@ -128,6 +128,8 @@ public:
     bool isCopyConstructible() const;
 
     static void addSynthesizedComparisonOperators(const AbstractMetaClassPtr &c,
+                                                  const AbstractMetaArgumentList &arguments,
+                                                  ComparisonOperators ops,
                                                   InternalFunctionFlags flags);
 
     bool generateExceptionHandling() const;

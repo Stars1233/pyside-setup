@@ -53,6 +53,7 @@ enum class FunctionAttribute : std::uint8_t {
     Final      = 0x00000010,
     Deprecated = 0x00000020, // Code annotation
     Explicit   = 0x00000040, // Constructor
+    Defaulted  = 0x00000080
 };
 
 Q_DECLARE_FLAGS(FunctionAttributes, FunctionAttribute)

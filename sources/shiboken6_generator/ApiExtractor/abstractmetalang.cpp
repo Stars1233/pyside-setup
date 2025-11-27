@@ -920,35 +920,30 @@ static AbstractMetaType boolType()
     return result;
 }
 
-// Helper to synthesize comparison operators from a spaceship operator. Since
-// shiboken also generates code for comparing to different types, this fits
-// better than of handling it in the generator code.
+// Helper to synthesize comparison operators from a spaceship operator and equality operators.
+// Since shiboken also generates code for comparing to different types, this fits
+// better than handling it in the generator code.
 void AbstractMetaClass::addSynthesizedComparisonOperators(const AbstractMetaClassPtr &c,
+                                                          const AbstractMetaArgumentList &arguments,
+                                                          ComparisonOperators ops,
                                                           InternalFunctionFlags flags)
 {
     static const auto returnType = boolType();
 
-    AbstractMetaType selfType(c->typeEntry());
-    selfType.setConstant(true);
-    selfType.setReferenceType(LValueReference);
-    selfType.decideUsagePattern();
-    AbstractMetaArgument selfArgument;
-    selfArgument.setType(selfType);
-    selfArgument.setName(u"rhs"_s);
-    AbstractMetaArgumentList arguments(1, selfArgument);
-
-    static const char *operators[]
-        = {"operator==", "operator!=", "operator<", "operator<=", "operator>", "operator>="};
-    for (const auto *op : operators) {
-        auto *f = AbstractMetaClassPrivate::createFunction(QLatin1StringView(op),
-                                                           AbstractMetaFunction::ComparisonOperator,
-                                                           Access::Public, arguments,
-                                                           returnType, c);
-        f->setFlags(f->flags() | flags);
-        f->setConstant(true);
-        AbstractMetaFunctionCPtr newFunction(f);
-        c->d->addFunction(newFunction);
-        ReportHandler::addGeneralMessage(msgSynthesizedFunction(newFunction));
+    for (int mask = 0x1; (mask & int(ComparisonOperatorType::AllMask)) != 0; mask <<= 1) {
+        const auto op = ComparisonOperatorType(mask);
+        if (ops.testFlag(op)) {
+            const QString name = "operator"_L1 + QLatin1StringView(AbstractMetaFunction::cppComparisonOperator(op));
+            auto *f = AbstractMetaClassPrivate::createFunction(name,
+                                                               AbstractMetaFunction::ComparisonOperator,
+                                                               Access::Public, arguments,
+                                                               returnType, c);
+            f->setFlags(f->flags() | flags);
+            f->setConstant(true);
+            AbstractMetaFunctionCPtr newFunction(f);
+            c->d->addFunction(newFunction);
+            ReportHandler::addGeneralMessage(msgSynthesizedFunction(newFunction));
+        }
     }
 }
 

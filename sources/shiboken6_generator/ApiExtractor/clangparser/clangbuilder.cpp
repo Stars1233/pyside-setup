@@ -397,6 +397,7 @@ FunctionModelItem BuilderPrivate::createMemberFunction(const CXCursor &cursor,
     result->setAttribute(FunctionAttribute::Static, clang_CXXMethod_isStatic(cursor) != 0);
     result->setAttribute(FunctionAttribute::Virtual, clang_CXXMethod_isVirtual(cursor) != 0);
     result->setAttribute(FunctionAttribute::Abstract, clang_CXXMethod_isPureVirtual(cursor) != 0);
+    result->setAttribute(FunctionAttribute::Defaulted, clang_CXXMethod_isDefaulted(cursor) != 0);
     return result;
 }
 

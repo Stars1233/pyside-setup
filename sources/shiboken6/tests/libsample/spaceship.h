@@ -17,6 +17,7 @@ public:
 
 #if __cplusplus >= 202002 || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002)
     auto operator<=>(const SpaceshipComparisonTester &rhs) const = default;
+    std::strong_ordering operator<=>(int rhs) const;
 
     enum Enabled { HasSpaceshipOperator = 1 };
 #else
