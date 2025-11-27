@@ -66,12 +66,6 @@ public:
     };
     Q_ENUM(FunctionType)
 
-    enum ComparisonOperatorType : std::uint8_t {
-        OperatorEqual, OperatorNotEqual, OperatorLess, OperatorLessEqual,
-        OperatorGreater, OperatorGreaterEqual
-    };
-    Q_ENUM(ComparisonOperatorType)
-
     enum CompareResultFlag : std::uint16_t {
         EqualName            = 0x0001,
         EqualModifiedName    = 0x0002,
@@ -194,6 +188,9 @@ public:
     bool isArithmeticOperator() const;
     bool isBitwiseOperator() const; // Includes shift operator
     bool isComparisonOperator() const;
+    std::optional<ComparisonOperatorType> comparisonOperatorType() const;
+    bool isOrderingComparisonOperator() const; // Non-equality, <, <=, >, >=
+
     /// Returns whether this is a comparison accepting owner class
     /// (bool operator==(QByteArray,QByteArray) but not bool operator==(QByteArray,const char *)
     bool isSymmetricalComparisonOperator() const;
@@ -273,8 +270,6 @@ public:
     bool maybeAccessor() const;
     FunctionType functionType() const;
     void setFunctionType(FunctionType type);
-
-    std::optional<ComparisonOperatorType> comparisonOperatorType() const;
 
     bool usesRValueReferences() const;
     bool generateBinding() const;
@@ -433,6 +428,7 @@ public:
 
     static const char *pythonRichCompareOpCode(ComparisonOperatorType ct);
     static const char *cppComparisonOperator(ComparisonOperatorType ct);
+    static std::optional<ComparisonOperatorType> comparisonOperatorTypeFromName(const QString &name);
 
 private:
     template <class Predicate>

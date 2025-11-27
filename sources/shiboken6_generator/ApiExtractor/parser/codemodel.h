@@ -500,6 +500,8 @@ public:
 
     bool isDefaultConstructor() const;
     bool isSpaceshipOperator() const;
+    bool isOperatorEqual() const;
+    bool isOperatorNotEqual() const;
 
     bool isSimilar(const FunctionModelItem &other) const;
 

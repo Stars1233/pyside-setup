@@ -6,6 +6,21 @@
 
 #include <QtCore/qflags.h>
 
+enum class ComparisonOperatorType : std::uint8_t {
+    OperatorEqual        = 0x01,
+    OperatorNotEqual     = 0x02,
+    EqualityMask         = OperatorEqual | OperatorNotEqual,
+    OperatorLess         = 0x04,
+    OperatorLessEqual    = 0x08,
+    OperatorGreater      = 0x10,
+    OperatorGreaterEqual = 0x20,
+    OrderingMask         = OperatorLess | OperatorLessEqual | OperatorGreater | OperatorGreaterEqual,
+    AllMask              = EqualityMask | OrderingMask
+};
+
+Q_DECLARE_FLAGS(ComparisonOperators, ComparisonOperatorType)
+Q_DECLARE_OPERATORS_FOR_FLAGS(ComparisonOperators)
+
 enum class FunctionQueryOption : std::uint32_t {
     AnyConstructor               = 0x0000001, // Any constructor (copy/move)
     Constructors                 = 0x0000002, // Constructors except copy/move

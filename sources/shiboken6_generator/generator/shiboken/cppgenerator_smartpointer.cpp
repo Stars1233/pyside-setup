@@ -55,34 +55,23 @@ static AbstractMetaClassCList
     return result;
 }
 
-using ComparisonOperatorList = QList<AbstractMetaFunction::ComparisonOperatorType>;
-
 // Return the available comparison operators for smart pointers
-static ComparisonOperatorList smartPointeeComparisons(const GeneratorContext &context)
+static ComparisonOperators smartPointeeComparisons(const GeneratorContext &context)
 {
     Q_ASSERT(context.forSmartPointer());
     auto te = context.preciseType().instantiations().constFirst().typeEntry();
-    if (isExtendedCppPrimitive(te)) { // Primitive pointee types have all
-        return {AbstractMetaFunction::OperatorEqual,
-                AbstractMetaFunction::OperatorNotEqual,
-                AbstractMetaFunction::OperatorLess,
-                AbstractMetaFunction::OperatorLessEqual,
-                AbstractMetaFunction::OperatorGreater,
-                AbstractMetaFunction::OperatorGreaterEqual};
-    }
+    if (isExtendedCppPrimitive(te)) // Primitive pointee types have all
+        return ComparisonOperatorType::AllMask;
 
     const auto pointeeClass = context.pointeeClass();
     if (!pointeeClass)
         return {};
 
-    ComparisonOperatorList result;
+    ComparisonOperators result;
     const auto &comparisons =
         pointeeClass->operatorOverloads(OperatorQueryOption::SymmetricalComparisonOp);
-    for (const auto &f : comparisons) {
-        const auto ct = f->comparisonOperatorType().value();
-        if (!result.contains(ct))
-            result.append(ct);
-    }
+    for (const auto &f : comparisons)
+        result.setFlag(f->comparisonOperatorType().value());
     return result;
 }
 
@@ -349,10 +338,9 @@ void CppGenerator::writeSmartPointerRichCompareFunction(TextStream &s,
     // If we have an object without any comparisons, only generate a simple
     // equality check by pointee address
     auto availableOps = smartPointeeComparisons(context);
-    const bool comparePointeeAddressOnly = availableOps.isEmpty();
+    const bool comparePointeeAddressOnly = availableOps == 0;
     if (comparePointeeAddressOnly) {
-        availableOps << AbstractMetaFunction::OperatorEqual
-                     << AbstractMetaFunction::OperatorNotEqual;
+        availableOps |= ComparisonOperatorType::EqualityMask;
     } else {
         // For value types with operators, we complain about nullptr
         s << "if (" << selfPointeeVar << " == nullptr || " << cppArg0PointeeVar
@@ -363,28 +351,30 @@ void CppGenerator::writeSmartPointerRichCompareFunction(TextStream &s,
 
     s << "bool " << CPP_RETURN_VAR << "= false;\n"
       << "switch (op) {\n";
-    for (auto op : availableOps) {
-        s << "case " << AbstractMetaFunction::pythonRichCompareOpCode(op) << ":\n"
-          << indent << CPP_RETURN_VAR << " = ";
-        if (comparePointeeAddressOnly) {
-            s << selfPointeeVar << ' ' << AbstractMetaFunction::cppComparisonOperator(op)
-              << ' ' << cppArg0PointeeVar << ";\n";
-        } else {
-            // Shortcut for equality: Check pointee address
-            if (op == AbstractMetaFunction::OperatorEqual
-                || op == AbstractMetaFunction::OperatorLessEqual
-                || op == AbstractMetaFunction::OperatorGreaterEqual) {
-                s << selfPointeeVar << " == " << cppArg0PointeeVar << " || ";
+    for (int mask = 0x1; (mask & int(ComparisonOperatorType::AllMask)) != 0; mask <<= 1) {
+        const auto op = ComparisonOperatorType(mask);
+        if (availableOps.testFlag(op)) {
+            s << "case " << AbstractMetaFunction::pythonRichCompareOpCode(op) << ":\n"
+                << indent << CPP_RETURN_VAR << " = ";
+            if (comparePointeeAddressOnly) {
+                s << selfPointeeVar << ' ' << AbstractMetaFunction::cppComparisonOperator(op)
+                    << ' ' << cppArg0PointeeVar << ";\n";
+            } else {
+                // Shortcut for equality: Check pointee address
+                if (op == ComparisonOperatorType::OperatorEqual
+                    || op == ComparisonOperatorType::OperatorLessEqual
+                    || op == ComparisonOperatorType::OperatorGreaterEqual) {
+                    s << selfPointeeVar << " == " << cppArg0PointeeVar << " || ";
+                }
+                // Generate object's comparison
+                s << "*" << selfPointeeVar << ' '
+                    << AbstractMetaFunction::cppComparisonOperator(op) << " *"
+                    << cppArg0PointeeVar << ";\n";
             }
-            // Generate object's comparison
-            s << "*" << selfPointeeVar << ' '
-              << AbstractMetaFunction::cppComparisonOperator(op) << " *"
-              << cppArg0PointeeVar << ";\n";
+            s << "break;\n" << outdent;
         }
-        s << "break;\n" << outdent;
-
     }
-    if (availableOps.size() < 6) {
+    if (availableOps != ComparisonOperatorType::AllMask) {
         s << "default:\n" << indent
           << richCompareComment
           << "return FallbackRichCompare(self, " << PYTHON_ARG << ", op);\n" << outdent;

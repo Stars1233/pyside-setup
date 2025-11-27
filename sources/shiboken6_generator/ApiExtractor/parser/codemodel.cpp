@@ -954,6 +954,18 @@ bool _FunctionModelItem::isNoExcept() const
     return m_exceptionSpecification == ExceptionSpecification::NoExcept;
 }
 
+bool _FunctionModelItem::isOperatorEqual() const
+{
+    return m_functionType == CodeModel::ComparisonOperator
+        && name() == "operator=="_L1;
+}
+
+bool _FunctionModelItem::isOperatorNotEqual() const
+{
+    return m_functionType == CodeModel::ComparisonOperator
+           && name() == "operator!="_L1;
+}
+
 bool _FunctionModelItem::isOperator() const
 {
     bool result = false;

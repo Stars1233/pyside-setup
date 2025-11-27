@@ -816,22 +816,35 @@ void AbstractMetaFunction::setFunctionType(AbstractMetaFunction::FunctionType ty
     d->m_functionType = type;
 }
 
-std::optional<AbstractMetaFunction::ComparisonOperatorType>
-AbstractMetaFunction::comparisonOperatorType() const
+std::optional<ComparisonOperatorType> AbstractMetaFunction::comparisonOperatorTypeFromName(const QString &name)
+{
+    static const QHash<QString, ComparisonOperatorType> mapping = {
+        {u"operator=="_s, ComparisonOperatorType::OperatorEqual},
+        {u"operator!="_s, ComparisonOperatorType::OperatorNotEqual},
+        {u"operator<"_s, ComparisonOperatorType::OperatorLess},
+        {u"operator<="_s, ComparisonOperatorType::OperatorLessEqual},
+        {u"operator>"_s, ComparisonOperatorType::OperatorGreater},
+        {u"operator>="_s, ComparisonOperatorType::OperatorGreaterEqual}
+    };
+    const auto it = mapping.constFind(name);
+    if (it == mapping.constEnd())
+        return std::nullopt;
+    return it.value();
+}
+
+std::optional<ComparisonOperatorType> AbstractMetaFunction::comparisonOperatorType() const
 {
     if (d->m_functionType != ComparisonOperator)
-        return {};
-    static const QHash<QString, ComparisonOperatorType> mapping = {
-        {u"operator=="_s, OperatorEqual},
-        {u"operator!="_s, OperatorNotEqual},
-        {u"operator<"_s, OperatorLess},
-        {u"operator<="_s, OperatorLessEqual},
-        {u"operator>"_s, OperatorGreater},
-        {u"operator>="_s, OperatorGreaterEqual}
-    };
-    const auto it = mapping.constFind(originalName());
-    Q_ASSERT(it != mapping.constEnd());
-    return it.value();
+        return std::nullopt;
+    const auto result = AbstractMetaFunction::comparisonOperatorTypeFromName(originalName());
+    Q_ASSERT(result.has_value());
+    return result;
+}
+
+bool AbstractMetaFunction::isOrderingComparisonOperator() const
+{
+    const auto opTypeO = comparisonOperatorType();
+    return opTypeO.has_value() && (opTypeO.value() & ComparisonOperatorType::OrderingMask) != 0;
 }
 
 // Auto-detect whether a function should be wrapped into
@@ -1666,17 +1679,17 @@ struct ComparisonOperator
 };
 
 using ComparisonOperatorMapping =
-    QHash<AbstractMetaFunction::ComparisonOperatorType, ComparisonOperator>;
+    QHash<ComparisonOperatorType, ComparisonOperator>;
 
 static const ComparisonOperatorMapping &comparisonOperatorMapping()
 {
     static const ComparisonOperatorMapping result = {
-        {AbstractMetaFunction::OperatorEqual, {"==", "Py_EQ"}},
-        {AbstractMetaFunction::OperatorNotEqual, {"!=", "Py_NE"}},
-        {AbstractMetaFunction::OperatorLess, {"<", "Py_LT"}},
-        {AbstractMetaFunction::OperatorLessEqual, {"<=", "Py_LE"}},
-        {AbstractMetaFunction::OperatorGreater, {">", "Py_GT"}},
-        {AbstractMetaFunction::OperatorGreaterEqual, {">=", "Py_GE"}}
+        {ComparisonOperatorType::OperatorEqual, {"==", "Py_EQ"}},
+        {ComparisonOperatorType::OperatorNotEqual, {"!=", "Py_NE"}},
+        {ComparisonOperatorType::OperatorLess, {"<", "Py_LT"}},
+        {ComparisonOperatorType::OperatorLessEqual, {"<=", "Py_LE"}},
+        {ComparisonOperatorType::OperatorGreater, {">", "Py_GT"}},
+        {ComparisonOperatorType::OperatorGreaterEqual, {">=", "Py_GE"}}
     };
     return result;
 }

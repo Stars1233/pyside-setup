@@ -5268,10 +5268,10 @@ void CppGenerator::writeRichCompareFunction(TextStream &s, TextStream &t,
         }
 
         s << " else {\n";
-        if (op == AbstractMetaFunction::OperatorEqual ||
-                op == AbstractMetaFunction::OperatorNotEqual) {
+        if (op == ComparisonOperatorType::OperatorEqual ||
+                op == ComparisonOperatorType::OperatorNotEqual) {
             s << indent << PYTHON_RETURN_VAR << " = "
-                << (op == AbstractMetaFunction::OperatorEqual ? "Py_False" : "Py_True") << ";\n"
+                << (op == ComparisonOperatorType::OperatorEqual ? "Py_False" : "Py_True") << ";\n"
                 << "Py_INCREF(" << PYTHON_RETURN_VAR << ");\n" << outdent;
         } else {
             s << indent << "return Shiboken::returnFromRichCompare("
