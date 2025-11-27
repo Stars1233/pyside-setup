@@ -14,7 +14,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import FreeSpaceshipComparisonTester, SpaceshipComparisonTester
+from sample import (FreeSpaceshipComparisonTester, SpaceshipComparisonTester,
+                    NonEqualityComparisonTester)
 
 
 class SpaceshipTest(unittest.TestCase):
@@ -44,6 +45,15 @@ class SpaceshipTest(unittest.TestCase):
         t2 = FreeSpaceshipComparisonTester(2)
         self.assertTrue(t1 < t2)
         self.assertFalse(t1 > t2)
+
+    @unittest.skipUnless(SpaceshipComparisonTester.Enabled.HasSpaceshipOperator, "< C++ 20")
+    def testNonEqualSynthetization(self):
+        ne_a = NonEqualityComparisonTester(1)
+        ne_b = NonEqualityComparisonTester(1)
+        self.assertTrue(ne_a == ne_b)
+        # Verify that different instances with same value are not reported as "not equal",
+        # (fooling the FallbackRichCompare() function which is generated for missing operators).
+        self.assertFalse(ne_a != ne_b)
 
 
 if __name__ == '__main__':

@@ -278,6 +278,15 @@ void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelI
     }
 }
 
+// Find "operator!=" matching an "operator==" in a scope.
+static bool hasOperatorNotEqual(const ScopeModelItem &scopeItem, const FunctionModelItem &operatorEqual)
+{
+    auto pred = [&operatorEqual](const FunctionModelItem &f) {
+        return f->isOperatorNotEqual() && operatorEqual->hasEquivalentArguments(*f);
+    };
+    return std::any_of(scopeItem->functions().cbegin(), scopeItem->functions().cend(), pred);
+}
+
 static ComparisonOperators synthesizedSpaceshipComparison(const AbstractMetaClassCPtr &currentClass,
                                                           const FunctionModelItem &item)
 {
@@ -297,6 +306,7 @@ static ComparisonOperators synthesizedSpaceshipComparison(const AbstractMetaClas
 
 // Traverse free operator functions (global/namespace)
 void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionModelItem &item,
+                                                              const ScopeModelItem &scope,
                                                               const AbstractMetaClassPtr &currentClass)
 {
     Q_ASSERT(!currentClass || currentClass->isNamespace());
@@ -380,6 +390,17 @@ void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionMode
                                                              ops, flags);
         return;
     }
+
+    // C++20: Synthesize "!=" from "=="
+    if (clang::emulatedCompilerLanguageLevel() >= LanguageLevel::Cpp20
+        && item->isOperatorEqual()
+        && !item->hasPointerArguments() && !hasOperatorNotEqual(scope, item)) {
+        AbstractMetaClass::addSynthesizedComparisonOperators(
+            baseoperandClass, metaFunction->arguments(),
+            ComparisonOperatorType::OperatorNotEqual,
+            flags | InternalFunctionFlag::OperatorCpp20NonEquality);
+    }
+
     AbstractMetaClass::addFunction(baseoperandClass, metaFunction);
     ReportHandler::addGeneralMessage(msgSynthesizedFunction(metaFunction, item));
     if (!metaFunction->arguments().isEmpty()) {
@@ -697,11 +718,11 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
         case CodeModel::ArithmeticOperator:
         case CodeModel::BitwiseOperator:
         case CodeModel::LogicalOperator:
-            traverseFreeOperatorFunction(func, {});
+            traverseFreeOperatorFunction(func, dom, {});
             break;
         case CodeModel::ShiftOperator:
             if (!traverseStreamOperator(func, {}))
-                traverseFreeOperatorFunction(func, {});
+                traverseFreeOperatorFunction(func, dom, {});
         default:
             break;
         }
@@ -1486,7 +1507,7 @@ void AbstractMetaBuilderPrivate::traverseNameSpaceFunctions(const ScopeModelItem
     functions.reserve(scopeFunctionList.size());
     for (const FunctionModelItem &function : scopeFunctionList) {
         if (function->isOperator()) {
-            traverseFreeOperatorFunction(function, currentClass);
+            traverseFreeOperatorFunction(function, scopeItem, currentClass);
         } else if (auto metaFunction = traverseFunction(function, currentClass)) {
             metaFunction->setCppAttribute(FunctionAttribute::Static);
             functions.append(metaFunction);
@@ -1569,7 +1590,6 @@ void AbstractMetaBuilderPrivate::traverseClassFunction(const ScopeModelItem& sco
                                                        const AbstractMetaFunctionPtr &metaFunction,
                                                        const AbstractMetaClassPtr &metaClass) const
 {
-    Q_UNUSED(scopeItem)
     if (function->isSpaceshipOperator()) {
         // For spaceship, the traverse mechanism is only used to handle rejections
         // and get the argument type.
@@ -1580,6 +1600,15 @@ void AbstractMetaBuilderPrivate::traverseClassFunction(const ScopeModelItem& sco
                                                                  ops, InternalFunctionFlag::OperatorCpp20Spaceship);
         }
         return;
+    }
+
+    // C++20: Synthesize "!=" from "=="
+    if (clang::emulatedCompilerLanguageLevel() >= LanguageLevel::Cpp20
+        && function->isOperatorEqual() && !hasOperatorNotEqual(scopeItem, function)) {
+        AbstractMetaClass::addSynthesizedComparisonOperators(
+            metaClass, metaFunction->arguments(),
+            ComparisonOperatorType::OperatorNotEqual,
+            InternalFunctionFlag::OperatorCpp20NonEquality);
     }
 
     traverseClassFunction(metaFunction, metaClass);

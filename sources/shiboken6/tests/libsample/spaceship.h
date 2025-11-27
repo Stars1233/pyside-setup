@@ -45,4 +45,18 @@ LIBSAMPLE_API std::strong_ordering operator<=>(FreeSpaceshipComparisonTester lhs
                                                FreeSpaceshipComparisonTester rhs);
 #endif // C++ 20
 
+
+class LIBSAMPLE_API NonEqualityComparisonTester
+{
+public:
+    explicit NonEqualityComparisonTester(int v) noexcept;
+
+    int value() const;
+
+    bool operator==(NonEqualityComparisonTester rhs) const;
+
+private:
+    int m_value;
+};
+
 #endif // SPACESHIP_H

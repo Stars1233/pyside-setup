@@ -64,6 +64,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/moveonly_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/moveonlyhandler_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/noimplicitconversion_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/nondefaultctor_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/nonequalitycomparisontester_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objectmodel_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttype_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttypebyvalue_wrapper.cpp

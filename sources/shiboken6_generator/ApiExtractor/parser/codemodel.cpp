@@ -846,6 +846,13 @@ void _ArgumentModelItem::setScopeResolution(bool v)
     m_scopeResolution = v;
 }
 
+bool _ArgumentModelItem::isEquivalent(const _ArgumentModelItem &rhs) const
+{
+    return m_scopeResolution == rhs.m_scopeResolution && m_defaultValue == rhs.m_defaultValue
+        && m_defaultValueExpression == rhs.m_defaultValueExpression
+        && m_type == rhs.m_type;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 void _ArgumentModelItem::formatDebug(QDebug &d) const
 {
@@ -991,6 +998,16 @@ bool _FunctionModelItem::isOperator() const
     return result;
 }
 
+static bool isPointerArgument(const ArgumentModelItem &a)
+{
+    return !a->type().indirectionsV().isEmpty();
+}
+
+bool _FunctionModelItem::hasPointerArguments() const
+{
+    return std::any_of(m_arguments.cbegin(), m_arguments.cend(), isPointerArgument);
+}
+
 ExceptionSpecification _FunctionModelItem::exceptionSpecification() const
 {
     return m_exceptionSpecification;
@@ -1073,6 +1090,19 @@ QString _FunctionModelItem::typeSystemSignature() const  // For dumping out type
     }
     str << ')';
     return result;
+}
+
+static inline bool equivalentArguments(const ArgumentModelItem &lhs,
+                                       const ArgumentModelItem &rhs)
+{
+    return lhs->isEquivalent(*rhs);
+}
+
+bool _FunctionModelItem::hasEquivalentArguments(const _FunctionModelItem &rhs) const
+{
+    return m_arguments.size() == rhs.m_arguments.size()
+        && std::equal(m_arguments.cbegin(), m_arguments.cend(), rhs.m_arguments.cbegin(), rhs.m_arguments.cend(),
+                         equivalentArguments);
 }
 
 using NameFunctionTypeHash = QHash<QStringView, CodeModel::FunctionType>;

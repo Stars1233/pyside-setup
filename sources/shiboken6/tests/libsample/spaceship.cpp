@@ -32,3 +32,18 @@ std::strong_ordering operator<=>(FreeSpaceshipComparisonTester lhs,
     return lhs.value() <=> rhs.value();
 }
 #endif // C++ 20
+
+NonEqualityComparisonTester::NonEqualityComparisonTester(int v) noexcept
+    : m_value(v)
+{
+}
+
+int NonEqualityComparisonTester::value() const
+{
+    return m_value;
+}
+
+bool NonEqualityComparisonTester::operator==(NonEqualityComparisonTester rhs) const
+{
+    return m_value == rhs.m_value;
+}

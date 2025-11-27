@@ -380,6 +380,8 @@ public:
     bool scopeResolution() const;
     void setScopeResolution(bool v);
 
+    bool isEquivalent(const _ArgumentModelItem &rhs) const; // Compare all except name
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
@@ -502,6 +504,7 @@ public:
     bool isSpaceshipOperator() const;
     bool isOperatorEqual() const;
     bool isOperatorNotEqual() const;
+    bool hasPointerArguments() const;
 
     bool isSimilar(const FunctionModelItem &other) const;
 
@@ -514,6 +517,9 @@ public:
 
     QString classQualifiedSignature() const;
     QString typeSystemSignature() const; // For dumping out type system files
+
+    // Compare all except names
+    bool hasEquivalentArguments(const _FunctionModelItem &rhs) const;
 
     // Private, for usage by the clang builder.
     void _determineType();
