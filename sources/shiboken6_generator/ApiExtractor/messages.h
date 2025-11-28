@@ -288,4 +288,13 @@ QString msgRemoveRedundantOverload(const AbstractMetaFunctionCPtr &func,
 
 QString msgCommandLineArguments(const QStringList &argv);
 
+QString msgSynthesizedOperatorDescription(const AbstractMetaFunction *newFunction);
+QString msgSynthesizedOperatorDescription(const AbstractMetaFunctionCPtr &newFunction);
+
+QString msgSynthesizedFunction(const AbstractMetaFunctionCPtr &newFunction,
+                               QStringView why = {});
+
+QString msgSynthesizedFunction(const AbstractMetaFunctionCPtr &newFunction,
+                               const FunctionModelItem &oldFunction);
+
 #endif // MESSAGES_H

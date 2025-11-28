@@ -923,7 +923,8 @@ static AbstractMetaType boolType()
 // Helper to synthesize comparison operators from a spaceship operator. Since
 // shiboken also generates code for comparing to different types, this fits
 // better than of handling it in the generator code.
-void AbstractMetaClass::addSynthesizedComparisonOperators(const AbstractMetaClassPtr &c)
+void AbstractMetaClass::addSynthesizedComparisonOperators(const AbstractMetaClassPtr &c,
+                                                          InternalFunctionFlags flags)
 {
     static const auto returnType = boolType();
 
@@ -943,7 +944,10 @@ void AbstractMetaClass::addSynthesizedComparisonOperators(const AbstractMetaClas
                                                            AbstractMetaFunction::ComparisonOperator,
                                                            Access::Public, arguments,
                                                            returnType, c);
-         c->d->addFunction(AbstractMetaFunctionCPtr(f));
+        f->setFlags(f->flags() | flags);
+        AbstractMetaFunctionCPtr newFunction(f);
+        c->d->addFunction(newFunction);
+        ReportHandler::addGeneralMessage(msgSynthesizedFunction(newFunction));
     }
 }
 

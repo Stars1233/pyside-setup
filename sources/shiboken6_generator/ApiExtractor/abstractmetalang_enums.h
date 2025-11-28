@@ -57,6 +57,8 @@ enum class InternalFunctionFlag : std::uint16_t
     OperatorLeadingClassArgumentRemoved  = 0x001,
     OperatorTrailingClassArgumentRemoved = 0x002,
     OperatorClassArgumentByValue = 0x004, // The removed class argument was passed by value
+    OperatorCpp20Spaceship       = 0x008, // Synthesized from operator<=> in C++ 20
+    OperatorCpp20NonEquality     = 0x010, // Synthesized from operator== in C++ 20
     OperatorMask                 = 0x01F,
     InheritedFromTemplate        = 0x020, // Inherited from a template in metabuilder
     HiddenFriend                 = 0x040,

@@ -1116,3 +1116,52 @@ QString msgCommandLineArguments(const QStringList &argv)
     result.append(u'\n');
     return result;
 }
+
+QString msgSynthesizedOperatorDescription(const AbstractMetaFunction *newFunction)
+{
+    QString result;
+    const auto flags = newFunction->flags();
+    if ((flags & InternalFunctionFlag::OperatorMask) != 0) {
+        if (flags.testAnyFlags(InternalFunctionFlag::OperatorLeadingClassArgumentRemoved
+                               | InternalFunctionFlag::OperatorTrailingClassArgumentRemoved)) {
+            result += u" free"_s;
+        }
+        if (newFunction->isReverseOperator())
+            result += u" reverse"_s;
+        if (flags.testFlag(InternalFunctionFlag::OperatorCpp20Spaceship))
+            result += u" from operator<=>()"_s;
+        else if (flags.testFlag(InternalFunctionFlag::OperatorCpp20NonEquality))
+            result += u" from operator==()"_s;
+        else
+            result += u" operator"_s;
+
+        if (!result.isEmpty()) {
+            result[0] = u'[';
+            result += u']';
+        }
+    }
+    return result;
+}
+
+QString msgSynthesizedOperatorDescription(const AbstractMetaFunctionCPtr &newFunction)
+{
+    return msgSynthesizedOperatorDescription(newFunction.get());
+}
+
+QString msgSynthesizedFunction(const AbstractMetaFunctionCPtr &newFunction,
+                               QStringView why)
+{
+    QString result = "Synthesizing: \""_L1 + newFunction->classQualifiedSignature() + u'"';
+    if (QString opDescr = msgSynthesizedOperatorDescription(newFunction); !opDescr.isEmpty())
+        result += u' ' + opDescr;
+    if (!why.isEmpty())
+        result += " ("_L1 + why + u')';
+    return result;
+}
+
+QString msgSynthesizedFunction(const AbstractMetaFunctionCPtr &newFunction,
+                               const FunctionModelItem &oldFunction)
+{
+    const QString why = "from: \""_L1 + oldFunction->classQualifiedSignature() + u'"';
+    return msgSynthesizedFunction(newFunction, why);
+}

@@ -314,7 +314,8 @@ void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionMode
     }
 
     if (item->isSpaceshipOperator() && !item->isDeleted()) {
-        AbstractMetaClass::addSynthesizedComparisonOperators(baseoperandClass);
+        AbstractMetaClass::addSynthesizedComparisonOperators(baseoperandClass,
+                                                             InternalFunctionFlag::OperatorCpp20Spaceship);
         return;
     }
 
@@ -353,6 +354,7 @@ void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionMode
     metaFunction->setFlags(flags);
     metaFunction->setAccess(Access::Public);
     AbstractMetaClass::addFunction(baseoperandClass, metaFunction);
+    ReportHandler::addGeneralMessage(msgSynthesizedFunction(metaFunction, item));
     if (!metaFunction->arguments().isEmpty()) {
         const auto include = metaFunction->arguments().constFirst().type().typeEntry()->include();
         baseoperandClass->typeEntry()->addArgumentInclude(include);
@@ -1468,8 +1470,10 @@ AbstractMetaFunctionList
         if (isNamespace && function->isOperator()) {
             traverseFreeOperatorFunction(function, currentClass);
         } else if (function->isSpaceshipOperator() && !function->isDeleted()) {
-            if (currentClass)
-                AbstractMetaClass::addSynthesizedComparisonOperators(currentClass);
+            if (currentClass) {
+                AbstractMetaClass::addSynthesizedComparisonOperators(currentClass,
+                                                                     InternalFunctionFlag::OperatorCpp20Spaceship);
+            }
         } else if (auto metaFunction = traverseFunction(function, currentClass)) {
             result.append(metaFunction);
         } else if (!function->isDeleted() && function->functionType() == CodeModel::Constructor) {

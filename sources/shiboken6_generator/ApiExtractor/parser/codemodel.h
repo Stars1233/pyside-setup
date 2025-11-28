@@ -510,6 +510,7 @@ public:
     ExceptionSpecification exceptionSpecification() const;
     void setExceptionSpecification(ExceptionSpecification e);
 
+    QString classQualifiedSignature() const;
     QString typeSystemSignature() const; // For dumping out type system files
 
     // Private, for usage by the clang builder.

@@ -127,7 +127,8 @@ public:
     bool isDefaultConstructible() const;
     bool isCopyConstructible() const;
 
-    static void addSynthesizedComparisonOperators(const AbstractMetaClassPtr &c);
+    static void addSynthesizedComparisonOperators(const AbstractMetaClassPtr &c,
+                                                  InternalFunctionFlags flags);
 
     bool generateExceptionHandling() const;
 

@@ -1019,6 +1019,36 @@ void _FunctionModelItem::setHiddenFriend(bool f)
     m_isHiddenFriend = f;
 }
 
+QString _FunctionModelItem::classQualifiedSignature() const
+{
+    QString result;
+    QTextStream str(&result);
+    if (m_attributes.testFlag(FunctionAttribute::Virtual))
+        str << "virtual ";
+    str << type().toString() << ' ';
+    const auto &scopeList = scope();
+    for (const auto &scope : scopeList)
+        str << scope << "::";
+    str << name() << '(';
+    for (qsizetype a = 0, size = m_arguments.size(); a < size; ++a) {
+        if (a)
+            str << ", ";
+        str << m_arguments.at(a)->type().toString();
+    }
+    str << ')';
+    if (isConstant())
+        str << " const";
+    if (isVolatile())
+        str << " volatile";
+    if (m_attributes.testFlag(FunctionAttribute::Override))
+        str << " override";
+    if (m_attributes.testFlag(FunctionAttribute::Final))
+        str << " final";
+    if (m_isDeleted)
+        str << " = delete";
+    return result;
+}
+
 QString _FunctionModelItem::typeSystemSignature() const  // For dumping out type system files
 {
     QString result;
