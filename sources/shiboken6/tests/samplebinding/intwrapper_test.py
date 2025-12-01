@@ -30,6 +30,13 @@ class IntWrapperTest(unittest.TestCase):
         i -= ten2
         self.assertTrue(i == ten1)
 
+    def testNonHomogeneousComparison(self):
+        ten = IntWrapper(10)
+        self.assertTrue(ten == 10)
+        self.assertTrue(ten != 11)
+        self.assertTrue(10 == ten)
+        self.assertTrue(11 != ten)
+
     def testAddPyMethodDef(self):
         """Test of added free function (PYSIDE-1905)."""
         i = IntWrapper(10)

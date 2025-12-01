@@ -32,6 +32,15 @@ public:
     friend constexpr inline bool operator>=(IntWrapper lhs, IntWrapper  rhs) noexcept
     { return lhs.m_number >= rhs.m_number; }
 
+    friend constexpr inline bool operator==(IntWrapper lhs, int v) noexcept
+    { return lhs.m_number == v; }
+    friend constexpr inline bool operator==(int v, IntWrapper lhs) noexcept
+    { return v == lhs.m_number; }
+    friend constexpr inline bool operator!=(IntWrapper lhs, int v) noexcept
+    { return lhs.m_number != v; }
+    friend constexpr inline bool operator!=(int v, IntWrapper lhs) noexcept
+    { return v != lhs.m_number; }
+
     constexpr inline IntWrapper &operator+=(IntWrapper i);
     constexpr inline IntWrapper &operator-=(const IntWrapper i);
 
