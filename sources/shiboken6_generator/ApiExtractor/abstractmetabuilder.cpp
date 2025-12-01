@@ -313,6 +313,12 @@ void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionMode
         return;
     }
 
+    // Do not synthesize reverse comparison operators. CPython swaps the
+    // arguments for them by itself in Py_tp_richcompare.
+    const bool reverseOperator = !firstArgumentIsSelf && !unaryOperator;
+    if (reverseOperator && item->functionType() == CodeModel::ComparisonOperator)
+        return;
+
     auto metaFunction = traverseFunction(item, baseoperandClass);
     if (metaFunction == nullptr)
         return;
@@ -320,7 +326,7 @@ void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionMode
     auto flags = metaFunction->flags();
     // Add free comparison operators to their classes, stripping the first argument.
     // Strip away first argument, since that is the containing object
-    if (firstArgumentIsSelf || unaryOperator) {
+    if (!reverseOperator) {
         AbstractMetaArgument first = metaFunction->takeArgument(0);
         if (!unaryOperator && first.type().indirections())
             metaFunction->setPointerOperator(true);
