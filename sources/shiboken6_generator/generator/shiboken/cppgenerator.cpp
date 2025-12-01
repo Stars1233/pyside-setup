@@ -3083,15 +3083,8 @@ void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s,
     s << "// Overloaded function decisor\n";
     const auto rfunc = overloadData.referenceFunction();
     const AbstractMetaFunctionCList &functionOverloads = overloadData.overloads();
-    for (qsizetype i = 0; i < functionOverloads.size(); ++i) {
-        const auto &func = functionOverloads.at(i);
-        s << "// " << i << ": ";
-        if (func->isStatic())
-            s << "static ";
-        if (const auto &decl = func->declaringClass())
-            s << decl->name() << "::";
-        s << func->signatureComment() << '\n';
-    }
+    for (qsizetype i = 0; i < functionOverloads.size(); ++i)
+        s << "// " << i << ": " << functionOverloads.at(i)->signatureComment() << '\n';
     writeOverloadedFunctionDecisorEngine(s, overloadData, &overloadData);
     s << '\n';
 
@@ -3139,7 +3132,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
     // Functions without arguments are identified right away.
     if (maxArgs == 0) {
         s << "overloadId = " << overloadData.functionNumber(referenceFunction)
-            << "; // " << referenceFunction->minimalSignature() << '\n';
+            << "; // " << referenceFunction->signatureComment() << '\n';
         return;
 
     }
@@ -3155,7 +3148,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
         if (isLastArgument || (signatureFound && !hasDefaultCall)) {
             const auto func = node->referenceFunction();
             s << "overloadId = " << overloadData.functionNumber(func)
-                << "; // " << func->minimalSignature() << '\n';
+                << "; // " << func->signatureComment() << '\n';
             return;
         }
     }
@@ -3881,7 +3874,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                                    const QList<qsizetype> &argumentIndirections,
                                    ErrorReturn errorReturn) const
 {
-    s << "// " << func->minimalSignature() << (func->isReverseOperator() ? " [reverse operator]": "") << '\n';
+    s << "// " << func->signatureComment() << '\n';
     if (func->isConstructor()) {
         const CodeSnipList &snips = func->injectedCodeSnips();
         for (const CodeSnip &cs : snips) {
@@ -5234,7 +5227,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s, TextStream &t,
             writeTypeCheck(s, argType, PYTHON_ARG,
                            alternativeNumericTypes == 1 || isPyInt(argType));
             s << ") {\n" << indent
-                << "// " << func->signature() << '\n';
+                << "// " << func->signatureComment() << '\n';
             writeArgumentConversion(s, argType, CPP_ARG0,
                                     PYTHON_ARG, ErrorReturn::Default,
                                     metaClass,

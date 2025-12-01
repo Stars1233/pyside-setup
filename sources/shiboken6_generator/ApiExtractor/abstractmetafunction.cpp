@@ -54,8 +54,8 @@ public:
     }
 
     QString signature() const;
-    QString formatMinimalSignature(const AbstractMetaFunction *q,
-                                   bool comment) const;
+    QString formatMinimalSignature() const;
+    QString signatureComment(const AbstractMetaFunction *q) const;
     QString modifiedName(const AbstractMetaFunction *q) const;
     int overloadNumber(const AbstractMetaFunction *q) const;
 
@@ -986,30 +986,48 @@ QString AbstractMetaFunction::pyiTypeReplaced(int argumentIndex) const
     return {};
 }
 
-// Parameter 'comment' indicates usage as a code comment of the overload decisor
-QString AbstractMetaFunctionPrivate::formatMinimalSignature(const AbstractMetaFunction *q,
-                                                            bool comment) const
+QString AbstractMetaFunctionPrivate::formatMinimalSignature() const
 {
     QString result = m_originalName + u'(';
     for (qsizetype i = 0; i < m_arguments.size(); ++i) {
         const auto &argument = m_arguments.at(i);
         if (i > 0)
             result += u',';
-
-        const auto &type = comment ? argument.modifiedType() : argument.type();
-        result += type.minimalSignature();
-        if (comment && argument.hasDefaultValueExpression())
-            result += u'=';
+        result += argument.type().minimalSignature();
     }
     result += u')';
     if (m_constant)
         result += u"const"_s;
-    result = TypeDatabase::normalizedSignature(result);
+    return TypeDatabase::normalizedSignature(result);
+}
 
-    if (comment && !q->isVoid()) {
-        result += u"->"_s;
-        result += q->isTypeModified()
-                  ? q->modifiedTypeName() : q->type().minimalSignature();
+// code comment of the overload decisor
+QString AbstractMetaFunctionPrivate::signatureComment(const AbstractMetaFunction *q) const
+{
+    QString result;
+    QTextStream str(&result);
+    if (q->isStatic())
+        str << "static ";
+    if (m_declaringClass)
+        str << m_declaringClass->name() << "::";
+    str << m_originalName << '(';
+    for (qsizetype i = 0; i < m_arguments.size(); ++i) {
+        const auto &argument = m_arguments.at(i);
+        if (i > 0)
+            str << ',';
+        str << argument.modifiedType().minimalSignature();
+        if (argument.hasDefaultValueExpression())
+            str << '=';
+    }
+    str << ')';
+    if (m_constant)
+        str << "const";
+    if (!q->isVoid())
+        str << "->" << (q->isTypeModified() ? q->modifiedTypeName() : q->type().minimalSignature());
+
+    if (q->isOperatorOverload()) {
+        if (QString opDescr = msgSynthesizedOperatorDescription(q); !opDescr.isEmpty())
+            str << ' ' << opDescr;
     }
     return result;
 }
@@ -1017,7 +1035,7 @@ QString AbstractMetaFunctionPrivate::formatMinimalSignature(const AbstractMetaFu
 QString AbstractMetaFunction::minimalSignature() const
 {
     if (d->m_cachedMinimalSignature.isEmpty())
-        d->m_cachedMinimalSignature = d->formatMinimalSignature(this, false);
+        d->m_cachedMinimalSignature = d->formatMinimalSignature();
     return d->m_cachedMinimalSignature;
 }
 
@@ -1033,7 +1051,7 @@ QStringList AbstractMetaFunction::modificationSignatures() const
 
 QString AbstractMetaFunction::signatureComment() const
 {
-    return d->formatMinimalSignature(this, true);
+    return d->signatureComment(this);
 }
 
 QString AbstractMetaFunction::debugSignature() const
