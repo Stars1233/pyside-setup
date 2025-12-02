@@ -14,7 +14,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import OddBoolUser, ComparisonTester, SpaceshipComparisonTester
+from sample import OddBoolUser, ComparisonTester
 
 
 class DerivedOddBoolUser (OddBoolUser):
@@ -61,19 +61,6 @@ class OddBoolTest(unittest.TestCase):
         t1 = ComparisonTester(42)
         t2 = ComparisonTester(42)
         self.assertEqual(t1, t2)
-
-    def testSpaceshipOperator(self):
-        if not SpaceshipComparisonTester.Enabled.HasSpaceshipOperator:
-            print("Skipping Spaceship Operator test")
-            return
-        t1 = SpaceshipComparisonTester(42)
-        t2 = SpaceshipComparisonTester(42)
-        self.assertEqual(t1, t2)
-        self.assertTrue(t1 <= t2)
-        self.assertTrue(t1 >= t2)
-        t2 = SpaceshipComparisonTester(43)
-        self.assertTrue(t1 < t2)
-        self.assertFalse(t1 > t2)
 
 
 if __name__ == '__main__':

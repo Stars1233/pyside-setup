@@ -159,6 +159,7 @@
     <value-type name="SpaceshipComparisonTester">
         <enum-type name="Enabled"/>
     </value-type>
+    <value-type name="FreeSpaceshipComparisonTester"/>
 
     <primitive-type name="PStr">
         <include file-name="str.h" location="global"/>

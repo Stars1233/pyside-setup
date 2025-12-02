@@ -109,6 +109,7 @@
               "simplefile_test.py",
               "size_test.py",
               "snakecase_test.py",
+              "spaceship_test.py",
               "static_nonstatic_methods_test.py",
               "str_test.py",
               "strlist_test.py",

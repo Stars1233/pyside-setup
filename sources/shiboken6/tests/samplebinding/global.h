@@ -61,6 +61,7 @@
 #include "simplefile.h"
 #include "size.h"
 #include "snakecasetest.h"
+#include "spaceship.h"
 #include "str.h"
 #include "strlist.h"
 #include "sometime.h"

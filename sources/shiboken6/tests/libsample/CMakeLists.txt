@@ -70,6 +70,7 @@ simplefile.cpp simplefile.h
 size.cpp size.h
 snakecasetest.cpp snakecasetest.h
 sometime.cpp sometime.h
+spaceship.cpp spaceship.h
 str.cpp str.h
 strlist.cpp strlist.h
 templateptr.cpp templateptr.h
