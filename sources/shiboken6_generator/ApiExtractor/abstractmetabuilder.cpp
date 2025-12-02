@@ -332,9 +332,9 @@ void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionMode
         if (!unaryOperator && first.type().indirections())
             metaFunction->setPointerOperator(true);
         metaFunction->setArguments(arguments);
-        flags.setFlag(AbstractMetaFunction::Flag::OperatorLeadingClassArgumentRemoved);
+        flags.setFlag(InternalFunctionFlag::OperatorLeadingClassArgumentRemoved);
         if (first.type().passByValue())
-            flags.setFlag(AbstractMetaFunction::Flag::OperatorClassArgumentByValue);
+            flags.setFlag(InternalFunctionFlag::OperatorClassArgumentByValue);
     } else {
         // If the operator method is not unary and the first operator is
         // not of the same type of its owning class we suppose that it
@@ -346,9 +346,9 @@ void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionMode
             metaFunction->setPointerOperator(true);
         metaFunction->setArguments(arguments);
         metaFunction->setReverseOperator(true);
-        flags.setFlag(AbstractMetaFunction::Flag::OperatorTrailingClassArgumentRemoved);
+        flags.setFlag(InternalFunctionFlag::OperatorTrailingClassArgumentRemoved);
         if (last.type().passByValue())
-            flags.setFlag(AbstractMetaFunction::Flag::OperatorClassArgumentByValue);
+            flags.setFlag(InternalFunctionFlag::OperatorClassArgumentByValue);
     }
     metaFunction->setFlags(flags);
     metaFunction->setAccess(Access::Public);
@@ -2185,12 +2185,12 @@ AbstractMetaFunctionPtr
         return {};
     }
 
-    AbstractMetaFunction::Flags flags;
+    InternalFunctionFlags flags;
     auto metaFunction = std::make_shared<AbstractMetaFunction>(functionName);
     metaFunction->setCppAttributes(cppAttributes);
     metaFunction->setUnresolvedSignatures(signatures);
     if (functionItem->isHiddenFriend())
-        flags.setFlag(AbstractMetaFunction::Flag::HiddenFriend);
+        flags.setFlag(InternalFunctionFlag::HiddenFriend);
     metaFunction->setSourceLocation(functionItem->sourceLocation());
 
     // Additional check for assignment/move assignment down below
@@ -2246,7 +2246,7 @@ AbstractMetaFunctionPtr
         case QtSpecialArgument::None:
             break;
         case QtSpecialArgument::PrivateSignal:
-            flags.setFlag(AbstractMetaFunction::Flag::PrivateSignal);
+            flags.setFlag(InternalFunctionFlag::PrivateSignal);
             arguments.removeLast(); // Add private signals for documentation purposes
             break;
         case QtSpecialArgument::Disambiguated:
@@ -3384,7 +3384,7 @@ AbstractMetaFunctionPtr
 {
     AbstractMetaFunctionPtr f(function->copy());
     f->setArguments(AbstractMetaArgumentList());
-    f->setFlags(f->flags() | AbstractMetaFunction::Flag::InheritedFromTemplate);
+    f->setFlags(f->flags() | InternalFunctionFlag::InheritedFromTemplate);
 
     if (!function->isVoid()) {
         auto returnType = inheritTemplateType(templateTypes, function->type());

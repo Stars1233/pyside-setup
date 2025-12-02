@@ -205,14 +205,14 @@ QtDocParser::FunctionDocumentationOpt
 
     const auto funcFlags = func->flags();
     // Re-add arguments removed by the metabuilder to binary operator functions
-    if (funcFlags.testFlag(AbstractMetaFunction::Flag::OperatorLeadingClassArgumentRemoved)
-        || funcFlags.testFlag(AbstractMetaFunction::Flag::OperatorTrailingClassArgumentRemoved)) {
+    if (funcFlags.testFlag(InternalFunctionFlag::OperatorLeadingClassArgumentRemoved)
+        || funcFlags.testFlag(InternalFunctionFlag::OperatorTrailingClassArgumentRemoved)) {
         QString classType = metaClass->qualifiedCppName();
-        if (!funcFlags.testFlag(AbstractMetaFunction::Flag::OperatorClassArgumentByValue)) {
+        if (!funcFlags.testFlag(InternalFunctionFlag::OperatorClassArgumentByValue)) {
             classType.prepend(u"const "_s);
             classType.append(u" &"_s);
         }
-        if (funcFlags.testFlag(AbstractMetaFunction::Flag::OperatorLeadingClassArgumentRemoved))
+        if (funcFlags.testFlag(InternalFunctionFlag::OperatorLeadingClassArgumentRemoved))
             fq.parameters.prepend(classType);
         else
             fq.parameters.append(classType);

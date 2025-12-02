@@ -1593,9 +1593,9 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass, bool avo
                         if (superIsVirtual && isVirtual) {
                             f->setOverriddden(sf);
                             auto flags = f->flags();
-                            if (!flags.testFlag(AbstractMetaFunction::Flag::CovariantReturn)
+                            if (!flags.testFlag(InternalFunctionFlag::CovariantReturn)
                                 && f->type() != sf->type()) {
-                                f->setFlags(flags | AbstractMetaFunction::Flag::CovariantReturn);
+                                f->setFlags(flags | InternalFunctionFlag::CovariantReturn);
                             }
                             // Set "override" in case it was not spelled out (since it
                             // is then not detected by clang parsing).

@@ -120,20 +120,9 @@ public:
     void setCppAttributes(FunctionAttributes a);
     void setCppAttribute(FunctionAttribute a, bool on = true);
 
-    enum class Flag : std::uint8_t { // Internal flags not relevant for comparing functions
-        // Binary operator whose leading/trailing argument was removed by metabuilder
-        OperatorLeadingClassArgumentRemoved = 0x1,
-        OperatorTrailingClassArgumentRemoved = 0x2,
-        OperatorClassArgumentByValue = 0x4, // The removed class argument was passed by value
-        InheritedFromTemplate = 0x8, // Inherited from a template in metabuilder
-        HiddenFriend = 0x10,
-        PrivateSignal = 0x20, // Private Qt signal (cannot emit from client code)
-        CovariantReturn = 0x40 // Return type of virtual function differs (eg clone())
-    };
-    Q_DECLARE_FLAGS(Flags, Flag)
-
-    Flags flags() const;
-    void setFlags(Flags f);
+    // Internal flags not relevant for comparing functions
+    InternalFunctionFlags flags() const;
+    void setFlags(InternalFunctionFlags f);
 
     bool isAbstract() const;
     bool isClassMethod() const;
@@ -486,8 +475,6 @@ inline bool AbstractMetaFunction::isPropertyResetter() const
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::CompareResult);
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::Attributes);
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::Flags);
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug debug, const AbstractMetaFunction *af);

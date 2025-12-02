@@ -89,7 +89,7 @@ public:
     SourceLocation m_sourceLocation;
     AbstractMetaFunction::Attributes m_attributes;
     FunctionAttributes m_cppAttributes;
-    AbstractMetaFunction::Flags m_flags;
+    InternalFunctionFlags m_flags;
     uint m_constant                 : 1;
     uint m_reverse                  : 1;
     uint m_pointerOperator          : 1;
@@ -277,12 +277,12 @@ void AbstractMetaFunction::setCppAttribute(FunctionAttribute a, bool on)
     d->m_cppAttributes.setFlag(a, on);
 }
 
-AbstractMetaFunction::Flags AbstractMetaFunction::flags() const
+InternalFunctionFlags AbstractMetaFunction::flags() const
 {
     return d->m_flags;
 }
 
-void AbstractMetaFunction::setFlags(Flags f)
+void AbstractMetaFunction::setFlags(InternalFunctionFlags f)
 {
     d->m_flags = f;
 }

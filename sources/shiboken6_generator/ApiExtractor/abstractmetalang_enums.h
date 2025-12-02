@@ -50,4 +50,21 @@ enum class OperatorQueryOption : std::uint16_t {
 Q_DECLARE_FLAGS(OperatorQueryOptions, OperatorQueryOption)
 Q_DECLARE_OPERATORS_FOR_FLAGS(OperatorQueryOptions)
 
+// Internal flags of AbstractMetaFunction not relevant for comparing functions
+enum class InternalFunctionFlag : std::uint16_t
+{
+    // Binary operator whose leading/trailing argument was removed by metabuilder
+    OperatorLeadingClassArgumentRemoved  = 0x001,
+    OperatorTrailingClassArgumentRemoved = 0x002,
+    OperatorClassArgumentByValue = 0x004, // The removed class argument was passed by value
+    OperatorMask                 = 0x01F,
+    InheritedFromTemplate        = 0x020, // Inherited from a template in metabuilder
+    HiddenFriend                 = 0x040,
+    PrivateSignal                = 0x080, // Private Qt signal (cannot emit from client code)
+    CovariantReturn              = 0x100, // Return type of virtual function differs (eg clone())
+};
+
+Q_DECLARE_FLAGS(InternalFunctionFlags, InternalFunctionFlag)
+Q_DECLARE_OPERATORS_FOR_FLAGS(InternalFunctionFlags)
+
 #endif // ABSTRACTMETALANG_ENUMS_H

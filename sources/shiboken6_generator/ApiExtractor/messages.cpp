@@ -646,9 +646,9 @@ QString msgFallbackForDocumentation(const QString &fileName,
 static QString functionDescription(const AbstractMetaFunction *function)
 {
     QString result = u'"' + function->classQualifiedSignature() + u'"';
-    if (function->flags().testFlag(AbstractMetaFunction::Flag::HiddenFriend))
+    if (function->flags().testFlag(InternalFunctionFlag::HiddenFriend))
         result += u" (hidden friend)"_s;
-    if (function->flags().testFlag(AbstractMetaFunction::Flag::InheritedFromTemplate))
+    if (function->flags().testFlag(InternalFunctionFlag::InheritedFromTemplate))
         result += u" (inherited from template)"_s;
     return result;
 }
