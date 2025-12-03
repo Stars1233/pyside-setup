@@ -61,12 +61,6 @@ static QString stripTemplateArgs(const QString &name)
     return pos < 0 ? name : name.left(pos);
 }
 
-static void fixArgumentIndexes(AbstractMetaArgumentList *list)
-{
-    for (qsizetype i = 0, size = list->size(); i < size; ++i)
-        (*list)[i].setArgumentIndex(i);
-}
-
 bool operator<(const RejectEntry &re1, const RejectEntry &re2)
 {
     return re1.reason != re2.reason
@@ -326,13 +320,10 @@ void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionMode
     auto flags = metaFunction->flags();
     // Add free comparison operators to their classes, stripping the first argument.
     // Strip away first argument, since that is the containing object
-    AbstractMetaArgumentList arguments = metaFunction->arguments();
     if (firstArgumentIsSelf || unaryOperator) {
-        AbstractMetaArgument first = arguments.takeFirst();
-        fixArgumentIndexes(&arguments);
+        AbstractMetaArgument first = metaFunction->takeArgument(0);
         if (!unaryOperator && first.type().indirections())
             metaFunction->setPointerOperator(true);
-        metaFunction->setArguments(arguments);
         flags.setFlag(InternalFunctionFlag::OperatorLeadingClassArgumentRemoved);
         if (first.type().passByValue())
             flags.setFlag(InternalFunctionFlag::OperatorClassArgumentByValue);
@@ -342,10 +333,9 @@ void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionMode
         // must be an reverse operator (e.g. CLASS::operator(TYPE, CLASS)).
         // All operator overloads that operate over a class are already
         // being added as member functions of that class by the API Extractor.
-        AbstractMetaArgument last = arguments.takeLast();
+        AbstractMetaArgument last = metaFunction->takeArgument(metaFunction->arguments().size() - 1);
         if (last.type().indirections())
             metaFunction->setPointerOperator(true);
-        metaFunction->setArguments(arguments);
         metaFunction->setReverseOperator(true);
         flags.setFlag(InternalFunctionFlag::OperatorTrailingClassArgumentRemoved);
         if (last.type().passByValue())
@@ -380,25 +370,15 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
        return false;
 
     // Strip first argument, since that is the containing object
-   AbstractMetaArgumentList arguments = streamFunction->arguments();
-   if (!streamClass->typeEntry()->generateCode()) {
-       arguments.takeLast();
-   } else {
-       arguments.takeFirst();
-       fixArgumentIndexes(&arguments);
-   }
-
-    streamFunction->setArguments(arguments);
+    const qsizetype removedArg = streamClass->typeEntry()->generateCode() ? 0 : streamFunction->arguments().size() - 1;
+    streamFunction->takeArgument(removedArg);
 
     streamFunction->setAccess(Access::Public);
 
     AbstractMetaClassPtr funcClass;
 
     if (!streamClass->typeEntry()->generateCode()) {
-        AbstractMetaArgumentList reverseArgs = streamFunction->arguments();
-        std::reverse(reverseArgs.begin(), reverseArgs.end());
-        fixArgumentIndexes(&reverseArgs);
-        streamFunction->setArguments(reverseArgs);
+        streamFunction->reverseArguments();
         streamFunction->setReverseOperator(true);
         funcClass = streamedClass;
     } else {

@@ -53,6 +53,8 @@ public:
     {
     }
 
+    void fixArgumentIndexes();
+
     QString signature() const;
     QString formatMinimalSignature() const;
     QString signatureComment(const AbstractMetaFunction *q) const;
@@ -101,6 +103,12 @@ public:
     TypeSystem::AllowThread m_allowThreadModification = TypeSystem::AllowThread::Unspecified;
     TypeSystem::ExceptionHandling m_exceptionHandlingModification = TypeSystem::ExceptionHandling::Unspecified;
 };
+
+void AbstractMetaFunctionPrivate::fixArgumentIndexes()
+{
+    for (qsizetype i = 0, size = m_arguments.size(); i < size; ++i)
+        m_arguments[i].setArgumentIndex(i);
+}
 
 AbstractMetaFunction::AbstractMetaFunction(const QString &name) :
     AbstractMetaFunction()
@@ -729,6 +737,22 @@ void AbstractMetaFunction::setArgumentName(qsizetype a, const QString &name)
 void AbstractMetaFunction::addArgument(const AbstractMetaArgument &argument)
 {
     d->m_arguments << argument;
+}
+
+AbstractMetaArgument AbstractMetaFunction::takeArgument(qsizetype a)
+{
+    AbstractMetaArgument result;
+    if (a >= 0 && a < d->m_arguments.size()) {
+        result = d->m_arguments.takeAt(a);
+        d->fixArgumentIndexes();
+    }
+    return result;
+}
+
+void AbstractMetaFunction::reverseArguments()
+{
+    std::reverse(d->m_arguments.begin(), d->m_arguments.end());
+    d->fixArgumentIndexes();
 }
 
 static bool modifiedDeprecated(const FunctionModification &mod)
