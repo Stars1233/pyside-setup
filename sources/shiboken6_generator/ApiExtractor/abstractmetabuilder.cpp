@@ -1283,7 +1283,10 @@ void AbstractMetaBuilderPrivate::traverseScopeMembers(const ScopeModelItem &item
 {
     // Classes/Namespace members
     traverseFields(item, metaClass);
-    traverseFunctions(item, metaClass);
+    if (item->kind() == _CodeModelItem::Kind_Class)
+        traverseClassFunctions(item, metaClass);
+    else
+        traverseNameSpaceFunctions(item, metaClass);
 
     // Inner classes
     const ClassList &innerClasses = item->classes();
@@ -1452,112 +1455,125 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(const Abstrac
     metaFunction->setType(metaType);
 }
 
-AbstractMetaFunctionList
-    AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
-                                                  AbstractMetaClass::Attributes *constructorAttributes,
-                                                  const AbstractMetaClassPtr &currentClass)
+void AbstractMetaBuilderPrivate::traverseNameSpaceFunctions(const ScopeModelItem& scopeItem,
+                                                            const AbstractMetaClassPtr &currentClass)
+
 {
-    *constructorAttributes = {};
-    AbstractMetaFunctionList result;
+    Q_ASSERT(currentClass);
+    AbstractMetaFunctionList functions;
     const FunctionList &scopeFunctionList = scopeItem->functions();
-    result.reserve(scopeFunctionList.size());
-    const bool isNamespace = currentClass->isNamespace();
+    functions.reserve(scopeFunctionList.size());
     for (const FunctionModelItem &function : scopeFunctionList) {
-        if (isNamespace && function->isOperator()) {
+        if (function->isOperator()) {
             traverseFreeOperatorFunction(function, currentClass);
-        } else if (function->isSpaceshipOperator() && !function->isDeleted()) {
-            if (currentClass) {
-                AbstractMetaClass::addSynthesizedComparisonOperators(currentClass,
-                                                                     InternalFunctionFlag::OperatorCpp20Spaceship);
-            }
         } else if (auto metaFunction = traverseFunction(function, currentClass)) {
-            result.append(metaFunction);
+            metaFunction->setCppAttribute(FunctionAttribute::Static);
+            functions.append(metaFunction);
+            AbstractMetaClass::addFunction(currentClass, metaFunction);
+            applyFunctionModifications(metaFunction);
+        }
+    }
+    fillAddedFunctions(currentClass);
+}
+
+void AbstractMetaBuilderPrivate::traverseClassFunction(const AbstractMetaFunctionPtr &metaFunction,
+                                                       const AbstractMetaClassPtr &metaClass)
+{
+    const auto propertyFunction = metaClass->searchPropertyFunction(metaFunction->name());
+    if (propertyFunction.index >= 0) {
+        QPropertySpec prop = metaClass->propertySpecs().at(propertyFunction.index);
+        switch (propertyFunction.function) {
+        case AbstractMetaClass::PropertyFunction::Read:
+            // Property reader must be in the form "<type> name()"
+            if (!metaFunction->isSignal()
+                && prop.typeEntry() == metaFunction->type().typeEntry()
+                && metaFunction->arguments().isEmpty()) {
+                *metaFunction += AbstractMetaFunction::PropertyReader;
+                metaFunction->setPropertySpecIndex(propertyFunction.index);
+            }
+            break;
+        case AbstractMetaClass::PropertyFunction::Write:
+            // Property setter must be in the form "void name(<type>)"
+            // Make sure the function was created with all arguments; some
+            // argument can be missing during the parsing because of errors
+            // in the typesystem.
+            if (metaFunction->isVoid() && metaFunction->arguments().size() == 1
+                && (prop.typeEntry() == metaFunction->arguments().at(0).type().typeEntry())) {
+                *metaFunction += AbstractMetaFunction::PropertyWriter;
+                metaFunction->setPropertySpecIndex(propertyFunction.index);
+            }
+            break;
+        case AbstractMetaClass::PropertyFunction::Reset:
+            // Property resetter must be in the form "void name()"
+            if (metaFunction->isVoid() && metaFunction->arguments().isEmpty()) {
+                *metaFunction += AbstractMetaFunction::PropertyResetter;
+                metaFunction->setPropertySpecIndex(propertyFunction.index);
+            }
+            break;
+        case AbstractMetaClass::PropertyFunction::Notify:
+            if (metaFunction->isSignal()) {
+                *metaFunction += AbstractMetaFunction::PropertyNotify;
+                metaFunction->setPropertySpecIndex(propertyFunction.index);
+            }
+        }
+    }
+
+    if (metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction) {
+        metaClass->setHasPrivateConstructor(true);
+        return;
+    }
+
+    if (metaFunction->isConstructor() && !metaFunction->isPrivate()) // Including Copy CT
+        metaClass->setHasNonPrivateConstructor(true);
+
+    if (metaFunction->isDestructor()) {
+        metaClass->setHasPrivateDestructor(metaFunction->isPrivate());
+        metaClass->setHasProtectedDestructor(metaFunction->isProtected());
+        metaClass->setHasVirtualDestructor(metaFunction->isVirtual());
+        return;
+    }
+
+    if (metaFunction->isSignal() && metaClass->hasSignal(metaFunction.get()))
+        ReportHandler::addGeneralMessage(msgSignalOverloaded(metaClass, metaFunction.get()));
+
+    if (metaFunction->isConversionOperator())
+        fixReturnTypeOfConversionOperator(metaFunction);
+
+    AbstractMetaClass::addFunction(metaClass, metaFunction);
+    applyFunctionModifications(metaFunction);
+}
+
+void AbstractMetaBuilderPrivate::traverseClassFunction(const ScopeModelItem& scopeItem,
+                                                       const FunctionModelItem &function,
+                                                       const AbstractMetaFunctionPtr &metaFunction,
+                                                       const AbstractMetaClassPtr &metaClass) const
+{
+    Q_UNUSED(scopeItem)
+    Q_UNUSED(function)
+    traverseClassFunction(metaFunction, metaClass);
+}
+
+void AbstractMetaBuilderPrivate::traverseClassFunctions(const ScopeModelItem& scopeItem,
+                                                        const AbstractMetaClassPtr &metaClass)
+{
+    Q_ASSERT(metaClass);
+    AbstractMetaClass::Attributes constructorAttributes;
+    for (const FunctionModelItem &function : scopeItem->functions()) {
+        if (function->isSpaceshipOperator() && !function->isDeleted()) {
+            AbstractMetaClass::addSynthesizedComparisonOperators(metaClass,
+                                                                 InternalFunctionFlag::OperatorCpp20Spaceship);
+        } else if (auto metaFunction = traverseFunction(function, metaClass)) {
+            traverseClassFunction(scopeItem, function, metaFunction, metaClass);
         } else if (!function->isDeleted() && function->functionType() == CodeModel::Constructor) {
             // traverseFunction() failed: mark rejected constructors
             auto arguments = function->arguments();
-            *constructorAttributes |= AbstractMetaClass::HasRejectedConstructor;
+            constructorAttributes |= AbstractMetaClass::HasRejectedConstructor;
             if (arguments.isEmpty() || arguments.constFirst()->defaultValue())
-                *constructorAttributes |= AbstractMetaClass::HasRejectedDefaultConstructor;
+                constructorAttributes |= AbstractMetaClass::HasRejectedDefaultConstructor;
         }
     }
-    return result;
-}
 
-void AbstractMetaBuilderPrivate::traverseFunctions(const ScopeModelItem& scopeItem,
-                                                   const AbstractMetaClassPtr &metaClass)
-{
-    AbstractMetaClass::Attributes constructorAttributes;
-    const AbstractMetaFunctionList functions =
-        classFunctionList(scopeItem, &constructorAttributes, metaClass);
     metaClass->setAttributes(metaClass->attributes() | constructorAttributes);
-
-    for (const auto &metaFunction : functions) {
-        if (metaClass->isNamespace())
-            metaFunction->setCppAttribute(FunctionAttribute::Static);
-
-        const auto propertyFunction = metaClass->searchPropertyFunction(metaFunction->name());
-        if (propertyFunction.index >= 0) {
-           QPropertySpec prop = metaClass->propertySpecs().at(propertyFunction.index);
-            switch (propertyFunction.function) {
-            case AbstractMetaClass::PropertyFunction::Read:
-                // Property reader must be in the form "<type> name()"
-                if (!metaFunction->isSignal()
-                    && prop.typeEntry() == metaFunction->type().typeEntry()
-                    && metaFunction->arguments().isEmpty()) {
-                    *metaFunction += AbstractMetaFunction::PropertyReader;
-                    metaFunction->setPropertySpecIndex(propertyFunction.index);
-                }
-                break;
-            case AbstractMetaClass::PropertyFunction::Write:
-                // Property setter must be in the form "void name(<type>)"
-                // Make sure the function was created with all arguments; some
-                // argument can be missing during the parsing because of errors
-                // in the typesystem.
-                if (metaFunction->isVoid() && metaFunction->arguments().size() == 1
-                    && (prop.typeEntry() == metaFunction->arguments().at(0).type().typeEntry())) {
-                    *metaFunction += AbstractMetaFunction::PropertyWriter;
-                    metaFunction->setPropertySpecIndex(propertyFunction.index);
-                }
-                break;
-            case AbstractMetaClass::PropertyFunction::Reset:
-                // Property resetter must be in the form "void name()"
-                if (metaFunction->isVoid() && metaFunction->arguments().isEmpty()) {
-                    *metaFunction += AbstractMetaFunction::PropertyResetter;
-                    metaFunction->setPropertySpecIndex(propertyFunction.index);
-                }
-                break;
-            case AbstractMetaClass::PropertyFunction::Notify:
-                if (metaFunction->isSignal()) {
-                    *metaFunction += AbstractMetaFunction::PropertyNotify;
-                    metaFunction->setPropertySpecIndex(propertyFunction.index);
-                }
-            }
-        }
-
-        if (metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction
-            && metaFunction->isPrivate()) {
-            metaClass->setHasPrivateConstructor(true);
-        }
-        if (metaFunction->isConstructor() && !metaFunction->isPrivate()) // Including Copy CT
-            metaClass->setHasNonPrivateConstructor(true);
-
-        if (!metaFunction->isDestructor()
-            && !(metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction)) {
-
-            if (metaFunction->isSignal() && metaClass->hasSignal(metaFunction.get()))
-                ReportHandler::addGeneralMessage(msgSignalOverloaded(metaClass, metaFunction.get()));
-
-            if (metaFunction->isConversionOperator())
-                fixReturnTypeOfConversionOperator(metaFunction);
-
-            AbstractMetaClass::addFunction(metaClass, metaFunction);
-            applyFunctionModifications(metaFunction);
-        } else if (metaFunction->isDestructor()) {
-            metaClass->setHasPrivateDestructor(metaFunction->isPrivate());
-            metaClass->setHasProtectedDestructor(metaFunction->isProtected());
-            metaClass->setHasVirtualDestructor(metaFunction->isVirtual());
-        }
-    }
 
     fillAddedFunctions(metaClass);
 }

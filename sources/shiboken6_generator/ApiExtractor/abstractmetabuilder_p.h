@@ -102,11 +102,16 @@ public:
     std::optional<AbstractMetaEnum>
         traverseTypedefedEnum(const FileModelItem &dom, const TypeDefModelItem &typeDefItem,
                               const AbstractMetaClassPtr &enclosing);
-    AbstractMetaFunctionList classFunctionList(const ScopeModelItem &scopeItem,
-                                               AbstractMetaClass::Attributes *constructorAttributes,
-                                               const AbstractMetaClassPtr &currentClass);
-    void traverseFunctions(const ScopeModelItem& item,
-                           const AbstractMetaClassPtr &parent);
+    void traverseClassFunction(const ScopeModelItem& scopeItem,
+                                      const FunctionModelItem &function,
+                                      const AbstractMetaFunctionPtr &metaFunction,
+                                      const AbstractMetaClassPtr &metaClass) const;
+    static void traverseClassFunction(const AbstractMetaFunctionPtr &metaFunction,
+                                      const AbstractMetaClassPtr &metaClass);
+    void traverseNameSpaceFunctions(const ScopeModelItem& scopeItem,
+                                    const AbstractMetaClassPtr &metaClass);
+    void traverseClassFunctions(const ScopeModelItem& item,
+                                const AbstractMetaClassPtr &parent);
     static void applyFunctionModifications(const AbstractMetaFunctionPtr &func);
     void traverseFields(const ScopeModelItem &item, const AbstractMetaClassPtr &parent);
     bool traverseStreamOperator(const FunctionModelItem &functionItem,
