@@ -1062,6 +1062,10 @@ QString AbstractMetaFunctionPrivate::signatureComment(const AbstractMetaFunction
     if (!q->isVoid())
         str << "->" << (q->isTypeModified() ? q->modifiedTypeName() : q->type().minimalSignature());
 
+    if (q->isUserAdded())
+        str << " [user added]";
+    else if (q->isUserDeclared())
+        str << " [user declared]";
     if (q->isOperatorOverload()) {
         if (QString opDescr = msgSynthesizedOperatorDescription(q); !opDescr.isEmpty())
             str << ' ' << opDescr;
