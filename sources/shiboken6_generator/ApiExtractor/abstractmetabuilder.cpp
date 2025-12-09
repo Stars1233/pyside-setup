@@ -160,6 +160,14 @@ const QMultiHash<QString, QString> &AbstractMetaBuilder::typedefTargetToName() c
     return d->m_typedefTargetToName;
 }
 
+static inline bool warnAboutConstMismatch(const AbstractMetaFunctionCPtr &function,
+                                          const QString &signature)
+{
+    return function->isConstant() && !signature.startsWith(u'^') && signature.endsWith(u')')
+           // An operator synthesized from a free operator?
+           && !(function->isOperatorOverload() && signature.contains(u','));
+}
+
 // Check whether a function modification can be found in a class, else
 // warn with candidates.
 static void checkModification(const FunctionModification &modification,
@@ -176,7 +184,7 @@ static void checkModification(const FunctionModification &modification,
     const QString &signature = modification.signature();
     auto it = std::find_if(functions.cbegin(), functions.cend(), modificationPredicate);
     if (it != functions.cend()) {
-        if ((*it)->isConstant() && signature.endsWith(u')')) // Warn about missing const
+        if (warnAboutConstMismatch(*it, signature))
             qCWarning(lcShiboken, "%s", qPrintable(msgModificationConstMismatch(*it, signature)));
         return;
     }
