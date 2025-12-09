@@ -945,6 +945,7 @@ void AbstractMetaClass::addSynthesizedComparisonOperators(const AbstractMetaClas
                                                            Access::Public, arguments,
                                                            returnType, c);
         f->setFlags(f->flags() | flags);
+        f->setConstant(true);
         AbstractMetaFunctionCPtr newFunction(f);
         c->d->addFunction(newFunction);
         ReportHandler::addGeneralMessage(msgSynthesizedFunction(newFunction));

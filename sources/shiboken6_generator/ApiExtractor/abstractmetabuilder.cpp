@@ -356,6 +356,8 @@ void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionMode
             flags.setFlag(InternalFunctionFlag::OperatorClassArgumentByValue);
     }
     metaFunction->setFlags(flags);
+    if (metaFunction->isComparisonOperator())
+        metaFunction->setConstant(true);
     metaFunction->setAccess(Access::Public);
     AbstractMetaClass::addFunction(baseoperandClass, metaFunction);
     ReportHandler::addGeneralMessage(msgSynthesizedFunction(metaFunction, item));
