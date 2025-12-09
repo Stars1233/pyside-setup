@@ -1900,10 +1900,8 @@
         <!-- Functions removed to proper deal with strings containing zeroes -->
         <modify-function signature="append(const char*)" remove="all" />
         <modify-function signature="append(const char*,int)" remove="all" />
-        <modify-function signature="operator==(const char*,ByteArray)" remove="all" />
-        <modify-function signature="operator==(ByteArray,const char*)" remove="all" />
-        <modify-function signature="operator!=(const char*,ByteArray)" remove="all" />
-        <modify-function signature="operator!=(ByteArray,const char*)" remove="all" />
+        <modify-function signature="operator==(const char*)const" remove="all" />
+        <modify-function signature="operator!=(const char*)const" remove="all" />
         <modify-function signature="operator+(ByteArray,const char*)" remove="all" />
         <modify-function signature="operator+(const char*,ByteArray)" remove="all" />
         <modify-function signature="operator+=(const char*)" remove="all" />

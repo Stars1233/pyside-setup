@@ -2101,17 +2101,14 @@
     <!-- ### These overloads must be removed accept strings with \x00 in their contents -->
     <modify-function signature="append(const char*)" remove="all"/>
     <modify-function signature="prepend(const char*)" remove="all"/>
-    <modify-function signature="operator==(const char*,QByteArray)" remove="all"/>
-    <modify-function signature="operator==(QByteArray,const char*)" remove="all"/>
-    <modify-function signature="operator>(const char*,QByteArray)" remove="all"/>
-    <modify-function signature="operator>(QByteArray,const char*)" remove="all"/>
-    <modify-function signature="operator>=(const char*,QByteArray)" remove="all"/>
-    <modify-function signature="operator>=(QByteArray,const char*)" remove="all"/>
-    <modify-function signature="operator&lt;(const char*,QByteArray)" remove="all"/>
-    <modify-function signature="operator&lt;=(const char*,QByteArray)" remove="all"/>
-    <modify-function signature="operator&lt;=(QByteArray,const char*)" remove="all"/>
-    <modify-function signature="operator!=(const char*,QByteArray)" remove="all"/>
-    <modify-function signature="operator!=(QByteArray,const char*)" remove="all"/>
+    <modify-function signature="operator==(const char*)const" remove="all"/>
+    <modify-function signature="operator>(const char*)const" remove="all"/>
+    <modify-function signature="operator>(const char*)const" remove="all"/>
+    <modify-function signature="operator>=(const char*)const" remove="all"/>
+    <modify-function signature="operator>=(const char*)const" remove="all"/>
+    <modify-function signature="operator&lt;(const char*)const" remove="all"/>
+    <modify-function signature="operator&lt;=(const char*)const" remove="all"/>
+    <modify-function signature="operator!=(const char*)const" remove="all"/>
     <modify-function signature="operator+=(const char*)" remove="all"/>
     <modify-function signature="operator+(QByteArray,const char*)" remove="all"/>
     <modify-function signature="operator+(const char*,QByteArray)" remove="all"/>
@@ -2190,12 +2187,6 @@
     <modify-function signature="number(qulonglong,int)" remove="all"/>
     <modify-function signature="operator+=(const char*)" remove="all"/>
     <modify-function signature="operator+(char,QByteArray)" remove="all"/>
-    <modify-function signature="operator==(const char*,QByteArray)" remove="all"/>
-    <modify-function signature="operator!=(const char*,QByteArray)" remove="all"/>
-    <modify-function signature="operator&lt;(const char*,QByteArray)" remove="all"/>
-    <modify-function signature="operator&lt;=(const char*,QByteArray)" remove="all"/>
-    <modify-function signature="operator>(const char*,QByteArray)" remove="all"/>
-    <modify-function signature="operator>=(const char*,QByteArray)" remove="all"/>
     <!-- Those types have the same representation in Python, an overload
          would be useless and cause overflow errors. -->
     <modify-function signature="setNum(uint,int)" remove="all"/>
