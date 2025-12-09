@@ -1811,12 +1811,10 @@ AbstractMetaFunctionPtr
             // Check if it's a reverse operator
             if (metaArguments[1].type().typeEntry() == metaClass->typeEntry()) {
                 metaFunction->setReverseOperator(true);
-                // we need to call these two function to cache the old signature (with two args)
-                // we do this buggy behaviour to comply with the original apiextractor buggy behaviour.
-                metaFunction->signature();
-                metaFunction->minimalSignature();
-                metaArguments.removeLast();
-                metaFunction->setArguments(metaArguments);
+                // Cache the old signature (with two args) for modifications
+                QString minimalSignature = metaFunction->minimalSignature();
+                metaFunction->takeArgument(1);
+                metaFunction->setUnresolvedSignatures({minimalSignature});
             } else {
                 qCWarning(lcShiboken) << "Operator overload can have two arguments only if it's a reverse operator!";
             }

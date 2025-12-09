@@ -53,7 +53,7 @@ public:
     {
     }
 
-    void fixArgumentIndexes();
+    void signatureChanged();
 
     QString signature() const;
     QString formatMinimalSignature() const;
@@ -104,10 +104,12 @@ public:
     TypeSystem::ExceptionHandling m_exceptionHandlingModification = TypeSystem::ExceptionHandling::Unspecified;
 };
 
-void AbstractMetaFunctionPrivate::fixArgumentIndexes()
+void AbstractMetaFunctionPrivate::signatureChanged()
 {
     for (qsizetype i = 0, size = m_arguments.size(); i < size; ++i)
         m_arguments[i].setArgumentIndex(i);
+    m_cachedMinimalSignature.clear();
+    m_cachedSignature.clear();
 }
 
 AbstractMetaFunction::AbstractMetaFunction(const QString &name) :
@@ -579,7 +581,10 @@ bool AbstractMetaFunction::isConstant() const
 
 void AbstractMetaFunction::setConstant(bool constant)
 {
-    d->m_constant = constant;
+    if (d->m_constant != constant) {
+        d->m_constant = constant;
+        d->signatureChanged();
+    }
 }
 
 bool AbstractMetaFunction::isUserAdded() const
@@ -727,6 +732,7 @@ AbstractMetaArgumentList &AbstractMetaFunction::arguments()
 void AbstractMetaFunction::setArguments(const AbstractMetaArgumentList &arguments)
 {
     d->m_arguments = arguments;
+    d->signatureChanged();
 }
 
 void AbstractMetaFunction::setArgumentName(qsizetype a, const QString &name)
@@ -737,6 +743,7 @@ void AbstractMetaFunction::setArgumentName(qsizetype a, const QString &name)
 void AbstractMetaFunction::addArgument(const AbstractMetaArgument &argument)
 {
     d->m_arguments << argument;
+    d->signatureChanged();
 }
 
 AbstractMetaArgument AbstractMetaFunction::takeArgument(qsizetype a)
@@ -744,15 +751,17 @@ AbstractMetaArgument AbstractMetaFunction::takeArgument(qsizetype a)
     AbstractMetaArgument result;
     if (a >= 0 && a < d->m_arguments.size()) {
         result = d->m_arguments.takeAt(a);
-        d->fixArgumentIndexes();
+        d->signatureChanged();
     }
     return result;
 }
 
 void AbstractMetaFunction::reverseArguments()
 {
-    std::reverse(d->m_arguments.begin(), d->m_arguments.end());
-    d->fixArgumentIndexes();
+    if (d->m_arguments.size() > 1) {
+        std::reverse(d->m_arguments.begin(), d->m_arguments.end());
+        d->signatureChanged();
+    }
 }
 
 static bool modifiedDeprecated(const FunctionModification &mod)
