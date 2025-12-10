@@ -106,6 +106,8 @@ private:
     static void writeMetaCast(TextStream &s, const GeneratorContext &classContext);
 
     void writeEnumConverterFunctions(TextStream &s, const AbstractMetaEnum &metaEnum) const;
+    static void writePointerToPythonConverter(TextStream &c, const GeneratorContext &context,
+                                              const QString &cpythonType);
     void writeConverterFunctions(TextStream &s, const AbstractMetaClassCPtr &metaClass,
                                  const GeneratorContext &classContext) const;
     void writeCustomConverterFunctions(TextStream &s,

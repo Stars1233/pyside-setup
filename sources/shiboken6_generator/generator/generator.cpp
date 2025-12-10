@@ -376,6 +376,12 @@ QString Generator::getFullTypeName(const AbstractMetaClassCPtr &metaClass)
     return metaClass->isTypeDef() ? qualName : addGlobalScopePrefix(qualName);
 }
 
+QString Generator::getFullTypeName(const GeneratorContext &classContext)
+{
+    return classContext.forSmartPointer()
+        ? getFullTypeName(classContext.preciseType()) : getFullTypeName(classContext.metaClass());
+}
+
 QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType &type)
 {
     if (type.isCString())

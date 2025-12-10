@@ -170,6 +170,7 @@ protected:
     static QString getFullTypeName(TypeEntryCPtr type);
     static QString getFullTypeName(const AbstractMetaType &type);
     static QString getFullTypeName(const AbstractMetaClassCPtr &metaClass);
+    static QString getFullTypeName(const GeneratorContext &classContext);
 
     /**
      *  Returns the full qualified C++ name for an AbstractMetaType, but removing modifiers

@@ -1769,15 +1769,18 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMeta
     s << '\n';
 }
 
-static void writePointerToPythonConverter(TextStream &c,
-                                          const AbstractMetaClassCPtr &metaClass,
-                                          const QString &typeName,
-                                          const QString &cpythonType)
+void CppGenerator::writePointerToPythonConverter(TextStream &c,
+                                                 const GeneratorContext &context,
+                                                 const QString &cpythonType)
 {
+    const auto &metaClass = context.metaClass();
     c << "auto *pyOut = reinterpret_cast<PyObject *>(" << retrieveWrapper(metaClass, "cppIn") << ");\n"
         << "if (pyOut) {\n" << indent
         << "Py_INCREF(pyOut);\nreturn pyOut;\n" << outdent
         << "}\n";
+
+    QString instanceCast = "auto *tCppIn = reinterpret_cast<const "_L1 + getFullTypeName(context)
+                           + " *>(cppIn);\n"_L1;
 
     const QString nameFunc = metaClass->typeEntry()->polymorphicNameFunction();
     if (nameFunc.isEmpty() && !metaClass->hasVirtualDestructor()) {
@@ -1786,8 +1789,7 @@ static void writePointerToPythonConverter(TextStream &c,
         return;
     }
 
-    c   << "auto *tCppIn = reinterpret_cast<const " << typeName << R"( *>(cppIn);
-const char *typeName = )";
+    c << instanceCast << "const char *typeName = ";
     if (nameFunc.isEmpty())
         c << "typeid(*tCppIn).name();\n";
     else
@@ -1819,13 +1821,8 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
     if (metaClass->isNamespace())
         return;
 
-    QString typeName;
-    if (!classContext.forSmartPointer())
-        typeName = getFullTypeName(metaClass);
-    else
-        typeName = getFullTypeName(classContext.preciseType());
-
-    QString cpythonType = cpythonTypeName(metaClass);
+    const QString typeName = getFullTypeName(classContext);
+    const QString cpythonType = cpythonTypeName(metaClass);
 
     // Returns the C++ pointer of the Python wrapper.
     s << "// Python to C++ pointer conversion - returns the C++ object of the Python wrapper (keeps object identity).\n";
@@ -1848,7 +1845,7 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
         c << "return PySide::getWrapperForQObject(reinterpret_cast<"
             << typeName << " *>(const_cast<void *>(cppIn)), " << cpythonType << ");\n";
     } else {
-        writePointerToPythonConverter(c, metaClass, typeName, cpythonType);
+        writePointerToPythonConverter(c, classContext, cpythonType);
     }
     std::swap(targetTypeName, sourceTypeName);
     writeCppToPythonFunction(s, c.toString(), sourceTypeName, targetTypeName);
