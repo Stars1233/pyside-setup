@@ -106,6 +106,11 @@ enum class SmartPointerType : std::uint8_t {
     ValueHandle
 };
 
+enum class SmartPointerToPythonConversion : std::uint8_t {
+    Default,
+    NullAsNone,
+};
+
 enum class PythonEnumType : std::uint8_t {
     Unspecified,
     Enum,

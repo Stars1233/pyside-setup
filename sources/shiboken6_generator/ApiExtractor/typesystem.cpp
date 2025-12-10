@@ -2182,6 +2182,8 @@ public:
     TypeEntryCList m_excludedInstantiations;
     CustomConversionPtr m_customConversion;
     TypeSystem::SmartPointerType m_smartPointerType;
+    TypeSystem::SmartPointerToPythonConversion m_toPythonConversion =
+        TypeSystem::SmartPointerToPythonConversion::Default;
 };
 
 qsizetype SmartPointerTypeEntryPrivate::instantiationIndex(const TypeEntryCPtr &t) const
@@ -2291,6 +2293,18 @@ const TypeEntryCList &SmartPointerTypeEntry::excludedInstantiations() const
 {
     S_D(const SmartPointerTypeEntry);
     return d->m_excludedInstantiations;
+}
+
+TypeSystem::SmartPointerToPythonConversion SmartPointerTypeEntry::toPythonConversion() const
+{
+    S_D(const SmartPointerTypeEntry);
+    return d->m_toPythonConversion;
+}
+
+void  SmartPointerTypeEntry::setToPythonConversion(TypeSystem::SmartPointerToPythonConversion c)
+{
+    S_D(SmartPointerTypeEntry);
+    d->m_toPythonConversion = c;
 }
 
 SmartPointerTypeEntry::SmartPointerTypeEntry(SmartPointerTypeEntryPrivate *d) :

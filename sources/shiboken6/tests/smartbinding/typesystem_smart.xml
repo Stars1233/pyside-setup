@@ -13,6 +13,9 @@
     <smart-pointer-type name="SharedPtr" type="shared" getter="data" ref-count-method="useCount"
                         null-check-method="isNull"
                         instantiations="Integer,Smart::Integer2=Test::SmartInteger2Ptr,Obj"/>
+    <smart-pointer-type name="SharedPtr2" type="shared" getter="data" ref-count-method="useCount"
+                        null-check-method="isNull" to-python="null-as-none"
+                        instantiations="Integer"/>
 
     <object-type name="Obj" />
     <value-type name="Integer" />

@@ -147,6 +147,18 @@ SharedPtr<const Integer> Obj::createSharedPtrConstInteger()
     return co;
 }
 
+SharedPtr2<Integer> Obj::createNullSharedPtr2Integer()
+{
+    return {};
+}
+
+SharedPtr2<Integer> Obj::createSharedPtr2Integer(int value)
+{
+    auto *i = new Integer;
+    i->setValue(value);
+    return SharedPtr2<Integer>(i);
+}
+
 int Obj::takeSharedPtrToConstInteger(SharedPtr<const Integer> pInt)
 {
     return pInt->m_int;

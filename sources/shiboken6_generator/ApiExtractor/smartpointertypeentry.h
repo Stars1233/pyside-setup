@@ -50,6 +50,9 @@ public:
     void setExcludedInstantiations(const TypeEntryCList &ex);
     const TypeEntryCList &excludedInstantiations() const;
 
+    TypeSystem::SmartPointerToPythonConversion toPythonConversion() const;
+    void setToPythonConversion(TypeSystem::SmartPointerToPythonConversion c);
+
     QString getTargetName(const AbstractMetaType &metaType) const;
 
     bool hasCustomConversion() const;

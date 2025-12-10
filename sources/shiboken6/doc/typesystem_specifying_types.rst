@@ -770,6 +770,7 @@ will be generated into specific modules.
             reset-method="..."
             instantiations="..."
             excluded-instantiations="..."/>
+            to-python="default"
         </typesystem>
 
 
@@ -796,6 +797,24 @@ The *optional* **excluded-instantiations** attribute specifies a
 comma-separated list of types to be excluded from instantiating. Typically,
 this is used to exclude instantiations present in an underlying base module to
 prevent symbol clashes.
+
+The *optional* **to-python** attribute specifies how a smart pointer
+instance is converted to Python:
+
+.. list-table::
+  :header-rows: 1
+
+  * - Value
+
+    - Meaning
+
+  * - ``default``
+
+    - A smart pointer instance is returned in all cases
+
+  * - ``null-as-none``
+
+    - ``None`` is returned if the smart pointer is null.
 
 The *optional* attribute **type** specifies the type:
 

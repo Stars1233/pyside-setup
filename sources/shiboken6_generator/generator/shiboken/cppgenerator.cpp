@@ -1777,6 +1777,19 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMeta
     s << '\n';
 }
 
+static void writeSmartPointerNoneReturnCheck(TextStream &c, QAnyStringView varName,
+                                             const SmartPointerTypeEntryCPtr &ste)
+{
+    c << "if (";
+    if (!ste->nullCheckMethod().isEmpty())
+        c << varName << "->" << ste->nullCheckMethod() << "()";
+    else if (!ste->valueCheckMethod().isEmpty())
+        c << '!' << varName << "->" << ste->valueCheckMethod() << "()";
+    else
+        c << "!*" << varName;
+    c << ")\n" << indent << "Py_RETURN_NONE;\n" << outdent;
+}
+
 void CppGenerator::writePointerToPythonConverter(TextStream &c,
                                                  const GeneratorContext &context,
                                                  const QString &cpythonType)
@@ -1789,6 +1802,16 @@ void CppGenerator::writePointerToPythonConverter(TextStream &c,
 
     QString instanceCast = "auto *tCppIn = reinterpret_cast<const "_L1 + getFullTypeName(context)
                            + " *>(cppIn);\n"_L1;
+
+    if (context.forSmartPointer()) {
+        auto ste = std::static_pointer_cast<const SmartPointerTypeEntry>(context.metaClass()->typeEntry());
+        const auto toPythonConversion = ste->toPythonConversion();
+        if (toPythonConversion == TypeSystem::SmartPointerToPythonConversion::NullAsNone) {
+            c << instanceCast;
+            writeSmartPointerNoneReturnCheck(c, "tCppIn", ste);
+            instanceCast.clear();
+        }
+    }
 
     const QString nameFunc = metaClass->typeEntry()->polymorphicNameFunction();
     if (nameFunc.isEmpty() && !metaClass->hasVirtualDestructor()) {
@@ -1879,6 +1902,14 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
     } else {
         c << "auto *source = reinterpret_cast<const " << typeName << " *>(cppIn);\n";
     }
+
+    if (classContext.forSmartPointer()) {
+        auto ste = std::static_pointer_cast<const SmartPointerTypeEntry>(classContext.metaClass()->typeEntry());
+        const auto toPythonConversion = ste->toPythonConversion();
+        if (toPythonConversion == TypeSystem::SmartPointerToPythonConversion::NullAsNone)
+            writeSmartPointerNoneReturnCheck(c, "source", ste);
+    }
+
     c << "return Shiboken::Object::newObject(" << cpythonType
         << ", new " << globalScopePrefix(classContext) << classContext.effectiveClassName() << '('
         << (needsMove ? "std::move(*source)" : "*source")

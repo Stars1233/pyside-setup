@@ -38,6 +38,9 @@ public:
     static SharedPtr<Integer> createSharedPtrInteger(int value);
     static SharedPtr<Integer> createNullSharedPtrInteger();
 
+    static SharedPtr2<Integer> createNullSharedPtr2Integer();
+    static SharedPtr2<Integer> createSharedPtr2Integer(int value);
+
     int m_integer;  // public for testing member field access.
     Integer *m_internalInteger;
 };

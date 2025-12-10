@@ -288,6 +288,14 @@ class SmartPointerTests(unittest.TestCase):
         o.takeSharedPtrToInteger(None)
         o.takeSharedPtrToIntegerByConstRef(None)
 
+    def testNoneConversion(self):
+        """PYSIDE-3253: SharedPtr2 is configured to convert to None."""
+        valid_ptr = Obj.createSharedPtr2Integer(42)
+        null_ptr = Obj.createNullSharedPtr2Integer()
+        self.assertEqual(valid_ptr.value(), 42)
+        self.assertFalse(valid_ptr is None)
+        self.assertTrue(null_ptr is None)
+
     def testConstruction(self):
         p1 = SharedPtr_Integer(integerFromValue(42))
         self.assertEqual(p1.value(), 42)

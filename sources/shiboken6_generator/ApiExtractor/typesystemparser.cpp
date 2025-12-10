@@ -50,6 +50,7 @@ constexpr auto allowThreadAttribute = "allow-thread"_L1;
 constexpr auto checkFunctionAttribute = "check-function"_L1;
 constexpr auto defaultConstructibleAttribute = "default-constructible"_L1;
 constexpr auto copyableAttribute = "copyable"_L1;
+constexpr auto smartPointerToPythonConversionAttribute = "to-python"_L1;
 constexpr auto movableAttribute = "movable"_L1;
 constexpr auto accessAttribute = "access"_L1;
 constexpr auto actionAttribute = "action"_L1;
@@ -422,6 +423,14 @@ ENUM_LOOKUP_BEGIN(TypeSystem::SmartPointerType, Qt::CaseSensitive,
     {u"unique", TypeSystem::SmartPointerType::Unique},
     {u"value-handle", TypeSystem::SmartPointerType::ValueHandle},
     {u"shared", TypeSystem::SmartPointerType::Shared}
+};
+ENUM_LOOKUP_LINEAR_SEARCH
+
+ENUM_LOOKUP_BEGIN(TypeSystem::SmartPointerToPythonConversion, Qt::CaseSensitive,
+                  smartPointerToPythonConversionFromAttribute)
+{
+    {u"default", TypeSystem::SmartPointerToPythonConversion::Default},
+    {u"null-as-none", TypeSystem::SmartPointerToPythonConversion::NullAsNone}
 };
 ENUM_LOOKUP_LINEAR_SEARCH
 
@@ -1430,6 +1439,8 @@ SmartPointerTypeEntryPtr
     TypeDatabaseParserContext::SmartPointerEntry entry;
     QString instantiations;
     QString excludedInstantiations;
+    TypeSystem::SmartPointerToPythonConversion conversion =
+        TypeSystem::SmartPointerToPythonConversion::Default;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"type") {
@@ -1454,6 +1465,14 @@ SmartPointerTypeEntryPtr
             nullCheckMethod = attributes->takeAt(i).value().toString();
         } else if (name == u"reset-method") {
             resetMethod =  attributes->takeAt(i).value().toString();
+        } else if (name == smartPointerToPythonConversionAttribute) {
+            const auto attribute = attributes->takeAt(i);
+            const auto convOpt = smartPointerToPythonConversionFromAttribute(attribute.value());
+            if (!convOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
+                return nullptr;
+            }
+            conversion = convOpt.value();
         }
     }
 
@@ -1486,6 +1505,7 @@ SmartPointerTypeEntryPtr
                                                         currentParentTypeEntry());
     if (!applyComplexTypeAttributes(reader, type, attributes))
         return nullptr;
+    type->setToPythonConversion(conversion);
     type->setNullCheckMethod(nullCheckMethod);
     type->setValueCheckMethod(valueCheckMethod);
     type->setResetMethod(resetMethod);

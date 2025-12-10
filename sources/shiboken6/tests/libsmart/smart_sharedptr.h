@@ -91,4 +91,10 @@ public:
     std::shared_ptr<T> mPtr;
 };
 
+template <class T>
+class SharedPtr2 : public SharedPtr<T> {
+public:
+    using SharedPtr<T>::SharedPtr;
+};
+
 #endif // SMART_SHARED_PTR_H
