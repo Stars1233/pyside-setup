@@ -14,6 +14,10 @@ Qt Modules Supported by Qt for Python
 
         Provides access to Bluetooth hardware.
 
+    .. grid-item-card:: :mod:`Qt Canvas Painter <PySide6.QtCanvasPainter>`
+
+        Provides an API for accelerated, imperative 2D painting.
+
     .. grid-item-card:: :mod:`Qt Charts <PySide6.QtCharts>`
 
         UI Components for displaying visually pleasing charts,

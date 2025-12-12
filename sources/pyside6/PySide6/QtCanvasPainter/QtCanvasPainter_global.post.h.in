@@ -1,0 +1,3 @@
+#include <rhi/qrhi.h> // Some virtuals of QCPainterWidget and others use QRhi
+#include <rhi/qrhi_platform.h>
+#include <rhi/qshader.h>

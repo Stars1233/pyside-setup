@@ -1,0 +1,3 @@
+include(@QT_SRC_DIR@/../qtcanvaspainter/src/canvaspainter/doc/qtcanvaspainter.qdocconf)
+includepaths += -I @QT_SRC_DIR@/../qtcanvaspainter/src/canvaspainter
+include(../pyside-config.qdocconf)

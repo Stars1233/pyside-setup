@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+// Copyright (C) 2026 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+-->
+<typesystem package="PySide6.QtCanvasPainter"
+            namespace-begin="QT_BEGIN_NAMESPACE" namespace-end="QT_END_NAMESPACE">
+    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
+    <load-typesystem name="QtQuick/typesystem_quick.xml" generate="no"/>
+    <value-type name="QCBoxGradient"/>
+    <value-type name="QCBoxShadow"/>
+    <value-type name="QCBrush">
+        <enum-type name="BrushType"/>
+    </value-type>
+    <value-type name="QCConicalGradient"/>
+    <value-type name="QCCustomBrush"/>
+    <value-type name="QCGradient"/>
+    <value-type name="QCGridPattern"/>
+    <value-type name="QCImage"/>
+    <value-type name="QCImagePattern"/>
+    <value-type name="QCLinearGradient"/>
+    <value-type name="QCOffscreenCanvas">
+        <enum-type name="Flag" flags="Flags"/>
+    </value-type>
+    <object-type name="QCPainter">
+        <enum-type name="PathWinding"/>
+        <enum-type name="LineCap"/>
+        <enum-type name="LineJoin"/>
+        <enum-type name="TextAlign"/>
+        <enum-type name="TextBaseline"/>
+        <enum-type name="TextDirection"/>
+        <enum-type name="CompositeOperation"/>
+        <enum-type name="WrapMode"/>
+        <enum-type name="ImageFlag" flags="ImageFlags"/>
+        <enum-type name="RenderHint" flags="RenderHints"/>
+    </object-type>
+    <object-type name="QCPainterFactory"/>
+    <value-type name="QCPainterPath"/>
+    <object-type name="QCPainterWidget">
+        <add-function signature="grabCanvas(const QCOffscreenCanvas &amp;@canvas@,PyCallable*@resultCallback@)">
+            <inject-code class="target" position="beginning" file="../glue/qtcanvaspainter.cpp"
+                         snippet="qcpainterwidget-grabcanvas"/>
+            <inject-documentation format="target" mode="append" file="../doc/qtcanvaspainter.rst"
+                                  snippet="qcpainterwidget-grabcanvas"/>
+        </add-function>
+    </object-type>
+    <value-type name="QCRadialGradient"/>
+    <object-type name="QCRhiPaintDriver">
+        <enum-type name="EndPaintFlag" flags="EndPaintFlags"/>
+        <add-function signature="grabCanvas(const QCOffscreenCanvas &amp;@canvas@,PyCallable*@resultCallback@)">
+            <inject-code class="target" position="beginning" file="../glue/qtcanvaspainter.cpp"
+                         snippet="qcpainterwidget-grabcanvas"/>
+            <inject-documentation format="target" mode="append" file="../doc/qtcanvaspainter.rst"
+                                  snippet="qcpainterwidget-grabcanvas"/>
+        </add-function>
+    </object-type>
+    <object-type name="QQuickCPainterItem"/>
+    <object-type name="QQuickCPainterRenderer"/>
+</typesystem>

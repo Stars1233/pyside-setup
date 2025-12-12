@@ -197,6 +197,7 @@ def wheel_files_pyside_addons() -> list[ModuleData]:
         module_Qt3DRender(),
         module_QtAxContainer(),
         module_QtBluetooth(),
+        module_QtCanvasPainter(),
         module_QtCharts(),
         module_QtDataVisualization(),
         module_QtGraphs(),
@@ -635,6 +636,12 @@ def module_QtQuickTest() -> ModuleData:
 
 def module_QtQuickWidgets() -> ModuleData:
     data = ModuleData("QuickWidgets")
+    return data
+
+
+def module_QtCanvasPainter() -> ModuleData:
+    data = ModuleData("CanvasPainter")
+
     return data
 
 

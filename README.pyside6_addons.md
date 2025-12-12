@@ -20,6 +20,7 @@ it includes the following Qt modules:
 * Qt3DRender
 * QtAxContainer
 * QtBluetooth
+* QtCanvasPainter
 * QtCharts
 * QtDataVisualization
 * QtGraphs

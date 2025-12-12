@@ -104,6 +104,7 @@ macro(collect_optional_modules)
         Quick
         Quick3D
         QuickControls2
+        CanvasPainter
         QuickTest
         QuickWidgets
         RemoteObjects
