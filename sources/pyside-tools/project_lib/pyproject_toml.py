@@ -91,10 +91,17 @@ def parse_pyproject_toml(pyproject_toml_file: Path) -> PyProjectParseResult:
         result.errors.append(str(e))
         return result
 
-    pyside_table = root_table.get("tool", {}).get("pyside6-project", {})
+    tool_entry = root_table.get("tool", {})
+    pyside_table = tool_entry.get("pyside6-project", {})
     if not pyside_table:
         result.errors.append("Missing [tool.pyside6-project] table")
         return result
+
+    if rcc_table := tool_entry.get("pyside6-rcc", {}):
+        result.rcc_options = rcc_table.get("options", [])
+
+    if uic_table := tool_entry.get("pyside6-uic", {}):
+        result.uic_options = uic_table.get("options", [])
 
     files = pyside_table.get("files", [])
     if not isinstance(files, list):

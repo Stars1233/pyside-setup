@@ -34,8 +34,10 @@ class ProjectData:
         self._python_files: list[Path] = []
         # ui files
         self._ui_files: list[Path] = []
+        self._uic_options: list[str] = []
         # qrc files
         self._qrc_files: list[Path] = []
+        self._rcc_options: list[str] = []
         # ts files
         self._ts_files: list[Path] = []
 
@@ -52,6 +54,9 @@ class ProjectData:
             for error in project_file_data.errors:
                 print(f"{error}", file=sys.stderr)
             sys.exit(1)
+
+        self._rcc_options = project_file_data.rcc_options
+        self._uic_options = project_file_data.uic_options
 
         for f in project_file_data.files:
             file = Path(project_file.parent / f)
@@ -101,8 +106,16 @@ class ProjectData:
         return self._ui_files
 
     @property
+    def uic_options(self):
+        return self._uic_options
+
+    @property
     def qrc_files(self):
         return self._qrc_files
+
+    @property
+    def rcc_options(self):
+        return self._rcc_options
 
     @property
     def qml_files(self):

@@ -8,3 +8,5 @@ from pathlib import Path
 class PyProjectParseResult:
     errors: list[str] = field(default_factory=list)
     files: list[Path] = field(default_factory=list)
+    rcc_options: list[str] = field(default_factory=list)
+    uic_options: list[str] = field(default_factory=list)

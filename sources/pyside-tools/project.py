@@ -104,13 +104,19 @@ class Project:
         """Return path and command for a file's artifact"""
         if file.suffix == ".ui":  # Qt form files
             py_file = f"{file.parent}/ui_{file.stem}.py"
-            return [Path(py_file)], [UIC_CMD, os.fspath(file), "--rc-prefix", "-o", py_file]
+            cmd = [UIC_CMD]
+            cmd.extend(self.project.uic_options)
+            cmd.extend([os.fspath(file), "--rc-prefix", "-o", py_file])
+            return [Path(py_file)], cmd
         if file.suffix == ".qrc":  # Qt resources
             if not output_path:
                 py_file = f"{file.parent}/rc_{file.stem}.py"
             else:
                 py_file = str(output_path.resolve())
-            return [Path(py_file)], [RCC_CMD, os.fspath(file), "-o", py_file]
+            cmd = [RCC_CMD]
+            cmd.extend(self.project.rcc_options)
+            cmd.extend([os.fspath(file), "-o", py_file])
+            return [Path(py_file)], cmd
         # generate .qmltypes from sources with Qml decorators
         if file.suffix == ".py" and file in self._qml_module_sources:
             assert self._qml_module_dir

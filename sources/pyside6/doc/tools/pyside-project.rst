@@ -34,6 +34,17 @@ files are listed in the ``tool.pyside6-project`` table. For example:
     [tool.pyside6-project]
     files = ["main.py", "main_window.py"]
 
+It is also possible to specify options for the :ref:`pyside6-rcc` and
+:ref:`pyside6-uic` tools:
+
+.. code-block:: toml
+
+    [tool.pyside6-rcc]
+    options = ["--compress-algo", "zlib"]
+
+    [tool.pyside6-uic]
+    options = [" --star-imports"]
+
 More information about the ``pyproject.toml`` file format can be found in
 `Python Packaging User Guide specification: "Writing your pyproject.toml"`_.
 
