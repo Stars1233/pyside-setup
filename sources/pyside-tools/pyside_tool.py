@@ -179,7 +179,8 @@ def designer():
         if is_virtual_env():
             _extend_path_var("PATH", os.fspath(Path(sys._base_executable).parent), True)
 
-    qt_tool_wrapper(ui_tool_binary("designer"), sys.argv[1:])
+    args = ["--python-help"] + sys.argv[1:]
+    qt_tool_wrapper(ui_tool_binary("designer"), args)
 
 
 def linguist():
