@@ -425,7 +425,7 @@ instructions:
       enable_if:
           condition: property
           property: host.osVersion
-          equals_value: RHEL_9_4
+          in_values: [RHEL_9_4, RHEL_9_6]
       userMessageOnFailure: >
         Failed to refresh subscription.
 
@@ -436,7 +436,7 @@ instructions:
       enable_if:
           condition: property
           property: host.osVersion
-          equals_value: RHEL_9_4
+          in_values: [RHEL_9_4, RHEL_9_6]
       userMessageOnFailure: >
           Failed to install python 3.11
 
@@ -446,7 +446,7 @@ instructions:
       enable_if:
           condition: property
           property: host.osVersion
-          equals_value: RHEL_9_4
+          in_values: [RHEL_9_4, RHEL_9_6]
 
     # Use pyenv to install Python 3.11 on macOS+Android
     - type: ExecuteCommand
