@@ -31,12 +31,12 @@ Popup {
         open()
     }
 
-    function updateColor(color_id, name, color, pantone_value) {
+    function updateColor(data) {
         newColor = false
-        colorNameField.text = name
-        currentColor = color
-        colorPantoneField.text = pantone_value
-        colorId = color_id
+        colorNameField.text = data.name
+        currentColor = data.color
+        colorPantoneField.text = data.pantone_value
+        colorId = data.id
         open()
     }
 

@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import sys
-from dataclasses import dataclass
-from PySide6.QtCore import (QAbstractListModel, QByteArray,
-                            QUrlQuery, Property, Signal, Slot, Qt)
-from PySide6.QtQml import QmlAnonymous, QmlElement
+from PySide6.QtCore import (QUrlQuery, Property, Signal, Slot)
+from PySide6.QtQml import QmlElement
 
 from abstractresource import AbstractResource
 
@@ -19,123 +17,7 @@ totalPagesField = "total_pages"
 currentPageField = "page"
 
 
-@dataclass
-class ColorUser:
-    id: int
-    email: str
-    avatar: str  # URL
-
-
 @QmlElement
-class ColorUserModel (QAbstractListModel):
-    IdRole = Qt.ItemDataRole.UserRole + 1
-    EmailRole = Qt.ItemDataRole.UserRole + 2
-    AvatarRole = Qt.ItemDataRole.UserRole + 3
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self._users = []
-
-    def clear(self):
-        self.set_data([])
-
-    def set_data(self, json_list):
-        if not self._users and not json_list:
-            return
-        self.beginResetModel()
-        self._users.clear()
-        for e in json_list:
-            self._users.append(ColorUser(int(e["id"]), e["email"], e["avatar"]))
-        self.endResetModel()
-
-    def roleNames(self):
-        roles = {
-            ColorUserModel.IdRole: QByteArray(b'id'),
-            ColorUserModel.EmailRole: QByteArray(b'email'),
-            ColorUserModel.AvatarRole: QByteArray(b'avatar')
-        }
-        return roles
-
-    def rowCount(self, index):
-        return len(self._users)
-
-    def data(self, index, role):
-        if index.isValid():
-            d = self._users[index.row()]
-            if role == ColorUserModel.IdRole:
-                return d.id
-            if role == ColorUserModel.EmailRole:
-                return d.email
-            if role == ColorUserModel.AvatarRole:
-                return d.avatar
-        return None
-
-    def avatarForEmail(self, email):
-        for e in self._users:
-            if e.email == email:
-                return e.avatar
-        return ""
-
-
-@dataclass
-class Color:
-    id: int
-    color: str
-    name: str
-    pantone_value: str
-
-
-@QmlElement
-class ColorModel (QAbstractListModel):
-    IdRole = Qt.ItemDataRole.UserRole + 1
-    ColorRole = Qt.ItemDataRole.UserRole + 2
-    NameRole = Qt.ItemDataRole.UserRole + 3
-    PantoneValueRole = Qt.ItemDataRole.UserRole + 4
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self._colors = []
-
-    def clear(self):
-        self.set_data([])
-
-    def set_data(self, json_list):
-        if not self._colors and not json_list:
-            return
-        self.beginResetModel()
-        self._colors.clear()
-        for e in json_list:
-            self._colors.append(Color(int(e["id"]), e["color"],
-                                      e["name"], e["pantone_value"]))
-        self.endResetModel()
-
-    def roleNames(self):
-        roles = {
-            ColorModel.IdRole: QByteArray(b'color_id'),
-            ColorModel.ColorRole: QByteArray(b'color'),
-            ColorModel.NameRole: QByteArray(b'name'),
-            ColorModel.PantoneValueRole: QByteArray(b'pantone_value')
-        }
-        return roles
-
-    def rowCount(self, index):
-        return len(self._colors)
-
-    def data(self, index, role):
-        if index.isValid():
-            d = self._colors[index.row()]
-            if role == ColorModel.IdRole:
-                return d.id
-            if role == ColorModel.ColorRole:
-                return d.color
-            if role == ColorModel.NameRole:
-                return d.name
-            if role == ColorModel.PantoneValueRole:
-                return d.pantone_value
-        return None
-
-
-@QmlAnonymous
 class PaginatedResource(AbstractResource):
     """This class manages a simple paginated Crud resource,
        where the resource is a paginated list of JSON items."""
@@ -151,12 +33,7 @@ class PaginatedResource(AbstractResource):
         # The default page we request if the user hasn't set otherwise
         self.m_currentPage = 1
         self.m_path = ""
-
-    def _clearModel(self):
-        pass
-
-    def _populateModel(self, json_list):
-        pass
+        self._data = []
 
     @Property(str)
     def path(self):
@@ -200,7 +77,7 @@ class PaginatedResource(AbstractResource):
 
     def refreshRequestFinished(self, json):
         json_object = json.object()
-        self._populateModel(json_object["data"])
+        self._data = json_object["data"]
         self.m_pages = int(json_object[totalPagesField])
         self.m_currentPage = int(json_object[currentPageField])
         self.pageUpdated.emit()
@@ -216,7 +93,7 @@ class PaginatedResource(AbstractResource):
             # Refresh failed and we we're already on page 1 => clear data
             self.m_pages = 0
             self.pagesUpdated.emit()
-            self._clearModel()
+            self._data = []
             self.dataUpdated.emit()
 
     @Slot("QVariantMap", int)
@@ -238,42 +115,6 @@ class PaginatedResource(AbstractResource):
         request = self.m_api.createRequest(f"{self.m_path}/{id}")
         self.m_manager.deleteResource(request, self, self.updateReply)
 
-
-@QmlElement
-class PaginatedColorUsersResource(PaginatedResource):
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.m_model = ColorUserModel(self)
-
-    @Property(ColorUserModel, constant=True)
-    def model(self):
-        return self.m_model
-
-    def _clearModel(self):
-        self.m_model.clear()
-
-    def _populateModel(self, json_list):
-        self.m_model.set_data(json_list)
-
-    @Slot(str, result=str)
-    def avatarForEmail(self, email):
-        return self.m_model.avatarForEmail(email)
-
-
-@QmlElement
-class PaginatedColorsResource(PaginatedResource):
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.m_model = ColorModel(self)
-
-    @Property(ColorModel, constant=True)
-    def model(self):
-        return self.m_model
-
-    def _clearModel(self):
-        self.m_model.clear()
-
-    def _populateModel(self, json_list):
-        self.m_model.set_data(json_list)
+    @Property("QList<QJsonObject>", notify=dataUpdated, final=True)
+    def data(self):
+        return self._data

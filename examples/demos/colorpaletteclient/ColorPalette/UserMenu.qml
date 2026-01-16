@@ -15,7 +15,7 @@ Popup {
     id: userMenu
 
     required property BasicLogin userLoginService
-    required property PaginatedColorUsersResource userMenuUsers
+    required property PaginatedResource userMenuUsers
 
     width: 280
     height: 270
@@ -26,7 +26,7 @@ Popup {
         ListView {
             id: userListView
 
-            model: userMenu.userMenuUsers.model
+            model: userMenu.userMenuUsers.data
             spacing: 5
             footerPositioning: ListView.PullBackFooter
             clip: true
@@ -37,14 +37,12 @@ Popup {
             delegate: Rectangle {
                 id: userInfo
 
-                required property string email
-                required property string avatar
-
                 height: 30
                 width: userListView.width
 
 
-                readonly property bool logged: (email === loginService.user)
+                required property var modelData
+                readonly property bool logged: (modelData.email === userMenu.userLoginService.user)
 
                 Rectangle {
                     id: userImageCliped
@@ -56,7 +54,7 @@ Popup {
                     Image {
                         id: userImage
                         anchors.fill: parent
-                        source: userInfo.avatar
+                        source: userInfo.modelData.avatar
                         visible: false
                     }
 
@@ -81,7 +79,7 @@ Popup {
                     anchors.left: userImageCliped.right
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.margins: 5
-                    text: userInfo.email
+                    text: userInfo.modelData.email
                     font.bold: userInfo.logged
                 }
 
@@ -99,9 +97,9 @@ Popup {
                             userMenu.userLoginService.logout()
                         } else {
                             //! [Login]
-                            userMenu.userLoginService.login({"email" : userInfo.email,
+                            userMenu.userLoginService.login({"email" : userInfo.modelData.email,
                                                 "password" : "apassword",
-                                                "id" : userInfo.id})
+                                                "id" : userInfo.modelData.id})
                             //! [Login]
                             userMenu.close()
                         }

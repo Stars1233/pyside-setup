@@ -41,9 +41,11 @@ The users and colors are paginated resources on the server-side. This means
 that the server provides the data in chunks called pages. The UI listing
 reflects this pagination and views the data on pages.
 
-Viewing the data on UI is done with standard QML views where the model are
-QAbstractListModel-derived classes representing JSON data received from the
-server.
+Viewing the data on UI is done with standard `QML views`_ populated by
+JSON data received from the server via the ``data`` property of the class
+``PaginatedResource``. For C++ compatibility, it is declared to be of type
+``QList<QJsonObject>``. It can be passed a list of dicts as obtained from
+parsing using :class:`~PySide6.QtCore.QJsonDocument`.
 
 Logging in happens via the login function provided by the login popup. Under
 the hood the login sends a HTTP POST request. Upon receiving a successful

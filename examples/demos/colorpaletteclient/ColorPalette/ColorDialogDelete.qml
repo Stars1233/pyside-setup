@@ -20,9 +20,9 @@ Popup {
 
     property string colorName: ""
 
-    function maybeDelete(color_id, name) {
-        colorName = name
-        colorId = color_id
+    function maybeDelete(data) {
+        colorName = data.name
+        colorId = data.id
         open()
     }
 

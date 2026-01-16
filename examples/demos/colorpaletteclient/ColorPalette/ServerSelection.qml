@@ -16,8 +16,8 @@ Item {
 
     signal serverSelected()
 
-    required property PaginatedColorsResource colorResources
-    required property PaginatedColorUsersResource colorUsers
+    required property PaginatedResource colorResources
+    required property PaginatedResource colorUsers
     required property RestService restPalette
 
     Connections {
@@ -34,12 +34,12 @@ Item {
         id: server
         ListElement {
             title: qsTr("Public REST API Test Server")
-            url: "https://reqres.in"
+            url: "https://reqres.in/api"
             icon: "qrc:/qt/qml/ColorPalette/icons/testserver.png"
         }
         ListElement {
             title: qsTr("Qt-based REST API server")
-            url: "http://127.0.0.1:49425"
+            url: "http://127.0.0.1:49425/api"
             icon: "qrc:/qt/qml/ColorPalette/icons/qt.png"
         }
     }
@@ -76,7 +76,7 @@ Item {
             border.color: ListView.view.currentIndex === index ? "#2CDE85" : "#E0E2E7"
             border.width: 2
 
-            implicitWidth: 180
+            implicitWidth: 210
             implicitHeight: 100
 
             Rectangle {
@@ -132,7 +132,7 @@ Item {
         ListView {
             id: serverList
             Layout.alignment: Qt.AlignHCenter
-            Layout.minimumWidth: 180 * server.count + 20
+            Layout.minimumWidth: 210 * server.count + 20
             Layout.minimumHeight: 100
             orientation: ListView.Horizontal
 
@@ -144,7 +144,7 @@ Item {
 
         Button {
             Layout.alignment: Qt.AlignHCenter
-            text: restPalette.sslSupported ? qsTr("Connect (SSL)") : qsTr("Connect")
+            text: root.restPalette.sslSupported ? qsTr("Connect (SSL)") : qsTr("Connect")
 
             buttonColor: "#2CDE85"
             textColor: "#FFFFFF"

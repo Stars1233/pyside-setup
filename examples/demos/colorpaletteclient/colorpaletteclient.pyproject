@@ -12,10 +12,12 @@
         "ColorPalette/Main.qml",
         "ColorPalette/ServerSelection.qml",
         "ColorPalette/UserMenu.qml",
+        "ColorPalette/qmldir",
         "QtExampleStyle/Button.qml",
         "QtExampleStyle/Popup.qml",
         "QtExampleStyle/TextField.qml",
         "QtExampleStyle/UIStyle.qml",
+        "QtExampleStyle/qmldir",
         "colorpaletteclient.qrc"
     ]
 }

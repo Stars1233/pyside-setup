@@ -15,8 +15,8 @@ import ColorPalette
 Item {
     id: root
     required property BasicLogin loginService
-    required property PaginatedColorsResource colors
-    required property PaginatedColorUsersResource colorViewUsers
+    required property PaginatedResource colors
+    required property PaginatedResource colorViewUsers
 
     ColorDialogEditor {
         id: colorPopup
@@ -83,9 +83,13 @@ Item {
                             visible: false
 
                             function getCurrentUserImage() {
-                                if (root.loginService.loggedIn)
-                                    return users.avatarForEmail(loginService.user)
-                                return "qrc:/qt/qml/ColorPalette/icons/user.svg";
+                                if (!root.loginService.loggedIn)
+                                    return "qrc:/qt/qml/ColorPalette/icons/user.svg";
+                                let users = root.colorViewUsers
+                                for (let i = 0; i < users.data.length; i++) {
+                                    if (users.data[i].email === root.loginService.user)
+                                        return users.data[i].avatar;
+                                }
                             }
                         }
 
@@ -238,7 +242,7 @@ Item {
         ListView {
             id: colorListView
 
-            model: root.colors.model
+            model: root.colors.data
         //! [View and model]
             footerPositioning: ListView.OverlayFooter
             spacing: 15
@@ -288,10 +292,7 @@ Item {
             delegate: Item {
                 id: colorInfo
 
-                required property int color_id
-                required property string name
-                required property string color
-                required property string pantone_value
+                required property var modelData
 
                 width: colorListView.width
                 height: 25
@@ -306,26 +307,26 @@ Item {
                         implicitWidth: 36
                         implicitHeight: 21
                         radius: 6
-                        color: colorInfo.color
+                        color: colorInfo.modelData.color
                     }
 
                     Text {
                         Layout.preferredWidth: colorInfo.width * 0.3 - colorSample.width
                         horizontalAlignment: Qt.AlignLeft
                         leftPadding: 5
-                        text: colorInfo.name
+                        text: colorInfo.modelData.name
                     }
 
                     Text {
                         Layout.preferredWidth: colorInfo.width * 0.25
                         horizontalAlignment: Qt.AlignHCenter
-                        text: colorInfo.color
+                        text: colorInfo.modelData.color
                     }
 
                     Text {
                         Layout.preferredWidth: colorInfo.width * 0.25
                         horizontalAlignment: Qt.AlignHCenter
-                        text: colorInfo.pantone_value
+                        text: colorInfo.modelData.pantone_value
                     }
 
                     Item {
@@ -339,12 +340,12 @@ Item {
                             ToolButton {
                                 icon.source: UIStyle.iconPath("delete")
                                 enabled: root.loginService.loggedIn
-                                onClicked: colorDeletePopup.maybeDelete(color_id, name)
+                                onClicked: colorDeletePopup.maybeDelete(colorInfo.modelData)
                             }
                             ToolButton {
                                 icon.source: UIStyle.iconPath("edit")
                                 enabled: root.loginService.loggedIn
-                                onClicked: colorPopup.updateColor(color_id, name, color, pantone_value)
+                                onClicked: colorPopup.updateColor(colorInfo.modelData)
                             }
                         }
                     }

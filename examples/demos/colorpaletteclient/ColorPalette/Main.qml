@@ -41,20 +41,20 @@ Window {
     RestService {
         id: paletteService
 
-        PaginatedColorUsersResource {
+        PaginatedResource {
             id: users
-            path: "/api/users"
+            path: "users"
         }
 
-        PaginatedColorsResource {
+        PaginatedResource {
             id: colors
-            path: "/api/unknown"
+            path: "unknown"
         }
 
         BasicLogin {
             id: colorLogin
-            loginPath: "/api/login"
-            logoutPath: "/api/logout"
+            loginPath: "login"
+            logoutPath: "logout"
         }
     }
     //! [RestService QML element]
