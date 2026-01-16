@@ -31,6 +31,8 @@ QML_ADVANCED_TUTORIAL_NAMES = ["advanced1-Base-project", "advanced2-Inheritance-
 QML_ADVANCED_TUTORIALS = ["qml/tutorials/extending-qml-advanced/" + n
                           for n in QML_ADVANCED_TUTORIAL_NAMES]
 
+
+# Qt Module -> List of PySide 6 examples
 EXAMPLE_MAPPING = {
     "qtbase": ["corelib/ipc/sharedmemory", "gui/rhiwindow", "sql/books",
                "widgets/animation/easing", "widgets/rhi/simplerhiwidget"],
@@ -54,6 +56,7 @@ EXAMPLE_MAPPING = {
     "qtwebengine": ["pdfwidgets/pdfviewer", "webenginequick/nanobrowser",
                     "webenginewidgets/notifications", "webenginewidgets/simplebrowser"],
     "qtwebview": ["webview/minibrowser"],
+    "qtdoc": ["demos/colorpaletteclient", "demos/documentviewer"]
 }
 
 
@@ -73,6 +76,8 @@ def pyside_2_qt_example(e):
         return e.replace("scenegraph_customgeometry", "customgeometry")
     if e.endswith("modbusclient"):
         return e.replace("modbusclient", "client")
+    if e.endswith("demos/documentviewer"):
+        return e + "/app"
     return e
 
 
