@@ -77,6 +77,8 @@
                  snippet="qarg_helper"/>
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
                  snippet="darwin_permission_plugin"/>
+    <inject-code class="target" position="end" file="../glue/qtcore.cpp"
+                 snippet="register-qjsonobject-list"/>
 
     <add-function signature="qDebug(const char*@message@)">
         <inject-code file="../glue/qtcore.cpp" snippet="qdebug-format-string"/>
@@ -3529,6 +3531,11 @@
     <extra-includes>
       <include file-name="QStringList" location="global"/>
     </extra-includes>
+    <add-function signature="toObjectList()" return-type="QList&lt;QJsonObject&gt;">
+      <inject-code file="../glue/qtcore.cpp" snippet="qjsonarray-toobjectlist"/>
+      <inject-documentation format="target" mode="append"
+                            file="../doc/qtcore.rst" snippet="qjsonarray-toobjectlist"/>
+    </add-function>
   </value-type>
 
   <value-type name="QJsonDocument">

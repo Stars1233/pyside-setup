@@ -94,6 +94,10 @@ to a list.
 
 // @snippet qsettings-value
 
+// @snippet qjsonarray-toobjectlist
+Returns a list of JSON objects ready for use in a QML ListView.
+// @snippet qjsonarray-toobjectlist
+
 // @snippet qmessagelogger
 
 In Python, the :class:`QMessageLogger` is useful to connect an existing logging

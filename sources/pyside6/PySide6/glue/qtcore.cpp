@@ -2508,3 +2508,19 @@ if (!vList.isEmpty() && std::all_of(vList.cbegin(),  vList.cend(), isVariantList
     %0 = new %TYPE(vList, %2);
 }
 // @snippet qrangemodel-sequence-constructor
+
+// Enables populating QML ListView via properties of type "QList<QJsonObject>"
+// @snippet register-qjsonobject-list
+qRegisterMetaType<QList<QJsonObject>>();
+// @snippet register-qjsonobject-list
+
+// Besides being a convenience function, this function also ensures a SbkConverter
+// for "QList<QJsonObject>" is created.
+// @snippet qjsonarray-toobjectlist
+QList<QJsonObject> result;
+const auto size = %CPPSELF.size();
+result.reserve(size);
+for (qsizetype i = 0; i < size; ++i)
+    result.append(%CPPSELF.at(i).toObject());
+%PYARG_0 = %CONVERTTOPYTHON[QList<QJsonObject>](result);
+// @snippet qjsonarray-toobjectlist
