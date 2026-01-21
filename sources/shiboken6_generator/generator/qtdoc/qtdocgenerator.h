@@ -5,7 +5,6 @@
 
 #include <QtCore/qstringlist.h>
 #include <QtCore/qmap.h>
-#include <QtCore/qscopedpointer.h>
 
 #include "generator.h"
 #include "documentation.h"

@@ -4,7 +4,6 @@
 #include "qtxmltosphinx.h"
 #include "exception.h"
 #include <filecache.h>
-#include "qtxmltosphinxinterface.h"
 #include <codesniphelpers.h>
 #include "rstformat.h"
 
@@ -858,18 +857,18 @@ void QtXmlToSphinx::handleSeeAlsoTag(QXmlStreamReader& reader)
         const auto  textR = reader.text().trimmed();
         if (!textR.isEmpty()) {
             const QString text = textR.toString();
-            if (m_seeAlsoContext.isNull()) {
+            if (!m_seeAlsoContext.has_value()) {
                 const QString type = text.endsWith(u"()")
                     ? functionLinkType : classLinkType;
-                m_seeAlsoContext.reset(handleLinkStart(type, text));
+                m_seeAlsoContext = handleLinkStart(type, text);
             }
-            handleLinkText(m_seeAlsoContext.data(), text);
+            handleLinkText(m_seeAlsoContext.value(), text);
         }
     }
         break;
     case QXmlStreamReader::EndElement:
-        if (!m_seeAlsoContext.isNull()) { // direct, no nested </link> seen
-            handleLinkEnd(m_seeAlsoContext.data());
+        if (m_seeAlsoContext.has_value()) { // direct, no nested </link> seen
+            handleLinkEnd(m_seeAlsoContext.value());
             m_seeAlsoContext.reset();
         }
         m_output << "\n\n";
@@ -1104,16 +1103,16 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
         m_seeAlsoContext.reset();
         const QString type = fixLinkType(reader.attributes().value(u"type"_s));
         const QString ref = reader.attributes().value(linkSourceAttribute(type)).toString();
-        m_linkContext.reset(handleLinkStart(type, ref));
+        m_linkContext = handleLinkStart(type, ref);
     }
         break;
     case QXmlStreamReader::Characters:
-        Q_ASSERT(!m_linkContext.isNull());
-        handleLinkText(m_linkContext.data(), reader.text().toString());
+        Q_ASSERT(m_linkContext.has_value());
+        handleLinkText(m_linkContext.value(), reader.text().toString());
         break;
     case QXmlStreamReader::EndElement:
-        Q_ASSERT(!m_linkContext.isNull());
-        handleLinkEnd(m_linkContext.data());
+        Q_ASSERT(m_linkContext.has_value());
+        handleLinkEnd(m_linkContext.value());
         m_linkContext.reset();
         break;
     default:
@@ -1121,45 +1120,45 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
     }
 }
 
-QtXmlToSphinxLink *QtXmlToSphinx::handleLinkStart(const QString &type, QString ref) const
+QtXmlToSphinxLink QtXmlToSphinx::handleLinkStart(const QString &type, QString ref) const
 {
     ref.replace(u"::"_s, u"."_s);
     ref.remove(u"()"_s);
-    auto *result = new QtXmlToSphinxLink(ref);
+    QtXmlToSphinxLink result(ref);
 
     if (m_insideBold)
-        result->flags |= QtXmlToSphinxLink::InsideBold;
+        result.flags |= QtXmlToSphinxLink::InsideBold;
     else if (m_insideItalic)
-        result->flags |= QtXmlToSphinxLink::InsideItalic;
+        result.flags |= QtXmlToSphinxLink::InsideItalic;
 
     if (type == u"external" || isHttpLink(ref)) {
-        result->type = QtXmlToSphinxLink::External;
+        result.type = QtXmlToSphinxLink::External;
     } else if (type == functionLinkType && !m_context.isEmpty()) {
-        result->type = QtXmlToSphinxLink::Method;
-        const auto rawlinklist = QStringView{result->linkRef}.split(u'.');
+        result.type = QtXmlToSphinxLink::Method;
+        const auto rawlinklist = QStringView{result.linkRef}.split(u'.');
         if (rawlinklist.size() == 1 || rawlinklist.constFirst() == m_context) {
             const auto lastRawLink = rawlinklist.constLast().toString();
             QString context = m_generator->resolveContextForMethod(m_context, lastRawLink);
-            if (!result->linkRef.startsWith(context))
-                result->linkRef.prepend(context + u'.');
+            if (!result.linkRef.startsWith(context))
+                result.linkRef.prepend(context + u'.');
         } else {
-            result->linkRef = m_generator->expandFunction(result->linkRef);
+            result.linkRef = m_generator->expandFunction(result.linkRef);
         }
     } else if (type == functionLinkType && m_context.isEmpty()) {
-        result->type = QtXmlToSphinxLink::Function;
+        result.type = QtXmlToSphinxLink::Function;
     } else if (type == classLinkType) {
-        result->type = QtXmlToSphinxLink::Class;
-        result->linkRef = m_generator->expandClass(m_context, result->linkRef);
+        result.type = QtXmlToSphinxLink::Class;
+        result.linkRef = m_generator->expandClass(m_context, result.linkRef);
     } else if (type == u"enum") {
-        result->type = QtXmlToSphinxLink::Attribute;
+        result.type = QtXmlToSphinxLink::Attribute;
     } else if (type == u"page") {
         // Module, external web page or reference
-        if (result->linkRef == m_parameters.moduleName)
-            result->type = QtXmlToSphinxLink::Module;
+        if (result.linkRef == m_parameters.moduleName)
+            result.type = QtXmlToSphinxLink::Module;
         else
-            result->type = QtXmlToSphinxLink::Reference;
+            result.type = QtXmlToSphinxLink::Reference;
     } else {
-        result->type = QtXmlToSphinxLink::Reference;
+        result.type = QtXmlToSphinxLink::Reference;
     }
     return result;
 }
@@ -1172,11 +1171,11 @@ QtXmlToSphinxLink *QtXmlToSphinx::handleLinkStart(const QString &type, QString r
 // <link raw="Qt::Window" href="qt.html#WindowType-enum" type="enum" enum="Qt::WindowType">Qt::Window</link>
 // <link raw="QNetworkSession::reject()" href="qnetworksession.html#reject" type="function">QNetworkSession::reject()</link>
 
-static QString fixLinkText(const QtXmlToSphinxLink *linkContext,
+static QString fixLinkText(const QtXmlToSphinxLink &linkContext,
                            QString linktext)
 {
-    if (linkContext->type == QtXmlToSphinxLink::External
-        || linkContext->type == QtXmlToSphinxLink::Reference) {
+    if (linkContext.type == QtXmlToSphinxLink::External
+        || linkContext.type == QtXmlToSphinxLink::Reference) {
         return linktext;
     }
     // For the language reference documentation, strip the module name.
@@ -1186,23 +1185,23 @@ static QString fixLinkText(const QtXmlToSphinxLink *linkContext,
         linktext.remove(0, lastSep + 2);
     else
          QtXmlToSphinx::stripPythonQualifiers(&linktext);
-    if (linkContext->linkRef == linktext)
+    if (linkContext.linkRef == linktext)
          return {};
-    if ((linkContext->type & QtXmlToSphinxLink::FunctionMask) != 0
-        && (linkContext->linkRef + u"()"_s) == linktext) {
+    if ((linkContext.type & QtXmlToSphinxLink::FunctionMask) != 0
+        && (linkContext.linkRef + u"()"_s) == linktext) {
         return {};
     }
     return  linktext;
 }
 
-void QtXmlToSphinx::handleLinkText(QtXmlToSphinxLink *linkContext, const QString &linktext)
+void QtXmlToSphinx::handleLinkText(QtXmlToSphinxLink &linkContext, const QString &linktext)
 {
-    linkContext->linkText = fixLinkText(linkContext, linktext);
+    linkContext.linkText = fixLinkText(linkContext, linktext);
 }
 
-void QtXmlToSphinx::handleLinkEnd(QtXmlToSphinxLink *linkContext)
+void QtXmlToSphinx::handleLinkEnd(const QtXmlToSphinxLink &linkContext)
 {
-    m_output << m_generator->resolveLink(*linkContext);
+    m_output << m_generator->resolveLink(linkContext);
 }
 
 WebXmlTag QtXmlToSphinx::parentTag() const

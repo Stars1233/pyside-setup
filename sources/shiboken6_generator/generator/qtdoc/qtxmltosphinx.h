@@ -5,12 +5,14 @@
 #define QTXMLTOSPHINX_H
 
 #include <textstream.h>
+#include "qtxmltosphinxinterface.h"
+
 
 #include <QtCore/qlist.h>
-#include <QtCore/qscopedpointer.h>
 #include <QtCore/qstack.h>
 
 #include <memory>
+#include <optional>
 
 QT_BEGIN_NAMESPACE
 class QDebug;
@@ -153,9 +155,9 @@ private:
     void handleAnchorTag(QXmlStreamReader& reader);
     void handleRstPassTroughTag(QXmlStreamReader& reader);
 
-    QtXmlToSphinxLink *handleLinkStart(const QString &type, QString ref) const;
-    static void handleLinkText(QtXmlToSphinxLink *linkContext, const QString &linktext) ;
-    void handleLinkEnd(QtXmlToSphinxLink *linkContext);
+    QtXmlToSphinxLink handleLinkStart(const QString &type, QString ref) const;
+    static void handleLinkText(QtXmlToSphinxLink &linkContext, const QString &linktext) ;
+    void handleLinkEnd(const QtXmlToSphinxLink &linkContext);
     WebXmlTag parentTag() const;
 
     void warn(const QString &message) const;
@@ -169,8 +171,8 @@ private:
     QStack<StringSharedPtr> m_buffers; // Maintain address stability since it used in TextStream
 
     QStack<Table> m_tables; // Stack of tables, used for <table><list> with nested <item>
-    QScopedPointer<QtXmlToSphinxLink> m_linkContext; // for <link>
-    QScopedPointer<QtXmlToSphinxLink> m_seeAlsoContext; // for <see-also>foo()</see-also>
+    std::optional<QtXmlToSphinxLink> m_linkContext; // for <link>
+    std::optional<QtXmlToSphinxLink> m_seeAlsoContext; // for <see-also>foo()</see-also>
     QString m_context;
     const QtXmlToSphinxDocGeneratorInterface *m_generator;
     const QtXmlToSphinxParameters &m_parameters;
