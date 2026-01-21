@@ -135,7 +135,7 @@ public:
     uint m_toStringCapabilityIndirections = 0;
 };
 
-AbstractMetaClass::AbstractMetaClass() : d(new AbstractMetaClassPrivate)
+AbstractMetaClass::AbstractMetaClass() : d(std::make_unique<AbstractMetaClassPrivate>())
 {
 }
 
@@ -1518,7 +1518,7 @@ static inline bool isSignal(const AbstractMetaFunctionCPtr &f)
 
 void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass, bool avoidProtectedHack)
 {
-    auto *d = klass->d.data();
+    auto *d = klass->d.get();
     if (d->m_functionsFixed)
         return;
 
@@ -1694,7 +1694,7 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass, bool avo
 void AbstractMetaClass::fixSpecialFunctions(const AbstractMetaClassPtr &klass,
                                             bool avoidProtectedHack)
 {
-    auto *d = klass->d.data();
+    auto *d = klass->d.get();
     auto typeEntry = klass->typeEntry();
     // Add implicit default constructor/copy constructor since they
     // are needed by the generators in the function overload lists.

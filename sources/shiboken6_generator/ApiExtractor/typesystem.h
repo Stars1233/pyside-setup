@@ -9,7 +9,8 @@
 
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/qstring.h>
-#include <QtCore/qscopedpointer.h>
+
+#include <memory>
 
 class AbstractMetaType;
 class CustomTypeEntry;
@@ -185,7 +186,7 @@ protected:
 private:
     bool setRevisionHelper(int r);
     int sbkIndexHelper() const;
-    QScopedPointer<TypeEntryPrivate> m_d;
+    std::unique_ptr<TypeEntryPrivate> m_d;
 };
 
 TypeSystemTypeEntryCPtr typeSystemTypeEntry(TypeEntryCPtr e);

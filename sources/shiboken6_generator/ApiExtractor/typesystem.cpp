@@ -500,12 +500,12 @@ bool isExtendedCppPrimitive(const TypeEntryCPtr &e)
 
 const TypeEntryPrivate *TypeEntry::d_func() const
 {
-    return m_d.data();
+    return m_d.get();
 }
 
 TypeEntryPrivate *TypeEntry::d_func()
 {
-    return m_d.data();
+    return m_d.get();
 }
 
 QString TypeEntry::targetLangEntryName() const
@@ -546,7 +546,7 @@ bool TypeEntry::isComplex() const
 
 TypeEntry *TypeEntry::clone() const
 {
-    return new TypeEntry(new TypeEntryPrivate(*m_d.data()));
+    return new TypeEntry(new TypeEntryPrivate(*m_d.get()));
 }
 
 // Take over parameters relevant for typedefs

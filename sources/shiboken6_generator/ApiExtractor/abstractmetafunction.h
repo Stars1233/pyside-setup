@@ -12,9 +12,9 @@
 #include "parser/codemodel_enums.h"
 
 #include <QtCore/qmetaobject.h>
-#include <QtCore/qscopedpointer.h>
 
 #include <optional>
+#include <memory>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 QT_FORWARD_DECLARE_CLASS(QRegularExpression)
@@ -437,7 +437,7 @@ private:
                            TypeSystem::Language language = TypeSystem::All) const;
     bool autoDetectAllowThread() const;
 
-    QScopedPointer<AbstractMetaFunctionPrivate> d;
+    std::unique_ptr<AbstractMetaFunctionPrivate> d;
 };
 
 inline bool AbstractMetaFunction::isAbstract() const

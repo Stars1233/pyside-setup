@@ -11,7 +11,6 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qdir.h>
 #include <QtCore/qfile.h>
-#include <QtCore/qscopedpointer.h>
 #include <QtCore/qstring.h>
 
 using namespace Qt::StringLiterals;

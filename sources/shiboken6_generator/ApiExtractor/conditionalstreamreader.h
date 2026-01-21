@@ -6,6 +6,7 @@
 
 #include <QtCore/qxmlstream.h>
 
+#include <memory>
 #include <utility>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
@@ -28,6 +29,7 @@ class ConditionalStreamReader
 public:
     Q_DISABLE_COPY_MOVE(ConditionalStreamReader)
 
+    using XmlStreamEntityResolverPtr = std::shared_ptr<QXmlStreamEntityResolver>;
     using TokenType = QXmlStreamReader::TokenType;
     explicit ConditionalStreamReader(QIODevice *iod);
     explicit ConditionalStreamReader(const QString &s);
@@ -37,8 +39,8 @@ public:
 
     // Note: Caching of entity values is done internally by
     // ConditionalStreamReader.
-    void setEntityResolver(QXmlStreamEntityResolver *resolver);
-    QXmlStreamEntityResolver *entityResolver() const;
+    void setEntityResolver(const XmlStreamEntityResolverPtr &resolver);
+    XmlStreamEntityResolverPtr entityResolver() const;
 
     bool atEnd() const { return m_reader.atEnd(); }
     TokenType readNext();

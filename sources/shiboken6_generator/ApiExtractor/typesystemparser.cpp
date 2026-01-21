@@ -824,8 +824,8 @@ bool TypeSystemParser::parseXml(ConditionalStreamReader &reader)
         m_currentPath = fi.absolutePath();
         m_currentFile = fi.absoluteFilePath();
     }
-    m_entityResolver.reset(new TypeSystemEntityResolver(m_currentPath));
-    reader.setEntityResolver(m_entityResolver.data());
+    m_entityResolver = std::make_shared<TypeSystemEntityResolver>(m_currentPath);
+    reader.setEntityResolver(m_entityResolver);
 
     while (!reader.atEnd()) {
         switch (reader.readNext()) {

@@ -10,8 +10,9 @@
 #include "typesystem_typedefs.h"
 
 #include <QtCore/qobjectdefs.h>
-#include <QtCore/qscopedpointer.h>
 #include <QtCore/qstringlist.h>
+
+#include <memory>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
@@ -364,7 +365,7 @@ private:
     friend void formatMetaClass(QDebug &, const AbstractMetaClass *);
 #endif
 
-    QScopedPointer<AbstractMetaClassPrivate> d;
+    std::unique_ptr<AbstractMetaClassPrivate> d;
 };
 
 inline bool AbstractMetaClass::isAbstract() const

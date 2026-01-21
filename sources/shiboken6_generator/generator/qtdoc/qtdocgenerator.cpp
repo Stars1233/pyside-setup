@@ -1549,11 +1549,11 @@ bool QtDocGenerator::doSetup()
             m_options.parameters.libSourceDir.split(QDir::listSeparator());
     }
 
-    if (m_docParser.isNull()) {
+    if (!m_docParser) {
         if (m_options.doxygen)
-            m_docParser.reset(new DoxygenParser);
+            m_docParser = std::make_unique<DoxygenParser>();
         else
-            m_docParser.reset(new QtDocParser);
+            m_docParser = std::make_unique<QtDocParser>();
     }
 
     if (m_options.parameters.libSourceDir.isEmpty()

@@ -246,7 +246,7 @@ bool AbstractMetaFunction::isOperatorBool() const
         && d->m_constant && returnsBool();
 }
 
-AbstractMetaFunction::AbstractMetaFunction() : d(new AbstractMetaFunctionPrivate)
+AbstractMetaFunction::AbstractMetaFunction() : d(std::make_unique<AbstractMetaFunctionPrivate>())
 {
 }
 

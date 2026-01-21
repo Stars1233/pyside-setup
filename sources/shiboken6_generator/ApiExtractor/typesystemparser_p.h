@@ -12,7 +12,6 @@
 
 #include <QtCore/qstack.h>
 #include <QtCore/qhash.h>
-#include <QtCore/qscopedpointer.h>
 
 #include <memory>
 #include <optional>
@@ -299,7 +298,7 @@ private:
     QString m_currentSignature;
     QString m_currentPath;
     QString m_currentFile;
-    QScopedPointer<TypeSystemEntityResolver> m_entityResolver;
+    std::shared_ptr<TypeSystemEntityResolver> m_entityResolver;
 };
 
 #endif // TYPESYSTEMPARSER_H

@@ -835,16 +835,19 @@ void AbstractMetaType::setViewOn(const AbstractMetaType &v)
         d->m_viewOn = std::make_shared<AbstractMetaType>(v);
 }
 
+static AbstractMetaType createVoidType()
+{
+    TypeEntryCPtr voidTypeEntry = TypeDatabase::instance()->findType(u"void"_s);
+    Q_ASSERT(voidTypeEntry);
+    AbstractMetaType result(voidTypeEntry);
+    result.decideUsagePattern();
+    return result;
+}
+
 AbstractMetaType AbstractMetaType::createVoid()
 {
-    static QScopedPointer<AbstractMetaType> metaType;
-    if (metaType.isNull()) {
-        static TypeEntryCPtr voidTypeEntry = TypeDatabase::instance()->findType(u"void"_s);
-        Q_ASSERT(voidTypeEntry);
-        metaType.reset(new AbstractMetaType(voidTypeEntry));
-        metaType->decideUsagePattern();
-    }
-    return *metaType.data();
+    static const AbstractMetaType result = createVoidType();
+    return result;
 }
 
 void AbstractMetaType::dereference(QString *type)

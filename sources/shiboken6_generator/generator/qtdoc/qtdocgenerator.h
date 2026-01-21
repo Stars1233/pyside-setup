@@ -14,6 +14,8 @@
 #include "modifications_typedefs.h"
 #include "qtxmltosphinxinterface.h"
 
+#include <memory>
+
 class DocParser;
 struct DocGeneratorOptions;
 struct GeneratorDocumentation;
@@ -151,7 +153,7 @@ private:
 
     QStringList m_functionList;
     QMap<QString, DocPackage> m_packages;
-    QScopedPointer<DocParser> m_docParser;
+    std::unique_ptr<DocParser> m_docParser;
     static DocGeneratorOptions m_options;
 };
 

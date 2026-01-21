@@ -15,12 +15,14 @@ using namespace Qt::StringLiterals;
 class ProxyEntityResolver : public QXmlStreamEntityResolver
 {
 public:
+    using XmlStreamEntityResolverPtr = ConditionalStreamReader::XmlStreamEntityResolverPtr;
+
     QString resolveEntity(const QString& publicId,
                           const QString& systemId) override;
     QString resolveUndeclaredEntity(const QString &name) override;
 
-    QXmlStreamEntityResolver *source() const { return m_source; }
-    void setSource(QXmlStreamEntityResolver *s) { m_source = s; }
+    XmlStreamEntityResolverPtr source() const { return m_source; }
+    void setSource(const XmlStreamEntityResolverPtr &s) { m_source = s; }
 
     void defineEntity(const QString &name, const QString &value)
     {
@@ -29,7 +31,7 @@ public:
 
 private:
     QHash<QString, QString> m_undeclaredEntityCache;
-    QXmlStreamEntityResolver *m_source = nullptr;
+    XmlStreamEntityResolverPtr m_source;
 };
 
 QString ProxyEntityResolver::resolveEntity(const QString &publicId, const QString &systemId)
@@ -79,12 +81,12 @@ ConditionalStreamReader::~ConditionalStreamReader()
     delete m_proxyEntityResolver;
 }
 
-void ConditionalStreamReader::setEntityResolver(QXmlStreamEntityResolver *resolver)
+void ConditionalStreamReader::setEntityResolver(const XmlStreamEntityResolverPtr &resolver)
 {
     m_proxyEntityResolver->setSource(resolver);
 }
 
-QXmlStreamEntityResolver *ConditionalStreamReader::entityResolver() const
+ConditionalStreamReader::XmlStreamEntityResolverPtr ConditionalStreamReader::entityResolver() const
 {
     return m_proxyEntityResolver->source();
 }
