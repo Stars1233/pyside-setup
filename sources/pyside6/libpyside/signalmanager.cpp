@@ -27,10 +27,10 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qhash.h>
 #include <QtCore/qmetatype.h>
-#include <QtCore/qscopedpointer.h>
 
 #include <climits>
 #include <memory>
+#include <optional>
 #include <utility>
 
 using namespace Qt::StringLiterals;
@@ -528,9 +528,9 @@ static int callPythonMetaMethodHelper(const QByteArrayList &paramTypes,
         PyTuple_SetItem(preparedArgs, i, converter.toPython(src));
     }
 
-    QScopedPointer<Shiboken::Conversions::SpecificConverter> retConverter;
+    std::optional<Shiboken::Conversions::SpecificConverter> retConverter;
     if (args[0] != nullptr && isNonVoidReturn(returnType)) {
-        retConverter.reset(new Shiboken::Conversions::SpecificConverter(returnType));
+        retConverter = Shiboken::Conversions::SpecificConverter(returnType);
         if (!retConverter->isValid())
             return CallResult::CallReturnValueError;
     }
@@ -539,8 +539,8 @@ static int callPythonMetaMethodHelper(const QByteArrayList &paramTypes,
     if (PyErr_Occurred() != nullptr || retval.isNull())
         return CallResult::CallOtherError;
 
-    if (retval != Py_None && !retConverter.isNull())
-        retConverter->toCpp(retval, args[0]);
+    if (retval != Py_None && retConverter.has_value())
+        retConverter.value().toCpp(retval, args[0]);
     return CallResult::CallOk;
 }
 
