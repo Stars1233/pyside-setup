@@ -101,7 +101,7 @@ struct A {
     </value-type>
 </typesystem>)XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     auto *typeDb = TypeDatabase::instance();
     AbstractMetaClassList classes = builder->classes();
@@ -145,7 +145,7 @@ void TestAddFunction::testAddFunctionConstructor()
             <add-function signature='A(int)'/>\n\
         </value-type>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -168,7 +168,7 @@ void TestAddFunction::testAddFunctionTagDefaultValues()
             <add-function signature='func()'/>\n\
         </value-type>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -194,7 +194,7 @@ void TestAddFunction::testAddFunctionCodeSnippets()
         </value-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -223,7 +223,7 @@ void TestAddFunction::testAddFunctionWithoutParenteses()
         </value-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -259,7 +259,7 @@ void TestAddFunction::testAddFunctionWithDefaultArgs()
         </value-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -282,7 +282,7 @@ void TestAddFunction::testAddFunctionAtModuleLevel()
         </add-function>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -322,7 +322,7 @@ void TestAddFunction::testAddFunctionWithVarargs()
         </value-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -346,7 +346,7 @@ void TestAddFunction::testAddStaticFunction()
             </add-function>\n\
         </value-type>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -371,7 +371,7 @@ void TestAddFunction::testAddGlobalFunction()
         </add-function>\n\
         <value-type name='B'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     const auto globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.size(), 2);
@@ -396,8 +396,7 @@ void TestAddFunction::testAddFunctionWithApiVersion()
             <inject-code class='target' position='beginning'>custom_code();</inject-code>\n\
         </add-function>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                true, u"0.1"_s));
+    auto builder = TestUtil::parse(cppCode, xmlCode, true, u"0.1"_s);
     QVERIFY(builder);
     const auto globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.size(), 1);
@@ -420,7 +419,7 @@ void TestAddFunction::testModifyAddedFunction()
     </value-type>
 </typesystem>
 )";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto foo = AbstractMetaClass::findClass(classes, "Foo");
@@ -447,7 +446,7 @@ void TestAddFunction::testAddFunctionOnTypedef()
             </add-function>\n\
         </value-type>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto foo = AbstractMetaClass::findClass(classes, "FooInt");
@@ -471,7 +470,7 @@ void TestAddFunction::testAddFunctionWithTemplateArg()
         <add-function signature='func(Foo&lt;int>)'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     QCOMPARE(builder->globalFunctions().size(), 1);
     const auto func = builder->globalFunctions().constFirst();

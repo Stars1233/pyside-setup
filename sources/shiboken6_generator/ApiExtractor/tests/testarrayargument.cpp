@@ -32,8 +32,8 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
         </object-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
+    QVERIFY(builder);
     const auto classA = AbstractMetaClass::findClass(builder->classes(), "A");
     QVERIFY(classA);
 
@@ -70,8 +70,8 @@ void TestArrayArgument::testArraySignature()
         <object-type name='A'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
+    QVERIFY(builder);
     const auto classA = AbstractMetaClass::findClass(builder->classes(), "A");
     QCOMPARE(functionMinimalSignature(classA, u"mi1"_s),
              u"mi1(int[5])");
@@ -106,8 +106,8 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
         </object-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
+    QVERIFY(builder);
     AbstractMetaClassPtr classA = AbstractMetaClass::findClass(builder->classes(), "A");
     QVERIFY(classA);
 
@@ -137,7 +137,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
         </object-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     const auto classA = AbstractMetaClass::findClass(builder->classes(), "A");
     QVERIFY(classA);

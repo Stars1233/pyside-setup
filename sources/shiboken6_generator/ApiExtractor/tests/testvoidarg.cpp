@@ -18,7 +18,7 @@ void TestVoidArg::testVoidParsedFunction()
     <typesystem package=\"Foo\">\n\
         <value-type name='A'/>\n\
     </typesystem>";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -37,7 +37,7 @@ void TestVoidArg::testVoidAddedFunction()
             <add-function signature=\"a(void)\"/>\n\
         </value-type>\n\
     </typesystem>";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -55,7 +55,7 @@ void TestVoidArg::testVoidPointerParsedFunction()
     <typesystem package=\"Foo\">\n\
         <value-type name='A' />\n\
     </typesystem>";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");

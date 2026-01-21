@@ -22,7 +22,7 @@ void TestAbstractMetaClass::testClassName()
     const char xmlCode[] = R"(<typesystem package="Foo">
     <value-type name="ClassName"/>
 </typesystem>)";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
@@ -38,7 +38,7 @@ void TestAbstractMetaClass::testClassNameUnderNamespace()
             <value-type name="ClassName"/>
         </namespace-type>
     </typesystem>)XML";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2); // 1 namespace + 1 class
@@ -109,7 +109,7 @@ public:
     <object-type name='F'/>
 </typesystem>
 )XML";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 4);
@@ -193,7 +193,7 @@ class Derived : public Base {};
     <object-type name='Derived'/>
 </typesystem>
 )XML";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto base = AbstractMetaClass::findClass(classes, "Base");
@@ -217,7 +217,7 @@ void TestAbstractMetaClass::testDefaultValues()
             <value-type name='B'/>
         </value-type>
     </typesystem>)XML";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -247,7 +247,7 @@ void TestAbstractMetaClass::testModifiedDefaultValues()
             <value-type name='B'/>
         </value-type>
     </typesystem>)XML";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -273,7 +273,7 @@ void TestAbstractMetaClass::testInnerClassOfAPolymorphicOne()
             <value-type name='B'/>
         </object-type>
     </typesystem>)XML";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -301,7 +301,7 @@ void TestAbstractMetaClass::testForwardDeclaredInnerClass()
             <value-type name='B'/>
         </value-type>
     </typesystem>)XML";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -332,7 +332,7 @@ void TestAbstractMetaClass::testSpecialFunctions()
         <object-type name='B'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -398,7 +398,7 @@ void TestAbstractMetaClass::testClassDefaultConstructors()
         <value-type name='F'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 6);
@@ -467,7 +467,7 @@ void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
         <object-type name='B'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -505,7 +505,7 @@ void TestAbstractMetaClass::testAbstractClassDefaultConstructors()
         <object-type name='A'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
@@ -526,7 +526,7 @@ void TestAbstractMetaClass::testObjectTypesMustNotHaveCopyConstructors()
         <object-type name='A'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
@@ -612,7 +612,7 @@ void TestAbstractMetaClass::testValueConstructors()
 </typesystem>
 )";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode.constData(), xmlCode));
+    auto builder = TestUtil::parse(cppCode.constData(), xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
@@ -645,7 +645,7 @@ void TestAbstractMetaClass::testIsPolymorphic()
         <value-type name='B'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -675,7 +675,7 @@ class Derived : public BaseAlias2 {
 </typesystem>
 )XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -726,7 +726,7 @@ void TestAbstractMetaClass::testFreeOperators()
         <value-type name="Value"/>
     </typesystem>)XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(code.constData(), xmlCode));
+    auto builder = TestUtil::parse(code.constData(), xmlCode);
     QVERIFY(builder);
     const auto classes = builder->classes();
     QCOMPARE(classes.size(), 1);
@@ -760,7 +760,7 @@ public:
 </typesystem>
 )XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -815,7 +815,7 @@ void TestAbstractMetaClass::testUsingTemplateMembers()
 </typesystem>
 )XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(code.constData(), xmlCode));
+    auto builder = TestUtil::parse(code.constData(), xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto valueList = AbstractMetaClass::findClass(classes, "ValueList");
@@ -845,7 +845,7 @@ public:
 </typesystem>
 )XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto tc = AbstractMetaClass::findClass(classes, "TestClass");

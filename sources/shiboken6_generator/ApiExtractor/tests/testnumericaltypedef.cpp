@@ -25,7 +25,7 @@ void TestNumericalTypedef::testNumericalTypedef()
         <function signature='funcDouble(double)'/>\n\
         <function signature='funcReal(real)'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
 
     QCOMPARE(builder->globalFunctions().size(), 2);
@@ -64,7 +64,7 @@ void TestNumericalTypedef::testUnsignedNumericalTypedef()
         <function signature='funcUnsignedShort(unsigned short)'/>\n\
         <function signature='funcUShort(custom_ushort)'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
 
     QCOMPARE(builder->globalFunctions().size(), 2);

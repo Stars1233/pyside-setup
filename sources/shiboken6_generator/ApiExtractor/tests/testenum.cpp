@@ -37,7 +37,7 @@ void TestEnum::testEnumCppSignature()
         <function signature='func(A::ClassEnum)'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
@@ -91,8 +91,7 @@ void TestEnum::testEnumWithApiVersion()
         </value-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                true, u"0.1"_s));
+    auto builder = TestUtil::parse(cppCode, xmlCode, true, u"0.1"_s);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
@@ -118,7 +117,7 @@ void TestEnum::testAnonymousEnum()
         </value-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
@@ -173,7 +172,7 @@ void TestEnum::testGlobalEnums()
         <enum-type name='EnumB'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
@@ -221,7 +220,7 @@ void TestEnum::testEnumValueFromNeighbourEnum()
         </namespace-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
@@ -283,7 +282,7 @@ void TestEnum::testEnumValueFromExpression()
         </value-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
 
     AbstractMetaClassPtr classA = AbstractMetaClass::findClass(builder->classes(), "A");
@@ -361,7 +360,7 @@ void TestEnum::testPrivateEnum()
         </value-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
 
     const auto classA = AbstractMetaClass::findClass(builder->classes(), "A");
@@ -400,7 +399,7 @@ void TestEnum::testTypedefEnum()
         <enum-type name='EnumA'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
@@ -461,7 +460,7 @@ namespace Test2
 </typesystem>
 )";
 
-    fixture->builder.reset(TestUtil::parse(cppCode, xmlCode, false));
+    fixture->builder = TestUtil::parse(cppCode, xmlCode, false);
     if (!fixture->builder)
         return -1;
 

@@ -32,7 +32,7 @@ void TestConversionOperator::testConversionOperator()
         <value-type name='C'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -70,7 +70,7 @@ void TestConversionOperator::testConversionOperatorOfDiscardedClass()
         <value-type name='A' />\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -94,7 +94,7 @@ void TestConversionOperator::testRemovedConversionOperator()
         </value-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -120,7 +120,7 @@ void TestConversionOperator::testConversionOperatorReturningReference()
         <value-type name='B'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -154,7 +154,7 @@ void TestConversionOperator::testConversionOperatorReturningConstReference()
         <value-type name='B'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");

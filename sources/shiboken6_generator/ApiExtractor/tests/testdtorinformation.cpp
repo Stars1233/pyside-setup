@@ -25,7 +25,7 @@ private:
     <value-type name="Subject"/>
 </typesystem>)";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -53,7 +53,7 @@ protected:
     <value-type name="Subject"/>
 </typesystem>)";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -81,7 +81,7 @@ protected:
     <value-type name="Subject"/>
 </typesystem>)";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -106,7 +106,7 @@ class Subject : public SubjectBase {};
 <value-type name="Subject"/>
 </typesystem>
 )XML";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 4);
@@ -142,7 +142,7 @@ protected:
     <value-type name="Subject"/>
 </typesystem>)";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);

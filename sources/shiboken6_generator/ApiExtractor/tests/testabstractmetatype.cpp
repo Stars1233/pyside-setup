@@ -53,7 +53,7 @@ void TestAbstractMetaType::testConstCharPtrType()
         <primitive-type name='char'/>\n\
         <function signature='justAtest()' />\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     QCOMPARE(builder->globalFunctions().size(), 1);
     const auto func = builder->globalFunctions().constFirst();
@@ -85,8 +85,8 @@ void TestAbstractMetaType::testApiVersionSupported()
         <function signature='justAtest2()' since='1.1'/>\n\
         <function signature='justAtest3()'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                false, u"1.0"_s));
+    auto builder = TestUtil::parse(cppCode, xmlCode,
+                                                                false, u"1.0"_s);
     QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
@@ -103,8 +103,8 @@ void TestAbstractMetaType::testApiVersionNotSupported()
     const char xmlCode[] = "<typesystem package='Foo'>\n\
         <value-type name='object' since='0.1'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                true, u"0.1"_s));
+    auto builder = TestUtil::parse(cppCode, xmlCode,
+                                                                true, u"0.1"_s);
     QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
@@ -119,7 +119,7 @@ void TestAbstractMetaType::testCharType()
     <value-type name='A'/>\n\
     <function signature='justAtest()'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
@@ -156,7 +156,7 @@ void TestAbstractMetaType::testTypedef()
     const char xmlCode[] = "<typesystem package=\"Foo\">\n\
     <value-type name='C' />\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
@@ -181,7 +181,7 @@ void TestAbstractMetaType::testTypedefWithTemplates()
     <value-type name='B' />\n\
     <function signature='func(A&lt;B&gt;)'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
@@ -206,7 +206,7 @@ void TestAbstractMetaType::testObjectTypeUsedAsValue()
     const char xmlCode[] = "<typesystem package='Foo'>\n\
     <object-type name='A'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();

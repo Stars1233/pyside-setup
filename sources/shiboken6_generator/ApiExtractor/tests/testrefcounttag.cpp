@@ -31,7 +31,7 @@ void TestRefCountTag::testReferenceCountTag()
         </modify-function>\n\
         </object-type>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classB = AbstractMetaClass::findClass(classes, "B");
@@ -64,8 +64,7 @@ void TestRefCountTag::testWithApiVersion()
         </object-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                false, u"0.1"_s));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false, u"0.1"_s);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classB = AbstractMetaClass::findClass(classes, "B");

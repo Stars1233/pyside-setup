@@ -59,7 +59,7 @@ void TestCodeInjections::testReadFile()
             <value-type name='B'/>\n\
         </value-type>\n\
     </typesystem>\n"_s;
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.toLocal8Bit().constData()));
+    auto builder = TestUtil::parse(cppCode, xmlCode.toLocal8Bit().constData());
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -84,8 +84,8 @@ void TestCodeInjections::testInjectWithValidApiVersion()
         </value-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                true, u"1.0"_s));
+    auto builder = TestUtil::parse(cppCode, xmlCode,
+                                                                true, u"1.0"_s);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -104,8 +104,7 @@ void TestCodeInjections::testInjectWithInvalidApiVersion()
         </value-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                true, u"0.1"_s));
+    auto builder = TestUtil::parse(cppCode, xmlCode, true, u"0.1"_s);
     QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();

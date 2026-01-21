@@ -22,7 +22,7 @@ void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
         <primitive-type name='A' default-constructor='A()'/>\n\
         <object-type name='B'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();

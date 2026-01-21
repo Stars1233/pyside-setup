@@ -42,7 +42,7 @@ void TestNestedTypes::testNestedTypesModifications()
         </namespace-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
@@ -92,7 +92,7 @@ void TestNestedTypes::testDuplicationOfNestedTypes()
         </namespace-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);

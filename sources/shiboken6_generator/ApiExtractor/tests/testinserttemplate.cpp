@@ -26,7 +26,7 @@ void TestInsertTemplate::testInsertTemplateOnClassInjectCode()
             </inject-code>\n\
         </value-type>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
@@ -49,7 +49,7 @@ void TestInsertTemplate::testInsertTemplateOnModuleInjectCode()
             <insert-template name='code_template'/>\n\
         </inject-code>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QVERIFY(classes.isEmpty());

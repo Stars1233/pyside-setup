@@ -23,7 +23,7 @@ void TestValueTypeDefaultCtorTag::testValueTypeDefaultCtorTagArgument()
         <value-type name='A' default-constructor='A(0, 0)' />\n\
         <value-type name='B' />\n\
     </typesystem>";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();

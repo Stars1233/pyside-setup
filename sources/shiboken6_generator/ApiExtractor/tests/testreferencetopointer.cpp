@@ -24,7 +24,7 @@ void TestReferenceToPointer::testReferenceToPointerArgument()
         <object-type name='A'/>\n\
         <object-type name='B'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classB = AbstractMetaClass::findClass(classes, "B");

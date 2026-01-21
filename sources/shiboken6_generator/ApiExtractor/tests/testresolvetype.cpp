@@ -46,7 +46,7 @@ void TestResolveType::testResolveReturnTypeFromParentScope()
             <value-type name='D'/>
         </namespace-type>
     </typesystem>)XML";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classD = AbstractMetaClass::findClass(classes, "A::D");
@@ -109,7 +109,7 @@ public:
 </typesystem>
 )";
 
-    fixture->builder.reset(TestUtil::parse(cppCode, xmlCode, false));
+    fixture->builder = TestUtil::parse(cppCode, xmlCode, false);
     if (!fixture->builder)
         return -1;
 
@@ -262,7 +262,7 @@ public:
 </typesystem>
 )";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto testClass = AbstractMetaClass::findClass(classes, "Test");

@@ -26,7 +26,7 @@ void TestReverseOperators::testReverseSum()
         <value-type name='A' />\n\
     </typesystem>";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -68,7 +68,7 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
         <value-type name='B' />\n\
     </typesystem>";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -111,8 +111,7 @@ void  TestReverseOperators::testSpaceshipOperator()
         <typesystem package="Foo">
             <value-type name='Test'/>
         </typesystem>)";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false,
-                                                                {}, {}, LanguageLevel::Cpp20));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false, {}, {}, LanguageLevel::Cpp20);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);

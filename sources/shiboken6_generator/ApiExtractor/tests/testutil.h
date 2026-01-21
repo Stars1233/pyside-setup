@@ -18,11 +18,10 @@
 
 namespace TestUtil
 {
-    static AbstractMetaBuilder *parse(const char *cppCode, const char *xmlCode,
-                                      bool silent = true,
-                                      const QString &apiVersion = {},
-                                      const QStringList &dropTypeEntries = {},
-                                      LanguageLevel languageLevel = LanguageLevel::Default)
+    static std::unique_ptr<AbstractMetaBuilder>
+        parse(const char *cppCode, const char *xmlCode, bool silent = true,
+              const QString &apiVersion = {}, const QStringList &dropTypeEntries = {},
+              LanguageLevel languageLevel = LanguageLevel::Default)
     {
         ReportHandler::setSilent(silent);
         ReportHandler::startTimer();
@@ -55,12 +54,12 @@ namespace TestUtil
         auto builder = std::make_unique<AbstractMetaBuilder>();
         try {
             if (!builder->build(arguments, {}, true, languageLevel))
-                return nullptr;
+                builder.reset();
         } catch (const std::exception &e) {
             qWarning("%s", e.what());
-            return nullptr;
+            builder.reset();
         }
-        return builder.release();
+        return builder;
     }
 } // namespace TestUtil
 

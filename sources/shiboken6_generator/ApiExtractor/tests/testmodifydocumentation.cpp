@@ -32,7 +32,7 @@ R"(<typesystem package="Foo">
     </value-type>
 </typesystem>
 )";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     const auto classA = AbstractMetaClass::findClass(builder->classes(), "A");
     QVERIFY(classA);
@@ -97,7 +97,7 @@ void TestModifyDocumentation::testInjectAddedFunctionDocumentation()
     </value-type>
 </typesystem>
 )XML";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     const auto classA = AbstractMetaClass::findClass(builder->classes(), "A");
     QVERIFY(classA);

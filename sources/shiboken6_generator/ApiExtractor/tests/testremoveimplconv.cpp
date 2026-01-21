@@ -31,7 +31,7 @@ void TestRemoveImplConv::testRemoveImplConv()
             <modify-function signature='C(const A&amp;)' remove='all'/>\n\
         </value-type>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);

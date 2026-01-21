@@ -45,7 +45,7 @@ void TestModifyFunction::testRenameArgument()
 )";
 
     const QByteArray xmlCode = QByteArray(xmlCode1) + pattern + QByteArray(xmlCode2);
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.constData(), false));
+    auto builder = TestUtil::parse(cppCode, xmlCode.constData(), false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -73,7 +73,7 @@ void TestModifyFunction::testOwnershipTransfer()
         </modify-function>\n\
         </object-type>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classB = AbstractMetaClass::findClass(classes, "B");
@@ -122,8 +122,7 @@ void TestModifyFunction::invalidateAfterUse()
         </object-type>\n\
         <object-type name='E' />\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                false, u"0.1"_s));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false, u"0.1"_s);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classB = AbstractMetaClass::findClass(classes, "B");
@@ -195,8 +194,7 @@ void TestModifyFunction::testWithApiVersion()
         </modify-function>\n\
         </object-type>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                false, u"0.1"_s));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false, u"0.1"_s);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classB = AbstractMetaClass::findClass(classes, "B");
@@ -234,8 +232,7 @@ struct A {
     </object-type>
 </typesystem>
 )XML";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
-                                                                false, u"0.1"_s));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false, u"0.1"_s);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -285,7 +282,7 @@ void TestModifyFunction::testGlobalFunctionModification()
         </function>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     QCOMPARE(builder->globalFunctions().size(), 1);
 
@@ -433,7 +430,7 @@ void TestModifyFunction::testScopedModifications()
     QFETCH(bool, expectedGenerateThrowing);
     QFETCH(bool, expectedAllowThread);
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode.constData(), xmlCode.constData(), false));
+    auto builder = TestUtil::parse(cppCode.constData(), xmlCode.constData(), false);
     QVERIFY(builder);
 
     const auto classA = AbstractMetaClass::findClass(builder->classes(), "A");

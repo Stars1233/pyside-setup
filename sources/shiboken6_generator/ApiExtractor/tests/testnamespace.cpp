@@ -30,7 +30,7 @@ void NamespaceTest::testNamespaceMembers()
             <enum-type name='Option' />\n\
         </namespace-type>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto ns = AbstractMetaClass::findClass(classes, "Namespace");
@@ -60,7 +60,7 @@ void NamespaceTest::testNamespaceInnerClassMembers()
             </namespace-type>\n\
         </namespace-type>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto ons = AbstractMetaClass::findClass(classes, "OuterNamespace");

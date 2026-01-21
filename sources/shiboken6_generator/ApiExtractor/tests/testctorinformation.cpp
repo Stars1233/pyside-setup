@@ -20,7 +20,7 @@ void TestCtorInformation::testCtorIsPrivate()
                                 <object-type name='Subject'/>\n\
                                 <value-type name='CtorLess'/>\n\
                            </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
@@ -46,7 +46,7 @@ void TestCtorInformation::testHasNonPrivateCtor()
                                 <object-type name='Base' generate='no'/>\n\
                                 <object-type name='Derived'/>\n\
                            </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);

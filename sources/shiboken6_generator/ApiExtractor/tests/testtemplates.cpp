@@ -55,7 +55,7 @@ namespace Internet {
     </namespace-type>
 </typesystem>)XML").arg(file.fileName());
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, qPrintable(xmlCode1), false));
+    auto builder = TestUtil::parse(cppCode, qPrintable(xmlCode1), false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
@@ -93,7 +93,7 @@ namespace Namespace {
     <object-type name='Base'/>
 </typesystem>)XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
@@ -130,7 +130,7 @@ void func(List<int> arg) {}
     <function signature='func(List&lt;int&gt;)'/>
 </typesystem>)XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     const auto globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.size(), 1);
@@ -155,7 +155,7 @@ void func(List<int>* arg) {}
      <function signature='func(List&lt;int&gt;*)'/>
  </typesystem>)XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaFunctionCList globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.size(), 1);
@@ -180,7 +180,7 @@ void func(List<int>& arg) {}
     <function signature='func(List&lt;int&gt;&amp;)'/>
 </typesystem>)XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     const auto globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.size(), 1);
@@ -209,7 +209,7 @@ struct List {
      </container-type>
  </typesystem>)XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     const AbstractMetaClassList templates = builder->templates();
 
@@ -249,7 +249,7 @@ struct FooBars : public ListContainer<FooBar> {};
     </value-type>
 </typesystem>)XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     AbstractMetaClassList templates = builder->templates();
@@ -286,7 +286,7 @@ template<SomeEnum type> struct Future {};
     <value-type name='Future' generate='no'/>
 </typesystem>)XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
@@ -325,7 +325,7 @@ template<SomeEnum type> struct Future {};
     </namespace-type>
 </typesystem>)XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
@@ -361,7 +361,7 @@ typedef BaseTemplateClass<TypeOne> TypeOneClass;
     </namespace-type>
 </typesystem>)XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    auto builder = TestUtil::parse(cppCode, xmlCode, false);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
@@ -410,7 +410,7 @@ typedef Vector<int> IntVector;
     <value-type name='IntVector'/>
 </typesystem>)XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
+    auto builder = TestUtil::parse(cppCode, xmlCode, true);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
@@ -454,7 +454,7 @@ Array<int, 2> foo();
     <function signature="foo()"/>
 </typesystem>)XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
+    auto builder = TestUtil::parse(cppCode, xmlCode, true);
     QVERIFY(builder);
     auto functions = builder->globalFunctions();
     QCOMPARE(functions.size(), 1);
@@ -537,7 +537,7 @@ void TestTemplates::testTemplateTypeDefs()
 
     const QByteArray cppBa = cpp.toLocal8Bit();
     const QByteArray xmlBa = xml.toLocal8Bit();
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppBa.constData(), xmlBa.constData(), true));
+    auto builder = TestUtil::parse(cppBa.constData(), xmlBa.constData(), true);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
@@ -606,7 +606,7 @@ public:
     <object-type name='Test'/>
 </typesystem>)XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
+    auto builder = TestUtil::parse(cppCode, xmlCode, true);
     QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();

@@ -29,7 +29,7 @@ void TestTypeRevision::testRevisionAttr()
                         "    <enum-type name=\"Rev_5\" revision=\"5\" flags=\"Flag_5\" />"
                         "</object-type>"
                         "</typesystem>";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto rev0 = AbstractMetaClass::findClass(classes, "Rev_0");
@@ -81,7 +81,7 @@ class Bar20 {};
 </typesystem>
 )XML";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true, version));
+    auto builder = TestUtil::parse(cppCode, xmlCode, true, version);
     QVERIFY(builder);
 
     QCOMPARE(builder->classes().size(), expectedClassCount);

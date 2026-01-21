@@ -35,7 +35,7 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
             <conversion-rule class='target' file='"_s + file.fileName() + u"'/>\n\
         </value-type>\n\
     </typesystem>\n"_s;
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.toLocal8Bit().data()));
+    auto builder = TestUtil::parse(cppCode, xmlCode.toLocal8Bit().data());
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
@@ -85,7 +85,7 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
         <value-type name='B'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     auto *typeDb = TypeDatabase::instance();
     auto typeA = typeDb->findPrimitiveType(u"A"_s);
@@ -153,7 +153,7 @@ if (!TargetDateTimeAPI) TargetDateTime_IMPORT;\n\
         </value-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     const auto classA = AbstractMetaClass::findClass(builder->classes(), "Date");
     QVERIFY(classA);
@@ -216,7 +216,7 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
     "%OUT = %IN.createA();\n"
     "// TEMPLATE - target_to_native - END";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     auto *typeDb = TypeDatabase::instance();
     auto typeA = typeDb->findPrimitiveType(u"A"_s);

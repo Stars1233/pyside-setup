@@ -30,7 +30,7 @@ void TestImplicitConversions::testWithPrivateCtors()
         <value-type name='B'/>\n\
         <value-type name='C'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
@@ -60,7 +60,7 @@ void TestImplicitConversions::testWithModifiedVisibility()
     <value-type name='B'/>
 </typesystem>
 )";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -94,7 +94,7 @@ void TestImplicitConversions::testWithAddedCtor()
         </value-type>\n\
         <value-type name='C'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
@@ -121,7 +121,7 @@ void TestImplicitConversions::testWithExternalConversionOperator()
         <value-type name='A'/>\n\
         <value-type name='B'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    auto builder = TestUtil::parse(cppCode, xmlCode);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);

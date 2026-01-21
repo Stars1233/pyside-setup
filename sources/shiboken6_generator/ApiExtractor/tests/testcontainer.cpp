@@ -29,7 +29,7 @@ void TestContainer::testContainerType()
         <object-type name='A'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
+    auto builder = TestUtil::parse(cppCode, xmlCode, true);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -62,7 +62,7 @@ void TestContainer::testListOfValueType()
         <value-type name='A'/>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
+    auto builder = TestUtil::parse(cppCode, xmlCode, true);
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
