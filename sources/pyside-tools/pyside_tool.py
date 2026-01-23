@@ -184,7 +184,8 @@ def designer():
 
 
 def linguist():
-    qt_tool_wrapper(ui_tool_binary("linguist"), sys.argv[1:])
+    args = ["--web-help"] + sys.argv[1:]
+    qt_tool_wrapper(ui_tool_binary("linguist"), args)
 
 
 def genpyi():
