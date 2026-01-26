@@ -79,31 +79,29 @@ class SpreadSheetItem(QTableWidgetItem):
         first_val = int(start.text()) if start else 0
         second_val = int(end.text()) if start else 0
 
-        if op == "sum":
-            sum = 0
-            for r in range(first_row, second_row + 1):
-                for c in range(first_col, second_col + 1):
-                    table_item = widget.item(r, c)
-                    if table_item and table_item != this:
-                        sum += int(table_item.text())
+        match op:
+            case "sum":
+                sum = 0
+                for r in range(first_row, second_row + 1):
+                    for c in range(first_col, second_col + 1):
+                        table_item = widget.item(r, c)
+                        if table_item and table_item != this:
+                            sum += int(table_item.text())
 
-            result = sum
-        elif op == "+":
-            result = first_val + second_val
-        elif op == "-":
-            result = first_val - second_val
-        elif op == "*":
-            result = first_val * second_val
-        elif op == "/":
-            if second_val == 0:
-                result = "nan"
-            else:
-                result = first_val / second_val
-        elif op == "=":
-            if start:
-                result = start.text()
-        else:
-            result = formula
+                result = sum
+            case "+":
+                result = first_val + second_val
+            case "-":
+                result = first_val - second_val
+            case "*":
+                result = first_val * second_val
+            case "/":
+                result = first_val / second_val if second_val != 0 else "nan"
+            case "=":
+                if start:
+                    result = start.text()
+            case _:
+                result = formula
 
         return result
 

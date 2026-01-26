@@ -389,13 +389,13 @@ class Dialog(QDialog):
                               QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
                               | QMessageBox.StandardButton.Cancel)
         msg_box.setInformativeText(m)
-        reply = msg_box.exec()
-        if reply == QMessageBox.StandardButton.Yes:
-            self._question_label.setText("Yes")
-        elif reply == QMessageBox.StandardButton.No:
-            self._question_label.setText("No")
-        else:
-            self._question_label.setText("Cancel")
+        match msg_box.exec():
+            case QMessageBox.StandardButton.Yes:
+                self._question_label.setText("Yes")
+            case QMessageBox.StandardButton.No:
+                self._question_label.setText("No")
+            case _:
+                self._question_label.setText("Cancel")
 
     @Slot()
     def warning_message(self):

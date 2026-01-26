@@ -62,14 +62,15 @@ class WebAuthDialog(QDialog):
 
     def update_display(self):
         state = self.uxRequest.state()
-        if state == QWebEngineWebAuthUxRequest.WebAuthUxState.SelectAccount:
-            self.setupSelectAccountUI()
-        elif state == QWebEngineWebAuthUxRequest.WebAuthUxState.CollectPin:
-            self.setupCollectPinUI()
-        elif state == QWebEngineWebAuthUxRequest.WebAuthUxState.FinishTokenCollection:
-            self.setupFinishCollectTokenUI()
-        elif state == QWebEngineWebAuthUxRequest.WebAuthUxState.RequestFailed:
-            self.setupErrorUI()
+        match state:
+            case QWebEngineWebAuthUxRequest.WebAuthUxState.SelectAccount:
+                self.setupSelectAccountUI()
+            case QWebEngineWebAuthUxRequest.WebAuthUxState.CollectPin:
+                self.setupCollectPinUI()
+            case QWebEngineWebAuthUxRequest.WebAuthUxState.FinishTokenCollection:
+                self.setupFinishCollectTokenUI()
+            case QWebEngineWebAuthUxRequest.WebAuthUxState.RequestFailed:
+                self.setupErrorUI()
 
         self.adjustSize()
 
@@ -145,16 +146,17 @@ class WebAuthDialog(QDialog):
 
         errorDetails = ""
 
-        if pinRequestInfo.error == QWebEngineWebAuthUxRequest.PinEntryError.InternalUvLocked:
-            errorDetails = self.tr("Internal User Verification Locked ")
-        elif pinRequestInfo.error == QWebEngineWebAuthUxRequest.PinEntryError.WrongPin:
-            errorDetails = self.tr("Wrong PIN")
-        elif pinRequestInfo.error == QWebEngineWebAuthUxRequest.PinEntryError.TooShort:
-            errorDetails = self.tr("Too Short")
-        elif pinRequestInfo.error == QWebEngineWebAuthUxRequest.PinEntryError.InvalidCharacters:
-            errorDetails = self.tr("Invalid Characters")
-        elif pinRequestInfo.error == QWebEngineWebAuthUxRequest.PinEntryError.SameAsCurrentPin:
-            errorDetails = self.tr("Same as current PIN")
+        match pinRequestInfo.error:
+            case QWebEngineWebAuthUxRequest.PinEntryError.InternalUvLocked:
+                errorDetails = self.tr("Internal User Verification Locked ")
+            case QWebEngineWebAuthUxRequest.PinEntryError.WrongPin:
+                errorDetails = self.tr("Wrong PIN")
+            case QWebEngineWebAuthUxRequest.PinEntryError.TooShort:
+                errorDetails = self.tr("Too Short")
+            case QWebEngineWebAuthUxRequest.PinEntryError.InvalidCharacters:
+                errorDetails = self.tr("Invalid Characters")
+            case QWebEngineWebAuthUxRequest.PinEntryError.SameAsCurrentPin:
+                errorDetails = self.tr("Same as current PIN")
 
         if errorDetails:
             errorDetails += f" {pinRequestInfo.remainingAttempts} attempts remaining"
@@ -184,40 +186,41 @@ class WebAuthDialog(QDialog):
         state = self.uxRequest.requestFailureReason()
         failure_reason = QWebEngineWebAuthUxRequest.RequestFailureReason
 
-        if state == failure_reason.Timeout:
-            error_description = self.tr("Request Timeout")
-        elif state == failure_reason.KeyNotRegistered:
-            error_description = self.tr("Key not registered")
-        elif state == failure_reason.KeyAlreadyRegistered:
-            error_description = self.tr("You already registered self device."
-                                        "Try again with device")
-            isVisibleRetry = True
-        elif state == failure_reason.SoftPinBlock:
-            error_description = self.tr(
-                "The security key is locked because the wrong PIN was entered too many times."
-                "To unlock it, remove and reinsert it.")
-            isVisibleRetry = True
-        elif state == failure_reason.HardPinBlock:
-            error_description = self.tr(
-                "The security key is locked because the wrong PIN was entered too many times."
-                " Yo'll need to reset the security key.")
-        elif state == failure_reason.AuthenticatorRemovedDuringPinEntry:
-            error_description = self.tr(
-                "Authenticator removed during verification. Please reinsert and try again")
-        elif state == failure_reason.AuthenticatorMissingResidentKeys:
-            error_description = self.tr("Authenticator doesn't have resident key support")
-        elif state == failure_reason.AuthenticatorMissingUserVerification:
-            error_description = self.tr("Authenticator missing user verification")
-        elif state == failure_reason.AuthenticatorMissingLargeBlob:
-            error_description = self.tr("Authenticator missing Large Blob support")
-        elif state == failure_reason.NoCommonAlgorithms:
-            error_description = self.tr("Authenticator missing Large Blob support")
-        elif state == failure_reason.StorageFull:
-            error_description = self.tr("Storage Full")
-        elif state == failure_reason.UserConsentDenied:
-            error_description = self.tr("User consent denied")
-        elif state == failure_reason.WinUserCancelled:
-            error_description = self.tr("User Cancelled Request")
+        match state:
+            case failure_reason.Timeout:
+                error_description = self.tr("Request Timeout")
+            case failure_reason.KeyNotRegistered:
+                error_description = self.tr("Key not registered")
+            case failure_reason.KeyAlreadyRegistered:
+                error_description = self.tr("You already registered self device."
+                                            "Try again with device")
+                isVisibleRetry = True
+            case failure_reason.SoftPinBlock:
+                error_description = self.tr(
+                    "The security key is locked because the wrong PIN was entered too many times."
+                    "To unlock it, remove and reinsert it.")
+                isVisibleRetry = True
+            case failure_reason.HardPinBlock:
+                error_description = self.tr(
+                    "The security key is locked because the wrong PIN was entered too many times."
+                    " Yo'll need to reset the security key.")
+            case failure_reason.AuthenticatorRemovedDuringPinEntry:
+                error_description = self.tr(
+                    "Authenticator removed during verification. Please reinsert and try again")
+            case failure_reason.AuthenticatorMissingResidentKeys:
+                error_description = self.tr("Authenticator doesn't have resident key support")
+            case failure_reason.AuthenticatorMissingUserVerification:
+                error_description = self.tr("Authenticator missing user verification")
+            case failure_reason.AuthenticatorMissingLargeBlob:
+                error_description = self.tr("Authenticator missing Large Blob support")
+            case failure_reason.NoCommonAlgorithms:
+                error_description = self.tr("Authenticator missing Large Blob support")
+            case failure_reason.StorageFull:
+                error_description = self.tr("Storage Full")
+            case failure_reason.UserConsentDenied:
+                error_description = self.tr("User consent denied")
+            case failure_reason.WinUserCancelled:
+                error_description = self.tr("User Cancelled Request")
 
         self.uiWebAuthDialog.m_headingLabel.setText(error_heading)
         self.uiWebAuthDialog.m_description.setText(error_description)

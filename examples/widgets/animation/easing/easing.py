@@ -24,13 +24,14 @@ class PathType(IntEnum):
 
 def createEasingCurve(curveType):
     curve = QEasingCurve(curveType)
-    if curveType == QEasingCurve.Type.BezierSpline:
-        curve.addCubicBezierSegment(QPointF(0.4, 0.1), QPointF(0.6, 0.9), QPointF(1.0, 1.0))
-    elif curveType == QEasingCurve.Type.TCBSpline:
-        curve.addTCBSegment(QPointF(0.0, 0.0), 0, 0, 0)
-        curve.addTCBSegment(QPointF(0.3, 0.4), 0.2, 1, -0.2)
-        curve.addTCBSegment(QPointF(0.7, 0.6), -0.2, 1, 0.2)
-        curve.addTCBSegment(QPointF(1.0, 1.0), 0, 0, 0)
+    match curveType:
+        case QEasingCurve.Type.BezierSpline:
+            curve.addCubicBezierSegment(QPointF(0.4, 0.1), QPointF(0.6, 0.9), QPointF(1.0, 1.0))
+        case QEasingCurve.Type.TCBSpline:
+            curve.addTCBSegment(QPointF(0.0, 0.0), 0, 0, 0)
+            curve.addTCBSegment(QPointF(0.3, 0.4), 0.2, 1, -0.2)
+            curve.addTCBSegment(QPointF(0.7, 0.6), -0.2, 1, 0.2)
+            curve.addTCBSegment(QPointF(1.0, 1.0), 0, 0, 0)
     return curve
 
 

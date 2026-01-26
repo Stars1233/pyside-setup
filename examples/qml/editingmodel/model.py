@@ -32,18 +32,16 @@ class BaseModel(QAbstractListModel):
         return default
 
     def data(self, index, role: int):
-        if not self.db:
-            ret = None
-        elif not index.isValid():
-            ret = None
-        elif role == Qt.ItemDataRole.DisplayRole:
-            ret = self.db[index.row()]["text"]
-        elif role == Qt.ItemDataRole.BackgroundRole:
-            ret = self.db[index.row()]["bgColor"]
-        elif role == self.RatioRole:
-            ret = self.db[index.row()]["ratio"]
-        else:
-            ret = None
+        ret = None
+        if self.db and index.isValid():
+            item = self.db[index.row()]
+            match role:
+                case Qt.ItemDataRole.DisplayRole:
+                    ret = item["text"]
+                case Qt.ItemDataRole.BackgroundRole:
+                    ret = item["bgColor"]
+                case self.RatioRole:
+                    ret = item["ratio"]
         return ret
 
     def setData(self, index, value, role):

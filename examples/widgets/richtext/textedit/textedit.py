@@ -350,15 +350,16 @@ class TextEdit(QMainWindow):
         db = QMimeDatabase()
         mime_type_name = db.mimeTypeForFileNameAndData(f, data).name()
         text = data.data().decode('utf8')
-        if mime_type_name == "text/html":
-            file_url = QUrl(f) if f[0] == ':' else QUrl.fromLocalFile(f)
-            options = QUrl.FormattingOptions(QUrl.UrlFormattingOption.RemoveFilename)
-            self._text_edit.document().setBaseUrl(file_url.adjusted(options))
-            self._text_edit.setHtml(text)
-        elif mime_type_name == "text/markdown":
-            self._text_edit.setMarkdown(text)
-        else:
-            self._text_edit.setPlainText(text)
+        match mime_type_name:
+            case "text/html":
+                file_url = QUrl(f) if f[0] == ':' else QUrl.fromLocalFile(f)
+                options = QUrl.FormattingOptions(QUrl.UrlFormattingOption.RemoveFilename)
+                self._text_edit.document().setBaseUrl(file_url.adjusted(options))
+                self._text_edit.setHtml(text)
+            case "text/markdown":
+                self._text_edit.setMarkdown(text)
+            case _:
+                self._text_edit.setPlainText(text)
 
         self.set_current_file_name(f)
         return True
@@ -511,34 +512,35 @@ class TextEdit(QMainWindow):
         style = QTextListFormat.ListStyleUndefined
         marker = QTextBlockFormat.MarkerType.NoMarker
 
-        if styleIndex == 1:
-            style = QTextListFormat.ListDisc
-        elif styleIndex == 2:
-            style = QTextListFormat.ListCircle
-        elif styleIndex == 3:
-            style = QTextListFormat.ListSquare
-        elif styleIndex == 4:
-            if cursor.currentList():
-                style = cursor.currentList().format().style()
-            else:
+        match styleIndex:
+            case 1:
                 style = QTextListFormat.ListDisc
-            marker = QTextBlockFormat.MarkerType.Unchecked
-        elif styleIndex == 5:
-            if cursor.currentList():
-                style = cursor.currentList().format().style()
-            else:
-                style = QTextListFormat.ListDisc
-            marker = QTextBlockFormat.MarkerType.Checked
-        elif styleIndex == 6:
-            style = QTextListFormat.ListDecimal
-        elif styleIndex == 7:
-            style = QTextListFormat.ListLowerAlpha
-        elif styleIndex == 8:
-            style = QTextListFormat.ListUpperAlpha
-        elif styleIndex == 9:
-            style = QTextListFormat.ListLowerRoman
-        elif styleIndex == 10:
-            style = QTextListFormat.ListUpperRoman
+            case 2:
+                style = QTextListFormat.ListCircle
+            case 3:
+                style = QTextListFormat.ListSquare
+            case 4:
+                if cursor.currentList():
+                    style = cursor.currentList().format().style()
+                else:
+                    style = QTextListFormat.ListDisc
+                marker = QTextBlockFormat.MarkerType.Unchecked
+            case 5:
+                if cursor.currentList():
+                    style = cursor.currentList().format().style()
+                else:
+                    style = QTextListFormat.ListDisc
+                marker = QTextBlockFormat.MarkerType.Checked
+            case 6:
+                style = QTextListFormat.ListDecimal
+            case 7:
+                style = QTextListFormat.ListLowerAlpha
+            case 8:
+                style = QTextListFormat.ListUpperAlpha
+            case 9:
+                style = QTextListFormat.ListLowerRoman
+            case 10:
+                style = QTextListFormat.ListUpperRoman
 
         cursor.beginEditBlock()
 
@@ -648,34 +650,36 @@ class TextEdit(QMainWindow):
     def cursor_position_changed(self):
         self.alignment_changed(self._text_edit.alignment())
         if current_list := self._text_edit.textCursor().currentList():
-            style = current_list.format().style()
-            if style == QTextListFormat.ListDisc:
-                self._combo_style.setCurrentIndex(1)
-            elif style == QTextListFormat.ListCircle:
-                self._combo_style.setCurrentIndex(2)
-            elif style == QTextListFormat.ListSquare:
-                self._combo_style.setCurrentIndex(3)
-            elif style == QTextListFormat.ListDecimal:
-                self._combo_style.setCurrentIndex(6)
-            elif style == QTextListFormat.ListLowerAlpha:
-                self._combo_style.setCurrentIndex(7)
-            elif style == QTextListFormat.ListUpperAlpha:
-                self._combo_style.setCurrentIndex(8)
-            elif style == QTextListFormat.ListLowerRoman:
-                self._combo_style.setCurrentIndex(9)
-            elif style == QTextListFormat.ListUpperRoman:
-                self._combo_style.setCurrentIndex(10)
-            else:
-                self._combo_style.setCurrentIndex(-1)
-            marker = self._text_edit.textCursor().block().blockFormat().marker()
-            if marker == QTextBlockFormat.MarkerType.NoMarker:
-                self._action_toggle_check_state.setChecked(False)
-            elif marker == QTextBlockFormat.MarkerType.Unchecked:
-                self._combo_style.setCurrentIndex(4)
-                self._action_toggle_check_state.setChecked(False)
-            elif marker == QTextBlockFormat.MarkerType.Checked:
-                self._combo_style.setCurrentIndex(5)
-                self._action_toggle_check_state.setChecked(True)
+            match current_list.format().style():
+                case QTextListFormat.ListDisc:
+                    self._combo_style.setCurrentIndex(1)
+                case QTextListFormat.ListCircle:
+                    self._combo_style.setCurrentIndex(2)
+                case QTextListFormat.ListSquare:
+                    self._combo_style.setCurrentIndex(3)
+                case QTextListFormat.ListDecimal:
+                    self._combo_style.setCurrentIndex(6)
+                case QTextListFormat.ListLowerAlpha:
+                    self._combo_style.setCurrentIndex(7)
+                case QTextListFormat.ListUpperAlpha:
+                    self._combo_style.setCurrentIndex(8)
+                case QTextListFormat.ListLowerRoman:
+                    self._combo_style.setCurrentIndex(9)
+                case QTextListFormat.ListUpperRoman:
+                    self._combo_style.setCurrentIndex(10)
+                case _:
+                    self._combo_style.setCurrentIndex(-1)
+
+            match self._text_edit.textCursor().block().blockFormat().marker():
+                case QTextBlockFormat.MarkerType.NoMarker:
+                    self._action_toggle_check_state.setChecked(False)
+                case QTextBlockFormat.MarkerType.Unchecked:
+                    self._combo_style.setCurrentIndex(4)
+                    self._action_toggle_check_state.setChecked(False)
+                case QTextBlockFormat.MarkerType.Checked:
+                    self._combo_style.setCurrentIndex(5)
+                    self._action_toggle_check_state.setChecked(True)
+
         else:
             heading_level = self._text_edit.textCursor().blockFormat().headingLevel()
             new_level = heading_level + 10 if heading_level != 0 else 0

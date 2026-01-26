@@ -151,21 +151,20 @@ class JsonModel(QAbstractItemModel):
         Return data from a json item according index and role
 
         """
-        if not index.isValid():
-            return None
-
-        item = index.internalPointer()
-
-        if role == Qt.ItemDataRole.DisplayRole:
-            if index.column() == 0:
-                return item.key
-
-            if index.column() == 1:
-                return item.value
-
-        elif role == Qt.ItemDataRole.EditRole:
-            if index.column() == 1:
-                return item.value
+        ret = None
+        if index.isValid():
+            item = index.internalPointer()
+            match role:
+                case Qt.ItemDataRole.DisplayRole:
+                    match index.column():
+                        case 0:
+                            ret = item.key
+                        case 1:
+                            ret = item.value
+                case Qt.ItemDataRole.EditRole:
+                    if index.column() == 1:
+                        ret = item.value
+        return ret
 
     def setData(self, index: QModelIndex, value: Any, role: Qt.ItemDataRole):
         """Override from QAbstractItemModel

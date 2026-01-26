@@ -156,16 +156,16 @@ class AbstractViewer(QObject):
         else:
             self.statusMessage("Printing canceled!", type)
             return
-        state = printer.printerState()
         message = self.viewerName() + " :"
-        if state == QPrinter.PrinterState.Aborted:
-            message += "Printing aborted."
-        elif state == QPrinter.PrinterState.Active:
-            message += "Printing active."
-        elif state == QPrinter.PrinterState.Idle:
-            message += "Printing completed."
-        elif state == QPrinter.PrinterState.Error:
-            message += "Printing error."
+        match printer.printerState():
+            case QPrinter.PrinterState.Aborted:
+                message += "Printing aborted."
+            case QPrinter.PrinterState.Active:
+                message += "Printing active."
+            case QPrinter.PrinterState.Idle:
+                message += "Printing completed."
+            case QPrinter.PrinterState.Error:
+                message += "Printing error."
         self.statusMessage(message, type)
 
     def maybeSetPrintingEnabled(self, enabled):

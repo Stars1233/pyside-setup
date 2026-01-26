@@ -299,26 +299,25 @@ class GraphWidget(QGraphicsView):
             self._timer_id = self.startTimer(1000 / 25)
 
     def keyPressEvent(self, event):
-        key = event.key()
-
-        if key == Qt.Key.Key_Up:
-            self._center_node.moveBy(0, -20)
-        elif key == Qt.Key.Key_Down:
-            self._center_node.moveBy(0, 20)
-        elif key == Qt.Key.Key_Left:
-            self._center_node.moveBy(-20, 0)
-        elif key == Qt.Key.Key_Right:
-            self._center_node.moveBy(20, 0)
-        elif key == Qt.Key.Key_Plus:
-            self.scale_view(1.2)
-        elif key == Qt.Key.Key_Minus:
-            self.scale_view(1 / 1.2)
-        elif key == Qt.Key.Key_Space or key == Qt.Key.Key_Enter:
-            for item in self.scene().items():
-                if isinstance(item, Node):
-                    item.setPos(-150 + random(300), -150 + random(300))
-        else:
-            QGraphicsView.keyPressEvent(self, event)
+        match event.key():
+            case Qt.Key.Key_Up:
+                self._center_node.moveBy(0, -20)
+            case Qt.Key.Key_Down:
+                self._center_node.moveBy(0, 20)
+            case Qt.Key.Key_Left:
+                self._center_node.moveBy(-20, 0)
+            case Qt.Key.Key_Right:
+                self._center_node.moveBy(20, 0)
+            case Qt.Key.Key_Plus:
+                self.scale_view(1.2)
+            case Qt.Key.Key_Minus:
+                self.scale_view(1 / 1.2)
+            case Qt.Key.Key_Space | Qt.Key.Key_Enter:
+                for item in self.scene().items():
+                    if isinstance(item, Node):
+                        item.setPos(-150 + random(300), -150 + random(300))
+            case _:
+                QGraphicsView.keyPressEvent(self, event)
 
     def timerEvent(self, event):
         nodes = [item for item in self.scene().items() if isinstance(item, Node)]

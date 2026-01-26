@@ -121,19 +121,19 @@ class Player(QWidget):
 
         self.m_pitchCompensationButton = QPushButton("Pitch compensation", self)
         self.m_pitchCompensationButton.setCheckable(True)
-        av = self.m_player.pitchCompensationAvailability()
         toolTip = ""
-        if av == QMediaPlayer.PitchCompensationAvailability.AlwaysOn:
-            self.m_pitchCompensationButton.setEnabled(False)
-            self.m_pitchCompensationButton.setChecked(True)
-            toolTip = "Pitch compensation always enabled on self backend"
-        elif av == QMediaPlayer.PitchCompensationAvailability.Unavailable:
-            self.m_pitchCompensationButton.setEnabled(False)
-            self.m_pitchCompensationButton.setChecked(False)
-            toolTip = "Pitch compensation unavailable on self backend"
-        elif av == QMediaPlayer.PitchCompensationAvailability.Available:
-            self.m_pitchCompensationButton.setEnabled(True)
-            self.m_pitchCompensationButton.setChecked(self.m_player.pitchCompensation())
+        match self.m_player.pitchCompensationAvailability():
+            case QMediaPlayer.PitchCompensationAvailability.AlwaysOn:
+                self.m_pitchCompensationButton.setEnabled(False)
+                self.m_pitchCompensationButton.setChecked(True)
+                toolTip = "Pitch compensation always enabled on self backend"
+            case QMediaPlayer.PitchCompensationAvailability.Unavailable:
+                self.m_pitchCompensationButton.setEnabled(False)
+                self.m_pitchCompensationButton.setChecked(False)
+                toolTip = "Pitch compensation unavailable on self backend"
+            case QMediaPlayer.PitchCompensationAvailability.Available:
+                self.m_pitchCompensationButton.setEnabled(True)
+                self.m_pitchCompensationButton.setChecked(self.m_player.pitchCompensation())
         self.m_pitchCompensationButton.setToolTip(toolTip)
 
         controlLayout.addWidget(self.m_pitchCompensationButton)
@@ -352,22 +352,21 @@ class Player(QWidget):
     def statusChanged(self, status):
         self.handleCursor(status)
         # handle status message
-        if (status == QMediaPlayer.MediaStatus.NoMedia
-                or status == QMediaPlayer.MediaStatus.LoadedMedia):
-            self.setStatusInfo("")
-        elif status == QMediaPlayer.MediaStatus.LoadingMedia:
-            self.setStatusInfo("Loading...")
-        elif (status == QMediaPlayer.MediaStatus.BufferingMedia
-              or status == QMediaPlayer.MediaStatus.BufferedMedia):
-            progress = round(self.m_player.bufferProgress() * 100.0)
-            self.setStatusInfo(f"Buffering {progress}%")
-        elif status == QMediaPlayer.MediaStatus.StalledMedia:
-            progress = round(self.m_player.bufferProgress() * 100.0)
-            self.setStatusInfo(f"Stalled {progress}%")
-        elif status == QMediaPlayer.MediaStatus.EndOfMedia:
-            QApplication.alert(self)
-        elif status == QMediaPlayer.MediaStatus.InvalidMedia:
-            self.displayErrorMessage()
+        match status:
+            case QMediaPlayer.MediaStatus.NoMedia | QMediaPlayer.MediaStatus.LoadedMedia:
+                self.setStatusInfo("")
+            case QMediaPlayer.MediaStatus.LoadingMedia:
+                self.setStatusInfo("Loading...")
+            case QMediaPlayer.MediaStatus.BufferingMedia | QMediaPlayer.MediaStatus.BufferedMedia:
+                progress = round(self.m_player.bufferProgress() * 100.0)
+                self.setStatusInfo(f"Buffering {progress}%")
+            case QMediaPlayer.MediaStatus.StalledMedia:
+                progress = round(self.m_player.bufferProgress() * 100.0)
+                self.setStatusInfo(f"Stalled {progress}%")
+            case QMediaPlayer.MediaStatus.EndOfMedia:
+                QApplication.alert(self)
+            case QMediaPlayer.MediaStatus.InvalidMedia:
+                self.displayErrorMessage()
 
     def handleCursor(self, status):
         if (status == QMediaPlayer.MediaStatus.LoadingMedia

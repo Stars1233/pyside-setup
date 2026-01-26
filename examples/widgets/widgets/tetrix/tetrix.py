@@ -208,21 +208,21 @@ class TetrixBoard(QFrame):
             super(TetrixBoard, self).keyPressEvent(event)
             return
 
-        key = event.key()
-        if key == Qt.Key.Key_Left:
-            self.try_move(self._cur_piece, self._cur_x - 1, self._cur_y)
-        elif key == Qt.Key.Key_Right:
-            self.try_move(self._cur_piece, self._cur_x + 1, self._cur_y)
-        elif key == Qt.Key.Key_Down:
-            self.try_move(self._cur_piece.rotated_right(), self._cur_x, self._cur_y)
-        elif key == Qt.Key.Key_Up:
-            self.try_move(self._cur_piece.rotated_left(), self._cur_x, self._cur_y)
-        elif key == Qt.Key.Key_Space:
-            self.drop_down()
-        elif key == Qt.Key.Key_D:
-            self.one_line_down()
-        else:
-            super(TetrixBoard, self).keyPressEvent(event)
+        match event.key():
+            case Qt.Key.Key_Left:
+                self.try_move(self._cur_piece, self._cur_x - 1, self._cur_y)
+            case Qt.Key.Key_Right:
+                self.try_move(self._cur_piece, self._cur_x + 1, self._cur_y)
+            case Qt.Key.Key_Down:
+                self.try_move(self._cur_piece.rotated_right(), self._cur_x, self._cur_y)
+            case Qt.Key.Key_Up:
+                self.try_move(self._cur_piece.rotated_left(), self._cur_x, self._cur_y)
+            case Qt.Key.Key_Space:
+                self.drop_down()
+            case Qt.Key.Key_D:
+                self.one_line_down()
+            case _:
+                super(TetrixBoard, self).keyPressEvent(event)
 
     def timerEvent(self, event):
         if event.timerId() == self.timer.timerId():

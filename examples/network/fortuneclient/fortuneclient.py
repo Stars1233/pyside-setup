@@ -95,21 +95,22 @@ class Client(QDialog):
         self._get_fortune_button.setEnabled(True)
 
     def display_error(self, socketError):
-        if socketError == QAbstractSocket.SocketError.RemoteHostClosedError:
-            pass
-        elif socketError == QAbstractSocket.SocketError.HostNotFoundError:
-            QMessageBox.information(self, "Fortune Client",
-                                    "The host was not found. Please check the host name and "
-                                    "port settings.")
-        elif socketError == QAbstractSocket.SocketError.ConnectionRefusedError:
-            QMessageBox.information(self, "Fortune Client",
-                                    "The connection was refused by the peer. Make sure the "
-                                    "fortune server is running, and check that the host name "
-                                    "and port settings are correct.")
-        else:
-            reason = self._tcp_socket.errorString()
-            QMessageBox.information(self, "Fortune Client",
-                                    f"The following error occurred: {reason}.")
+        match socketError:
+            case QAbstractSocket.SocketError.RemoteHostClosedError:
+                pass
+            case QAbstractSocket.SocketError.HostNotFoundError:
+                QMessageBox.information(self, "Fortune Client",
+                                        "The host was not found. Please check the host name and "
+                                        "port settings.")
+            case QAbstractSocket.SocketError.ConnectionRefusedError:
+                QMessageBox.information(self, "Fortune Client",
+                                        "The connection was refused by the peer. Make sure the "
+                                        "fortune server is running, and check that the host name "
+                                        "and port settings are correct.")
+            case _:
+                reason = self._tcp_socket.errorString()
+                QMessageBox.information(self, "Fortune Client",
+                                        f"The following error occurred: {reason}.")
 
         self._get_fortune_button.setEnabled(True)
 

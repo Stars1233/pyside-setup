@@ -45,16 +45,17 @@ class FileListModel(QAbstractListModel):
         if row >= len(self._file_list) or row < 0:
             return None
 
-        if role == Qt.ItemDataRole.DisplayRole:
-            return self._file_list[row].fileName()
+        match role:
+            case Qt.ItemDataRole.DisplayRole:
+                return self._file_list[row].fileName()
 
-        if role == Qt.ItemDataRole.BackgroundRole:
-            batch = row // BATCH_SIZE
-            palette = qApp.palette()  # noqa: F821
-            return palette.base() if batch % 2 == 0 else palette.alternateBase()
+            case Qt.ItemDataRole.BackgroundRole:
+                batch = row // BATCH_SIZE
+                palette = qApp.palette()  # noqa: F821
+                return palette.base() if batch % 2 == 0 else palette.alternateBase()
 
-        if role == Qt.ItemDataRole.DecorationRole:
-            return self._icon_provider.icon(self._file_list[row])
+            case Qt.ItemDataRole.DecorationRole:
+                return self._icon_provider.icon(self._file_list[row])
 
         return None
 

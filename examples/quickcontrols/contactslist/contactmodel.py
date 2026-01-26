@@ -63,14 +63,15 @@ class ContactModel(QAbstractListModel):
     def data(self, index: QModelIndex, role: int):
         row = index.row()
         if row < self.rowCount():
-            if role == ContactModel.ContactRole.FullNameRole:
-                return self.m_contacts[row].fullName
-            elif role == ContactModel.ContactRole.AddressRole:
-                return self.m_contacts[row].address
-            elif role == ContactModel.ContactRole.CityRole:
-                return self.m_contacts[row].city
-            elif role == ContactModel.ContactRole.NumberRole:
-                return self.m_contacts[row].number
+            match role:
+                case ContactModel.ContactRole.FullNameRole:
+                    return self.m_contacts[row].fullName
+                case ContactModel.ContactRole.AddressRole:
+                    return self.m_contacts[row].address
+                case ContactModel.ContactRole.CityRole:
+                    return self.m_contacts[row].city
+                case ContactModel.ContactRole.NumberRole:
+                    return self.m_contacts[row].number
 
     def roleNames(self):
         default = super().roleNames()

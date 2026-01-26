@@ -116,14 +116,15 @@ class ScatterDataModifier(QObject):
 
     @Slot(QtGraphs3D.ElementType)
     def handleElementSelected(self, type):
-        if type == QtGraphs3D.ElementType.AxisXLabel:
-            self._state = InputState.StateDraggingX
-        elif type == QtGraphs3D.ElementType.AxisYLabel:
-            self._state = InputState.StateDraggingY
-        elif type == QtGraphs3D.ElementType.AxisZLabel:
-            self._state = InputState.StateDraggingZ
-        else:
-            self._state = InputState.StateNormal
+        match type:
+            case QtGraphs3D.ElementType.AxisXLabel:
+                self._state = InputState.StateDraggingX
+            case QtGraphs3D.ElementType.AxisYLabel:
+                self._state = InputState.StateDraggingY
+            case QtGraphs3D.ElementType.AxisZLabel:
+                self._state = InputState.StateDraggingZ
+            case _:
+                self._state = InputState.StateNormal
 
     @Slot(QVector2D)
     def handleAxisDragging(self, delta):
@@ -145,19 +146,20 @@ class ScatterDataModifier(QObject):
         yMove = -move.y() if yRotation < 0 else move.y()
 
         # Adjust axes
-        if self._state == InputState.StateDraggingX:
-            axis = self._graph.axisX()
-            distance = (move.x() * xMulX - yMove * xMulY) / self._dragSpeedModifier
-            axis.setRange(axis.min() - distance, axis.max() - distance)
-        elif self._state == InputState.StateDraggingZ:
-            axis = self._graph.axisZ()
-            distance = (move.x() * zMulX + yMove * zMulY) / self._dragSpeedModifier
-            axis.setRange(axis.min() + distance, axis.max() + distance)
-        elif self._state == InputState.StateDraggingY:
-            axis = self._graph.axisY()
-            # No need to use adjusted y move here
-            distance = move.y() / self._dragSpeedModifier
-            axis.setRange(axis.min() + distance, axis.max() + distance)
+        match self._state:
+            case InputState.StateDraggingX:
+                axis = self._graph.axisX()
+                distance = (move.x() * xMulX - yMove * xMulY) / self._dragSpeedModifier
+                axis.setRange(axis.min() - distance, axis.max() - distance)
+            case InputState.StateDraggingZ:
+                axis = self._graph.axisZ()
+                distance = (move.x() * zMulX + yMove * zMulY) / self._dragSpeedModifier
+                axis.setRange(axis.min() + distance, axis.max() + distance)
+            case InputState.StateDraggingY:
+                axis = self._graph.axisY()
+                # No need to use adjusted y move here
+                distance = move.y() / self._dragSpeedModifier
+                axis.setRange(axis.min() + distance, axis.max() + distance)
 
     @Slot(int)
     def changeShadowQuality(self, quality):

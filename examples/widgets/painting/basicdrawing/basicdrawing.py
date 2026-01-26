@@ -94,34 +94,35 @@ class RenderArea(QWidget):
                             painter.scale(0.6, 0.9)
                             painter.translate(-50, -50)
 
-                        if self.shape == RenderArea.Line:
-                            painter.drawLine(rect.bottomLeft(), rect.topRight())
-                        elif self.shape == RenderArea.Points:
-                            painter.drawPoints(RenderArea.points)
-                        elif self.shape == RenderArea.Polyline:
-                            painter.drawPolyline(RenderArea.points)
-                        elif self.shape == RenderArea.Polygon:
-                            painter.drawPolygon(RenderArea.points)
-                        elif self.shape == RenderArea.Rect:
-                            painter.drawRect(rect)
-                        elif self.shape == RenderArea.RoundedRect:
-                            painter.drawRoundedRect(rect, 25, 25, Qt.SizeMode.RelativeSize)
-                        elif self.shape == RenderArea.Ellipse:
-                            painter.drawEllipse(rect)
-                        elif self.shape == RenderArea.Arc:
-                            painter.drawArc(rect, start_angle, arc_length)
-                        elif self.shape == RenderArea.Chord:
-                            painter.drawChord(rect, start_angle, arc_length)
-                        elif self.shape == RenderArea.Pie:
-                            painter.drawPie(rect, start_angle, arc_length)
-                        elif self.shape == RenderArea.Path:
-                            painter.drawPath(path)
-                        elif self.shape == RenderArea.Text:
-                            qv = qVersion()
-                            painter.drawText(rect, Qt.AlignmentFlag.AlignCenter,
-                                             f"PySide 6\nQt {qv}")
-                        elif self.shape == RenderArea.Pixmap:
-                            painter.drawPixmap(10, 10, self.pixmap)
+                        match self.shape:
+                            case RenderArea.Line:
+                                painter.drawLine(rect.bottomLeft(), rect.topRight())
+                            case RenderArea.Points:
+                                painter.drawPoints(RenderArea.points)
+                            case RenderArea.Polyline:
+                                painter.drawPolyline(RenderArea.points)
+                            case RenderArea.Polygon:
+                                painter.drawPolygon(RenderArea.points)
+                            case RenderArea.Rect:
+                                painter.drawRect(rect)
+                            case RenderArea.RoundedRect:
+                                painter.drawRoundedRect(rect, 25, 25, Qt.SizeMode.RelativeSize)
+                            case RenderArea.Ellipse:
+                                painter.drawEllipse(rect)
+                            case RenderArea.Arc:
+                                painter.drawArc(rect, start_angle, arc_length)
+                            case RenderArea.Chord:
+                                painter.drawChord(rect, start_angle, arc_length)
+                            case RenderArea.Pie:
+                                painter.drawPie(rect, start_angle, arc_length)
+                            case RenderArea.Path:
+                                painter.drawPath(path)
+                            case RenderArea.Text:
+                                qv = qVersion()
+                                painter.drawText(rect, Qt.AlignmentFlag.AlignCenter,
+                                                 f"PySide 6\nQt {qv}")
+                            case RenderArea.Pixmap:
+                                painter.drawPixmap(10, 10, self.pixmap)
 
             painter.setPen(self.palette().dark().color())
             painter.setBrush(Qt.BrushStyle.NoBrush)
@@ -273,31 +274,31 @@ class Window(QWidget):
         self._render_area.set_pen(QPen(Qt.GlobalColor.blue, width, style, cap, join))
 
     def brush_changed(self):
-        style = Qt.BrushStyle(self._brush_style_combo_box.itemData(
-            self._brush_style_combo_box.currentIndex(), id_role))
-
-        if style == Qt.BrushStyle.LinearGradientPattern:
-            linear_gradient = QLinearGradient(0, 0, 100, 100)
-            linear_gradient.setColorAt(0.0, Qt.GlobalColor.white)
-            linear_gradient.setColorAt(0.2, Qt.GlobalColor.green)
-            linear_gradient.setColorAt(1.0, Qt.GlobalColor.black)
-            self._render_area.set_brush(QBrush(linear_gradient))
-        elif style == Qt.BrushStyle.RadialGradientPattern:
-            radial_gradient = QRadialGradient(50, 50, 50, 70, 70)
-            radial_gradient.setColorAt(0.0, Qt.GlobalColor.white)
-            radial_gradient.setColorAt(0.2, Qt.GlobalColor.green)
-            radial_gradient.setColorAt(1.0, Qt.GlobalColor.black)
-            self._render_area.set_brush(QBrush(radial_gradient))
-        elif style == Qt.BrushStyle.ConicalGradientPattern:
-            conical_gradient = QConicalGradient(50, 50, 150)
-            conical_gradient.setColorAt(0.0, Qt.GlobalColor.white)
-            conical_gradient.setColorAt(0.2, Qt.GlobalColor.green)
-            conical_gradient.setColorAt(1.0, Qt.GlobalColor.black)
-            self._render_area.set_brush(QBrush(conical_gradient))
-        elif style == Qt.BrushStyle.TexturePattern:
-            self._render_area.set_brush(QBrush(QPixmap(':/images/brick.png')))
-        else:
-            self._render_area.set_brush(QBrush(Qt.GlobalColor.green, style))
+        index = self._brush_style_combo_box.currentIndex()
+        style = Qt.BrushStyle(self._brush_style_combo_box.itemData(index, id_role))
+        match style:
+            case Qt.BrushStyle.LinearGradientPattern:
+                linear_gradient = QLinearGradient(0, 0, 100, 100)
+                linear_gradient.setColorAt(0.0, Qt.GlobalColor.white)
+                linear_gradient.setColorAt(0.2, Qt.GlobalColor.green)
+                linear_gradient.setColorAt(1.0, Qt.GlobalColor.black)
+                self._render_area.set_brush(QBrush(linear_gradient))
+            case Qt.BrushStyle.RadialGradientPattern:
+                radial_gradient = QRadialGradient(50, 50, 50, 70, 70)
+                radial_gradient.setColorAt(0.0, Qt.GlobalColor.white)
+                radial_gradient.setColorAt(0.2, Qt.GlobalColor.green)
+                radial_gradient.setColorAt(1.0, Qt.GlobalColor.black)
+                self._render_area.set_brush(QBrush(radial_gradient))
+            case Qt.BrushStyle.ConicalGradientPattern:
+                conical_gradient = QConicalGradient(50, 50, 150)
+                conical_gradient.setColorAt(0.0, Qt.GlobalColor.white)
+                conical_gradient.setColorAt(0.2, Qt.GlobalColor.green)
+                conical_gradient.setColorAt(1.0, Qt.GlobalColor.black)
+                self._render_area.set_brush(QBrush(conical_gradient))
+            case Qt.BrushStyle.TexturePattern:
+                self._render_area.set_brush(QBrush(QPixmap(':/images/brick.png')))
+            case _:
+                self._render_area.set_brush(QBrush(Qt.GlobalColor.green, style))
 
 
 if __name__ == '__main__':

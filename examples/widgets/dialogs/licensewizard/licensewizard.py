@@ -266,30 +266,32 @@ class LicenseWizard(QWizard):
         self.last_help_message: str = None
 
     def show_help(self):
-        if self.currentId() == Pages.Page_Intro:
-            message = "The decision you make here will affect which page you get to see next."
+        match self.currentId():
+            case Pages.Page_Intro:
+                message = "The decision you make here will affect which page you get to see next."
 
-        elif self.currentId() == Pages.Page_Evaluate:
-            message = (
-                "Make sure to provide a valid email address, such as "
-                "toni.buddenbrook@example.de."
-            )
+            case Pages.Page_Evaluate:
+                message = (
+                    "Make sure to provide a valid email address, such as "
+                    "toni.buddenbrook@example.de."
+                )
 
-        elif self.currentId() == Pages.Page_Register:
-            message = (
-                "If you don't provide an upgrade key, you will be asked to fill in your details."
-            )
+            case Pages.Page_Register:
+                message = (
+                    "If you don't provide an upgrade key, you will be asked to fill in "
+                    "your details."
+                )
 
-        elif self.currentId() == Pages.Page_Details:
-            message = (
-                "Make sure to provide a valid email address, such as "
-                "thomas.gradgrind@example.co.uk."
-            )
+            case Pages.Page_Details:
+                message = (
+                    "Make sure to provide a valid email address, such as "
+                    "thomas.gradgrind@example.co.uk."
+                )
 
-        elif self.currentId() == Pages.Page_Conclusion:
-            message = "You must accept the terms and conditions of the license to proceed."
-        else:
-            message = "This help is likely not to be of any help."
+            case Pages.Page_Conclusion:
+                message = "You must accept the terms and conditions of the license to proceed."
+            case _:
+                message = "This help is likely not to be of any help."
 
         if self.last_help_message == message:
             message = (

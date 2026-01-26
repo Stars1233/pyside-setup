@@ -396,16 +396,17 @@ class BrowserWindow(QMainWindow):
         return navigation_bar
 
     def handle_web_action_enabled_changed(self, action, enabled):
-        if action == QWebEnginePage.WebAction.Back:
-            self._history_back_action.setEnabled(enabled)
-        elif action == QWebEnginePage.WebAction.Forward:
-            self._history_forward_action.setEnabled(enabled)
-        elif action == QWebEnginePage.WebAction.Reload:
-            self._reload_action.setEnabled(enabled)
-        elif action == QWebEnginePage.WebAction.Stop:
-            self._stop_action.setEnabled(enabled)
-        else:
-            print("Unhandled webActionChanged signal", file=sys.stderr)
+        match action:
+            case QWebEnginePage.WebAction.Back:
+                self._history_back_action.setEnabled(enabled)
+            case QWebEnginePage.WebAction.Forward:
+                self._history_forward_action.setEnabled(enabled)
+            case QWebEnginePage.WebAction.Reload:
+                self._reload_action.setEnabled(enabled)
+            case QWebEnginePage.WebAction.Stop:
+                self._stop_action.setEnabled(enabled)
+            case _:
+                print("Unhandled webActionChanged signal", file=sys.stderr)
 
     def handle_web_view_title_changed(self, title):
         off_the_record = self._profile.isOffTheRecord()

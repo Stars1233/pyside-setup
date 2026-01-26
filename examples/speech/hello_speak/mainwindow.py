@@ -49,14 +49,15 @@ class MainWindow(QMainWindow):
 
     @Slot(QTextToSpeech.State)
     def state_changed(self, state):
-        if state == QTextToSpeech.Speaking:
-            self._ui.statusbar.showMessage("Speech started...")
-        elif state == QTextToSpeech.Ready:
-            self._ui.statusbar.showMessage("Speech stopped...", 2000)
-        elif state == QTextToSpeech.Paused:
-            self._ui.statusbar.showMessage("Speech paused...")
-        else:
-            self._ui.statusbar.showMessage("Speech error!")
+        match state:
+            case QTextToSpeech.Speaking:
+                self._ui.statusbar.showMessage("Speech started...")
+            case QTextToSpeech.Ready:
+                self._ui.statusbar.showMessage("Speech stopped...", 2000)
+            case QTextToSpeech.Paused:
+                self._ui.statusbar.showMessage("Speech paused...")
+            case _:
+                self._ui.statusbar.showMessage("Speech error!")
 
         self._ui.pauseButton.setEnabled(state == QTextToSpeech.Speaking)
         self._ui.resumeButton.setEnabled(state == QTextToSpeech.Paused)

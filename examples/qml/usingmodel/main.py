@@ -42,12 +42,13 @@ class PersonModel (QAbstractListModel):
 
     def data(self, index, role):
         d = self._data[index.row()]
-        if role == Qt.ItemDataRole.DisplayRole:
-            return d.name
-        if role == Qt.ItemDataRole.DecorationRole:
-            return Qt.GlobalColor.black
-        if role == PersonModel.MyRole:
-            return d.myrole
+        match role:
+            case Qt.ItemDataRole.DisplayRole:
+                return d.name
+            case Qt.ItemDataRole.DecorationRole:
+                return Qt.GlobalColor.black
+            case PersonModel.MyRole:
+                return d.myrole
         return None
 
     @staticmethod

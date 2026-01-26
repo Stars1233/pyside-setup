@@ -37,22 +37,24 @@ class Generator(QIODevice):
     def generate_data(self, fmt, durationUs, sampleRate):
         pack_format = ''
 
-        sample_size = fmt.bytesPerSample() * 8
-        if sample_size == 8:
-            if fmt.sampleFormat() == QAudioFormat.SampleFormat.UInt8:
-                scaler = lambda x: ((1.0 + x) / 2 * 255)  # noqa: E731
-                pack_format = 'B'
-            elif fmt.sampleFormat() == QAudioFormat.SampleFormat.Int16:
-                scaler = lambda x: x * 127  # noqa: E731
-                pack_format = 'b'
-        elif sample_size == 16:
-            little_endian = QSysInfo.Endian.ByteOrder == QSysInfo.Endian.LittleEndian
-            if fmt.sampleFormat() == QAudioFormat.SampleFormat.UInt8:
-                scaler = lambda x: (1.0 + x) / 2 * 65535  # noqa: E731
-                pack_format = '<H' if little_endian else '>H'
-            elif fmt.sampleFormat() == QAudioFormat.SampleFormat.Int16:
-                scaler = lambda x: x * 32767  # noqa: E731
-                pack_format = '<h' if little_endian else '>h'
+        match fmt.bytesPerSample() * 8:
+            case 8:
+                match fmt.sampleFormat():
+                    case QAudioFormat.SampleFormat.UInt8:
+                        scaler = lambda x: ((1.0 + x) / 2 * 255)  # noqa: E731
+                        pack_format = 'B'
+                    case QAudioFormat.SampleFormat.Int16:
+                        scaler = lambda x: x * 127  # noqa: E731
+                        pack_format = 'b'
+            case 16:
+                little_endian = QSysInfo.Endian.ByteOrder == QSysInfo.Endian.LittleEndian
+                match fmt.sampleFormat():
+                    case QAudioFormat.SampleFormat.UInt8:
+                        scaler = lambda x: (1.0 + x) / 2 * 65535  # noqa: E731
+                        pack_format = '<H' if little_endian else '>H'
+                    case QAudioFormat.SampleFormat.Int16:
+                        scaler = lambda x: x * 32767  # noqa: E731
+                        pack_format = '<h' if little_endian else '>h'
 
         assert pack_format != ''
 
@@ -234,20 +236,21 @@ class AudioTest(QMainWindow):
 
     @Slot()
     def toggle_suspend_resume(self):
-        if self.m_audioSink.state() == QtAudio.State.SuspendedState:
-            qWarning("status: Suspended, resume()")
-            self.m_audioSink.resume()
-            self.m_suspendResumeButton.setText(self.SUSPEND_LABEL)
-        elif self.m_audioSink.state() == QtAudio.State.ActiveState:
-            qWarning("status: Active, suspend()")
-            self.m_audioSink.suspend()
-            self.m_suspendResumeButton.setText(self.RESUME_LABEL)
-        elif self.m_audioSink.state() == QtAudio.State.StoppedState:
-            qWarning("status: Stopped, resume()")
-            self.m_audioSink.resume()
-            self.m_suspendResumeButton.setText(self.SUSPEND_LABEL)
-        elif self.m_audioSink.state() == QtAudio.State.IdleState:
-            qWarning("status: IdleState")
+        match self.m_audioSink.state():
+            case QtAudio.State.SuspendedState:
+                qWarning("status: Suspended, resume()")
+                self.m_audioSink.resume()
+                self.m_suspendResumeButton.setText(self.SUSPEND_LABEL)
+            case QtAudio.State.ActiveState:
+                qWarning("status: Active, suspend()")
+                self.m_audioSink.suspend()
+                self.m_suspendResumeButton.setText(self.RESUME_LABEL)
+            case QtAudio.State.StoppedState:
+                qWarning("status: Stopped, resume()")
+                self.m_audioSink.resume()
+                self.m_suspendResumeButton.setText(self.SUSPEND_LABEL)
+            case QtAudio.State.IdleState:
+                qWarning("status: IdleState")
 
     state_map = {
         QtAudio.State.ActiveState: "ActiveState",

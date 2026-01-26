@@ -153,29 +153,30 @@ class DiagramItem(QGraphicsPolygonItem):
         self._my_context_menu = contextMenu
 
         path = QPainterPath()
-        if self.diagram_type == self.StartEnd:
-            path.moveTo(200, 50)
-            path.arcTo(150, 0, 50, 50, 0, 90)
-            path.arcTo(50, 0, 50, 50, 90, 90)
-            path.arcTo(50, 50, 50, 50, 180, 90)
-            path.arcTo(150, 50, 50, 50, 270, 90)
-            path.lineTo(200, 25)
-            self._my_polygon = path.toFillPolygon()
-        elif self.diagram_type == self.Conditional:
-            self._my_polygon = QPolygonF([
-                QPointF(-100, 0), QPointF(0, 100),
-                QPointF(100, 0), QPointF(0, -100),
-                QPointF(-100, 0)])
-        elif self.diagram_type == self.Step:
-            self._my_polygon = QPolygonF([
-                QPointF(-100, -100), QPointF(100, -100),
-                QPointF(100, 100), QPointF(-100, 100),
-                QPointF(-100, -100)])
-        else:
-            self._my_polygon = QPolygonF([
-                QPointF(-120, -80), QPointF(-70, 80),
-                QPointF(120, 80), QPointF(70, -80),
-                QPointF(-120, -80)])
+        match self.diagram_type:
+            case self.StartEnd:
+                path.moveTo(200, 50)
+                path.arcTo(150, 0, 50, 50, 0, 90)
+                path.arcTo(50, 0, 50, 50, 90, 90)
+                path.arcTo(50, 50, 50, 50, 180, 90)
+                path.arcTo(150, 50, 50, 50, 270, 90)
+                path.lineTo(200, 25)
+                self._my_polygon = path.toFillPolygon()
+            case self.Conditional:
+                self._my_polygon = QPolygonF([
+                    QPointF(-100, 0), QPointF(0, 100),
+                    QPointF(100, 0), QPointF(0, -100),
+                    QPointF(-100, 0)])
+            case self.Step:
+                self._my_polygon = QPolygonF([
+                    QPointF(-100, -100), QPointF(100, -100),
+                    QPointF(100, 100), QPointF(-100, 100),
+                    QPointF(-100, -100)])
+            case _:
+                self._my_polygon = QPolygonF([
+                    QPointF(-120, -80), QPointF(-70, 80),
+                    QPointF(120, 80), QPointF(70, -80),
+                    QPointF(-120, -80)])
 
         self.setPolygon(self._my_polygon)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
@@ -284,36 +285,39 @@ class DiagramScene(QGraphicsScene):
         if (mouseEvent.button() != Qt.MouseButton.LeftButton):
             return
 
-        if self._my_mode == self.InsertItem:
-            item = DiagramItem(self._my_item_type, self._my_item_menu)
-            item.setBrush(self._my_item_color)
-            self.addItem(item)
-            item.setPos(mouseEvent.scenePos())
-            self.item_inserted.emit(item)
-        elif self._my_mode == self.InsertLine:
-            self.line = QGraphicsLineItem(QLineF(mouseEvent.scenePos(), mouseEvent.scenePos()))
-            self.line.setPen(QPen(self._my_line_color, 2))
-            self.addItem(self.line)
-        elif self._my_mode == self.InsertText:
-            text_item = DiagramTextItem()
-            text_item.setFont(self._my_font)
-            text_item.setTextInteractionFlags(Qt.TextInteractionFlag.TextEditorInteraction)
-            text_item.setZValue(1000.0)
-            text_item.lost_focus.connect(self.editor_lost_focus)
-            text_item.selected_change.connect(self.item_selected)
-            self.addItem(text_item)
-            text_item.setDefaultTextColor(self._my_text_color)
-            text_item.setPos(mouseEvent.scenePos())
-            self.text_inserted.emit(text_item)
+        match self._my_mode:
+            case self.InsertItem:
+                item = DiagramItem(self._my_item_type, self._my_item_menu)
+                item.setBrush(self._my_item_color)
+                self.addItem(item)
+                item.setPos(mouseEvent.scenePos())
+                self.item_inserted.emit(item)
+            case self.InsertLine:
+                self.line = QGraphicsLineItem(QLineF(mouseEvent.scenePos(), mouseEvent.scenePos()))
+                self.line.setPen(QPen(self._my_line_color, 2))
+                self.addItem(self.line)
+            case self.InsertText:
+                text_item = DiagramTextItem()
+                text_item.setFont(self._my_font)
+                text_item.setTextInteractionFlags(Qt.TextInteractionFlag.TextEditorInteraction)
+                text_item.setZValue(1000.0)
+                text_item.lost_focus.connect(self.editor_lost_focus)
+                text_item.selected_change.connect(self.item_selected)
+                self.addItem(text_item)
+                text_item.setDefaultTextColor(self._my_text_color)
+                text_item.setPos(mouseEvent.scenePos())
+                self.text_inserted.emit(text_item)
 
         super(DiagramScene, self).mousePressEvent(mouseEvent)
 
     def mouseMoveEvent(self, mouseEvent):
-        if self._my_mode == self.InsertLine and self.line:
-            new_line = QLineF(self.line.line().p1(), mouseEvent.scenePos())
-            self.line.setLine(new_line)
-        elif self._my_mode == self.MoveItem:
-            super(DiagramScene, self).mouseMoveEvent(mouseEvent)
+        match self._my_mode:
+            case self.InsertItem:
+                if self.line:
+                    new_line = QLineF(self.line.line().p1(), mouseEvent.scenePos())
+                    self.line.setLine(new_line)
+            case self.MoveItem:
+                super(DiagramScene, self).mouseMoveEvent(mouseEvent)
 
     def mouseReleaseEvent(self, mouseEvent):
         if self.line and self._my_mode == self.InsertLine:

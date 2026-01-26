@@ -85,14 +85,15 @@ class WebView(QWebEngineView):
     @Slot(QWebEnginePage.RenderProcessTerminationStatus, int)
     def _render_process_terminated(self, termStatus, statusCode):
         status = ""
-        if termStatus == QWebEnginePage.NormalTerminationStatus:
-            status = "Render process normal exit"
-        elif termStatus == QWebEnginePage.AbnormalTerminationStatus:
-            status = "Render process abnormal exit"
-        elif termStatus == QWebEnginePage.CrashedTerminationStatus:
-            status = "Render process crashed"
-        elif termStatus == QWebEnginePage.KilledTerminationStatus:
-            status = "Render process killed"
+        match termStatus:
+            case QWebEnginePage.NormalTerminationStatus:
+                status = "Render process normal exit"
+            case QWebEnginePage.AbnormalTerminationStatus:
+                status = "Render process abnormal exit"
+            case QWebEnginePage.CrashedTerminationStatus:
+                status = "Render process crashed"
+            case QWebEnginePage.KilledTerminationStatus:
+                status = "Render process killed"
 
         m = f"Render process exited with code: {statusCode:#x}\nDo you want to reload the page?"
         btn = QMessageBox.question(self.window(), status, m)

@@ -145,18 +145,19 @@ class MainWindow(QMainWindow):
             painter.drawText(QPoint(self.pX * font_width, (self.pY + 2) * font_height), '@')
 
     def move_player(self, direction):
-        if direction == self.left:
-            if self.map[self.pX - 1][self.pY] != '#':
-                self.pX -= 1
-        elif direction == self.right:
-            if self.map[self.pX + 1][self.pY] != '#':
-                self.pX += 1
-        elif direction == self.Up:
-            if self.map[self.pX][self.pY - 1] != '#':
-                self.pY -= 1
-        elif direction == self.down:
-            if self.map[self.pX][self.pY + 1] != '#':
-                self.pY += 1
+        match direction:
+            case self.left:
+                if self.map[self.pX - 1][self.pY] != '#':
+                    self.pX -= 1
+            case self.right:
+                if self.map[self.pX + 1][self.pY] != '#':
+                    self.pX += 1
+            case self.Up:
+                if self.map[self.pX][self.pY - 1] != '#':
+                    self.pY -= 1
+            case self.down:
+                if self.map[self.pX][self.pY + 1] != '#':
+                    self.pY += 1
         self.repaint()
 
     def get_status(self):

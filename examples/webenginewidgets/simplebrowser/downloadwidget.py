@@ -74,33 +74,34 @@ class DownloadWidget(QFrame):
         state = self._download.state()
 
         progress_bar = self._ui.m_progressBar
-        if state == QWebEngineDownloadRequest.DownloadInProgress:
-            if total_bytes_v > 0:
-                progress = round(100 * received_bytes_v / total_bytes_v)
-                progress_bar.setValue(progress)
-                progress_bar.setDisabled(False)
-                fmt = f"%p% - {received_bytes} of {total_bytes} downloaded - {bytes_per_second}/s"
+        match state:
+            case QWebEngineDownloadRequest.DownloadInProgress:
+                if total_bytes_v > 0:
+                    progress = round(100 * received_bytes_v / total_bytes_v)
+                    progress_bar.setValue(progress)
+                    progress_bar.setDisabled(False)
+                    fmt = f"%p% - {received_bytes} of {total_bytes} downloaded - {bytes_per_second}/s"  # noqa: E501
+                    progress_bar.setFormat(fmt)
+                else:
+                    progress_bar.setValue(0)
+                    progress_bar.setDisabled(False)
+                    fmt = f"unknown size - {received_bytes} downloaded - {bytes_per_second}/s"
+                    progress_bar.setFormat(fmt)
+            case QWebEngineDownloadRequest.DownloadCompleted:
+                progress_bar.setValue(100)
+                progress_bar.setDisabled(True)
+                fmt = f"completed - {received_bytes} downloaded - {bytes_per_second}/s"
                 progress_bar.setFormat(fmt)
-            else:
+            case QWebEngineDownloadRequest.DownloadCancelled:
                 progress_bar.setValue(0)
-                progress_bar.setDisabled(False)
-                fmt = f"unknown size - {received_bytes} downloaded - {bytes_per_second}/s"
+                progress_bar.setDisabled(True)
+                fmt = f"cancelled - {received_bytes} downloaded - {bytes_per_second}/s"
                 progress_bar.setFormat(fmt)
-        elif state == QWebEngineDownloadRequest.DownloadCompleted:
-            progress_bar.setValue(100)
-            progress_bar.setDisabled(True)
-            fmt = f"completed - {received_bytes} downloaded - {bytes_per_second}/s"
-            progress_bar.setFormat(fmt)
-        elif state == QWebEngineDownloadRequest.DownloadCancelled:
-            progress_bar.setValue(0)
-            progress_bar.setDisabled(True)
-            fmt = f"cancelled - {received_bytes} downloaded - {bytes_per_second}/s"
-            progress_bar.setFormat(fmt)
-        elif state == QWebEngineDownloadRequest.DownloadInterrupted:
-            progress_bar.setValue(0)
-            progress_bar.setDisabled(True)
-            fmt = "interrupted: " + self._download.interruptReasonString()
-            progress_bar.setFormat(fmt)
+            case QWebEngineDownloadRequest.DownloadInterrupted:
+                progress_bar.setValue(0)
+                progress_bar.setDisabled(True)
+                fmt = "interrupted: " + self._download.interruptReasonString()
+                progress_bar.setFormat(fmt)
 
         if state == QWebEngineDownloadRequest.DownloadInProgress:
             self._ui.m_cancelButton.setIcon(self._cancel_icon)

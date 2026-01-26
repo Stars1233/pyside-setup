@@ -92,19 +92,19 @@ class PlayerControls(QWidget):
             baseColor = self.palette().color(QPalette.ColorRole.Base)
             inactiveStyleSheet = f"background-color: {baseColor.name()}"
             defaultStyleSheet = ""
-
-            if state == QMediaPlayer.PlaybackState.StoppedState:
-                self.m_stopButton.setStyleSheet(inactiveStyleSheet)
-                self.m_playButton.setStyleSheet(defaultStyleSheet)
-                self.m_pauseButton.setStyleSheet(defaultStyleSheet)
-            elif state == QMediaPlayer.PlaybackState.PlayingState:
-                self.m_stopButton.setStyleSheet(defaultStyleSheet)
-                self.m_playButton.setStyleSheet(inactiveStyleSheet)
-                self.m_pauseButton.setStyleSheet(defaultStyleSheet)
-            elif state == QMediaPlayer.PlaybackState.PausedState:
-                self.m_stopButton.setStyleSheet(defaultStyleSheet)
-                self.m_playButton.setStyleSheet(defaultStyleSheet)
-                self.m_pauseButton.setStyleSheet(inactiveStyleSheet)
+            match state:
+                case QMediaPlayer.PlaybackState.StoppedState:
+                    self.m_stopButton.setStyleSheet(inactiveStyleSheet)
+                    self.m_playButton.setStyleSheet(defaultStyleSheet)
+                    self.m_pauseButton.setStyleSheet(defaultStyleSheet)
+                case QMediaPlayer.PlaybackState.PlayingState:
+                    self.m_stopButton.setStyleSheet(defaultStyleSheet)
+                    self.m_playButton.setStyleSheet(inactiveStyleSheet)
+                    self.m_pauseButton.setStyleSheet(defaultStyleSheet)
+                case QMediaPlayer.PlaybackState.PausedState:
+                    self.m_stopButton.setStyleSheet(defaultStyleSheet)
+                    self.m_playButton.setStyleSheet(defaultStyleSheet)
+                    self.m_pauseButton.setStyleSheet(inactiveStyleSheet)
 
     def volume(self):
         linearVolume = QtAudio.convertVolume(self.m_volumeSlider.value() / 100.0,

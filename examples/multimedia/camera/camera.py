@@ -70,28 +70,28 @@ class Camera(QMainWindow):
 
             # camera
             cam_permission = QCameraPermission()
-            cam_permission_status = qApp.checkPermission(cam_permission)  # noqa: F821
-            if cam_permission_status == Qt.PermissionStatus.Undetermined:
-                qApp.requestPermission(cam_permission, self, self.initialize)  # noqa: F821
-                return
-            if cam_permission_status == Qt.PermissionStatus.Denied:
-                qWarning("Camera permission is not granted!")
-                return
-            elif cam_permission_status == Qt.PermissionStatus.Granted:
-                print("[AudioSource] Camera permission granted")
+            match qApp.checkPermission(cam_permission):  # noqa: F821
+                case Qt.PermissionStatus.Undetermined:
+                    qApp.requestPermission(cam_permission, self, self.initialize)  # noqa: F821
+                    return
+                case Qt.PermissionStatus.Denied:
+                    qWarning("Camera permission is not granted!")
+                    return
+                case Qt.PermissionStatus.Granted:
+                    print("[AudioSource] Camera permission granted")
 
             # microphone
             microphone_permission = QMicrophonePermission()
-            microphone_permission_status = qApp.checkPermission(microphone_permission)  # noqa: F821
-            if microphone_permission_status == Qt.PermissionStatus.Undetermined:
-                qApp.requestPermission(microphone_permission, self, self.initialize)  # noqa: F821
-                return
-            if microphone_permission_status == Qt.PermissionStatus.Denied:
-                qWarning("Microphone permission is not granted!")
-                self.initializeErrorWindow()
-                return
-            elif microphone_permission_status == Qt.PermissionStatus.Granted:
-                print("[AudioSource] Microphone permission granted")
+            match qApp.checkPermission(microphone_permission):  # noqa: F821
+                case Qt.PermissionStatus.Undetermined:
+                    qApp.requestPermission(microphone_permission, self, self.initialize)  # noqa: F821, E501
+                    return
+                case Qt.PermissionStatus.Denied:
+                    qWarning("Microphone permission is not granted!")
+                    self.initializeErrorWindow()
+                    return
+                case Qt.PermissionStatus.Granted:
+                    print("[AudioSource] Microphone permission granted")
 
         self.m_audioInput = QAudioInput()
         self.m_captureSession.setAudioInput(self.m_audioInput)
@@ -147,22 +147,22 @@ class Camera(QMainWindow):
         if event.isAutoRepeat():
             return
 
-        key = event.key()
-        if key == Qt.Key.Key_CameraFocus:
-            self.displayViewfinder()
-            event.accept()
-        elif key == Qt.Key.Key_Camera:
-            if self.m_doImageCapture:
-                self.takeImage()
-            else:
-                if self.m_mediaRecorder.recorderState() == QMediaRecorder.RecordingState:
-                    self.stop()
+        match event.key():
+            case Qt.Key.Key_CameraFocus:
+                self.displayViewfinder()
+                event.accept()
+            case Qt.Key.Key_Camera:
+                if self.m_doImageCapture:
+                    self.takeImage()
                 else:
-                    self.record()
+                    if self.m_mediaRecorder.recorderState() == QMediaRecorder.RecordingState:
+                        self.stop()
+                    else:
+                        self.record()
 
-            event.accept()
-        else:
-            super().keyPressEvent(event)
+                event.accept()
+            case _:
+                super().keyPressEvent(event)
 
     @Slot()
     def updateRecordTime(self):
@@ -257,21 +257,22 @@ class Camera(QMainWindow):
 
     @Slot(QMediaRecorder.RecorderState)
     def updateRecorderState(self, state):
-        if state == QMediaRecorder.RecorderState.StoppedState:
-            self._ui.recordButton.setEnabled(True)
-            self._ui.pauseButton.setEnabled(True)
-            self._ui.stopButton.setEnabled(False)
-            self._ui.metaDataButton.setEnabled(True)
-        elif state == QMediaRecorder.RecorderState.PausedState:
-            self._ui.recordButton.setEnabled(True)
-            self._ui.pauseButton.setEnabled(False)
-            self._ui.stopButton.setEnabled(True)
-            self._ui.metaDataButton.setEnabled(False)
-        elif state == QMediaRecorder.RecorderState.RecordingState:
-            self._ui.recordButton.setEnabled(False)
-            self._ui.pauseButton.setEnabled(True)
-            self._ui.stopButton.setEnabled(True)
-            self._ui.metaDataButton.setEnabled(False)
+        match state:
+            case QMediaRecorder.RecorderState.StoppedState:
+                self._ui.recordButton.setEnabled(True)
+                self._ui.pauseButton.setEnabled(True)
+                self._ui.stopButton.setEnabled(False)
+                self._ui.metaDataButton.setEnabled(True)
+            case QMediaRecorder.RecorderState.PausedState:
+                self._ui.recordButton.setEnabled(True)
+                self._ui.pauseButton.setEnabled(False)
+                self._ui.stopButton.setEnabled(True)
+                self._ui.metaDataButton.setEnabled(False)
+            case QMediaRecorder.RecorderState.RecordingState:
+                self._ui.recordButton.setEnabled(False)
+                self._ui.pauseButton.setEnabled(True)
+                self._ui.stopButton.setEnabled(True)
+                self._ui.metaDataButton.setEnabled(False)
 
     @Slot()
     def displayRecorderError(self):
@@ -346,16 +347,17 @@ class Camera(QMainWindow):
         for i in range(0, QMediaMetaData.NumMetaData):
             if val := self.m_metaDataDialog.m_metaDataFields[i].text():
                 key = QMediaMetaData.Key(i)
-                if key == QMediaMetaData.Key.CoverArtImage:
-                    cover_art = QImage(val)
-                    data.insert(key, cover_art)
-                elif key == QMediaMetaData.Key.ThumbnailImage:
-                    thumbnail = QImage(val)
-                    data.insert(key, thumbnail)
-                elif key == QMediaMetaData.Key.Date:
-                    date = QDateTime.fromString(val)
-                    data.insert(key, date)
-                else:
-                    data.insert(key, val)
+                match key:
+                    case QMediaMetaData.Key.CoverArtImage:
+                        cover_art = QImage(val)
+                        data.insert(key, cover_art)
+                    case QMediaMetaData.Key.ThumbnailImage:
+                        thumbnail = QImage(val)
+                        data.insert(key, thumbnail)
+                    case QMediaMetaData.Key.Date:
+                        date = QDateTime.fromString(val)
+                        data.insert(key, date)
+                    case _:
+                        data.insert(key, val)
 
         self.m_mediaRecorder.setMetaData(data)

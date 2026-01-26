@@ -105,14 +105,16 @@ class JsonItemModel(QAbstractItemModel):
             return None
 
         item = self.itemFromIndex(index)
-        if role == Qt.ItemDataRole.DisplayRole:
-            if index.column() == 0:
-                return item.key()
-            if index.column() == 1:
-                return item.value()
-        elif role == Qt.ItemDataRole.EditRole:
-            if index.column() == 1:
-                return item.value()
+        match role:
+            case Qt.ItemDataRole.DisplayRole:
+                match index.column():
+                    case 0:
+                        return item.key()
+                    case 1:
+                        return item.value()
+            case Qt.ItemDataRole.EditRole:
+                if index.column() == 1:
+                    return item.value()
         return None
 
     def headerData(self, section, orientation, role):

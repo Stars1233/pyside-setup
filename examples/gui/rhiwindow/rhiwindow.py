@@ -63,17 +63,15 @@ class RhiWindow(QWindow):
         self.m_viewProjection = QMatrix4x4()
 
         self.m_graphicsApi = graphicsApi
-
-        if graphicsApi == QRhi.Implementation.OpenGLES2:
-            self.setSurfaceType(QSurface.SurfaceType.OpenGLSurface)
-        elif graphicsApi == QRhi.Implementation.Vulkan:
-            self.setSurfaceType(QSurface.SurfaceType.VulkanSurface)
-        elif graphicsApi == QRhi.Implementation.D3D11 or graphicsApi == QRhi.Implementation.D3D12:
-            self.setSurfaceType(QSurface.SurfaceType.Direct3DSurface)
-        elif graphicsApi == QRhi.Implementation.Metal:
-            self.setSurfaceType(QSurface.SurfaceType.MetalSurface)
-        elif graphicsApi == QRhi.Implementation.Null:
-            pass  # RasterSurface
+        match graphicsApi:
+            case QRhi.Implementation.OpenGLES2:
+                self.setSurfaceType(QSurface.SurfaceType.OpenGLSurface)
+            case QRhi.Implementation.Vulkan:
+                self.setSurfaceType(QSurface.SurfaceType.VulkanSurface)
+            case QRhi.Implementation.D3D11 | QRhi.Implementation.D3D12:
+                self.setSurfaceType(QSurface.SurfaceType.Direct3DSurface)
+            case QRhi.Implementation.Metal:
+                self.setSurfaceType(QSurface.SurfaceType.MetalSurface)
 
     def __del__(self):
         # destruction order matters to a certain degree: the fallbackSurface
@@ -152,31 +150,32 @@ class RhiWindow(QWindow):
         return super().event(e)
 
     def init(self):
-        if self.m_graphicsApi == QRhi.Implementation.Null:
-            params = QRhiNullInitParams()
-            self.m_rhi = QRhi.create(QRhi.Implementation.Null, params)
+        match self.m_graphicsApi:
+            case QRhi.Implementation.Null:
+                params = QRhiNullInitParams()
+                self.m_rhi = QRhi.create(QRhi.Implementation.Null, params)
 
-        if self.m_graphicsApi == QRhi.Implementation.OpenGLES2:
-            self.m_fallbackSurface = QRhiGles2InitParams.newFallbackSurface()
-            params = QRhiGles2InitParams()
-            params.fallbackSurface = self.m_fallbackSurface
-            params.window = self
-            self.m_rhi = QRhi.create(QRhi.Implementation.OpenGLES2, params)
-        elif self.m_graphicsApi == QRhi.Implementation.D3D11:
-            params = QRhiD3D11InitParams()
-            # Enable the debug layer, if available. This is optional
-            # and should be avoided in production builds.
-            params.enableDebugLayer = True
-            self.m_rhi = QRhi.create(QRhi.Implementation.D3D11, params)
-        elif self.m_graphicsApi == QRhi.Implementation.D3D12:
-            params = QRhiD3D12InitParams()
-            # Enable the debug layer, if available. This is optional
-            # and should be avoided in production builds.
-            params.enableDebugLayer = True
-            self.m_rhi = QRhi.create(QRhi.Implementation.D3D12, params)
-        elif self.m_graphicsApi == QRhi.Implementation.Metal:
-            params = QRhiMetalInitParams()
-            self.m_rhi = QRhi.create(QRhi.Implementation.Metal, params)
+            case QRhi.Implementation.OpenGLES2:
+                self.m_fallbackSurface = QRhiGles2InitParams.newFallbackSurface()
+                params = QRhiGles2InitParams()
+                params.fallbackSurface = self.m_fallbackSurface
+                params.window = self
+                self.m_rhi = QRhi.create(QRhi.Implementation.OpenGLES2, params)
+            case QRhi.Implementation.D3D11:
+                params = QRhiD3D11InitParams()
+                # Enable the debug layer, if available. This is optional
+                # and should be avoided in production builds.
+                params.enableDebugLayer = True
+                self.m_rhi = QRhi.create(QRhi.Implementation.D3D11, params)
+            case QRhi.Implementation.D3D12:
+                params = QRhiD3D12InitParams()
+                # Enable the debug layer, if available. This is optional
+                # and should be avoided in production builds.
+                params.enableDebugLayer = True
+                self.m_rhi = QRhi.create(QRhi.Implementation.D3D12, params)
+            case QRhi.Implementation.Metal:
+                params = QRhiMetalInitParams()
+                self.m_rhi = QRhi.create(QRhi.Implementation.Metal, params)
 
         if not self.m_rhi:
             qFatal("Failed to create RHI backend")

@@ -264,22 +264,23 @@ class MandelbrotWidget(QWidget):
         self.thread.render(self._center_x, self._center_y, self._cur_scale, self.size())
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key.Key_Plus:
-            self.zoom(ZOOM_IN_FACTOR)
-        elif event.key() == Qt.Key.Key_Minus:
-            self.zoom(ZOOM_OUT_FACTOR)
-        elif event.key() == Qt.Key.Key_Left:
-            self.scroll(-SCROLL_STEP, 0)
-        elif event.key() == Qt.Key.Key_Right:
-            self.scroll(+SCROLL_STEP, 0)
-        elif event.key() == Qt.Key.Key_Down:
-            self.scroll(0, -SCROLL_STEP)
-        elif event.key() == Qt.Key.Key_Up:
-            self.scroll(0, +SCROLL_STEP)
-        elif event.key() == Qt.Key.Key_Q:
-            self.close()
-        else:
-            super(MandelbrotWidget, self).keyPressEvent(event)
+        match event.key():
+            case Qt.Key.Key_Plus:
+                self.zoom(ZOOM_IN_FACTOR)
+            case Qt.Key.Key_Minus:
+                self.zoom(ZOOM_OUT_FACTOR)
+            case Qt.Key.Key_Left:
+                self.scroll(-SCROLL_STEP, 0)
+            case Qt.Key.Key_Right:
+                self.scroll(+SCROLL_STEP, 0)
+            case Qt.Key.Key_Down:
+                self.scroll(0, -SCROLL_STEP)
+            case Qt.Key.Key_Up:
+                self.scroll(0, +SCROLL_STEP)
+            case Qt.Key.Key_Q:
+                self.close()
+            case _:
+                super().keyPressEvent(event)
 
     def wheelEvent(self, event):
         num_degrees = event.angleDelta().y() / 8

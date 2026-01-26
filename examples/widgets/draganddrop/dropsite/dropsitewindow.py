@@ -81,22 +81,23 @@ class DropSiteWindow(QWidget):
             format_item.setFlags(Qt.ItemFlag.ItemIsEnabled)
             format_item.setTextAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
 
-            if format == "text/plain":
-                text = simplify_whitespace(mime_data.text())
-            elif format == "text/markdown":
-                text = mime_data.data("text/markdown").data().decode("utf8")
-            elif format == "text/html":
-                text = simplify_whitespace(mime_data.html())
-            elif format == "text/uri-list":
-                url_list = mime_data.urls()
-                text = ""
-                for i in range(0, min(len(url_list), 32)):
-                    text += url_list[i].toString() + " "
-            else:
-                data = mime_data.data(format)
-                if data.size() > 32:
-                    data.truncate(32)
-                text = data.toHex(" ").data().decode("utf8").upper()
+            match format:
+                case "text/plain":
+                    text = simplify_whitespace(mime_data.text())
+                case "text/markdown":
+                    text = mime_data.data("text/markdown").data().decode("utf8")
+                case "text/html":
+                    text = simplify_whitespace(mime_data.html())
+                case "text/uri-list":
+                    url_list = mime_data.urls()
+                    text = ""
+                    for i in range(0, min(len(url_list), 32)):
+                        text += url_list[i].toString() + " "
+                case _:
+                    data = mime_data.data(format)
+                    if data.size() > 32:
+                        data.truncate(32)
+                    text = data.toHex(" ").data().decode("utf8").upper()
 
             row = self._formats_table.rowCount()
             self._formats_table.insertRow(row)

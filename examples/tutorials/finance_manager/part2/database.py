@@ -27,12 +27,13 @@ if env_db_path:
     db_path = Path(env_db_path)
 else:
     # Determine the application data directory based on the operating system using pathlib
-    if platform.system() == 'Windows':
-        app_data_location = Path(os.getenv('APPDATA')) / 'FinanceManager'
-    elif platform.system() == 'Darwin':  # macOS
-        app_data_location = Path.home() / 'Library' / 'Application Support' / 'FinanceManager'
-    else:  # Linux and other Unix-like systems
-        app_data_location = Path.home() / '.local' / 'share' / 'FinanceManager'
+    match platform.system():
+        case 'Windows':
+            app_data_location = Path(os.getenv('APPDATA')) / 'FinanceManager'
+        case 'Darwin':  # macOS
+            app_data_location = Path.home() / 'Library' / 'Application Support' / 'FinanceManager'
+        case _:  # Linux and other Unix-like systems
+            app_data_location = Path.home() / '.local' / 'share' / 'FinanceManager'
 
     db_path = app_data_location / 'finances.db'
 
