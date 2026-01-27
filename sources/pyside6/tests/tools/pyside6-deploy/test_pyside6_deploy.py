@@ -132,7 +132,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
         # Checking for dry run commands is equivalent to mocking the subprocess.check_call()
         # in commands.py as the dry run command is the command being run.
         original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
-        self.assertCmdEqual(original_output, self.expected_run_cmd)
+        self.assertCmdEqual(self.expected_run_cmd, original_output)
 
     @patch("deploy_lib.dependency_util.QtDependencyReader.get_qt_libs_dir")
     def testWidgetConfigFile(self, mock_sitepackages, mock_plugins):
@@ -145,7 +145,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
 
         # test with config
         original_output = self.deploy.main(config_file=self.config_file, dry_run=True, force=True)
-        self.assertCmdEqual(original_output, self.expected_run_cmd)
+        self.assertCmdEqual(self.expected_run_cmd, original_output)
 
         # test config file contents
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
@@ -184,7 +184,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
         original_output = self.deploy.main(self.main_file, mode="standalone", dry_run=True,
                                            force=True)
 
-        self.assertCmdEqual(original_output, self.expected_run_cmd)
+        self.assertCmdEqual(self.expected_run_cmd, original_output)
 
     @patch("deploy_lib.dependency_util.QtDependencyReader.get_qt_libs_dir")
     def testExtraModules(self, mock_sitepackages, mock_plugins):
@@ -343,7 +343,7 @@ class TestPySide6DeployQml(DeployTestBase):
         with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:
             mock_qmlimportscanner.return_value = ["QtQuick"]
             original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
-            self.assertCmdEqual(original_output, self.expected_run_cmd)
+            self.assertCmdEqual(self.expected_run_cmd, original_output)
             self.assertEqual(mock_qmlimportscanner.call_count, 1)
 
     def testMainFileDryRun(self, mock_plugins):
@@ -351,7 +351,7 @@ class TestPySide6DeployQml(DeployTestBase):
         with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:
             mock_qmlimportscanner.return_value = ["QtQuick"]
             original_output = self.deploy.main(Path.cwd() / "main.py", dry_run=True, force=True)
-            self.assertCmdEqual(original_output, self.expected_run_cmd)
+            self.assertCmdEqual(self.expected_run_cmd, original_output)
             self.assertEqual(mock_qmlimportscanner.call_count, 1)
 
 
