@@ -425,6 +425,18 @@ QByteArrayList emulatedCompilerOptions(LanguageLevel level)
         break;
     }
 
+    // For Android cross-compilation, prevent clang from including host system headers that
+    // conflict with NDK headers.
+    // This addresses the mbstate_t typedef redefinition error in COIN for RHEL 9.4
+    if (_optionsTriplet.platform() == Platform::Android
+        && (_hostTriplet.platform() == Platform::Unix
+            || _hostTriplet.platform() == Platform::Linux)
+        && (_optionsTriplet.compiler() == Compiler::Clang
+            || _optionsTriplet.compiler() == Compiler::Gpp)) {
+        result.append("-nostdinc");
+        result.append("-nostdinc++");
+    }
+
     std::transform(headerPaths.cbegin(), headerPaths.cend(),
                    std::back_inserter(result), HeaderPath::includeOption);
     return result;
