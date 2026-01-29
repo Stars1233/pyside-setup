@@ -1265,9 +1265,9 @@ static bool isArgumentNotRemoved(const AbstractMetaArgument &a)
     return !a.isModifiedRemoved();
 }
 
-// PyObject_Vectorcall(): since 3.9
+// PyObject_Vectorcall(): since 3.9, stable API since 3.12
 static const char vectorCallCondition[] =
-    "#if !defined(PYPY_VERSION) && !defined(Py_LIMITED_API)\n";
+    "#if !defined(PYPY_VERSION) && (!defined(Py_LIMITED_API) || Py_LIMITED_API >= 0x030C0000)\n";
 
 // PyObject_CallNoArgs(): since 3.9, stable API since 3.10
 static const char noArgsCallCondition[] =
