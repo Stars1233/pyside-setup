@@ -201,8 +201,10 @@ static void storeErrorOrPrintWithContext(const char *context)
     if (hasPythonContext()) {
         fetchError(savedError);
         prependToExceptionMessage(savedError.exc, context);
-    } else {
-        std::fputs(context, stderr);
+    } else  {
+        // PYSIDE-3273: sys.exit() called in overridden function, silence warning
+        if (PyErr_Occurred() == nullptr || PyErr_ExceptionMatches(PyExc_SystemExit) == 0)
+            std::fputs(context, stderr);
         PyErr_Print();
     }
 }
