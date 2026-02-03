@@ -5,6 +5,9 @@ project(QtWebView)
 
 set(QtWebView_Src
 ${QtWebView_GEN_DIR}/qtwebview_wrapper.cpp
+${QtWebView_GEN_DIR}/qwebview_wrapper.cpp
+${QtWebView_GEN_DIR}/qwebviewloadinginfo_wrapper.cpp
+${QtWebView_GEN_DIR}/qwebviewsettings_wrapper.cpp
 # module is always needed
 ${QtWebView_GEN_DIR}/qtwebview_module_wrapper.cpp
 )
