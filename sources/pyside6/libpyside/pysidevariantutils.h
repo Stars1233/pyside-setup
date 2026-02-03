@@ -32,6 +32,10 @@ PYSIDE_API QVariant convertToVariantList(PyObject *list);
 
 /// Converts a map to a QVariantMap (string keys and QVariant values)
 PYSIDE_API QVariant convertToVariantMap(PyObject *map);
+
+/// Converts a QVariant parameter of a JavaScript callback to Python
+PYSIDE_API PyObject *javascriptVariantToPython(const QVariant &value);
+
 } // namespace PySide::Variant
 
 #endif // PYSIDEVARIANTUTILS_H

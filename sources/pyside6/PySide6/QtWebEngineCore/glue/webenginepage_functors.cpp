@@ -7,7 +7,7 @@
 #include "gilstate.h"
 #include "sbkconverter.h"
 
-#include "pysideutils.h"
+#include "pysidevariantutils.h"
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qvariant.h>
@@ -17,27 +17,7 @@ QT_BEGIN_NAMESPACE
 void RunJavascriptFunctor::operator()(const QVariant &result)
 {
     Shiboken::GilState state;
-    Shiboken::AutoDecRef arglist(PyTuple_New(1));
-    switch (result.typeId()) {
-    case QMetaType::Bool: {
-        PyObject *pyValue = result.toBool() ? Py_True : Py_False;
-        Py_INCREF(pyValue);
-        PyTuple_SetItem(arglist, 0, pyValue);
-    }
-    break;
-    case QMetaType::Int:
-    case QMetaType::UInt:
-    case QMetaType::LongLong:
-    case QMetaType::ULongLong:
-    case QMetaType::Double:
-        PyTuple_SetItem(arglist, 0, PyFloat_FromDouble(result.toDouble()));
-    break;
-    default: {
-        const QString value = result.toString();
-        PyTuple_SetItem(arglist, 0, PySide::qStringToPyUnicode(value));
-    }
-    break;
-    }
+    Shiboken::AutoDecRef arglist(PyTuple_Pack(1, PySide::Variant::javascriptVariantToPython(result)));
     Shiboken::AutoDecRef ret(PyObject_CallObject(object(), arglist));
     release(); // single shot
 }

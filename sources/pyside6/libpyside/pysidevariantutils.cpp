@@ -216,4 +216,25 @@ QVariant convertToVariantMap(PyObject *map)
     return result;
 }
 
+PyObject *javascriptVariantToPython(const QVariant &value)
+{
+    switch (value.typeId()) {
+    case QMetaType::Bool: {
+        if (value.toBool())
+            Py_RETURN_TRUE;
+        Py_RETURN_FALSE;
+    }
+    break;
+    case QMetaType::Int:
+    case QMetaType::UInt:
+    case QMetaType::LongLong:
+    case QMetaType::ULongLong:
+    case QMetaType::Double:
+        return PyFloat_FromDouble(value.toDouble());
+    default:
+        break;
+    }
+    return PySide::qStringToPyUnicode(value.toString());
+}
+
 } // namespace PySide::Variant
