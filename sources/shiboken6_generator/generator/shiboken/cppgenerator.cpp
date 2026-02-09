@@ -6051,8 +6051,9 @@ void CppGenerator::writeStaticFieldInitialization(TextStream &s,
             << "auto *type = reinterpret_cast<PyTypeObject *>(obType);\n"
             << "Shiboken::AutoDecRef dict(PepType_GetDict(type));\n";
     }
+
     for (const AbstractMetaField &field : metaClass->fields()) {
-        if (field.isStatic()) {
+        if (field.isStatic() && field.access() == Access::Public) {
             s << "PyDict_SetItemString(dict, \"" << field.name()
                 << "\",\n                     ";
             writeToPythonConversion(s, field.type(), metaClass, field.qualifiedCppName());
