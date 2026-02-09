@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/stop-32.png</file>
+        <file>images/settings-32.png</file>
+        <file>images/right-32.png</file>
+        <file>images/refresh-32.png</file>
+        <file>images/left-32.png</file>
+    </qresource>
+</RCC>
