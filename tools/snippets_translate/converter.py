@@ -38,7 +38,7 @@ RETURN_TYPE_PATTERN = re.compile(r"^[a-zA-Z0-9]+(<.*?>)? [\w]+::[\w\*\&]+\(.*\)$
 FUNCTION_PATTERN = re.compile(r"^[a-zA-Z0-9]+(<.*?>)? [\w\*\&]+\(.*\)$")
 ITERATOR_PATTERN = re.compile(r"(std::)?[\w]+<[\w]+>::(const_)?iterator")
 SCOPE_PATTERN = re.compile(r"[\w]+::")
-SWITCH_PATTERN = re.compile(r"^\s*switch\s*\(([a-zA-Z0-9_\.]+)\)\s*{.*$")
+SWITCH_PATTERN = re.compile(r"^(\s*)switch\s*\((.+)\)\s*{.*$")
 CASE_PATTERN = re.compile(r"^(\s*)case\s+([a-zA-Z0-9_:\.]+):.*$")
 DEFAULT_PATTERN = re.compile(r"^(\s*)default:.*$")
 
@@ -50,12 +50,12 @@ QUALIFIERS = {"public:", "protected:", "private:", "public slots:",
 FUNCTION_QUALIFIERS = ["virtual ", " override", "inline ", " noexcept"]
 
 
-switch_var = None
-switch_branch = 0
+switch_end_pattern = ""
+additional_indent = ""
 
 
 def snippet_translate(x):
-    global switch_var, switch_branch
+    global switch_end_pattern, additional_indent
 
     # # Cases which are not C++
     # # TODO: Maybe expand this with lines that doesn't need to be translated
@@ -71,6 +71,15 @@ def snippet_translate(x):
 
     # Remove lines with only '{' or '}'
     xs = x.strip()
+
+    if switch_end_pattern:
+        if xs == "break":  # Skip within switch
+            return ""
+        if x == switch_end_pattern:
+            switch_end_pattern = ""
+            additional_indent = ""
+            return ""
+
     if xs == "{" or xs == "}":
         return ""
 
@@ -154,22 +163,23 @@ def snippet_translate(x):
 
     switch_match = SWITCH_PATTERN.match(x)
     if switch_match:
-        switch_var = switch_match.group(1)
-        switch_branch = 0
-        return ""
+        indent = switch_match.group(1)
+        switch_var = switch_match.group(2)
+        additional_indent = "    "
+        return f"{indent}match {switch_var}:"
 
     switch_match = CASE_PATTERN.match(x)
     if switch_match:
         indent = switch_match.group(1)
+        switch_end_pattern = indent + "}"
+        additional_indent = "    "
         value = switch_match.group(2).replace("::", ".")
-        cond = "if" if switch_branch == 0 else "elif"
-        switch_branch += 1
-        return f"{indent}{cond} {switch_var} == {value}:"
+        return f"{indent}    case {value}:"
 
     switch_match = DEFAULT_PATTERN.match(x)
     if switch_match:
         indent = switch_match.group(1)
-        return f"{indent}else:"
+        return f"{indent}    case _:"
 
     # handle 'void Class::method(...)' and 'void method(...)'
     if VOID_METHOD_PATTERN.search(x):
@@ -203,7 +213,7 @@ def snippet_translate(x):
 
     if xs.startswith("emit "):
         x = handle_emit(x)
-        return dstrip(x)
+        return additional_indent + dstrip(x)
 
     # *_cast
     if "_cast<" in x:
@@ -223,23 +233,23 @@ def snippet_translate(x):
     # line might end in ')' or ") {"
     if xs.startswith(("while", "if", "else if", "} else if")):
         x = handle_conditions(x)
-        return dstrip(x)
+        return additional_indent + dstrip(x)
     elif ELSE_PATTERN.search(x):
         x = ELSE_REPLACEMENT_PATTERN.sub("else:", x)
-        return dstrip(x)
+        return additional_indent + dstrip(x)
 
     # 'cout' and 'endl'
     if COUT_PATTERN.search(x) or ("endl" in x) or xs.startswith("qDebug()"):
         x = handle_cout_endl(x)
-        return dstrip(x)
+        return additional_indent + dstrip(x)
 
     # 'for' loops
     if FOR_PATTERN.search(xs):
-        return dstrip(handle_for(x))
+        return additional_indent + dstrip(handle_for(x))
 
     # 'foreach' loops
     if FOREACH_PATTERN.search(xs):
-        return dstrip(handle_foreach(x))
+        return additional_indent + dstrip(handle_foreach(x))
 
     # 'class' and 'structs'
     if CLASS_PATTERN.search(x) or STRUCT_PATTERN.search(x):
@@ -249,7 +259,7 @@ def snippet_translate(x):
 
     # 'delete'
     if DELETE_PATTERN.search(x):
-        return x.replace("delete", "del")
+        return additional_indent + x.replace("delete", "del")
 
     # 'public:', etc
     if xs in QUALIFIERS:
@@ -280,7 +290,7 @@ def snippet_translate(x):
         #   QString notAFunction(Something something)
         # Maybe checking the structure of the arguments?
         if "Func" not in x:
-            return dstrip(handle_type_var_declaration(x))
+            return additional_indent + dstrip(handle_type_var_declaration(x))
 
     # For expressions like: `Type var = value`,
     # considering complex right-side expressions.
@@ -303,7 +313,7 @@ def snippet_translate(x):
             v = x.rstrip()
             if (not v.endswith(" True") and not v.endswith(" False") and not v.endswith(" None")):
                 x = f"{v}()"
-        return dstrip(x)
+        return additional_indent + dstrip(x)
 
     # For constructors, that we now the shape is:
     #    ClassName::ClassName(...)
@@ -351,7 +361,7 @@ def snippet_translate(x):
     # TODO: handle iterator initialization statement like it = container.begin();
     if ITERATOR_PATTERN.search(x):
         x = ""
-        return x
+        return additional_indent + x
 
     # By now all the typical special considerations of scope resolution operator should be handled
     # 'Namespace*::' -> 'Namespace*.'
@@ -361,7 +371,7 @@ def snippet_translate(x):
         x = x.replace("::", ".")
 
     # General return for no special cases
-    return dstrip(x)
+    return additional_indent + dstrip(x)
 
     # TODO:
     # * Lambda expressions

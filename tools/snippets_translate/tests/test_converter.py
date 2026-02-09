@@ -466,19 +466,18 @@ default:
     break;
 }
 """
-    expected = """
-if v == 1:
-    f1()
-    break
-elif v == ClassName.EnumValue:
-    f2()
-    break
-else:
-    f3()
-    break
+    expected = """match v:
+    case 1:
+        f1()
+
+    case ClassName.EnumValue:
+        f2()
+
+    case _:
+        f3()
+
 
 """
-
     assert multi_st(source) == expected
 
 
