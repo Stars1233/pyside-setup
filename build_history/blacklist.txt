@@ -81,4 +81,8 @@
     pypy
 [QtQml::qqmlincubator_incubateWhile]
     pypy        # gives timeout on macOS if I run video converter while testing
+[QtRemoteObjects::integration_test]
+    darwin # PYSIDE-3274, fails for Universal build on macOS 26
+[QtDataVisualization::datavisualization_test]
+    darwin # PYSIDE-3274, fails for Universal build on macOS 26
 # 2022-03-04 PyPy: Currently 28 of 657 tests fail
