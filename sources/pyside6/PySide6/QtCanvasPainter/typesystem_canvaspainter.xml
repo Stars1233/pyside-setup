@@ -23,6 +23,7 @@
         <enum-type name="Flag" flags="Flags"/>
     </value-type>
     <object-type name="QCPainter">
+        <enum-type name="PathConnection"/>
         <enum-type name="PathWinding"/>
         <enum-type name="LineCap"/>
         <enum-type name="LineJoin"/>
@@ -46,6 +47,7 @@
     </object-type>
     <value-type name="QCRadialGradient"/>
     <object-type name="QCRhiPaintDriver">
+        <enum-type name="BeginPaintFlag" flags="BeginPaintFlags"/>
         <enum-type name="EndPaintFlag" flags="EndPaintFlags"/>
         <add-function signature="grabCanvas(const QCOffscreenCanvas &amp;@canvas@,PyCallable*@resultCallback@)">
             <inject-code class="target" position="beginning" file="../glue/qtcanvaspainter.cpp"

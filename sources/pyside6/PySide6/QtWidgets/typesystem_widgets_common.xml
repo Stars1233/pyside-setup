@@ -518,7 +518,6 @@
   </object-type>
   <object-type name="QFileIconProvider"/>
   <object-type name="QWizard">
-    <enum-type name="BannerStretchPolicy" since="6.11"/>
     <enum-type name="WizardButton"/>
     <enum-type name="WizardOption" flags="WizardOptions"/>
     <enum-type name="WizardPixmap"/>
