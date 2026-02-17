@@ -593,11 +593,6 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
     return Shiboken::Conversions::copyToPython(metaObjConnectionConverter(), &conn);
 }
 
-static int argCountInSignature(const char *signature)
-{
-    return QByteArrayView{signature}.count(',') + 1;
-}
-
 static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
 {
     auto *source = reinterpret_cast<PySideSignalInstance *>(self);
@@ -608,8 +603,7 @@ static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
         return PyErr_Format(PyExc_RuntimeError, msgSourceDeleted);
 
     Shiboken::AutoDecRef pyArgs(PyList_New(0));
-    Py_ssize_t numArgsGiven = PySequence_Size(args);
-    int numArgsInSignature = argCountInSignature(source->d->signature);
+    const Py_ssize_t numArgsGiven = PySequence_Size(args);
 
     // If number of arguments given to emit is smaller than the first source signature expects,
     // it is possible it's a case of emitting a signal with default parameters.
@@ -619,11 +613,11 @@ static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
     // @TODO: This should be improved to take into account argument types as well. The current
     // assumption is there are no signals which are both overloaded on argument types and happen to
     // have signatures with default parameters.
-    if (numArgsGiven < numArgsInSignature) {
+    if (numArgsGiven < source->d->argCount) {
         PySideSignalInstance *possibleDefaultInstance = source;
         while ((possibleDefaultInstance = possibleDefaultInstance->d->next)) {
             if (possibleDefaultInstance->d->attributes & QMetaMethod::Cloned
-                    && argCountInSignature(possibleDefaultInstance->d->signature) == numArgsGiven) {
+                    && possibleDefaultInstance->d->argCount == numArgsGiven) {
                 source = possibleDefaultInstance;
                 break;
             }
