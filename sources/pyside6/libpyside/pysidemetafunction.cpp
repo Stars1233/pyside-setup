@@ -14,6 +14,7 @@
 #include <signature.h>
 
 #include <QtCore/qmetaobject.h>
+#include <QtCore/qvarlengtharray.h>
 
 using namespace Qt::StringLiterals;
 
@@ -113,65 +114,56 @@ bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
 {
 
     QMetaMethod method = self->metaObject()->method(methodIndex);
-    QList<QByteArray> argTypes = method.parameterTypes();
+    const int parameterCount = method.parameterCount();
 
     // args given plus return type
     Shiboken::AutoDecRef sequence(PySequence_Fast(args, nullptr));
-    qsizetype numArgs = PySequence_Size(sequence.object()) + 1;
+    const qsizetype numArgs = PySequence_Size(sequence.object()) + 1;
 
-    if (numArgs - 1 > argTypes.size()) {
+    if (numArgs - 1 > parameterCount) {
         PyErr_Format(PyExc_TypeError, "%s only accepts %d argument(s), %d given!",
-                     method.methodSignature().constData(),
-                     argTypes.size(), numArgs - 1);
+                     method.methodSignature().constData(), parameterCount, int(numArgs - 1));
         return false;
     }
 
-    if (numArgs - 1 < argTypes.size()) {
+    if (numArgs - 1 < parameterCount) {
         PyErr_Format(PyExc_TypeError, "%s needs %d argument(s), %d given!",
-                     method.methodSignature().constData(),
-                     argTypes.size(), numArgs - 1);
+                     method.methodSignature().constData(), parameterCount, int(numArgs - 1));
         return false;
     }
 
-    auto *methValues = new QVariant[numArgs];
-    void **methArgs = new void *[numArgs];
+    QVarLengthArray<QVariant> methValues(numArgs);
+    QVarLengthArray<void *> methArgs(numArgs, nullptr);
 
-    // Prepare room for return type
-    const char *returnType = method.typeName();
-    if (returnType && std::strcmp("void", returnType) != 0)
-        argTypes.prepend(returnType);
-    else
-        argTypes.prepend(QByteArray());
-
-    int i = 0;
-    for (; i < numArgs; ++i) {
-        const QByteArray &typeName = argTypes.at(i);
-        // This must happen only when the method hasn't return type.
-        if (typeName.isEmpty()) {
-            methArgs[i] = nullptr;
+    // Leave room for return type
+    for (qsizetype i = 0; i < numArgs; ++i) {
+        const int argIndex = int(i - 1);
+        const int metaTypeId = i == 0 ?  method.returnType() : method.parameterType(argIndex);
+        if (i == 0 && metaTypeId == QMetaType::Void) // void return
             continue;
-        }
+
+        const QByteArray &typeName = i == 0 ? QByteArray{method.typeName()}
+                                            : method.parameterTypeName(argIndex);
 
         Shiboken::Conversions::SpecificConverter converter(typeName);
         if (converter) {
-            QMetaType metaType = QMetaType::fromName(typeName);
             if (!Shiboken::Conversions::pythonTypeIsObjectType(converter)) {
-                if (!metaType.isValid()) {
+                if (metaTypeId == QMetaType::UnknownType) {
                     PyErr_Format(PyExc_TypeError, "Value types used on meta functions (including signals) need to be "
                                                   "registered on meta type: %s", typeName.data());
                     break;
                 }
-                methValues[i] = QVariant(metaType);
+                methValues[i] = QVariant(QMetaType(metaTypeId));
             }
             methArgs[i] = methValues[i].data();
             if (i == 0) // Don't do this for return type
                 continue;
-            Shiboken::AutoDecRef obj(PySequence_GetItem(sequence.object(), i - 1));
-            if (metaType.id() == QMetaType::QString) {
+            Shiboken::AutoDecRef obj(PySequence_GetItem(sequence.object(), argIndex));
+            if (metaTypeId == QMetaType::QString) {
                 QString tmp;
                 converter.toCpp(obj, &tmp);
                 methValues[i] = tmp;
-            } else if (metaType.id() == PyObjectWrapper::metaTypeId()) {
+            } else if (metaTypeId == PyObjectWrapper::metaTypeId()) {
                 // Manual conversion, see PyObjectWrapper converter registration
                 methValues[i] = QVariant::fromValue(PyObjectWrapper(obj.object()));
                 methArgs[i] = methValues[i].data();
@@ -179,33 +171,28 @@ bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
                 converter.toCpp(obj, methArgs[i]);
             }
         } else {
-            PyErr_Format(PyExc_TypeError, "Unknown type used to call meta function (that may be a signal): %s", argTypes[i].constData());
-            break;
+            const QByteArray description = i == 0 ? "return type "_ba : "argument type #"_ba + QByteArray::number(i);
+            PyErr_Format(PyExc_TypeError, "Unknown %s used in call of meta function (that may be a signal): %s",
+                         description.constData(), typeName.constData());
+            return false;
         }
     }
 
-    bool ok = i == numArgs;
-    if (ok) {
-        Py_BEGIN_ALLOW_THREADS
-        QMetaObject::metacall(self, QMetaObject::InvokeMetaMethod, method.methodIndex(), methArgs);
-        Py_END_ALLOW_THREADS
-
-        if (retVal) {
-            if (methArgs[0]) {
-                static SbkConverter *qVariantTypeConverter = Shiboken::Conversions::getConverter("QVariant");
-                Q_ASSERT(qVariantTypeConverter);
-                *retVal = Shiboken::Conversions::copyToPython(qVariantTypeConverter, &methValues[0]);
-            } else {
-                *retVal = Py_None;
-                Py_INCREF(*retVal);
-            }
+    Py_BEGIN_ALLOW_THREADS
+    QMetaObject::metacall(self, QMetaObject::InvokeMetaMethod, method.methodIndex(), methArgs.data());
+    Py_END_ALLOW_THREADS
+    if (retVal) {
+        if (methArgs[0]) {
+            static SbkConverter *qVariantTypeConverter = Shiboken::Conversions::getConverter("QVariant");
+            Q_ASSERT(qVariantTypeConverter);
+            *retVal = Shiboken::Conversions::copyToPython(qVariantTypeConverter, &methValues[0]);
+        } else {
+            *retVal = Py_None;
+            Py_INCREF(*retVal);
         }
     }
 
-    delete[] methArgs;
-    delete[] methValues;
-
-    return ok;
+    return true;
 }
 
 } //namespace PySide::MetaFunction
