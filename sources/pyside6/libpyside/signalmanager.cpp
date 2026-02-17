@@ -328,6 +328,11 @@ bool SignalManager::emitSignal(QObject *source, const char *signal, PyObject *ar
     signal++;
 
     int signalIndex = source->metaObject()->indexOfSignal(signal);
+    return emitSignal(source, signalIndex, args);
+}
+
+bool SignalManager::emitSignal(QObject* source, int signalIndex, PyObject* args)
+{
     return signalIndex != -1 && MetaFunction::call(source, signalIndex, args);
 }
 

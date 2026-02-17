@@ -57,6 +57,7 @@ struct PySideSignalInstancePrivate
     PySideSignalInstance *next = nullptr;
     unsigned short attributes = 0;
     short argCount = 0;
+    short signalIndex = -1; // lazily initialized by initPySideSignalInstancePrivate()
 };
 
 namespace PySide::Signal {

@@ -593,6 +593,12 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
     return Shiboken::Conversions::copyToPython(metaObjConnectionConverter(), &conn);
 }
 
+static inline void initPySideSignalInstancePrivate(PySideSignalInstancePrivate *p)
+{
+    if (p->signalIndex == -1 && !p->shared->source.isNull())
+        p->signalIndex = p->shared->source->metaObject()->indexOfSignal(p->signature);
+}
+
 static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
 {
     auto *source = reinterpret_cast<PySideSignalInstance *>(self);
@@ -604,6 +610,7 @@ static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
 
     Shiboken::AutoDecRef pyArgs(PyList_New(0));
     const Py_ssize_t numArgsGiven = PySequence_Size(args);
+    initPySideSignalInstancePrivate(source->d);
 
     // If number of arguments given to emit is smaller than the first source signature expects,
     // it is possible it's a case of emitting a signal with default parameters.
@@ -616,6 +623,7 @@ static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
     if (numArgsGiven < source->d->argCount) {
         PySideSignalInstance *possibleDefaultInstance = source;
         while ((possibleDefaultInstance = possibleDefaultInstance->d->next)) {
+            initPySideSignalInstancePrivate(possibleDefaultInstance->d);
             if (possibleDefaultInstance->d->attributes & QMetaMethod::Cloned
                     && possibleDefaultInstance->d->argCount == numArgsGiven) {
                 source = possibleDefaultInstance;
@@ -624,9 +632,7 @@ static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
         }
     }
 
-    const bool ok = PySide::SignalManager::emitSignal(sender(source),
-                                                      qSignalSignature(source).constData(),
-                                                      args);
+    const bool ok = PySide::SignalManager::emitSignal(sender(source), source->d->signalIndex, args);
     if (PyErr_Occurred() != nullptr)
         return nullptr;
     if (ok)
