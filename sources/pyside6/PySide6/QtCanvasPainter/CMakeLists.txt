@@ -6,25 +6,25 @@ project(QtCanvasPainter)
 set (QtCanvasPainter_DROPPED_ENTRIES)
 
 set(QtCanvasPainter_SRC
-${QtCanvasPainter_GEN_DIR}/qcboxgradient_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcboxshadow_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcbrush_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcconicalgradient_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qccustombrush_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcgradient_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcgridpattern_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcimage_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcimagepattern_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qclineargradient_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcoffscreencanvas_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcpainter_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcpainterfactory_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcpainterpath_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcpainterwidget_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcradialgradient_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcrhipaintdriver_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qquickcpainteritem_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qquickcpainterrenderer_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvasboxgradient_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvasboxshadow_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvasbrush_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvasconicalgradient_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvascustombrush_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvasgradient_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvasgridpattern_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvasimage_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvasimagepattern_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvaslineargradient_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvasoffscreencanvas_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvaspainter_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvaspainterfactory_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvaspainteritem_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvaspainteritemrenderer_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvaspainterpath_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvaspainterwidget_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvasradialgradient_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvasrhipaintdriver_wrapper.cpp
 # module is always needed
 ${QtCanvasPainter_GEN_DIR}/qtcanvaspainter_module_wrapper.cpp
 )

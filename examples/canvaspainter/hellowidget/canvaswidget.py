@@ -1,15 +1,15 @@
 # Copyright (C) 2026 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-from PySide6.QtCanvasPainter import (QCPainter, QCPainterWidget,
-                                     QCImagePattern, QCRadialGradient)
+from PySide6.QtCanvasPainter import (QCanvasPainter, QCanvasPainterWidget,
+                                     QCanvasImagePattern, QCanvasRadialGradient)
 from PySide6.QtGui import QColor, QFont, QImage
 from PySide6.QtCore import QPointF, Qt
 
 import rc_hellowidget  # noqa F401
 
 
-class CanvasWidget(QCPainterWidget):
+class CanvasWidget(QCanvasPainterWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -18,7 +18,7 @@ class CanvasWidget(QCPainterWidget):
 
     def initializeResources(self, p):
         assert (self.m_image is None)
-        flags = QCPainter.ImageFlag.Repeat | QCPainter.ImageFlag.GenerateMipmaps
+        flags = QCanvasPainter.ImageFlag.Repeat | QCanvasPainter.ImageFlag.GenerateMipmaps
         image = QImage(":/qt-translucent.png")
         assert (not image.size().isEmpty())
         self.m_image = p.addImage(image, flags)
@@ -32,7 +32,7 @@ class CanvasWidget(QCPainterWidget):
         centerY = self.height() / 2
 
         # Paint the background circle
-        gradient1 = QCRadialGradient(centerX, centerY - size * 0.1, size * 0.6)
+        gradient1 = QCanvasRadialGradient(centerX, centerY - size * 0.1, size * 0.6)
         gradient1.setStartColor(QColor(0x909090))
         gradient1.setEndColor(QColor(0x404040))
         p.beginPath()
@@ -43,8 +43,8 @@ class CanvasWidget(QCPainterWidget):
         p.setLineWidth(size * 0.02)
         p.stroke()
         # Hello text
-        p.setTextAlign(QCPainter.TextAlign.Center)
-        p.setTextBaseline(QCPainter.TextBaseline.Middle)
+        p.setTextAlign(QCanvasPainter.TextAlign.Center)
+        p.setTextBaseline(QCanvasPainter.TextBaseline.Middle)
         font1 = QFont()
         font1.setWeight(QFont.Weight.Bold)
         font1.setItalic(True)
@@ -53,7 +53,7 @@ class CanvasWidget(QCPainterWidget):
         p.setFillStyle(QColor(0xB0D040))
         p.fillText("HELLO", centerX, centerY - size * 0.18)
 
-        # QCPainter text
+        # QCanvasPainter text
         font2 = QFont()
         font2.setWeight(QFont.Weight.Thin)
         font2.setPixelSize(round(size * 0.11))
@@ -61,9 +61,9 @@ class CanvasWidget(QCPainterWidget):
         p.fillText("Qt Canvas Painter", centerX, centerY - size * 0.08)
 
         # Paint heart
-        pattern = QCImagePattern(self.m_image, centerX, centerY, size * 0.08, size * 0.05)
+        pattern = QCanvasImagePattern(self.m_image, centerX, centerY, size * 0.08, size * 0.05)
         p.setFillStyle(pattern)
-        p.setLineCap(QCPainter.LineCap.Round)
+        p.setLineCap(QCanvasPainter.LineCap.Round)
         p.setStrokeStyle(QColor(0xB0D040))
         p.beginPath()
         p.moveTo(centerX, centerY + size * 0.3)
