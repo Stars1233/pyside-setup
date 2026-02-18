@@ -280,7 +280,10 @@ struct SignalManagerPrivate
     static void handleMetaCallError(QObject *object, int *result);
     static int qtPropertyMetacall(QObject *object, QMetaObject::Call call,
                                   int id, void **args);
-    static int qtMethodMetacall(QObject *object, int id, void **args);
+    static int qtPythonMetacall(QObject *object, const QMetaObject *metaObject,
+                                const QMetaMethod &method, int id, void **args);
+    static int qtSignalMetacall(QObject *object, const QMetaObject *metaObject,
+                                const QMetaMethod &method, int id, void **args);
 };
 
 SignalManager::QmlMetaCallErrorHandler
@@ -425,41 +428,59 @@ int SignalManagerPrivate::qtPropertyMetacall(QObject *object,
 }
 
 // Handler for QMetaObject::InvokeMetaMethod
-int SignalManagerPrivate::qtMethodMetacall(QObject *object,
-                                           int id, void **args)
+
+static inline bool isSignalConnected(const QObject *object, const QMetaMethod &method)
 {
-    const QMetaObject *metaObject = object->metaObject();
-    const QMetaMethod method = metaObject->method(id);
+    class FriendlyQObject : public QObject {
+    public:
+        using QObject::isSignalConnected; // protected
+    };
+
+    return static_cast<const FriendlyQObject *>(object)->isSignalConnected(method);
+}
+
+int SignalManagerPrivate::qtSignalMetacall(QObject *object, const QMetaObject *metaObject,
+                                           const QMetaMethod &method, int id, void **args)
+{
+    qCDebug(lcPySide).noquote().nospace() << __FUNCTION__ << " #" << id
+                                          << " \"" << method.methodSignature() << '"';
+
     int result = id - metaObject->methodCount();
+    const bool isConnected = isSignalConnected(object, method);
 
-    std::unique_ptr<Shiboken::GilState> gil;
+    QMetaObject::activate(object, id, args); // emit python signal
 
+    if (isConnected) { // Check for errors in connected Python slots.
+        Shiboken::GilState gilState;
+        if (PyErr_Occurred() != nullptr)
+            handleMetaCallError(object, &result);
+    }
+    return result;
+}
+
+int SignalManagerPrivate::qtPythonMetacall(QObject *object, const QMetaObject *metaObject,
+                                           const QMetaMethod &method, int id, void **args)
+{
     qCDebug(lcPySide).noquote().nospace() << __FUNCTION__ << " #" << id
         << " \"" << method.methodSignature() << '"';
 
-    if (method.methodType() == QMetaMethod::Signal) {
-        // emit python signal
-        QMetaObject::activate(object, id, args);
+    Shiboken::GilState gil;
+    auto *pySbkSelf = Shiboken::BindingManager::instance().retrieveWrapper(object);
+    Q_ASSERT(pySbkSelf);
+    auto *pySelf = reinterpret_cast<PyObject *>(pySbkSelf);
+    Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(pySelf, method.name().constData()));
+    if (pyMethod.isNull()) {
+        PyErr_Format(PyExc_AttributeError, "Slot '%s::%s' not found.",
+                     metaObject->className(), method.methodSignature().constData());
     } else {
-        gil.reset(new Shiboken::GilState);
-        auto *pySbkSelf = Shiboken::BindingManager::instance().retrieveWrapper(object);
-        Q_ASSERT(pySbkSelf);
-        auto *pySelf = reinterpret_cast<PyObject *>(pySbkSelf);
-        Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(pySelf, method.name().constData()));
-        if (pyMethod.isNull()) {
-            PyErr_Format(PyExc_AttributeError, "Slot '%s::%s' not found.",
-                         metaObject->className(), method.methodSignature().constData());
-        } else {
-            SignalManager::callPythonMetaMethod(method, args, pyMethod);
-        }
+        SignalManager::callPythonMetaMethod(method, args, pyMethod);
     }
+
     // WARNING Isn't safe to call any metaObject and/or object methods beyond this point
     //         because the object can be deleted inside the called slot.
 
-    if (gil == nullptr)
-        gil = std::make_unique<Shiboken::GilState>();
-
-    if (PyErr_Occurred())
+    int result = id - metaObject->methodCount();
+    if (PyErr_Occurred() != nullptr)
         handleMetaCallError(object, &result);
 
     return result;
@@ -477,8 +498,13 @@ int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, 
         case QMetaObject::BindableProperty:
             id -= object->metaObject()->propertyCount();
             break;
-        case QMetaObject::InvokeMetaMethod:
-            id = SignalManagerPrivate::qtMethodMetacall(object, id, args);
+        case QMetaObject::InvokeMetaMethod: {
+            const QMetaObject *metaObject = object->metaObject();
+            const QMetaMethod method = metaObject->method(id);
+            id = method.methodType() == QMetaMethod::Signal
+                ? SignalManagerPrivate::qtSignalMetacall(object, metaObject, method, id, args)
+                : SignalManagerPrivate::qtPythonMetacall(object, metaObject, method, id, args);
+        }
             break;
         case QMetaObject::CreateInstance:
         case QMetaObject::IndexOfMethod:
