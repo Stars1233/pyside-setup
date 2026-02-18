@@ -588,98 +588,111 @@ void initQApp()
     setDestroyQApplication(destroyQCoreApplication);
 }
 
+static PyObject *getHiddenTruePropertyDataFromQObject(PyObject *self, PyObject *name)
+{
+    // PYSIDE-1889: If we have actually a Python property, return f(get|set|del).
+    //              Do not store this attribute in the instance dict, because this
+    //              would create confusion with overload.
+    // Note: before implementing this property handling, the meta function code
+    // below created meta functions which was quite wrong.
+    auto *subdict = _PepType_Lookup(Py_TYPE(self), PySideMagicName::property_methods());
+    if (PyObject *propName = PyDict_GetItem(subdict, name)) {
+        // We really have a property name and need to fetch the fget or fset function.
+        static PyObject *const _fget = Shiboken::String::createStaticString("fget");
+        static PyObject *const _fset = Shiboken::String::createStaticString("fset");
+        static PyObject *const _fdel = Shiboken::String::createStaticString("fdel");
+        static PyObject *const arr[3] = {_fget, _fset, _fdel};
+        auto *prop = _PepType_Lookup(Py_TYPE(self), propName);
+        for (auto *trial : arr) {
+            auto *res = PyObject_GetAttr(prop, trial);
+            if (res) {
+                Shiboken::AutoDecRef elemName(PyObject_GetAttr(res, PySideMagicName::name()));
+                // Note: This comparison works because of interned strings.
+                if (elemName == name)
+                    return res;
+                Py_DECREF(res);
+            }
+            PyErr_Clear();
+        }
+    }
+
+    return nullptr;
+}
+
+static PyObject *getHiddenMetaMethodDataFromQObject(int featureFlags,
+                                                    QObject *cppSelf,
+                                                    PyObject *self,
+                                                    PyObject *attrName)
+{
+    // Provide methods from non-exposed QMetaObjects
+    const char *attrNameC = Shiboken::String::toCString(attrName);
+    if (std::strncmp("__", attrNameC, 2) == 0)
+        return nullptr;
+
+    const bool snakeFlag = featureFlags & 0x01;
+    const QMetaObject *metaObject = cppSelf->metaObject();
+    QList<QMetaMethod> signalList;
+    // Caution: This inserts a meta function or a signal into the instance dict.
+    for (int i = 0, imax = metaObject->methodCount(); i < imax; ++i) {
+        QMetaMethod method = metaObject->method(i);
+        // PYSIDE-1753: Snake case names must be renamed here too, or they will be
+        // found unexpectedly when forgetting to rename them.
+        const auto &origName = method.name();
+        // Currently, we rename only methods but no signals. This might change.
+        const bool isSignal = method.methodType() == QMetaMethod::Signal;
+        const QByteArray matchName =
+            (snakeFlag && !isSignal) ? _sigWithMangledName(origName, true) : origName;
+        if (attrNameC == matchName) {
+            if (isSignal) {
+                signalList.append(method);
+            } else if (auto *func = MetaFunction::newObject(cppSelf, i)) {
+                auto *result = reinterpret_cast<PyObject *>(func);
+                PyObject_SetAttr(self, attrName, result);
+                return result;
+            }
+        }
+    }
+
+    if (!signalList.isEmpty()) {
+        auto *pySignal = reinterpret_cast<PyObject *>(
+            Signal::newObjectFromMethod(cppSelf, self, signalList));
+        PyObject_SetAttr(self, attrName, pySignal);
+        return pySignal;
+    }
+
+    return nullptr;
+}
+
 PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name)
 {
-    using Shiboken::AutoDecRef;
-
     // PYSIDE-68-bis: This getattr finds signals early by `signalDescrGet`.
     PyObject *attr = PyObject_GenericGetAttr(self, name);
     if (!Shiboken::Object::isValid(reinterpret_cast<SbkObject *>(self), false))
         return attr;
 
-    if (attr && Property::checkType(attr)) {
-        PyObject *value = Property::getValue(reinterpret_cast<PySideProperty *>(attr), self);
-        Py_DECREF(attr);
-        if (!value)
-            return nullptr;
-        attr = value;
+    if (attr != nullptr) {
+        if (Property::checkType(attr)) {
+            PyObject *value = Property::getValue(reinterpret_cast<PySideProperty *>(attr), self);
+            Py_DECREF(attr);
+            return value;
+        }
+        return attr;
     }
 
-    // Search on metaobject (avoid internal attributes started with '__')
-    if (!attr) {
-        Shiboken::Errors::Stash errorStash;
+    Shiboken::Errors::Stash errorStash; // Stash the attribute error for later in case the below fails
 
-        int flags = currentSelectId(Py_TYPE(self));
-        int snake_flag = flags & 0x01;
-        int propFlag = flags & 0x02;
-
-        if (propFlag) {
-            // PYSIDE-1889: If we have actually a Python property, return f(get|set|del).
-            //              Do not store this attribute in the instance dict, because this
-            //              would create confusion with overload.
-            // Note: before implementing this property handling, the meta function code
-            // below created meta functions which was quite wrong.
-            auto *subdict = _PepType_Lookup(Py_TYPE(self), PySideMagicName::property_methods());
-            if (PyObject *propName = PyDict_GetItem(subdict, name)) {
-                // We really have a property name and need to fetch the fget or fset function.
-                static PyObject *const _fget = Shiboken::String::createStaticString("fget");
-                static PyObject *const _fset = Shiboken::String::createStaticString("fset");
-                static PyObject *const _fdel = Shiboken::String::createStaticString("fdel");
-                static PyObject *const arr[3] = {_fget, _fset, _fdel};
-                auto *prop = _PepType_Lookup(Py_TYPE(self), propName);
-                for (auto *trial : arr) {
-                    auto *res = PyObject_GetAttr(prop, trial);
-                    if (res) {
-                        AutoDecRef elemName(PyObject_GetAttr(res, PySideMagicName::name()));
-                        // Note: This comparison works because of interned strings.
-                        if (elemName == name) {
-                            errorStash.release();
-                            return res;
-                        }
-                        Py_DECREF(res);
-                    }
-                    PyErr_Clear();
-                }
-            }
-        }
-
-        const char *cname = Shiboken::String::toCString(name);
-        uint cnameLen = qstrlen(cname);
-        if (std::strncmp("__", cname, 2) != 0) {
-            const QMetaObject *metaObject = cppSelf->metaObject();
-            QList<QMetaMethod> signalList;
-            // Caution: This inserts a meta function or a signal into the instance dict.
-            for (int i=0, imax = metaObject->methodCount(); i < imax; i++) {
-                QMetaMethod method = metaObject->method(i);
-                // PYSIDE-1753: Snake case names must be renamed here too, or they will be
-                // found unexpectedly when forgetting to rename them.
-                auto origSignature = method.methodSignature();
-                // Currently, we rename only methods but no signals. This might change.
-                bool use_lower = snake_flag and method.methodType() != QMetaMethod::Signal;
-                const QByteArray methSig_ = _sigWithMangledName(origSignature, use_lower);
-                const char *methSig = methSig_.constData();
-                bool methMatch = std::strncmp(cname, methSig, cnameLen) == 0
-                                 && methSig[cnameLen] == '(';
-                if (methMatch) {
-                    if (method.methodType() == QMetaMethod::Signal) {
-                        signalList.append(method);
-                    } else if (auto *func = MetaFunction::newObject(cppSelf, i)) {
-                        auto *result = reinterpret_cast<PyObject *>(func);
-                        PyObject_SetAttr(self, name, result);
-                        errorStash.release();
-                        return result;
-                    }
-                }
-            }
-            if (!signalList.isEmpty()) {
-                auto *pySignal = reinterpret_cast<PyObject *>(
-                    Signal::newObjectFromMethod(cppSelf, self, signalList));
-                PyObject_SetAttr(self, name, pySignal);
-                errorStash.release();
-                return pySignal;
-            }
+    const int featureFlags = currentSelectId(Py_TYPE(self));
+    if (featureFlags & 0x02) { // True property feature
+        attr = getHiddenTruePropertyDataFromQObject(self, name);
+        if (attr != nullptr) {
+            errorStash.release();
+            return attr;
         }
     }
+
+    attr = getHiddenMetaMethodDataFromQObject(featureFlags, cppSelf, self, name);
+    if (attr != nullptr)
+        errorStash.release();
     return attr;
 }
 
