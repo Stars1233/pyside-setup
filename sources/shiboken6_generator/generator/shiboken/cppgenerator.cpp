@@ -6336,7 +6336,7 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
                 << defName << ".ml_flags & (~METH_STATIC),\n"
                 << defName << ".ml_doc,\n" << outdent
                 << "};\n"
-                << "if (Shiboken::String::compare(name, \""
+                << "if (PyUnicode_CompareWithASCIIString(name, \""
                 << func->definitionNames().constFirst() << "\") == 0)\n" << indent
                 << "return PyCFunction_NewEx(&non_static_" << defName << ", self, 0);\n"
                 << outdent;
