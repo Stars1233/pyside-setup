@@ -1138,10 +1138,8 @@ PySideSignalInstance *newObjectFromMethod(QObject *sourceQObject, PyObject *sour
         item->d = new PySideSignalInstancePrivate;
         PySideSignalInstancePrivate *selfPvt = item->d;
         selfPvt->shared = shared;
-        QByteArray cppName(m.methodSignature());
-        cppName.truncate(cppName.indexOf('('));
         // separate SignalName
-        selfPvt->signalName = cppName;
+        selfPvt->signalName = m.name();
         selfPvt->signature = m.methodSignature();
         selfPvt->argCount = short(m.parameterCount());
         selfPvt->attributes = m.attributes();
@@ -1183,8 +1181,7 @@ void registerSignals(PyTypeObject *pyObj, const QMetaObject *metaObject)
         QMetaMethod method = metaObject->method(i);
 
         if (method.methodType() == QMetaMethod::Signal) {
-            QByteArray methodName(method.methodSignature());
-            methodName.truncate(methodName.indexOf('('));
+            const QByteArray &methodName = method.name();
             Signature signature{method.parameterTypes().join(','), {},
                                 short(method.parameterCount())};
             if (method.attributes() & QMetaMethod::Cloned)
@@ -1279,11 +1276,9 @@ QByteArray getCallbackSignature(QMetaMethod signal, QObject *receiver,
         if (receiver) {
             // Search for signature on metaobject
             const QMetaObject *mo = receiver->metaObject();
-            QByteArray prefix(functionName);
-            prefix += '(';
             for (int i = 0, count = mo->methodCount(); i < count; ++i) {
                 QMetaMethod me = mo->method(i);
-                if ((std::strncmp(me.methodSignature(), prefix, prefix.size()) == 0) &&
+                if (functionName == me.name() &&
                     QMetaObject::checkConnectArgs(signal, me)) {
                     numArgs = me.parameterTypes().size() + useSelf;
                     break;

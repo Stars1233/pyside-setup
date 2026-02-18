@@ -445,9 +445,7 @@ int SignalManagerPrivate::qtMethodMetacall(QObject *object,
         auto *pySbkSelf = Shiboken::BindingManager::instance().retrieveWrapper(object);
         Q_ASSERT(pySbkSelf);
         auto *pySelf = reinterpret_cast<PyObject *>(pySbkSelf);
-        QByteArray methodName = method.methodSignature();
-        methodName.truncate(methodName.indexOf('('));
-        Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(pySelf, methodName));
+        Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(pySelf, method.name().constData()));
         if (pyMethod.isNull()) {
             PyErr_Format(PyExc_AttributeError, "Slot '%s::%s' not found.",
                          metaObject->className(), method.methodSignature().constData());
