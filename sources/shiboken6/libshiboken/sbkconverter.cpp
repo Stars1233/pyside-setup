@@ -918,7 +918,7 @@ SpecificConverter::SpecificConverter(const char *typeName)
     }
 }
 
-PyObject *SpecificConverter::toPython(const void *cppIn)
+PyObject *SpecificConverter::toPython(const void *cppIn) const
 {
     switch (m_type) {
     case CopyConversion:
@@ -934,7 +934,7 @@ PyObject *SpecificConverter::toPython(const void *cppIn)
     return nullptr;
 }
 
-void SpecificConverter::toCpp(PyObject *pyIn, void *cppOut)
+void SpecificConverter::toCpp(PyObject *pyIn, void *cppOut) const
 {
     switch (m_type) {
     case CopyConversion:

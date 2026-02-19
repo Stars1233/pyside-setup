@@ -93,16 +93,16 @@ public:
 
     explicit SpecificConverter(const char *typeName);
 
-    SbkConverter *converter() { return m_converter; }
+    SbkConverter *converter() const { return m_converter; }
     operator SbkConverter *() const { return m_converter; }
 
-    bool isValid() { return m_type != InvalidConversion; }
+    bool isValid() const { return m_type != InvalidConversion; }
     operator bool() const { return m_type != InvalidConversion; }
 
-    Type conversionType() { return m_type; }
+    Type conversionType() const { return m_type; }
 
-    PyObject *toPython(const void *cppIn);
-    void toCpp(PyObject *pyIn, void *cppOut);
+    PyObject *toPython(const void *cppIn) const;
+    void toCpp(PyObject *pyIn, void *cppOut) const;
 private:
     SbkConverter *m_converter;
     Type m_type;
