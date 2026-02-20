@@ -21,7 +21,7 @@ ${QtCanvasPainter_GEN_DIR}/qcanvaspainter_wrapper.cpp
 ${QtCanvasPainter_GEN_DIR}/qcanvaspainterfactory_wrapper.cpp
 ${QtCanvasPainter_GEN_DIR}/qcanvaspainteritem_wrapper.cpp
 ${QtCanvasPainter_GEN_DIR}/qcanvaspainteritemrenderer_wrapper.cpp
-${QtCanvasPainter_GEN_DIR}/qcanvaspainterpath_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvaspath_wrapper.cpp
 ${QtCanvasPainter_GEN_DIR}/qcanvaspainterwidget_wrapper.cpp
 ${QtCanvasPainter_GEN_DIR}/qcanvasradialgradient_wrapper.cpp
 ${QtCanvasPainter_GEN_DIR}/qcanvasrhipaintdriver_wrapper.cpp

@@ -36,7 +36,7 @@
         <enum-type name="RenderHint" flags="RenderHints"/>
     </object-type>
     <object-type name="QCanvasPainterFactory"/>
-    <value-type name="QCanvasPainterPath"/>
+    <value-type name="QCanvasPath"/>
     <object-type name="QCanvasPainterWidget">
         <add-function signature="grabCanvas(const QCanvasOffscreenCanvas &amp;@canvas@,PyCallable*@resultCallback@)">
             <inject-code class="target" position="beginning" file="../glue/qtcanvaspainter.cpp"
