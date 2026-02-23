@@ -1,0 +1,74 @@
+Qt for Python 6.11.0 is a minor release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+  - QQmlComponent: Functions create_withownership() and
+                   createWithInitialProperties_withownership() have been
+                   added to return created QML objects with Python ownership.
+ - [PYSIDE-2716] It is now possible to specify options for pyside6-uic and
+                 pyside6-rcc in a pyproject.toml file. This is useful for
+                 example to disable overly aggressive compression by
+                 pyside6-rcc which may result in files that are not usable
+                 on all platforms.
+ - [PYSIDE-2786] The minimum supported Python version has been raised to
+                 3.10.
+ - [PYSIDE-3168] A number of examples have been updated for Qt 6.11.
+ - [PYSIDE-3168] The QtCanvasPainter module and an example have been added.
+ - [PYSIDE-3193] Type hints: The return type of QTranslator.translate()
+                 has been fixed.
+ - [PYSIDE-3257] pyside6-designer has been fixed to display Python help.
+ - [PYSIDE-3273] A warning displayed when calling sys.exit() in
+                 a overridden function has been suppressed.
+ - [PYSIDE-3279] Signal emission has been sped up by code optimizations.
+ - [QTBUG-131837] The QWebView class of QtWebView and an example
+                  demoing it have been added.
+ - [QTBUG-143503] It is now possible to populate QML views with JSON data as
+                  shown in the updated colorpaletteclient example.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-1587] The source tree has been restructured; the
+                 shiboken-generator now is in a separate directory
+                 to enable building with scikit-build.
+ - [PYSIDE-2221] Some basic changes to enable free threaded Python/
+                 subinterpreter support have been made.
+ - [PYSIDE-2786] A number of helper functions now superseeded by Python 3.10
+                 have been removed from libshiboken: _PepUnicode_AsString(),
+                 PepType_GetSlot() and PepErr_GetRaisedException().
+                 Shiboken::String::compare() has been deprecated.
+ - [PYSIDE-3245] The support for synthesizing comparison operators in C++ 20
+                 has been reimplemented and improved.
+ - [PYSIDE-3245] Non-homogeneous reverse free comparison operators (trailing
+                 class argument) are now ignored by the code generator,
+                 potentially causing warnings about unmatched comparison
+                 operator modifications. The warnings can be ignored, or,
+                 the modification signatures can be rewritten to be
+                 const member operators, which is the recommended way to
+                 ensure compatibility with C++ 20 operator synthesis.
+ - [PYSIDE-3105] The cross building support has been extended.
+ - [PYSIDE-3155] libshiboken's warning/error messages are now prefixed.
+ - [PYSIDE-3168] Only public static fields are generated (even with
+                 the protected hack).
+ - [PYSIDE-3253] A typesystem attribute to convert null smart pointers
+                 to None has been added.
+ - [PYSIDE-3282] Keyword arguments passed to base classes in case
+                 of cooperative multiple inheritance are now filtered.
+ - [PYSIDE-3285] Nested types have been removed from the generated module's
+                 dictionaries.
