@@ -26,7 +26,9 @@ enum class PropertyFlag {
     Stored      = 0x020,
     User        = 0x040,
     Constant    = 0x080,
-    Final       = 0x100
+    Final       = 0x100,
+    Virtual     = 0x200,
+    Override    = 0x400
 };
 Q_DECLARE_FLAGS(PropertyFlags, PropertyFlag)
 

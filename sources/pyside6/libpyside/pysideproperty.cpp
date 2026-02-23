@@ -324,22 +324,26 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 
     static const char *kwlist[] = {"type", "fget", "fset", "freset", "fdel", "doc", "notify",
                                    "designable", "scriptable", "stored",
-                                   "user", "constant", "final", dataCapsuleKeyName, nullptr};
+                                   "user", "constant",
+                                   "final", "virtual", "override",
+                                   dataCapsuleKeyName, nullptr};
     char *doc{};
     PyObject *type{}, *fget{}, *fset{}, *freset{}, *fdel{}, *notify{};
     PyObject *dataCapsule{};
     bool designable{true}, scriptable{true}, stored{true};
-    bool user{false}, constant{false}, finalProp{false};
+    bool user{false}, constant{false};
+    bool finalProp{false}, overrideProp{false}, virtualProp{false};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
-                                     "O|OOOOsObbbbbbO:QtCore.Property",
+                                     "O|OOOOsObbbbbbbbO:QtCore.Property",
                                      const_cast<char **>(kwlist),
                                      /*OO*/     &type, &fget,
                                      /*OOO*/    &fset, &freset, &fdel,
                                      /*s*/      &doc,
                                      /*O*/      &notify,
                                      /*bbb*/    &designable, &scriptable, &stored,
-                                     /*bbb*/    &user, &constant, &finalProp,
+                                     /*bb*/     &user, &constant,
+                                     /*bbb*/    &finalProp, &virtualProp, &overrideProp,
                                      /*O*/      &dataCapsule)) {
         return -1;
     }
@@ -375,6 +379,8 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     flags.setFlag(PySide::Property::PropertyFlag::User, user);
     flags.setFlag(PySide::Property::PropertyFlag::Constant, constant);
     flags.setFlag(PySide::Property::PropertyFlag::Final, finalProp);
+    flags.setFlag(PySide::Property::PropertyFlag::Virtual, virtualProp);
+    flags.setFlag(PySide::Property::PropertyFlag::Override, overrideProp);
     pData->setFlags(flags);
 
     if (type == Py_None || pData->typeName().isEmpty())

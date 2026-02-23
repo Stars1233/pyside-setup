@@ -120,7 +120,8 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                                    "replace", "removeLast",
                                    "doc", "notify", // PySideProperty
                                    "designable", "scriptable", "stored",
-                                   "user", "constant", "final",
+                                   "user", "constant",
+                                   "final", "virtual", "override",
                                    nullptr};
     auto *pySelf = reinterpret_cast<PySideProperty *>(self);
 
@@ -129,17 +130,19 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     char *doc{};
     PyObject *append{}, *count{}, *at{}, *clear{}, *replace{}, *removeLast{}, *notify{};
     bool designable{true}, scriptable{true}, stored{true};
-    bool user{false}, constant{false}, finalProp{false};
+    bool user{false}, constant{false};
+    bool finalProp{false}, overrideProp{false}, virtualProp{false};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
-                                     "O|OOOOOOsObbbbbb:QtQml.ListProperty",
+                                     "O|OOOOOOsObbbbbbbb:QtQml.ListProperty",
                                      const_cast<char **>(kwlist),
                                      &data->obElementType,
                                      &append, &count, &at, &clear, &replace, &removeLast,
                                      /*s*/   &doc,
                                      /*O*/   &notify, // PySideProperty
                                      /*bbb*/ &designable, &scriptable, &stored,
-                                     /*bbb*/ &user, &constant, &finalProp)) {
+                                     /*bb*/  &user, &constant,
+                                     /*bbb*/ &finalProp, &virtualProp, &overrideProp)) {
         return -1;
     }
 
@@ -183,6 +186,8 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     flags.setFlag(PySide::Property::PropertyFlag::User, user);
     flags.setFlag(PySide::Property::PropertyFlag::Constant, constant);
     flags.setFlag(PySide::Property::PropertyFlag::Final, finalProp);
+    flags.setFlag(PySide::Property::PropertyFlag::Virtual, virtualProp);
+    flags.setFlag(PySide::Property::PropertyFlag::Override, overrideProp);
     data->setFlags(flags);
 
     data->incref();

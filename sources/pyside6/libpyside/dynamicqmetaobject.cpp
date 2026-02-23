@@ -347,6 +347,8 @@ int MetaObjectBuilderPrivate::addProperty(const QByteArray &propertyName,
     newProperty.setUser(flags.testFlag(PySide::Property::PropertyFlag::User));
     newProperty.setConstant(flags.testFlag(PySide::Property::PropertyFlag::Constant));
     newProperty.setFinal(flags.testFlag(PySide::Property::PropertyFlag::Final));
+    newProperty.setVirtual(flags.testFlag(PySide::Property::PropertyFlag::Virtual));
+    newProperty.setOverride(flags.testFlag(PySide::Property::PropertyFlag::Override));
 
     index = newProperty.index() + m_baseObject->propertyCount();
     m_dirty = true;

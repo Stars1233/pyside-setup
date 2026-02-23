@@ -53,10 +53,14 @@ PySide6.QtCore.Property
                  scriptable: bool = True,
                  stored: bool = True, user: bool = False,
                  constant: bool = False,
-                 final: bool = False) -> PySide6.QtCore.Property
+                 final: bool = False,
+                 virtual: bool = False,
+                 override: bool = False) -> PySide6.QtCore.Property
 
     Normally, only ``type``, ``fget``and ``fset`` are used.
 
+    The ``final``, ``virtual`` and ``override`` are relevant for use
+    in QML, see `Property Shadowing and Override Semantics`_.
 
     Properties compared with Python properties
     ------------------------------------------
@@ -134,3 +138,4 @@ PySide6.QtCore.Property
 
 .. _`Python Docs`:  https://docs.python.org/3/library/functions.html?highlight=property#property
 .. _`Qt Docs`:  https://doc.qt.io/qt-6/properties.html
+.. _`Property Shadowing and Override Semantics`: https://doc-snapshots.qt.io/qt6-dev/qtqml-syntax-overridesemantics.html
