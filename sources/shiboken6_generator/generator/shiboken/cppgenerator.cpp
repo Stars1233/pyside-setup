@@ -2185,6 +2185,7 @@ void CppGenerator::writeContainerConverterFunctions(TextStream &s,
 
 // Return whether an errInfo object is needed, either for argument errors
 // (count mismatch or keword arguments) or for storing filtered keword arguments
+// or passing filtered keword arguments to bases in case of multiple inheritance.
 static inline bool needsArgumentErrorHandling(const OverloadData &overloadData,
                                               CppGenerator::NamedArgumentFlags flags)
 {
@@ -2392,11 +2393,19 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     if (overloadData.maxArgs() > 0)
         writeOverloadedFunctionDecisor(s, overloadData, classContext, errorReturn);
 
+    if (namedArgumentFlags.testAnyFlags(NamedArgumentFlag::KeywordArgumentsMask)) {
+        writeConstructorsNameArgumentResolution(s, overloadData, namedArgumentFlags,
+                                                classContext, errorReturn);
+    }
+
     // Handles Python Multiple Inheritance
+    const char *miKeywordArgs =
+            namedArgumentFlags.testAnyFlags(NamedArgumentFlag::KeywordArgumentsMask)
+            ? "errInfo.isNull() ? kwds : errInfo.object()" : "kwds";
     s << "\n// PyMI support\n";
     if (needsMetaObject)
         s << "[[maybe_unused]] const bool usesPyMI = ";
-    s << "Shiboken::callInheritedInit(self, args, kwds, "
+    s << "Shiboken::callInheritedInit(self, args, " << miKeywordArgs << ", "
         << typeInitStruct(classContext) << ");\n"
         << "if (" << shibokenErrorsOccurred << ")\n"
         << indent << errorReturn << outdent << "\n";
@@ -3410,8 +3419,10 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
         return;
     }
 
-    // Handle named arguments.
-    writeNamedArgumentResolution(s, func, overloadData, flags, context, errorReturn);
+    // Handle named keyword arguments unless it is a constructor, where it is
+    // done before calling base init to obtain filtered keyword arguments.
+    if (!func->isConstructor())
+        writeNamedArgumentResolution(s, func, overloadData, flags, context, errorReturn);
 
     bool injectCodeCallsFunc = injectedCodeCallsCppFunction(context, func);
     bool mayHaveUnunsedArguments = !func->isUserAdded() && func->hasInjectedCode() && injectCodeCallsFunc;
@@ -3795,6 +3806,32 @@ void CppGenerator::writeSetPythonToCppPointerConversion(TextStream &s,
 {
     writeSetConverterFunction(s, "setPythonToCppPointerFunctions",
                               converterVar, pythonToCppFunc, isConvertibleFunc);
+}
+
+void CppGenerator::writeConstructorsNameArgumentResolution(TextStream &s,
+                                                           const OverloadData &overloadData,
+                                                           NamedArgumentFlags flags,
+                                                           const GeneratorContext &context,
+                                                           ErrorReturn errorReturn) const
+{
+    const AbstractMetaFunctionCList &overloads = overloadData.overloads();
+    s << "// Resolve keyword arguments\n";
+    if (overloads.size() == 1) {
+        s << "{\n" << indent;
+        writeNamedArgumentResolution(s, overloads.constFirst(), overloadData, flags,
+                                     context, errorReturn);
+    } else {
+        s << "switch (overloadId) {\n" << indent;
+        for (qsizetype i = 0; i < overloads.size(); ++i) {
+            const auto &func = overloads.at(i);
+            s << "case " << i << ": // " << func->signatureComment()
+                << "\n{\n" << indent;
+            writeNamedArgumentResolution(s, func, overloadData, flags,
+                                         context, errorReturn);
+            s << "break;\n" << outdent << "}\n";
+        }
+    }
+    s << outdent << "}\n";
 }
 
 // PySide-535: Allow for empty dict instead of nullptr in PyPy

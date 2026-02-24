@@ -187,5 +187,31 @@ class MissingInitFunctionTest(UsesQApplication):
         # check for object.__init__
 
 
+# PYSIDE 3282/cooperative multiple inheritance: Test that QObject keyword arguments
+# are removed when base classes are called (parent must not appear in MixinWithArgs).
+class BaseWithArgs(QObject):
+    def __init__(self, baseArg, baseKwarg=None, **kwargs):
+        super().__init__(**kwargs)
+
+
+class MixinWithArgs:
+    def __init__(self, mixinArg, mixinKwarg=None, *args, **kwargs):
+        super().__init__(**kwargs)
+
+
+class MultiBaseMixinWithArgs(BaseWithArgs, MixinWithArgs):
+    def __init__(self, childArg, childKwarg=None, **kwargs):
+        super().__init__(**kwargs)
+
+
+class PySide3282Test(UsesQApplication):
+    def test(self):
+        parent = QObject()
+        mbm = MultiBaseMixinWithArgs("childArg", "childKwarg",
+                                     baseArg="baseArg", baseKwarg="baseKwarg",
+                                     mixinArg="mixinArg", mixinKwarg="mixinKwargs", parent=parent)
+        self.assertEqual(parent, mbm.parent())
+
+
 if __name__ == "__main__":
     unittest.main()
