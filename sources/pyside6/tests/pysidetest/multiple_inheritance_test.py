@@ -12,7 +12,8 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import QObject
+from PySide6.QtGui import QCursor, QTextDocument
 from PySide6.QtWidgets import QMainWindow, QLabel, QWidget
 
 
@@ -29,7 +30,7 @@ class Age:
         self.age = age
 
 
-class Person(QtCore.QObject, Age):
+class Person(QObject, Age):
     def __init__(self, name, **kwds):
         super().__init__(**kwds)
 
@@ -48,7 +49,7 @@ class OriginalMultipleInheritanceTest(unittest.TestCase):
 
 
 # mro ('C', 'A', 'QObject', 'Object', 'B', 'object')
-class A(QtCore.QObject):
+class A(QObject):
     def __init__(self, anna=77, **kw):
         xprint(f'A: before init kw = {kw}')
         super().__init__(**kw)
@@ -74,7 +75,7 @@ class C(A, B):
 
 # mro ('F', 'D', 'QCursor', 'E', 'QLabel', 'QFrame', 'QWidget', 'QObject',
 #      'QPaintDevice', 'Object', 'object')
-class D(QtGui.QCursor):
+class D(QCursor):
     def __init__(self, anna=77, **kw):
         xprint(f'D: before init kw = {kw}')
         super().__init__(**kw)
@@ -89,7 +90,7 @@ class E:
         xprint('E: after init')
 
 
-class F(D, E, QtWidgets.QLabel):
+class F(D, E, QLabel):
     def __init__(self, **kw):
         xprint(f'F: before init kw = {kw}')
         super().__init__(**kw)
@@ -99,7 +100,7 @@ class F(D, E, QtWidgets.QLabel):
 # mro ('I', 'G', 'QTextDocument', 'H', 'QLabel', 'QFrame', 'QWidget', 'QObject',
 #      'QPaintDevice', 'Object', 'object')
 # Similar, but this time we want to reach `H` without support from `super`.
-class G(QtGui.QTextDocument):
+class G(QTextDocument):
     pass
 
 
@@ -111,7 +112,7 @@ class H:
         xprint('H: after init')
 
 
-class II(G, H, QtWidgets.QLabel):
+class II(G, H, QLabel):
     pass
 
 
