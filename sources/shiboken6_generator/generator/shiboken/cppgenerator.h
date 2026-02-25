@@ -154,11 +154,20 @@ private:
     void writeSmartPointerConverterFunctions(TextStream &s,
                                              const AbstractMetaType &smartPointerType) const;
 
-    static bool needsArgumentErrorHandling(const OverloadData &overloadData);
     static void writeMethodWrapperPreamble(TextStream &s,
                                            const OverloadData &overloadData,
                                            const GeneratorContext &context,
                                            ErrorReturn errorReturn = ErrorReturn::Default);
+    static void writeConstructorWrapperPreamble(TextStream &s,
+                                                const OverloadData &overloadData,
+                                                NamedArgumentFlags flags,
+                                                const GeneratorContext &context,
+                                                ErrorReturn errorReturn);
+    static void writeCommonMethodWrapperPreamble(TextStream &s,
+                                                 const OverloadData &overloadData,
+                                                 const GeneratorContext &context,
+                                                 bool initPythonArguments,
+                                                 ErrorReturn errorReturn);
     void writeConstructorWrapper(TextStream &s,
                                  const OverloadData &overloadData,
                                  const GeneratorContext &classContext) const;

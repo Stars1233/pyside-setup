@@ -2183,16 +2183,44 @@ void CppGenerator::writeContainerConverterFunctions(TextStream &s,
     writePythonToCppConversionFunctions(s, containerType);
 }
 
-bool CppGenerator::needsArgumentErrorHandling(const OverloadData &overloadData)
+// Return whether an errInfo object is needed, either for argument errors
+// (count mismatch or keword arguments) or for storing filtered keword arguments
+static inline bool needsArgumentErrorHandling(const OverloadData &overloadData,
+                                              CppGenerator::NamedArgumentFlags flags)
 {
-    if (overloadData.maxArgs() > 0)
-        return true;
-    // QObject constructors need error handling when passing properties as kwarg.
-    if (!usePySideExtensions())
-        return false;
-    auto rfunc = overloadData.referenceFunction();
-    return rfunc->functionType() == AbstractMetaFunction::ConstructorFunction
-        && isQObject(rfunc->ownerClass());
+    return overloadData.maxArgs() > 0
+            || flags.testFlag(CppGenerator::NamedArgumentFlag::ForceKeywordArguments);
+}
+
+static const char pythonContextMarker[] = "Shiboken::PythonContextMarker pcm;\n";
+static const char errInfo[] = "Shiboken::AutoDecRef errInfo{};\n";
+
+void CppGenerator::writeConstructorWrapperPreamble(TextStream &s,
+                                                   const OverloadData &overloadData,
+                                                   NamedArgumentFlags flags,
+                                                   const GeneratorContext &context,
+                                                   ErrorReturn errorReturn)
+{
+    const auto ownerClass = overloadData.referenceFunction()->targetLangOwner();
+    Q_ASSERT(ownerClass == context.metaClass());
+    // Check if the right constructor was called.
+    if (!ownerClass->hasPrivateDestructor()) {
+        const QString &qualifiedCppName = context.forSmartPointer()
+                ? context.preciseType().cppSignature() : ownerClass->qualifiedCppName();
+        s << "if (Shiboken::Object::isUserType(self) && "
+          << "!Shiboken::ObjectType::canCallConstructor(self->ob_type, Shiboken::SbkType< "
+          << m_gsp << qualifiedCppName << " >()))\n" << indent << errorReturn << outdent << '\n';
+    }
+    // Declare pointer for the underlying C++ object.
+    s << globalScopePrefix(context) << context.effectiveClassName() << " *cptr{};\n";
+
+    if (needsArgumentErrorHandling(overloadData, flags))
+        s << errInfo;
+
+    s << pythonContextMarker;
+
+    const bool initPythonArguments = overloadData.maxArgs() > 0;
+    writeCommonMethodWrapperPreamble(s, overloadData, context, initPythonArguments, errorReturn);
 }
 
 void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
@@ -2201,60 +2229,46 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
                                               ErrorReturn errorReturn)
 {
     const auto rfunc = overloadData.referenceFunction();
-    int minArgs = overloadData.minArgs();
-    int maxArgs = overloadData.maxArgs();
-    bool initPythonArguments{};
+    const int maxArgs = overloadData.maxArgs();
 
-    // If method is a constructor...
-    if (rfunc->isConstructor()) {
-        const auto ownerClass = rfunc->targetLangOwner();
-        Q_ASSERT(ownerClass == context.metaClass());
-        // Check if the right constructor was called.
-        if (!ownerClass->hasPrivateDestructor()) {
-            s << "if (Shiboken::Object::isUserType(self) && "
-              << "!Shiboken::ObjectType::canCallConstructor(self->ob_type, Shiboken::SbkType< "
-              << m_gsp;
-            QString qualifiedCppName;
-            if (!context.forSmartPointer())
-                qualifiedCppName = ownerClass->qualifiedCppName();
-            else
-                qualifiedCppName = context.preciseType().cppSignature();
-
-            s << qualifiedCppName << " >()))\n" << indent << errorReturn << outdent << '\n';
-        }
-        // Declare pointer for the underlying C++ object.
-        s << globalScopePrefix(context) << context.effectiveClassName() << " *cptr{};\n";
-
-        initPythonArguments = maxArgs > 0;
-
-    } else {
-        if (rfunc->implementingClass() &&
-            (!rfunc->implementingClass()->isNamespace() && overloadData.hasInstanceFunction())) {
-            CppSelfDefinitionFlags flags;
-            if (overloadData.hasStaticFunction())
-                flags.setFlag(CppSelfDefinitionFlag::HasStaticOverload);
-            if (overloadData.hasClassMethod())
-                flags.setFlag(CppSelfDefinitionFlag::HasClassMethodOverload);
-            writeCppSelfDefinition(s, rfunc, context, errorReturn, flags);
-        }
-        if (!rfunc->isInplaceOperator() && overloadData.hasNonVoidReturnType())
-            s << "PyObject *" << PYTHON_RETURN_VAR << "{};\n";
-
-        initPythonArguments = minArgs != maxArgs || maxArgs > 1;
+    if (rfunc->implementingClass() &&
+        (!rfunc->implementingClass()->isNamespace() && overloadData.hasInstanceFunction())) {
+        CppSelfDefinitionFlags flags;
+        if (overloadData.hasStaticFunction())
+            flags.setFlag(CppSelfDefinitionFlag::HasStaticOverload);
+        if (overloadData.hasClassMethod())
+            flags.setFlag(CppSelfDefinitionFlag::HasClassMethodOverload);
+        writeCppSelfDefinition(s, rfunc, context, errorReturn, flags);
     }
+    if (!rfunc->isInplaceOperator() && overloadData.hasNonVoidReturnType())
+        s << "PyObject *" << PYTHON_RETURN_VAR << "{};\n";
 
-    if (needsArgumentErrorHandling(overloadData))
-        s << "Shiboken::AutoDecRef errInfo{};\n";
+    if (needsArgumentErrorHandling(overloadData, {}))
+        s << errInfo;
 
     if (!context.hasClass()) // global functions need the full name
         s << "static const char fullName[] = \"" << fullPythonFunctionName(rfunc, true)
             << "\";\nSBK_UNUSED(fullName)\n";
-    s << "Shiboken::PythonContextMarker pcm;\n";
+    s << pythonContextMarker;
+
     // PYSIDE-2335: Mark blocking calls like `exec` or `run` as such.
     bool isBlockingFunction = rfunc->name() == u"exec"_s || rfunc->name() == u"exec_"_s
                               || rfunc->name() == u"run"_s;
     if (isBlockingFunction)
         s << "pcm.setBlocking();\n";
+
+    const bool initPythonArguments = overloadData.minArgs() != maxArgs || maxArgs > 1;
+    writeCommonMethodWrapperPreamble(s, overloadData, context, initPythonArguments, errorReturn);
+}
+
+void CppGenerator::writeCommonMethodWrapperPreamble(TextStream &s,
+                                                    const OverloadData &overloadData,
+                                                    const GeneratorContext &context,
+                                                    bool initPythonArguments,
+                                                    ErrorReturn errorReturn)
+{
+    const int minArgs = overloadData.minArgs();
+    const int maxArgs = overloadData.maxArgs();
 
     if (maxArgs > 0) {
         s << "int overloadId = -1;\n"
@@ -2266,7 +2280,7 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
 
     if (initPythonArguments) {
         s << "const Py_ssize_t numArgs = ";
-        if (minArgs == 0 && maxArgs == 1 && !rfunc->isConstructor()
+        if (minArgs == 0 && maxArgs == 1 && !overloadData.referenceFunction()->isConstructor()
             && !overloadData.pythonFunctionWrapperUsesListOfArguments()) {
             s << "(" << PYTHON_ARG << " == 0 ? 0 : 1);\n";
         } else {
@@ -2370,7 +2384,8 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     if (usePySideExtensions() && !classContext.forSmartPointer())
         s << "PySide::Feature::Select(self);\n";
 
-    writeMethodWrapperPreamble(s, overloadData, classContext, errorReturn);
+    writeConstructorWrapperPreamble(s, overloadData, namedArgumentFlags,
+                                    classContext, errorReturn);
 
     s << '\n';
 
@@ -2382,8 +2397,8 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     if (needsMetaObject)
         s << "const bool usesPyMI = ";
     s << "Shiboken::callInheritedInit(self, args, kwds, "
-        << (classContext.hasClass() ? typeInitStruct(classContext) : "fullName"_L1)
-        << ");\nif (" << shibokenErrorsOccurred << ")\n"
+        << typeInitStruct(classContext) << ");\n"
+        << "if (" << shibokenErrorsOccurred << ")\n"
         << indent << errorReturn << outdent << "\n";
 
     writeFunctionCalls(s, overloadData, namedArgumentFlags, classContext, errorReturn);
