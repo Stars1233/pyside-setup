@@ -44,6 +44,15 @@ public:
 
     const char *name() const override { return "Source generator"; }
 
+    enum class NamedArgumentFlag : std::uint8_t {
+        UsePyArgs               = 0x1, // List of arguments instead of single argument
+        HasDefaultArguments     = 0x2,
+        ForceKeywordArguments   = 0x4, // See forceQObjectNamedArguments()
+        KeywordArgumentsMask    = HasDefaultArguments | ForceKeywordArguments,
+        QObjectConstructor      = 0x8
+    };
+    Q_DECLARE_FLAGS(NamedArgumentFlags, NamedArgumentFlag)
+
 protected:
     QString fileNameForContext(const GeneratorContext &context) const override;
     void generateClass(TextStream &s, const QString &targetDir,
@@ -312,12 +321,13 @@ private:
     /// Writes calls to all the possible method/function overloads.
     void writeFunctionCalls(TextStream &s,
                             const OverloadData &overloadData,
+                            NamedArgumentFlags flags,
                             const GeneratorContext &context,
                             ErrorReturn errorReturn) const;
 
     /// Writes the call to a single function usually from a collection of overloads.
     void writeSingleFunctionCall(TextStream &s,
-                                 const OverloadData &overloadData,
+                                 const OverloadData &overloadData, NamedArgumentFlags flags,
                                  const AbstractMetaFunctionCPtr &func,
                                  const GeneratorContext &context,
                                  ErrorReturn errorReturn) const;
@@ -388,8 +398,8 @@ private:
 
     static void writeNamedArgumentResolution(TextStream &s,
                                              const AbstractMetaFunctionCPtr &func,
-                                             bool usePyArgs,
                                              const OverloadData &overloadData,
+                                             NamedArgumentFlags flags,
                                              const GeneratorContext &classContext,
                                              ErrorReturn errorReturn);
 
@@ -608,6 +618,7 @@ private:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(CppGenerator::CppSelfDefinitionFlags)
+Q_DECLARE_OPERATORS_FOR_FLAGS(CppGenerator::NamedArgumentFlags)
 
 TextStream &operator<<(TextStream &s, CppGenerator::ErrorReturn r);
 

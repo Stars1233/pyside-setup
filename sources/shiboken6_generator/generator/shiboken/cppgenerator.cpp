@@ -2288,6 +2288,20 @@ void CppGenerator::writeConstructorDummy(TextStream &s,
         << outdent << "}\n\n";
 }
 
+// PYSIDE-1986: Some QObject derived classes, (QVBoxLayout) do not have default
+// arguments, which breaks setting properties by named arguments. Force the
+// handling code to be generated nevertheless for applicable widget classes,
+// so that the mechanism of falling through to the error handling to set
+// the properties works nevertheless.
+static bool forceQObjectNamedArguments(const QString &name)
+{
+    static const QStringList classes = {
+        u"QVBoxLayout"_s, u"QHBoxLayout"_s, u"QSplitterHandle"_s,
+        u"QSizeGrip"_s, u"QPdfView"_s, u"QStackedLayout"_s}
+    ;
+    return classes.contains(name);
+}
+
 void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &overloadData,
                                            const GeneratorContext &classContext) const
 {
@@ -2304,6 +2318,17 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     s << sbkUnusedVariableCast("kwds");
 
     const bool needsMetaObject = usePySideExtensions() && isQObject(metaClass);
+
+    const bool hasDefaultArguments = overloadData.hasArgumentWithDefaultValue();
+    NamedArgumentFlags namedArgumentFlags;
+    namedArgumentFlags.setFlag(NamedArgumentFlag::UsePyArgs,
+                               overloadData.pythonFunctionWrapperUsesListOfArguments());
+    namedArgumentFlags.setFlag(NamedArgumentFlag::HasDefaultArguments, hasDefaultArguments);
+    if (needsMetaObject) {
+        namedArgumentFlags.setFlag(NamedArgumentFlag::QObjectConstructor);
+        if (!hasDefaultArguments && forceQObjectNamedArguments(metaClass->name()))
+            namedArgumentFlags.setFlag(NamedArgumentFlag::ForceKeywordArguments);
+    }
 
     s << "auto *sbkSelf = reinterpret_cast<SbkObject *>(self);\n";
 
@@ -2361,7 +2386,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
         << ");\nif (" << shibokenErrorsOccurred << ")\n"
         << indent << errorReturn << outdent << "\n";
 
-    writeFunctionCalls(s, overloadData, classContext, errorReturn);
+    writeFunctionCalls(s, overloadData, namedArgumentFlags, classContext, errorReturn);
     s << '\n';
 
     const QString typeName = classContext.forSmartPointer()
@@ -2469,6 +2494,13 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
     // Solves #119 - QDataStream <</>> operators not working for QPixmap.
     const bool hasReturnValue = overloadData.hasNonVoidReturnType();
 
+    NamedArgumentFlags namedArgumentFlags;
+    namedArgumentFlags.setFlag(NamedArgumentFlag::UsePyArgs,
+                               overloadData.pythonFunctionWrapperUsesListOfArguments());
+    namedArgumentFlags.setFlag(NamedArgumentFlag::HasDefaultArguments,
+                               overloadData.hasArgumentWithDefaultValue());
+
+
     if (hasReturnValue && rfunc->functionType() == AbstractMetaFunction::ShiftOperator
         && rfunc->isBinaryOperator()) {
         // For custom classes, operations like __radd__ and __rmul__
@@ -2497,12 +2529,12 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
             << "if (" << PYTHON_RETURN_VAR << " == nullptr) {\n" << indent;
         if (maxArgs > 0)
             writeOverloadedFunctionDecisor(s, overloadData, classContext, ErrorReturn::Default);
-        writeFunctionCalls(s, overloadData, classContext, ErrorReturn::Default);
+        writeFunctionCalls(s, overloadData, namedArgumentFlags, classContext, ErrorReturn::Default);
         s  << outdent << '\n' << "} // End of \"if (!" << PYTHON_RETURN_VAR << ")\"\n";
     } else { // binary shift operator
         if (maxArgs > 0)
             writeOverloadedFunctionDecisor(s, overloadData, classContext, ErrorReturn::Default);
-        writeFunctionCalls(s, overloadData, classContext, ErrorReturn::Default);
+        writeFunctionCalls(s, overloadData, namedArgumentFlags, classContext, ErrorReturn::Default);
     }
 
     s << '\n';
@@ -3309,6 +3341,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
 }
 
 void CppGenerator::writeFunctionCalls(TextStream &s, const OverloadData &overloadData,
+                                      NamedArgumentFlags flags,
                                       const GeneratorContext &context,
                                       ErrorReturn errorReturn) const
 {
@@ -3316,13 +3349,13 @@ void CppGenerator::writeFunctionCalls(TextStream &s, const OverloadData &overloa
     s << "// Call function/method\n"
         << (overloads.size() > 1 ? "switch (overloadId) " : "") << "{\n" << indent;
     if (overloads.size() == 1) {
-        writeSingleFunctionCall(s, overloadData, overloads.constFirst(), context,
+        writeSingleFunctionCall(s, overloadData, flags, overloads.constFirst(), context,
                                 errorReturn);
     } else {
         for (qsizetype i = 0; i < overloads.size(); ++i) {
             const auto &func = overloads.at(i);
             s << "case " << i << ": // " << func->signature() << "\n{\n" << indent;
-            writeSingleFunctionCall(s, overloadData, func, context, errorReturn);
+            writeSingleFunctionCall(s, overloadData, flags, func, context, errorReturn);
             s << "break;\n" << outdent << "}\n";
         }
     }
@@ -3345,6 +3378,7 @@ static void writeDeprecationWarning(TextStream &s,
 
 void CppGenerator::writeSingleFunctionCall(TextStream &s,
                                            const OverloadData &overloadData,
+                                           NamedArgumentFlags flags,
                                            const AbstractMetaFunctionCPtr &func,
                                            const GeneratorContext &context,
                                            ErrorReturn errorReturn) const
@@ -3359,10 +3393,8 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
         return;
     }
 
-    const bool usePyArgs = overloadData.pythonFunctionWrapperUsesListOfArguments();
-
     // Handle named arguments.
-    writeNamedArgumentResolution(s, func, usePyArgs, overloadData, context, errorReturn);
+    writeNamedArgumentResolution(s, func, overloadData, flags, context, errorReturn);
 
     bool injectCodeCallsFunc = injectedCodeCallsCppFunction(context, func);
     bool mayHaveUnunsedArguments = !func->isUserAdded() && func->hasInjectedCode() && injectCodeCallsFunc;
@@ -3394,7 +3426,8 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
             continue;
         auto argType = getArgumentType(func, argIdx);
         int argPos = argIdx - removedArgs;
-        QString pyArgName = usePyArgs ? pythonArgsAt(argPos) : PYTHON_ARG;
+        const QString &pyArgName = flags.testFlag(NamedArgumentFlag::UsePyArgs)
+                ? pythonArgsAt(argPos) : PYTHON_ARG;
         indirections[argIdx] =
             writeArgumentConversion(s, argType, CPP_ARG_N(argPos), pyArgName, errorReturn,
                                     func->implementingClass(), arg.defaultValueExpression(),
@@ -3747,40 +3780,23 @@ void CppGenerator::writeSetPythonToCppPointerConversion(TextStream &s,
                               converterVar, pythonToCppFunc, isConvertibleFunc);
 }
 
-// PYSIDE-1986: Some QObject derived classes, (QVBoxLayout) do not have default
-// arguments, which breaks setting properties by named arguments. Force the
-// handling code to be generated nevertheless for applicable widget classes,
-// so that the mechanism of falling through to the error handling to set
-// the properties works nevertheless.
-static bool forceQObjectNamedArguments(const AbstractMetaFunctionCPtr &func)
-{
-    if (func->functionType() != AbstractMetaFunction::ConstructorFunction)
-        return false;
-    const auto owner = func->ownerClass();
-    Q_ASSERT(owner);
-    if (!isQObject(owner))
-        return false;
-    const QString &name = owner->name();
-    return name == u"QVBoxLayout" || name == u"QHBoxLayout"
-        || name == u"QSplitterHandle" || name == u"QSizeGrip";
-}
-
 // PySide-535: Allow for empty dict instead of nullptr in PyPy
 static const char namedArgumentDictCheck[] = "if (kwds != nullptr && PyDict_Size(kwds) > 0)";
 
 void CppGenerator::writeNamedArgumentResolution(TextStream &s,
                                                 const AbstractMetaFunctionCPtr &func,
-                                                bool usePyArgs,
                                                 const OverloadData &overloadData,
+                                                NamedArgumentFlags flags,
                                                 const GeneratorContext &classContext,
                                                 ErrorReturn errorReturn)
 {
     const AbstractMetaArgumentList &args = OverloadData::getArgumentsWithDefaultValues(func);
-    const bool hasDefaultArguments = !args.isEmpty();
-    const bool force = !hasDefaultArguments && usePySideExtensions()
-        && forceQObjectNamedArguments(func);
-    if (!hasDefaultArguments && !force) {
-        if (overloadData.hasArgumentWithDefaultValue()) {
+    if (args.isEmpty()) {
+        if (flags.testFlag(NamedArgumentFlag::ForceKeywordArguments)) {
+            // Copy for QObject properties
+            s << namedArgumentDictCheck << indent << "\nerrInfo.reset(PyDict_Copy(kwds));\n" << outdent;
+        } else if (flags.testFlag(NamedArgumentFlag::HasDefaultArguments)) {
+            // Error for this particular overload without default arguments
             s << namedArgumentDictCheck << " {\n" << indent
                 << "errInfo.reset(kwds);\n"
                 << "Py_INCREF(errInfo.object());\n"
@@ -3790,13 +3806,9 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s,
         return;
     }
 
-    Q_ASSERT(usePyArgs);
+    Q_ASSERT(flags.testFlag(NamedArgumentFlag::UsePyArgs));
 
     const auto count = args.size();
-    if (count == 0) {
-        s << namedArgumentDictCheck << indent << "\nerrInfo.reset(PyDict_Copy(kwds));\n" << outdent;
-        return;
-    }
     s << namedArgumentDictCheck << " {\n" << indent
         << "static const Shiboken::ArgumentNameIndexMapping mapping[" << count << "] = {";
     for (qsizetype i = 0; i < count; ++i) {
@@ -3810,7 +3822,7 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s,
 
     s << "};\n";
 
-    const char *mappingFunc = func->isConstructor() && isQObject(func->ownerClass())
+    const char *mappingFunc = flags.testFlag(NamedArgumentFlag::QObjectConstructor)
         ? "parseConstructorKeywordArguments" : "parseKeywordArguments";
     s << "if (!Shiboken::" << mappingFunc << "(kwds, mapping, "
         << count << ", errInfo, " << PYTHON_ARGS << ')' << indent;
