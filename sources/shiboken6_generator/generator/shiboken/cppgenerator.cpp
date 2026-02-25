@@ -2353,9 +2353,10 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
         writeOverloadedFunctionDecisor(s, overloadData, classContext, errorReturn);
 
     // Handles Python Multiple Inheritance
-    QString pre = needsMetaObject ? u"bool usesPyMI = "_s : u""_s;
-    s << "\n// PyMI support\n"
-        << pre << "Shiboken::callInheritedInit(self, args, kwds, "
+    s << "\n// PyMI support\n";
+    if (needsMetaObject)
+        s << "const bool usesPyMI = ";
+    s << "Shiboken::callInheritedInit(self, args, kwds, "
         << (classContext.hasClass() ? typeInitStruct(classContext) : "fullName"_L1)
         << ");\nif (" << shibokenErrorsOccurred << ")\n"
         << indent << errorReturn << outdent << "\n";
@@ -3755,6 +3756,9 @@ static bool forceQObjectNamedArguments(const AbstractMetaFunctionCPtr &func)
         || name == u"QSplitterHandle" || name == u"QSizeGrip";
 }
 
+// PySide-535: Allow for empty dict instead of nullptr in PyPy
+static const char namedArgumentDictCheck[] = "if (kwds != nullptr && PyDict_Size(kwds) > 0)";
+
 void CppGenerator::writeNamedArgumentResolution(TextStream &s,
                                                 const AbstractMetaFunctionCPtr &func,
                                                 bool usePyArgs,
@@ -3768,8 +3772,7 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s,
         && forceQObjectNamedArguments(func);
     if (!hasDefaultArguments && !force) {
         if (overloadData.hasArgumentWithDefaultValue()) {
-            // PySide-535: Allow for empty dict instead of nullptr in PyPy
-            s << "if (kwds != nullptr && PyDict_Size(kwds) > 0) {\n" << indent
+            s << namedArgumentDictCheck << " {\n" << indent
                 << "errInfo.reset(kwds);\n"
                 << "Py_INCREF(errInfo.object());\n"
                 << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
@@ -3781,13 +3784,11 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s,
     Q_ASSERT(usePyArgs);
 
     const auto count = args.size();
-    // PySide-535: Allow for empty dict instead of nullptr in PyPy
-    s << "if (kwds && PyDict_Size(kwds) > 0)"; //  {\n" << indent;
     if (count == 0) {
-        s << indent << "\nerrInfo.reset(PyDict_Copy(kwds));\n" << outdent;
+        s << namedArgumentDictCheck << indent << "\nerrInfo.reset(PyDict_Copy(kwds));\n" << outdent;
         return;
     }
-    s << " {\n" << indent
+    s << namedArgumentDictCheck << " {\n" << indent
         << "static const Shiboken::ArgumentNameIndexMapping mapping[" << count << "] = {";
     for (qsizetype i = 0; i < count; ++i) {
         const auto &arg = args.at(i);
