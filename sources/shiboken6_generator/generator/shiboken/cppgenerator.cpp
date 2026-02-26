@@ -2395,7 +2395,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     // Handles Python Multiple Inheritance
     s << "\n// PyMI support\n";
     if (needsMetaObject)
-        s << "const bool usesPyMI = ";
+        s << "[[maybe_unused]] const bool usesPyMI = ";
     s << "Shiboken::callInheritedInit(self, args, kwds, "
         << typeInitStruct(classContext) << ");\n"
         << "if (" << shibokenErrorsOccurred << ")\n"
@@ -2429,13 +2429,15 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     // Create metaObject and register signal/slot
     if (needsMetaObject) {
         s << "\n// QObject setup\n"
-            << "PySide::Signal::updateSourceObject(self);\n"
-            << "const auto *metaObject = cptr->metaObject(); // <- init python qt properties\n"
-            << "if (!errInfo.isNull() && PyDict_Check(errInfo.object())) {\n" << indent
-                << "if (!PySide::fillQtProperties(self, metaObject, errInfo, usesPyMI))\n" << indent
-                    << returnErrorWrongArguments(overloadData, classContext, errorReturn, true)
-                    << outdent << outdent
-            << "};\n";
+            << "PySide::Signal::updateSourceObject(self);\n";
+        if (namedArgumentFlags.testAnyFlags(NamedArgumentFlag::KeywordArgumentsMask)) {
+            s << "const auto *metaObject = cptr->metaObject(); // <- init python qt properties\n"
+                << "if (!errInfo.isNull() && PyDict_Check(errInfo.object())) {\n" << indent
+                    << "if (!PySide::fillQtProperties(self, metaObject, errInfo, usesPyMI))\n" << indent
+                        << returnErrorWrongArguments(overloadData, classContext, errorReturn, true)
+                        << outdent << outdent
+                << "};\n";
+        }
     }
 
     // Constructor code injections, position=end
