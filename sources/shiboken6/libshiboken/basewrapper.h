@@ -153,8 +153,11 @@ LIBSHIBOKEN_API void setErrorAboutWrongArguments(PyObject *args, const char *fun
 /// This is used instead of goto.
 LIBSHIBOKEN_API PyObject *returnWrongArguments(PyObject *args, const char *memberName,
                                                PyObject *info, Module::TypeInitStruct initStruct);
+LIBSHIBOKEN_API PyObject *returnWrongArguments(PyObject *args, const char *memberName,
+                                               Module::TypeInitStruct initStruct);
 LIBSHIBOKEN_API PyObject *returnWrongArguments(PyObject *args, const char *globalFuncName,
                                                PyObject *info);
+LIBSHIBOKEN_API PyObject *returnWrongArguments(PyObject *args, const char *globalFuncName);
 
 LIBSHIBOKEN_API int returnWrongArguments_Zero(PyObject *args, const char *memberName,
                                               PyObject *info, Module::TypeInitStruct initStruct);
@@ -163,6 +166,8 @@ LIBSHIBOKEN_API int returnWrongArguments_Zero(PyObject *args, const char *global
 
 LIBSHIBOKEN_API int returnWrongArguments_MinusOne(PyObject *args, const char *memberName,
                                                   PyObject *info, Module::TypeInitStruct initStruct);
+LIBSHIBOKEN_API int returnWrongArguments_MinusOne(PyObject *args, const char *memberName,
+                                                  Module::TypeInitStruct initStruct);
 LIBSHIBOKEN_API int returnWrongArguments_MinusOne(PyObject *args, const char *globalFuncName,
                                                   PyObject *info);
 

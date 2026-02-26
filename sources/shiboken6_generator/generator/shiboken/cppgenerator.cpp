@@ -2373,8 +2373,8 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
         << "}\n";
     if (overloadData.maxArgs() > 0)
         s << "if (cptr == nullptr)\n" << indent
-            << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
-            << ";\n\n" << outdent;
+            << returnErrorWrongArguments(overloadData, classContext, errorReturn)
+            << outdent << '\n';
 
     s << "Shiboken::Object::setValidCpp(sbkSelf, true);\n";
     // If the created C++ object has a C++ wrapper the ownership is assigned to Python
@@ -2393,8 +2393,8 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
             << "const auto *metaObject = cptr->metaObject(); // <- init python qt properties\n"
             << "if (!errInfo.isNull() && PyDict_Check(errInfo.object())) {\n" << indent
                 << "if (!PySide::fillQtProperties(self, metaObject, errInfo, usesPyMI))\n" << indent
-                    << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
-                    << ";\n" << outdent << outdent
+                    << returnErrorWrongArguments(overloadData, classContext, errorReturn, true)
+                    << outdent << outdent
             << "};\n";
     }
 
@@ -2562,8 +2562,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
         s << "errInfo.reset(Shiboken::checkInvalidArgumentCount(numArgs, "
             <<  minArgs << ", " << maxArgs << "));\n"
             << "if (!errInfo.isNull())\n" << indent
-            << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn) << ";\n"
-            << outdent;
+            << returnErrorWrongArguments(overloadData,  classContext, errorReturn, true) << outdent;
     }
 
     const QList<int> invalidArgsLength = overloadData.invalidArgumentLengths();
@@ -2575,7 +2574,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
             s << "numArgs == " << invalidArgsLength.at(i);
         }
         s << ")\n" << indent
-            << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn) << ";\n"
+            << returnErrorWrongArguments(overloadData, classContext, errorReturn) << ";\n"
             << outdent;
     }
     s  << '\n';
@@ -2696,31 +2695,41 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
 
 QString CppGenerator::returnErrorWrongArguments(const OverloadData &overloadData,
                                                 const GeneratorContext &context,
-                                                ErrorReturn errorReturn)
+                                                ErrorReturn errorReturn,
+                                                bool hasErrInfo)
 {
-    Q_UNUSED(context);
-    const auto rfunc = overloadData.referenceFunction();
-    QString exprRest;
-    if (context.hasClass()) {
-        const QString &name = rfunc->isConstructor() ? "__init__"_L1 : rfunc->name();
-        exprRest = ", \""_L1 + name + "\", errInfo, "_L1 + typeInitStruct(context) + ")"_L1;
-    } else {
-        exprRest = ", fullName, errInfo)"_L1;
-    }
-    QString argsVar = overloadData.pythonFunctionWrapperUsesListOfArguments()
-        ? u"args"_s : PYTHON_ARG;
+    QString result = "return "_L1;
     switch (errorReturn) {
     case ErrorReturn::Default:
     case ErrorReturn::NullPtr:
-        return u"Shiboken::returnWrongArguments("_s + argsVar + exprRest;
+        result += "Shiboken::returnWrongArguments("_L1;
+        break;
     case ErrorReturn::Zero:
-        return u"Shiboken::returnWrongArguments_Zero("_s + argsVar + exprRest;
+        result += "Shiboken::returnWrongArguments_Zero("_L1;
+        break;
     case ErrorReturn::MinusOne:
-        return u"Shiboken::returnWrongArguments_MinusOne("_s + argsVar + exprRest;
+        result += "Shiboken::returnWrongArguments_MinusOne("_L1;
+        break;
     case ErrorReturn::Void:
         Q_ASSERT(false);
     }
-    return {};
+
+    result += overloadData.pythonFunctionWrapperUsesListOfArguments() ? "args"_L1 : PYTHON_ARG;
+
+    if (context.hasClass()) {
+        const auto &rfunc = overloadData.referenceFunction();
+        const QString &name = rfunc->isConstructor() ? "__init__"_L1 : rfunc->name();
+        result += ", \""_L1 + name + "\", "_L1;
+        if (hasErrInfo)
+            result += "errInfo, "_L1;
+        result += typeInitStruct(context);
+    } else {
+        result += ", fullName"_L1;
+        if (hasErrInfo)
+            result += ", errInfo"_L1;
+    }
+    result += ");\n"_L1;
+    return result;
 }
 
 void CppGenerator::writeFunctionReturnErrorCheckSection(TextStream &s,
@@ -3136,8 +3145,8 @@ void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s,
 
     s << "// Function signature not found.\n"
         << "if (overloadId == -1)\n" << indent
-            << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
-            << ";\n\n" << outdent;
+            << returnErrorWrongArguments(overloadData, classContext, errorReturn)
+            << outdent << '\n';
 }
 
 void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
@@ -3775,8 +3784,8 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s,
             s << namedArgumentDictCheck << " {\n" << indent
                 << "errInfo.reset(kwds);\n"
                 << "Py_INCREF(errInfo.object());\n"
-                << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
-                << ";\n" << outdent << "}\n";
+                << returnErrorWrongArguments(overloadData, classContext, errorReturn, true)
+                << outdent << "}\n";
         }
         return;
     }
@@ -3818,8 +3827,8 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s,
     }
     s << outdent << ") {\n" << indent
         << "Py_XINCREF(errInfo.object());\n" // PYSIDE-3133, 0 if conversion fails
-        << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
-        << ';' << outdent << "\n}\n";;
+        << returnErrorWrongArguments(overloadData, classContext, errorReturn, true)
+        << outdent << "}\n";
 
     // PYSIDE-1305: Handle keyword args correctly.
     // Normal functions handle their parameters immediately.

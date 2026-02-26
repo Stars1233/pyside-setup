@@ -950,9 +950,22 @@ PyObject *returnWrongArguments(PyObject *args, const char *memberName, PyObject 
     return {};
 }
 
+PyObject *returnWrongArguments(PyObject *args, const char *memberName,
+                               Module::TypeInitStruct initStruct)
+{
+    setErrorAboutWrongArguments(args, memberName, nullptr, initStruct.fullName);
+    return {};
+}
+
 PyObject *returnWrongArguments(PyObject *args, const char *globalFuncName, PyObject *info)
 {
     setErrorAboutWrongArguments(args, globalFuncName, info);
+    return {};
+}
+
+PyObject *returnWrongArguments(PyObject *args, const char *globalFuncName)
+{
+    setErrorAboutWrongArguments(args, globalFuncName, nullptr);
     return {};
 }
 
@@ -973,6 +986,13 @@ int returnWrongArguments_MinusOne(PyObject *args, const char *memberName, PyObje
                                   Module::TypeInitStruct initStruct)
 {
     setErrorAboutWrongArguments(args, memberName, info, initStruct.fullName);
+    return -1;
+}
+
+int returnWrongArguments_MinusOne(PyObject *args, const char *memberName,
+                                  Module::TypeInitStruct initStruct)
+{
+    setErrorAboutWrongArguments(args, memberName, nullptr, initStruct.fullName);
     return -1;
 }
 

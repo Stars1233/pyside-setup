@@ -192,7 +192,8 @@ private:
 
     static QString returnErrorWrongArguments(const OverloadData &overloadData,
                                              const GeneratorContext &context,
-                                             ErrorReturn errorReturn);
+                                             ErrorReturn errorReturn,
+                                             bool hasErrInfo = false);
 
     static void writeFunctionReturnErrorCheckSection(TextStream &s,
                                                      ErrorReturn errorReturn,
