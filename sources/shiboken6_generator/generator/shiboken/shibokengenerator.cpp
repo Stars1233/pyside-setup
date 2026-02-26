@@ -92,6 +92,7 @@ const char *const openExternC = "extern \"C\" {\n";
 const char *const closeExternC =  "} // extern \"C\"\n\n";
 const char *const richCompareComment =
     "// PYSIDE-74: By default, we redirect to object's tp_richcompare (which is `==`, `!=`).\n";
+const char *const maybeUnused = "[[maybe_unused]] ";
 
 struct ShibokenGeneratorOptions
 {
@@ -1154,12 +1155,15 @@ void ShibokenGenerator::writeFunctionArguments(TextStream &s,
 {
     int argUsed = 0;
     if (func->isUserAddedPythonOverride()) {
-        s << "Shiboken::GilState &gil, PyObject *" << PYTHON_OVERRIDE_VAR;
+        s << maybeUnused << "Shiboken::GilState &gil, PyObject *" << PYTHON_OVERRIDE_VAR;
         argUsed += 2;
     }
 
     if (options.testFlag(PythonOverrideImplementation)) {
-        s << "const char *ownerClassName, const char *funcName, Shiboken::GilState &gil, const Shiboken::AutoDecRef &"
+        s << maybeUnused << "const char *ownerClassName, "
+            << maybeUnused << "const char *funcName, "
+            << maybeUnused << "Shiboken::GilState &gil, "
+            << maybeUnused << "const Shiboken::AutoDecRef &"
             << PYTHON_OVERRIDE_VAR;
         argUsed += 3;
     }

@@ -36,7 +36,8 @@ public:
     enum CppSelfDefinitionFlag : std::uint8_t {
         HasStaticOverload = 0x1,
         HasClassMethodOverload = 0x2,
-        CppSelfAsReference = 0x4
+        CppSelfAsReference = 0x4,
+        MaybeUnused = 0x8
     };
     Q_DECLARE_FLAGS(CppSelfDefinitionFlags, CppSelfDefinitionFlag)
 

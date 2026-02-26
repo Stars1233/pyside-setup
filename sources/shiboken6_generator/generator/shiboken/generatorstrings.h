@@ -36,5 +36,6 @@ extern const char *const openTargetExternC;
 extern const char *const openExternC;
 extern const char *const closeExternC;
 extern const char *const richCompareComment;
+extern const char *const maybeUnused;
 
 #endif // GENERATORSTRINGS_H

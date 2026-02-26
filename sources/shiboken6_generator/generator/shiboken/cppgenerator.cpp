@@ -1389,9 +1389,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
         return;
     // Write Python override implementation definition
     s << functionSignature(func, className, {}, options | PythonOverrideImplementation)
-        << "\n{\n" << indent
-        << sbkUnusedVariableCast("ownerClassName") << sbkUnusedVariableCast("funcName")
-        << sbkUnusedVariableCast("gil") << sbkUnusedVariableCast(PYTHON_OVERRIDE_VAR);
+        << "\n{\n" << indent;
     if (returnStatement.needsReference)
         writeVirtualMethodStaticReturnVar(s, func);
     writeVirtualMethodPythonOverride(s, func, snips, returnStatement);
@@ -1613,7 +1611,7 @@ void CppGenerator::writeUserAddedPythonOverride(TextStream &s,
     s << '\n' << functionSignature(func, wrapperName(func->ownerClass()), {},
                                    Generator::SkipDefaultValues |
                                    Generator::OriginalTypeDescription)
-      << "\n{\n" << indent << sbkUnusedVariableCast("gil");
+      << "\n{\n" << indent;
 
     writeFuncNameVar(s, func, funcName);
     s << "const char ownerClassName[] = \"" << func->ownerClass()->name() << "\";\n";
@@ -2273,10 +2271,10 @@ void CppGenerator::writeCommonMethodWrapperPreamble(TextStream &s,
 
     if (maxArgs > 0) {
         s << "int overloadId = -1;\n"
-            << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR;
+            << maybeUnused << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR;
         if (overloadData.pythonFunctionWrapperUsesListOfArguments())
             s << '[' << maxArgs << ']';
-        s << ";\n" << sbkUnusedVariableCast(PYTHON_TO_CPP_VAR);
+        s << ";\n";
     }
 
     if (initPythonArguments) {
@@ -2327,10 +2325,10 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
 
     s << "static int\n";
     s << cpythonConstructorName(metaClass)
-        << "(PyObject *self, PyObject *args, PyObject *kwds)\n{\n" << indent;
+        << "(PyObject *self, ";
     if (overloadData.maxArgs() == 0 || metaClass->isAbstract())
-        s << sbkUnusedVariableCast("args");
-    s << sbkUnusedVariableCast("kwds");
+        s << maybeUnused;
+    s << "PyObject *args, " << maybeUnused << "PyObject *kwds)\n{\n" << indent;
 
     const bool needsMetaObject = usePySideExtensions() && isQObject(metaClass);
 
@@ -2404,7 +2402,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
             ? "errInfo.isNull() ? kwds : errInfo.object()" : "kwds";
     s << "\n// PyMI support\n";
     if (needsMetaObject)
-        s << "[[maybe_unused]] const bool usesPyMI = ";
+        s << maybeUnused << "const bool usesPyMI = ";
     s << "Shiboken::callInheritedInit(self, args, " << miKeywordArgs << ", "
         << typeInitStruct(classContext) << ");\n"
         << "if (" << shibokenErrorsOccurred << ")\n"
@@ -2494,20 +2492,19 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
     int maxArgs = overloadData.maxArgs();
 
     s << "static PyObject *";
-    s << cpythonFunctionName(rfunc) << "(PyObject *self";
+    s << cpythonFunctionName(rfunc) << '(';
+    if (rfunc->ownerClass() == nullptr || overloadData.hasStaticFunction())
+        s << maybeUnused;
+    s << "PyObject *self";
     bool hasKwdArgs = false;
     if (maxArgs > 0) {
         s << ", PyObject *"
             << (overloadData.pythonFunctionWrapperUsesListOfArguments() ? u"args"_s : PYTHON_ARG);
         hasKwdArgs = overloadData.hasArgumentWithDefaultValue() || rfunc->isCallOperator();
         if (hasKwdArgs)
-            s << ", PyObject *kwds";
+            s << ", " << maybeUnused << "PyObject *kwds";
     }
     s << ")\n{\n" << indent;
-    if (rfunc->ownerClass() == nullptr || overloadData.hasStaticFunction())
-        s << sbkUnusedVariableCast(PYTHON_SELF_VAR);
-    if (hasKwdArgs)
-        s << sbkUnusedVariableCast("kwds");
 
     writeMethodWrapperPreamble(s, overloadData, classContext);
 
@@ -2675,6 +2672,8 @@ void CppGenerator::writeCppSelfConversion(TextStream &s, const GeneratorContext 
 void CppGenerator::writeCppSelfVarDef(TextStream &s,
                                       CppSelfDefinitionFlags flags)
 {
+    if (flags.testFlag(CppSelfDefinitionFlag::MaybeUnused))
+        s << maybeUnused;
     if (flags.testFlag(CppGenerator::CppSelfAsReference))
         s << "auto &" <<  CPP_SELF_VAR << " = *";
     else
@@ -2705,7 +2704,7 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
     writeInvalidPyObjectCheck(s, PYTHON_SELF_VAR, errorReturn);
 
     if (flags.testFlag(CppSelfAsReference)) {
-         writeCppSelfVarDef(s, flags);
+         writeCppSelfVarDef(s, flags | CppSelfDefinitionFlag::MaybeUnused);
          writeCppSelfConversion(s, context, className, useWrapperClass);
          s << ";\n";
          return;
@@ -2714,15 +2713,14 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
     if (!flags.testFlag(HasStaticOverload)) {
         if (!flags.testFlag(HasClassMethodOverload)) {
             // PYSIDE-131: The single case of a class method for now: tr().
-            writeCppSelfVarDef(s, flags);
+            writeCppSelfVarDef(s, flags | CppSelfDefinitionFlag::MaybeUnused);
             writeCppSelfConversion(s, context, className, useWrapperClass);
-            s << ";\n" << sbkUnusedVariableCast(CPP_SELF_VAR);
+            s << ";\n";
         }
         return;
     }
 
-    s << className << " *" << CPP_SELF_VAR << " = nullptr;\n"
-        << sbkUnusedVariableCast(CPP_SELF_VAR);
+    s << maybeUnused << className << " *" << CPP_SELF_VAR << " = nullptr;\n";
 
     // Checks if the underlying C++ object is valid.
     s << "if (self)\n" << indent
@@ -3437,9 +3435,8 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
         if (arg.isModifiedRemoved()) {
             if (!arg.defaultValueExpression().isEmpty()) {
                 const QString cppArgRemoved = CPP_ARG_REMOVED(argIdx);
-                s << getFullTypeName(arg.type()) << ' ' << cppArgRemoved;
-                s << " = " << arg.defaultValueExpression() << ";\n"
-                    << sbkUnusedVariableCast(cppArgRemoved);
+                s << maybeUnused << getFullTypeName(arg.type()) << ' ' << cppArgRemoved;
+                s << " = " << arg.defaultValueExpression() << ";\n";
             } else if (!injectCodeCallsFunc && !func->isUserAdded() && !hasConversionRule) {
                 // When an argument is removed from a method signature and no other means of calling
                 // the method are provided (as with code injection) the generator must abort.
@@ -3622,14 +3619,13 @@ void CppGenerator::writeIsPythonConvertibleToCppFunction(TextStream &s,
     if (pythonToCppFuncName.isEmpty())
         pythonToCppFuncName = pythonToCppFunctionName(sourceTypeName, targetTypeName);
 
-    s << "static PythonToCppFunc " << convertibleToCppFunctionName(sourceTypeName, targetTypeName);
-    s << "(PyObject *pyIn)\n{\n" << indent;
+    s << "static PythonToCppFunc " << convertibleToCppFunctionName(sourceTypeName, targetTypeName) << '(';
+    if (!acceptNoneAsCppNull && !condition.contains(u"pyIn"))
+        s << maybeUnused;
+    s << "PyObject *pyIn)\n{\n" << indent;
     if (acceptNoneAsCppNull) {
         s << "if (pyIn == Py_None)\n" << indent
             << "return Shiboken::Conversions::nonePythonToCppNullPtr;\n" << outdent;
-    } else {
-        if (!condition.contains(u"pyIn"))
-            s << sbkUnusedVariableCast("pyIn");
     }
 
     const bool useBrace = condition.contains(u'\n');
@@ -5290,11 +5286,10 @@ void CppGenerator::writeRichCompareFunctionHeader(TextStream &s,
     s << "static PyObject * ";
     s << baseName << "_richcompare(PyObject *self, PyObject *" << PYTHON_ARG
         << ", int op)\n{\n" << indent;
-    writeCppSelfDefinition(s, context, ErrorReturn::Default, CppSelfDefinitionFlag::CppSelfAsReference);
-    s << sbkUnusedVariableCast(CPP_SELF_VAR)
-        << "PyObject *" << PYTHON_RETURN_VAR << "{};\n"
-        << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n"
-        << sbkUnusedVariableCast(PYTHON_TO_CPP_VAR) << '\n';
+    writeCppSelfDefinition(s, context, ErrorReturn::Default, CppSelfDefinitionFlag::CppSelfAsReference
+                           | CppSelfDefinitionFlag::MaybeUnused);
+    s << "PyObject *" << PYTHON_RETURN_VAR << "{};\n"
+        << maybeUnused << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n";
 }
 
 void CppGenerator::writeRichCompareFunction(TextStream &s, TextStream &t,
@@ -5594,14 +5589,12 @@ void CppGenerator::writeEnumsInitialization(TextStream &s,
         if (!preambleWritten) {
             s << "// Initialization of enums.\n"
                 << "Shiboken::AutoDecRef tpDict{};\n"
-                << "PyTypeObject *EType{};\n\n";
+                << maybeUnused << "PyTypeObject *EType{};\n\n";
             preambleWritten = true;
         }
         ConfigurableScope configScope(s, cppEnum.typeEntry());
         etypeUsed |= writeEnumInitialization(s, enclosing, cppEnum);
     }
-    if (preambleWritten && !etypeUsed)
-        s << sbkUnusedVariableCast("EType");
 }
 
 void CppGenerator::writeEnumsInitFunc(TextStream &s, const QString &funcName,
@@ -5916,8 +5909,7 @@ QStringList CppGenerator::pyBaseTypes(const AbstractMetaClassCPtr &metaClass)
 void CppGenerator::writeInitInheritance(TextStream &s) const
 {
     s << "static void " << initInheritanceFunction << "()\n{\n" << indent
-        << "auto &bm = Shiboken::BindingManager::instance();\n"
-        << sbkUnusedVariableCast("bm");
+        << maybeUnused << "auto &bm = Shiboken::BindingManager::instance();\n";
     for (const auto &cls : api().classes()){
         auto te = cls->typeEntry();
         if (shouldGenerate(te)) {
@@ -6259,9 +6251,8 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s,
     QString polymorphicExpr = metaClass->typeEntry()->polymorphicIdValue();
 
     s << "static void *" << cpythonBaseName(metaClass)
-        << "_typeDiscovery(void *cptr, PyTypeObject *instanceType)\n{\n" << indent
-        << sbkUnusedVariableCast("cptr")
-        << sbkUnusedVariableCast("instanceType");
+        << "_typeDiscovery(" << maybeUnused << "void *cptr, " << maybeUnused
+        << "PyTypeObject *instanceType)\n{\n" << indent;
 
     if (!polymorphicExpr.isEmpty()) {
         replacePolymorphicIdPlaceHolders(metaClass, &polymorphicExpr);
