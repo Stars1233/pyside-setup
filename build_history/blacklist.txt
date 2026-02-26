@@ -15,7 +15,6 @@
     darwin ci
 # PYSIDE-474
 [QtWebEngineWidgets::pyside-474-qtwebengineview]
-    py2
     py3
 [QtCore::qthread_test]
 # PYSIDE-754
@@ -36,19 +35,6 @@
 [QtAsyncio::qasyncio_test_chain]
     win32
 [QtQml::bug_825]
-    py3.9.0
-    py3.9.1
-    py3.9.2
-    py3.9.3
-    py3.9.4
-    py3.9.5
-    py3.9.6
-    py3.9.7
-    py3.9.8
-    py3.9.9
-    py3.9.10
-    py3.9.11
-    # fixed in 3.9.12
     py3.10.0
     py3.10.1
     py3.10.2

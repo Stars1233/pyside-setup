@@ -23,13 +23,8 @@ TEST_STRING = 'ABCD'
 
 
 def run(cmd):
-    # FIXME Python 3.7: Use subprocess.run()
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False,
-                            universal_newlines=True)
-    output, error = proc.communicate()
-    proc.wait()
-    return_code = proc.returncode
-    return (return_code, output, error)
+    proc = subprocess.run(cmd, capture_output=True, universal_newlines=True)
+    return (proc.returncode, proc.stdout, proc.stderr)
 
 
 class QSharedMemoryTest(unittest.TestCase):

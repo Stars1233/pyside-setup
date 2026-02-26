@@ -111,9 +111,9 @@ Windows troubleshooting
 Using ``qmake`` should work out of the box, there was a known issue
 with directories and white spaces that is solved by using the
 "~1" character, so the path will change from:
-``c:\Program Files\Python39\libs``
+``c:\Program Files\Python310\libs``
 to
-``c:\Progra~1\Python39\libs``
+``c:\Progra~1\Python310\libs``
 this will avoid the issues when the Makefiles are generated.
 
 It is possible when using ``CMake`` to pick up the wrong compiler

@@ -54,10 +54,7 @@ class MyWidget(QWidget):
 if __name__ == "__main__":
     print("Start of hello.py       ", time.ctime())
     print("  sys.version         = ", sys.version.splitlines()[0])
-    # Nuitka and hence pyside6-deploy fails on Python versions <= 3.9
-    # when this module is used
-    if sys.version_info.minor > 9:
-        print("  platform.platform() = ", platform.platform())
+    print("  platform.platform() = ", platform.platform())
 
     app = QApplication()
 

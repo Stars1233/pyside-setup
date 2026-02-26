@@ -27,8 +27,8 @@ On **Linux** you might get them with your operating system package manager, on *
 you might get them with ``brew``, and on **Windows** you can download the installer from each
 website.
 
-* **Python**: 3.9+ `[official Python website] <https://www.python.org/downloads/>`_
-* **Qt:** 6.10+ `[online installer] <https://download.qt.io/official_releases/online_installers/>`_
+* **Python**: 3.10+ `[official Python website] <https://www.python.org/downloads/>`_
+* **Qt:** 6.11+ `[online installer] <https://download.qt.io/official_releases/online_installers/>`_
 * **CMake:** 3.18+ `[official CMake website] <https://cmake.org/download/>`_
 * **Git:** 2.0+. `[official Git website] <https://git-scm.com/downloads>`_
 * **libclang:** The libclang library, recommended: version 18+ for 6.10+.
@@ -182,7 +182,7 @@ the latest Qt versions, like `Manjaro ARM`_ or `Archlinux ARM`_.
   Installer.
 * (target, host) Install the library and development packages that provide
   C++ headers, linkers, libraries, and compilers.
-* (target, host) Install Python interpreter v3.7 or later
+* (target, host) Install Python interpreter v3.10 or later
 * (target, host) Install CMake 3.17+
 
 After installing these prerequisites, copy the ``target`` sysroot to your

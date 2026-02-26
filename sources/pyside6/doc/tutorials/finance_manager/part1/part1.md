@@ -15,7 +15,7 @@ To download the complete source code for this tutorial, visit
 
 ## Prerequisites
 
-Before we begin, firstly make sure you have Python 3.9+ and PySide6 installed within you Python
+Before we begin, firstly make sure you have Python 3.10+ and PySide6 installed within your Python
 environment. You can install it using pip:
 
 ```bash

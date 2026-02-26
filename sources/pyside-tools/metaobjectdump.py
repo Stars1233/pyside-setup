@@ -39,11 +39,8 @@ ITEM_MODELS = ["QAbstractListModel", "QAbstractProxyModel",
 QOBJECT_DERIVED = ["QObject", "QQuickItem", "QQuickPaintedItem"] + ITEM_MODELS
 
 
-# Python 3.9 does not support this syntax, yet
-# AstDecorator = ast.Name | ast.Call
-# AstPySideTypeSpec = ast.Name | ast.Constant
-AstDecorator = Union[ast.Name, ast.Call]
-AstPySideTypeSpec = Union[ast.Name, ast.Constant]
+AstDecorator = ast.Name | ast.Call
+AstPySideTypeSpec = ast.Name | ast.Constant
 
 
 ClassList = list[dict]
