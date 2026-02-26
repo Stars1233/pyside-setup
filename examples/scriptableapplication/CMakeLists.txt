@@ -1,8 +1,8 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-cmake_minimum_required(VERSION 3.18)
-cmake_policy(VERSION 3.18)
+cmake_minimum_required(VERSION 3.22)
+cmake_policy(VERSION 3.22)
 
 # Enable policy to run automoc on generated files.
 if(POLICY CMP0071)

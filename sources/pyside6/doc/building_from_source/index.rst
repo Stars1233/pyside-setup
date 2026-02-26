@@ -29,7 +29,7 @@ website.
 
 * **Python**: 3.10+ `[official Python website] <https://www.python.org/downloads/>`_
 * **Qt:** 6.11+ `[online installer] <https://download.qt.io/official_releases/online_installers/>`_
-* **CMake:** 3.18+ `[official CMake website] <https://cmake.org/download/>`_
+* **CMake:** 3.22+ `[official CMake website] <https://cmake.org/download/>`_
 * **Git:** 2.0+. `[official Git website] <https://git-scm.com/downloads>`_
 * **libclang:** The libclang library, recommended: version 18+ for 6.10+.
   Prebuilt versions for each OS can be `downloaded here`_.
@@ -183,7 +183,7 @@ the latest Qt versions, like `Manjaro ARM`_ or `Archlinux ARM`_.
 * (target, host) Install the library and development packages that provide
   C++ headers, linkers, libraries, and compilers.
 * (target, host) Install Python interpreter v3.10 or later
-* (target, host) Install CMake 3.17+
+* (target, host) Install CMake 3.22+
 
 After installing these prerequisites, copy the ``target`` sysroot to your
 ``host`` computer. This process is tricky, because copying system files from
@@ -278,7 +278,7 @@ following file as an example, but keep in mind they might vary:
 .. code-block:: cmake
 
     # toolchain-aarch64.cmake
-    cmake_minimum_required(VERSION 3.18)
+    cmake_minimum_required(VERSION 3.22)
     include_guard(GLOBAL)
 
     set(CMAKE_SYSTEM_NAME Linux)

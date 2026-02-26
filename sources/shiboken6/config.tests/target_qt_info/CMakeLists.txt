@@ -1,7 +1,7 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.22)
 project(proj LANGUAGES CXX)
 
 include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/ShibokenHelpers.cmake")
