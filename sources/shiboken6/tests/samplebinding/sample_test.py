@@ -96,6 +96,13 @@ class ModuleTest(unittest.TestCase):
         self.assertTrue(point1 in polygon)
         self.assertFalse(sample.Point(5, 6) in polygon)
 
+    def testModuleDict(self):
+        """PYSIDE-3285: Verify that each attribute of the module's dictionary
+           is retrievable (subtypes were included by mistake)."""
+        for key in dir(sample):
+            value = getattr(sample, key)
+            print(key, value)
+
 
 if __name__ == '__main__':
     unittest.main()

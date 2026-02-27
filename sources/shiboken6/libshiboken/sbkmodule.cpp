@@ -281,9 +281,10 @@ static PyObject *_module_dir_template(PyObject * /* self */, PyObject *args)
     // Now add all elements that were not yet in the dict.
     auto &nameToFunc = tableIter->second;
     for (const auto &funcIter : nameToFunc) {
-        const char *name = funcIter.first.c_str();
-        Shiboken::AutoDecRef pyName(PyUnicode_FromString(name));
-        PyList_Append(ret, pyName);
+        if (funcIter.first.find('.') == std::string::npos) { // no nested types
+            Shiboken::AutoDecRef pyName(Shiboken::String::fromCppString(funcIter.first));
+            PyList_Append(ret, pyName);
+        }
     }
     return ret;
 }
