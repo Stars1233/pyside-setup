@@ -65,7 +65,7 @@ struct SourceDefs
 
     static int tp_init(PyObject *self, PyObject *args, PyObject *kwds)
     {
-        static initproc initFunc =
+        static auto initFunc =
             reinterpret_cast<initproc>(PyType_GetSlot(PySide::qObjectType(), Py_tp_init));
         int res = initFunc(self, args, kwds);
         if (res < 0) {
@@ -218,8 +218,8 @@ struct ReplicaDefs
 
     static int tp_init(PyObject *self, PyObject *args, PyObject *kwds)
     {
-        static initproc initFunc = reinterpret_cast<initproc>(PyType_GetSlot(getSbkType(),
-                                                                              Py_tp_init));
+        static auto initFunc = reinterpret_cast<initproc>(PyType_GetSlot(getSbkType(),
+                                                                         Py_tp_init));
         QRemoteObjectReplica *replica = nullptr;
         if (PyTuple_Size(args) == 0) {
             if (initFunc(self, args, kwds) < 0)
@@ -324,7 +324,7 @@ struct ReplicaDefs
                     static_cast<FriendlyReplica *>(replica)->send(QMetaObject::InvokeMetaMethod, callData->methodIndex, _args);
                     Py_RETURN_NONE;
                 }
-                QRemoteObjectPendingCall *cppResult = new QRemoteObjectPendingCall;
+                auto *cppResult = new QRemoteObjectPendingCall;
                 *cppResult = static_cast<FriendlyReplica *>(replica)->sendWithReply(QMetaObject::InvokeMetaMethod,
                                                     callData->methodIndex, _args);
                 static PyTypeObject *baseType =
@@ -454,12 +454,11 @@ PyTypeObject *createDynamicClassImpl(QMetaObject *meta)
         auto name = metaMethod.name();
         method.ml_name = name.constData();
         QList<QMetaType> argumentTypes;
-        for (int j = 0; j < metaMethod.parameterCount(); ++j)
+        for (int j = 0, count = metaMethod.parameterCount(); j < count; ++j)
             argumentTypes << metaMethod.parameterMetaType(j);
-        MethodCapsule *capsuleData = new MethodCapsule{metaMethod.name(),
-                                                       metaMethod.methodIndex(),
-                                                       std::move(argumentTypes),
-                                                       metaMethod.returnMetaType()};
+        auto *capsuleData = new MethodCapsule{metaMethod.name(), metaMethod.methodIndex(),
+                                              std::move(argumentTypes),
+                                              metaMethod.returnMetaType()};
         add_capsule_method_to_type(type, &method,
                                    PyCapsule_New(capsuleData, "MethodCapsule",
                                                  [](PyObject *capsule) {
@@ -472,10 +471,11 @@ PyTypeObject *createDynamicClassImpl(QMetaObject *meta)
 
 PyTypeObject *createDynamicClass(QMetaObject *meta, PyObject *properties_capsule)
 {
-    bool isSource;
-    if (std::strncmp(meta->superClass()->className(), "QObject", 7) == 0) {
+    bool isSource{};
+    const char *superClassName = meta->superClass()->className();
+    if (std::strncmp(superClassName, "QObject", 7) == 0) {
         isSource = true;
-    } else if (std::strncmp(meta->superClass()->className(), "QRemoteObjectReplica", 20) == 0) {
+    } else if (std::strncmp(superClassName, "QRemoteObjectReplica", 20) == 0) {
         isSource = false;
     } else {
         PyErr_SetString(PyExc_RuntimeError,

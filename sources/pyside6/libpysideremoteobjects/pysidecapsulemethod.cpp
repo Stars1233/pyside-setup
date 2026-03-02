@@ -145,7 +145,7 @@ static PyObject *CapsuleMethod_descr_get(PyObject *self, PyObject *instance, PyO
     }
 
     auto *d = reinterpret_cast<CapsuleDescriptor *>(self);
-    CapsuleDescriptorData *data = new CapsuleDescriptorData{instance, d->capsule};
+    auto *data = new CapsuleDescriptorData{instance, d->capsule};
     PyObject *payload = PyCapsule_New(data, "Payload", [](PyObject *capsule) {
         delete reinterpret_cast<CapsuleDescriptorData *>(PyCapsule_GetPointer(capsule, "Payload"));
     });
@@ -187,7 +187,7 @@ static PyObject *CapsuleProperty_descr_get(PyObject *self, PyObject *instance, P
     }
 
     auto *d = reinterpret_cast<CapsuleDescriptor *>(self);
-    CapsuleDescriptorData *data = new CapsuleDescriptorData{instance, d->capsule};
+    auto *data = new CapsuleDescriptorData{instance, d->capsule};
     PyObject *payload = PyCapsule_New(data, "Payload", [](PyObject *capsule) {
         delete reinterpret_cast<CapsuleDescriptorData *>(PyCapsule_GetPointer(capsule, "Payload"));
     });
@@ -200,7 +200,7 @@ static PyObject *CapsuleProperty_descr_get(PyObject *self, PyObject *instance, P
 static int CapsuleProperty_descr_set(PyObject *self, PyObject *instance, PyObject *value)
 {
     auto *d = reinterpret_cast<CapsuleDescriptor *>(self);
-    CapsuleDescriptorData *data = new CapsuleDescriptorData{instance, d->capsule};
+    auto *data = new CapsuleDescriptorData{instance, d->capsule};
     PyObject *payload = PyCapsule_New(data, "Payload", [](PyObject *capsule) {
         delete reinterpret_cast<CapsuleDescriptorData *>(PyCapsule_GetPointer(capsule, "Payload"));
     });

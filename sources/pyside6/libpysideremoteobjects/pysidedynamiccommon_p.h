@@ -54,7 +54,7 @@ template <>
 inline void Capsule_destructor<SbkConverter *>(PyObject *capsule)
 {
     capsule_count--;
-    SbkConverter *pointer = static_cast<SbkConverter *>(PyCapsule_GetPointer(capsule, nullptr));
+    auto *pointer = static_cast<SbkConverter *>(PyCapsule_GetPointer(capsule, nullptr));
     Shiboken::Conversions::deleteConverter(pointer);
     pointer = nullptr;
 }

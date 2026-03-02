@@ -337,7 +337,7 @@ static int RepFile_tp_init(PyObject *self, PyObject *args, PyObject * /* kwds */
 
 static void RepFile_tp_free(void *self)
 {
-    PySideRepFile *obj = reinterpret_cast<PySideRepFile*>(self);
+    auto *obj = reinterpret_cast<PySideRepFile*>(self);
     delete obj->d;
 }
 
