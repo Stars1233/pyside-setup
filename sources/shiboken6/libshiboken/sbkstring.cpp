@@ -26,14 +26,13 @@ bool checkIterableArgument(PyObject *obj)
 
 static PyObject *initPathLike()
 {
-    PyObject *PathLike{};
-    auto *osmodule = PyImport_ImportModule("os");
-    if (osmodule == nullptr
-        || (PathLike = PyObject_GetAttrString(osmodule, "PathLike")) == nullptr) {
-        PyErr_Print();
-        Py_FatalError("libshiboken: cannot import os.PathLike");
+    if (auto *osmodule = PyImport_ImportModule("os")) {
+        if (PyObject *PathLike = PyObject_GetAttrString(osmodule, "PathLike"))
+            return PathLike;
     }
-    return PathLike;
+    PyErr_Print();
+    Py_FatalError("libshiboken: cannot import os.PathLike");
+    return nullptr;
 }
 
 // PYSIDE-1499: Migrate to pathlib.Path and support __fspath__ in PySide

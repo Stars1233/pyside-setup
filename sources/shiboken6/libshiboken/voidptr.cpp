@@ -37,8 +37,10 @@ PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject * /* args */, PyObje
     return reinterpret_cast<PyObject *>(self);
 }
 
-#define SbkVoidPtr_Check(op) (Py_TYPE(op) == SbkVoidPtr_TypeF())
-
+static inline bool SbkVoidPtr_Check(PyObject *op)
+{
+    return Py_TYPE(op) == SbkVoidPtr_TypeF();
+}
 
 int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
 {

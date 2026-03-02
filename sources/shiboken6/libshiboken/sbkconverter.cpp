@@ -790,8 +790,8 @@ bool checkMultiDictTypes(PyTypeObject *keyType, PyTypeObject *valueType,
     if (!PyDict_Check(pyIn))
         return false;
 
-    PyObject *key;
-    PyObject *values;
+    PyObject *key{};
+    PyObject *values{};
     Py_ssize_t pos = 0;
     while (PyDict_Next(pyIn, &pos, &key, &values)) {
         if (!PyObject_TypeCheck(key, keyType))
@@ -908,9 +908,8 @@ bool pythonTypeIsWrapperType(const SbkConverter *converter)
 }
 
 SpecificConverter::SpecificConverter(const char *typeName)
-    : m_type(InvalidConversion)
+    : m_converter(getConverter(typeName)), m_type(InvalidConversion)
 {
-    m_converter = getConverter(typeName);
     if (!m_converter)
         return;
     const auto len = std::strlen(typeName);

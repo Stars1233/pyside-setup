@@ -108,14 +108,12 @@ static void formatPyTypeObject(PyTypeObject *obj, std::ostream &str, bool verbos
 #endif // !Py_LIMITED_API
         if (obj->tp_basicsize != 0)
             str << ", basicsize=" << obj->tp_basicsize;
-        if (verbose) {
-            formatTypeTuple(obj->tp_bases, "bases", str);
-            formatTypeTuple(obj->tp_mro, "mro", str);
-            if (!immutableType) {
-                auto *underlying = reinterpret_cast<const PyObject *>(obj)->ob_type;
-                if (underlying != nullptr && underlying != obj) {
-                    str << ", underlying=\"" << PepType_GetFullyQualifiedNameStr(underlying) << '"';
-                }
+        formatTypeTuple(obj->tp_bases, "bases", str);
+        formatTypeTuple(obj->tp_mro, "mro", str);
+        if (!immutableType) {
+            auto *underlying = reinterpret_cast<const PyObject *>(obj)->ob_type;
+            if (underlying != nullptr && underlying != obj) {
+                str << ", underlying=\"" << PepType_GetFullyQualifiedNameStr(underlying) << '"';
             }
         }
     }

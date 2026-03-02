@@ -201,7 +201,7 @@ static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
 
         return 0;
 
-    } while (0);
+    } while (false);
 
     PyErr_Print();
     Py_FatalError("libshiboken/signature: could not initialize part 2");
