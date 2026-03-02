@@ -13,6 +13,8 @@
     py3.10.2
     py3.10.3
     # fixed in 3.10.4
+[QtWebEngineCore::qwebenginecookiestore_test]
+    darwin ci
 # PYSIDE-535: These errors are still present. Please try to remove one :)
 [sample::mixed_mi]
     pypy
