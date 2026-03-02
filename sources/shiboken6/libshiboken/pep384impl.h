@@ -154,9 +154,6 @@ struct SbkEnumTypePrivate;
 LIBSHIBOKEN_API SbkEnumTypePrivate *PepType_SETP(SbkEnumType *type);
 LIBSHIBOKEN_API void PepType_SETP_delete(SbkEnumType *enumType);
 
-struct PySideQFlagsType;
-struct SbkQFlagsTypePrivate;
-
 /*****************************************************************************/
 
 // functions used everywhere

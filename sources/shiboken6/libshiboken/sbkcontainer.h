@@ -8,7 +8,6 @@
 #include "shibokenmacros.h"
 #include "shibokenbuffer.h"
 
-#include <algorithm>
 #include <iterator>
 #include <optional>
 #include <utility>

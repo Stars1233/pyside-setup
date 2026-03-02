@@ -12,6 +12,7 @@
 #include "pysideqenum.h"
 
 #include <autodecref.h>
+#include <basewrapper.h>
 #include <helper.h>
 #include <pep384ext.h>
 #include <sbkconverter.h>

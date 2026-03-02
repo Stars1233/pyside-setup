@@ -3,6 +3,7 @@
 
 #include "pysideqmlvolatilebool.h"
 
+#include <basewrapper.h>
 #include <pep384ext.h>
 #include <signature.h>
 #include <sbktypefactory.h>

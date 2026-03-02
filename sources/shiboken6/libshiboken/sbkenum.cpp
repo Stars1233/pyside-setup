@@ -8,7 +8,7 @@
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
 #include "sbkconverter.h"
-#include "basewrapper.h"
+#include "basewrapper_p.h"
 #include "autodecref.h"
 #include "sbktypefactory.h"
 

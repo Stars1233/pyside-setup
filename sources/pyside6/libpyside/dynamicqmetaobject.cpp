@@ -12,6 +12,7 @@
 #include "pysidestaticstrings.h"
 
 #include <autodecref.h>
+#include <basewrapper.h>
 #include <gilstate.h>
 #include <sbkpep.h>
 #include <sbkstaticstrings.h>

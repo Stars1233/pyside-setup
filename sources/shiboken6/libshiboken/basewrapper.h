@@ -6,11 +6,18 @@
 
 #include "sbkpython.h"
 #include "shibokenmacros.h"
-#include "sbkmodule.h"
-#include "gilstate.h"
 
 #include <vector>
 #include <string>
+
+namespace Shiboken
+{
+class GilState;
+
+namespace Module {
+struct TypeInitStruct;
+}
+}
 
 extern "C"
 {

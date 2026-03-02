@@ -7,11 +7,15 @@
 #include "sbkpython.h"
 #include "sbkmodule.h"
 #include "shibokenmacros.h"
-#include "sbkenum.h"
 #include "basewrapper_p.h"
 
-#include <limits>
+#include <cstdint>
 #include <string>
+
+namespace Shiboken::Module
+{
+struct TypeInitStruct;
+}
 
 struct SbkObject;
 
@@ -430,11 +434,5 @@ template<> inline PyTypeObject *SbkType<std::nullptr_t>() { return Py_TYPE(&_Py_
 } // namespace Shiboken
 
 #define SbkChar_Check(X) (PyNumber_Check(X) || Shiboken::String::checkChar(X))
-
-struct PySideQFlagsType;
-struct SbkQFlagsTypePrivate
-{
-    SbkConverter *converter;
-};
 
 #endif // SBK_CONVERTER_H

@@ -6,10 +6,10 @@
 
 #include "sbkpython.h"
 #include "shibokenmacros.h"
-#include "sbkconverter.h"
 
 extern "C"
 {
+struct SbkConverter;
 
 // Void pointer type declaration.
 extern LIBSHIBOKEN_API PyTypeObject *SbkVoidPtr_TypeF(void);

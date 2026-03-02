@@ -7,6 +7,7 @@
 #include <pysidemacros.h>
 
 #include <sbkpython.h>
+#include <basewrapper.h>
 #include <pep384ext.h>
 
 #include <QtCore/qbytearray.h>

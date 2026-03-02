@@ -13,6 +13,7 @@
 #endif
 #include "basewrapper.h"
 #include "autodecref.h"
+#include "gilstate.h"
 #include "pysideutils.h"
 
 #include <QtCore/QCoreApplication>

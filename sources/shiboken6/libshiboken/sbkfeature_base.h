@@ -4,6 +4,9 @@
 #ifndef SBKFEATURE_BASE_H
 #define SBKFEATURE_BASE_H
 
+#include "sbkpython.h"
+#include "shibokenmacros.h"
+
 extern "C"
 {
 

@@ -3,6 +3,7 @@
 
 #include "sbkarrayconverter.h"
 #include "sbkarrayconverter_p.h"
+#include "autodecref.h"
 #include "helper.h"
 #include "sbkconverter.h"
 

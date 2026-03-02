@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "helper.h"
+#include "autodecref.h"
 #include "sbkpepbuffer.h"
 #include "basewrapper_p.h"
 #include "sbkstring.h"
