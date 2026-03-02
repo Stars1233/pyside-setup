@@ -11,7 +11,6 @@
 
 #include <QtCore/qlist.h>
 #include <QtCore/qpoint.h>
-#include <QtCore/qpoint.h>
 
 namespace PySide::Numpy
 {

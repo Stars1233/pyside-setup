@@ -8,7 +8,6 @@
 #include <pysidemacros.h>
 
 #include <QtCore/qmetaobject.h>
-#include <QtCore/qmetaobject.h>
 #include <QtCore/qvariant.h>
 
 #include <utility>

@@ -109,7 +109,7 @@ void init(PyObject *module)
     initQApp();
 }
 
-static const QByteArray _sigWithMangledName(const QByteArray &signature, bool mangle)
+static QByteArray _sigWithMangledName(const QByteArray &signature, bool mangle)
 {
     if (!mangle)
         return signature;
@@ -137,7 +137,7 @@ static const QByteArray _sigWithMangledName(const QByteArray &signature, bool ma
     return result;
 }
 
-static const QByteArray _sigWithOrigName(const QByteArray &signature, bool mangle)
+static QByteArray _sigWithOrigName(const QByteArray &signature, bool mangle)
 {
     if (!mangle)
         return signature;
@@ -187,7 +187,7 @@ static const QByteArray _sigWithOrigName(const QByteArray &signature, bool mangl
  * dict entries in the mro are already mangled.
  */
 
-static const QByteArrayList parseFields(const char *propStr, int flags, bool *stdWrite)
+static QByteArrayList parseFields(const char *propStr, int flags, bool *stdWrite)
 {
     /*
      * Break the string into subfields at ':' and add defaults.

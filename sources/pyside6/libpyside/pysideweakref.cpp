@@ -76,7 +76,7 @@ PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData)
     callable->user_data = userData;
     Py_DECREF(callable); // PYSIDE-79: after decref the callable is undefined (theoretically)
 
-    return reinterpret_cast<PyObject *>(weak);
+    return weak;
 }
 
 } // namespace PySide::WeakRef

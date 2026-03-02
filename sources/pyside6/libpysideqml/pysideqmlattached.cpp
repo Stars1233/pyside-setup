@@ -184,7 +184,7 @@ PySide::Qml::QmlExtensionInfo qmlAttachedInfo(PyTypeObject *t,
     if (!info || info->attachedType == nullptr)
         return result;
 
-    const auto *name = PepType_GetFullyQualifiedNameStr(reinterpret_cast<PyTypeObject *>(t));
+    const auto *name = PepType_GetFullyQualifiedNameStr(t);
     if (nextAttachingType >= MAX_ATTACHING_TYPES) {
         qWarning("Unable to initialize attached type \"%s\": "
                  "The limit %d of  attached types has been reached.",
