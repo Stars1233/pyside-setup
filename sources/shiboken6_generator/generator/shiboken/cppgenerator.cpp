@@ -2326,7 +2326,8 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     s << "static int\n";
     s << cpythonConstructorName(metaClass)
         << "(PyObject *self, ";
-    if (overloadData.maxArgs() == 0 || metaClass->isAbstract())
+    const bool isAbstract = metaClass->isAbstract();
+    if (overloadData.maxArgs() == 0 || isAbstract)
         s << maybeUnused;
     s << "PyObject *args, " << maybeUnused << "PyObject *kwds)\n{\n" << indent;
 
@@ -2343,26 +2344,24 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
             namedArgumentFlags.setFlag(NamedArgumentFlag::ForceKeywordArguments);
     }
 
+    // C++ Wrapper disabled: Abstract C++ class cannot be instantiated.
+    if (isAbstract
+            && metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::DisableWrapper)) {
+        s << "Shiboken::Errors::setInstantiateAbstractClassDisabledWrapper(\""
+            << metaClass->qualifiedCppName() << "\");\n" << errorReturn << outdent
+            << "}\n\n";
+        return;
+    }
+
     s << "auto *sbkSelf = reinterpret_cast<SbkObject *>(self);\n";
 
-    if (metaClass->isAbstract() || metaClass->baseClassNames().size() > 1) {
+    if (isAbstract || metaClass->baseClassNames().size() > 1) {
         s << "PyTypeObject *type = self->ob_type;\n"
             << "PyTypeObject *myType = "
             << cpythonTypeNameExt(metaClass->typeEntry()) << ";\n";
     }
 
-    if (metaClass->isAbstract()) {
-        // C++ Wrapper disabled: Abstract C++ class cannot be instantiated.
-        if (metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::DisableWrapper)) {
-            s << sbkUnusedVariableCast("sbkSelf")
-                << sbkUnusedVariableCast("type")
-                << sbkUnusedVariableCast("myType");
-            s << "Shiboken::Errors::setInstantiateAbstractClassDisabledWrapper(\""
-                << metaClass->qualifiedCppName() << "\");\n" << errorReturn << outdent
-                << "}\n\n";
-            return;
-        }
-
+    if (isAbstract) {
         // Refuse to instantiate Abstract C++ class (via C++ Wrapper) unless it is
         // a Python-derived class for which type != myType.
         s << "if (type == myType) {\n" << indent
@@ -2372,10 +2371,10 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     }
 
     if (metaClass->baseClassNames().size() > 1) {
-        if (!metaClass->isAbstract())
+        if (!isAbstract)
             s << "if (type != myType)\n" << indent;
         s << "Shiboken::ObjectType::copyMultipleInheritance(type, myType);\n";
-        if (!metaClass->isAbstract())
+        if (!isAbstract)
             s << outdent << '\n';
     }
 
