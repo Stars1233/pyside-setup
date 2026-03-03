@@ -540,6 +540,8 @@ LIBSHIBOKEN_API void keepReference(SbkObject *self, const char *key, PyObject *r
  */
 LIBSHIBOKEN_API void removeReference(SbkObject *self, const char *key, PyObject *referredObject);
 
+LIBSHIBOKEN_API SbkConverter *getConverter(PyTypeObject *type);
+
 } // namespace Object
 
 } // namespace Shiboken

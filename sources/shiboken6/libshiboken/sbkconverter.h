@@ -7,7 +7,6 @@
 #include "sbkpython.h"
 #include "sbkmodule.h"
 #include "shibokenmacros.h"
-#include "basewrapper_p.h"
 
 #include <cstdint>
 #include <string>

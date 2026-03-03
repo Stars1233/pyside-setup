@@ -709,10 +709,8 @@ QString ShibokenGenerator::converterObject(const TypeEntryCPtr &type)
                + type->qualifiedCppName() + ">()"_L1;
     }
 
-    if (type->isWrapperType()) {
-        return "PepType_SOTP(reinterpret_cast<PyTypeObject *>("_L1
-               + cpythonTypeNameExt(type) + "))->converter"_L1;
-    }
+    if (type->isWrapperType())
+        return "Shiboken::Object::getConverter("_L1 + cpythonTypeNameExt(type) + u')';
 
     if (type->isEnum())
         return "Shiboken::Enum::getConverter("_L1 + sbkEnum(cpythonTypeNameExt(type)) + u')';

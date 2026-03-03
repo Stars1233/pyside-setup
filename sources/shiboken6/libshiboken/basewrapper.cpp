@@ -1958,6 +1958,11 @@ void clearReferences(SbkObject *self)
     self->d->referredObjects->clear();
 }
 
+SbkConverter *getConverter(PyTypeObject *type)
+{
+    return PepType_SOTP(type)->converter;
+}
+
 // Helpers for debug / info formatting
 
 static std::vector<PyTypeObject *> getBases(SbkObject *self)
