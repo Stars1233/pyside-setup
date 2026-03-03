@@ -2322,10 +2322,15 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     const auto rfunc = overloadData.referenceFunction();
     const auto metaClass = rfunc->ownerClass();
 
-    s << "static int\n";
-    s << cpythonConstructorName(metaClass)
-        << "(PyObject *self, ";
     const bool isAbstract = metaClass->isAbstract();
+    const bool disableWrapper = isAbstract
+            && metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::DisableWrapper);
+
+    s << "static int\n";
+    s << cpythonConstructorName(metaClass) << '(';
+    if (disableWrapper)
+        s << maybeUnused;
+    s << "PyObject *self, ";
     if (overloadData.maxArgs() == 0 || isAbstract)
         s << maybeUnused;
     s << "PyObject *args, " << maybeUnused << "PyObject *kwds)\n{\n" << indent;
@@ -2344,8 +2349,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     }
 
     // C++ Wrapper disabled: Abstract C++ class cannot be instantiated.
-    if (isAbstract
-            && metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::DisableWrapper)) {
+    if (disableWrapper) {
         s << "Shiboken::Errors::setInstantiateAbstractClassDisabledWrapper(\""
             << metaClass->qualifiedCppName() << "\");\n" << errorReturn << outdent
             << "}\n\n";
