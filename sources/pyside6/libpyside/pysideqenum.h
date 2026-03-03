@@ -10,8 +10,9 @@
 
 #include <vector>
 
-#include <QtCore/qbytearray.h>
+#include <QtCore/qtclasshelpermacros.h>
 
+QT_FORWARD_DECLARE_CLASS(QByteArray)
 QT_FORWARD_DECLARE_CLASS(QMetaType)
 
 namespace PySide::QEnum {

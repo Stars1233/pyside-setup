@@ -9,8 +9,6 @@
 #include "pysideclassdecorator_p.h"
 #include "pysideclassinfo.h"
 
-#include <QtCore/qmetaobject.h>
-
 struct PySideClassInfo;
 
 extern "C"

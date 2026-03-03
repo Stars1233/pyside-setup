@@ -8,8 +8,6 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/qmetaobject.h>
-
 class PySidePropertyBase;
 
 extern "C"

@@ -13,7 +13,6 @@
 #include <QtCore/qbytearray.h>
 
 #include <array>
-#include <string>
 
 /// Helpers for class decorators with parameters
 namespace PySide::ClassDecorator {

@@ -4,6 +4,8 @@
 #ifndef PYSIDE_P_H
 #define PYSIDE_P_H
 
+#include <sbkpython.h>
+
 #include <pysidemacros.h>
 
 #include <dynamicqmetaobject.h>

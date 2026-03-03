@@ -14,6 +14,7 @@
 #include <signature.h>
 
 #include <QtCore/qmetaobject.h>
+#include <QtCore/qobject.h>
 #include <QtCore/qvarlengtharray.h>
 
 using namespace Qt::StringLiterals;

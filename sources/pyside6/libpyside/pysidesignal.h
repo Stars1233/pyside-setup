@@ -7,13 +7,11 @@
 #include <pysidemacros.h>
 
 #include <sbkpython.h>
-#include <basewrapper.h>
 
 #include <QtCore/qlist.h>
-#include <QtCore/qmetaobject.h>
 
 QT_BEGIN_NAMESPACE
-struct QMetaObject;
+class QMetaMethod;
 class QObject;
 QT_END_NAMESPACE
 

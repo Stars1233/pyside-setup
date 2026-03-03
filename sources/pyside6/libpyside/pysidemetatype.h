@@ -8,7 +8,7 @@
 
 #include <pysidemacros.h>
 
-#include <QtCore/qtconfigmacros.h>
+#include <QtCore/qtclasshelpermacros.h>
 
 QT_FORWARD_DECLARE_CLASS(QMetaType)
 

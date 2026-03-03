@@ -8,7 +8,9 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/qobject.h>
+#include <QtCore/qtclasshelpermacros.h>
+
+QT_FORWARD_DECLARE_CLASS(QObject)
 
 extern "C"
 {
