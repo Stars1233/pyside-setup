@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "sbkenum.h"
+#include "sbkenum_p.h"
 #include "sbkpep.h"
 #include "sbkstring.h"
 #include "helper.h"
@@ -306,6 +307,18 @@ void setTypeConverter(PyTypeObject *type, SbkConverter *converter,
     SbkEnumTypePrivate *priv = PepType_SETP(reinterpret_cast<SbkEnumType *>(type));
     priv->converter = converter;
     priv->flagsConverter = flagsConverter;
+}
+
+SbkConverter *getConverter(SbkEnumType *type)
+{
+    SbkEnumTypePrivate *priv = PepType_SETP(reinterpret_cast<SbkEnumType *>(type));
+    return priv->converter;
+}
+
+SbkConverter *getFlagsConverter(SbkEnumType *type)
+{
+    SbkEnumTypePrivate *priv = PepType_SETP(reinterpret_cast<SbkEnumType *>(type));
+    return priv->flagsConverter;
 }
 
 static void setModuleAndQualnameOnType(PyObject *type, const char *fullName)

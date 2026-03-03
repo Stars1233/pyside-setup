@@ -697,9 +697,9 @@ QString ShibokenGenerator::converterObject(const AbstractMetaType &type)
     return converterObject(typeEntry);
 }
 
-static QString sbkEnumPrivate(const QString &name)
+static QString sbkEnum(const QString &name)
 {
-    return "PepType_SETP(reinterpret_cast<SbkEnumType *>("_L1 + name  + "))"_L1;
+    return "reinterpret_cast<SbkEnumType *>("_L1 + name  + u')';
 }
 
 QString ShibokenGenerator::converterObject(const TypeEntryCPtr &type)
@@ -715,9 +715,10 @@ QString ShibokenGenerator::converterObject(const TypeEntryCPtr &type)
     }
 
     if (type->isEnum())
-        return sbkEnumPrivate(cpythonTypeNameExt(type)) + "->converter"_L1;
+        return "Shiboken::Enum::getConverter("_L1 + sbkEnum(cpythonTypeNameExt(type)) + u')';
+
     if (type->isFlags())
-        return sbkEnumPrivate(cpythonTypeNameExt(type)) + "->flagsConverter"_L1;
+        return "Shiboken::Enum::getFlagsConverter("_L1 + sbkEnum(cpythonTypeNameExt(type)) + u')';
 
     if (type->isArray()) {
         qCWarning(lcShiboken, "Warning: no idea how to handle the Qt type \"%s\"",

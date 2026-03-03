@@ -9,7 +9,7 @@
 #include "sbkstaticstrings_p.h"
 #include "basewrapper.h"
 #include "basewrapper_p.h"
-#include "sbkenum.h"
+#include "sbkenum_p.h"
 #include "voidptr.h"
 
 #include <cstdlib>
