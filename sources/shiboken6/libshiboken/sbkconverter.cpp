@@ -9,6 +9,7 @@
 #include "bindingmanager.h"
 #include "autodecref.h"
 #include "helper.h"
+#include "sbkstring.h"
 #include "sbkpep.h"
 #include "voidptr.h"
 
@@ -24,6 +25,11 @@ static SbkConverter **PrimitiveTypeConverters;
 
 using ConvertersMap = std::unordered_map<std::string, SbkConverter *>;
 static ConvertersMap converters;
+
+bool SbkObject_TypeCheck(PyTypeObject *tp, PyObject *ob)
+{
+    return Py_TYPE(ob) == tp || PyType_IsSubtype(Py_TYPE(ob), tp);
+}
 
 namespace Shiboken::Conversions {
 
@@ -953,3 +959,8 @@ void SpecificConverter::toCpp(PyObject *pyIn, void *cppOut) const
 }
 
 } // namespace Shiboken::Conversions
+
+bool SbkChar_Check(PyObject *X)
+{
+    return PyNumber_Check(X) || Shiboken::String::checkChar(X);
+}

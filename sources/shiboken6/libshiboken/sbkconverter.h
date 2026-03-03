@@ -19,12 +19,11 @@ struct TypeInitStruct;
 struct SbkObject;
 
 /**
- *  This is a convenience macro identical to Python's PyObject_TypeCheck,
+ *  This is a convenience function identical to Python's PyObject_TypeCheck,
  *  except that the arguments have swapped places, for the great convenience
  *  of generator.
  */
-#define SbkObject_TypeCheck(tp, ob) \
-        (Py_TYPE(ob) == (tp) || PyType_IsSubtype(Py_TYPE(ob), (tp)))
+LIBSHIBOKEN_API  bool SbkObject_TypeCheck(PyTypeObject *tp, PyObject *ob);
 
 extern "C"
 {
@@ -432,6 +431,6 @@ template<> inline PyTypeObject *SbkType<std::nullptr_t>() { return Py_TYPE(&_Py_
 
 } // namespace Shiboken
 
-#define SbkChar_Check(X) (PyNumber_Check(X) || Shiboken::String::checkChar(X))
+LIBSHIBOKEN_API bool SbkChar_Check(PyObject *X);
 
 #endif // SBK_CONVERTER_H
