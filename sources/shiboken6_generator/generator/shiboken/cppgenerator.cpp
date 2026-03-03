@@ -543,7 +543,6 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
                 << "#include <pysidemetafunction.h>\n";
         }
         s << "#include <pysideqenum.h>\n"
-            << "#include <pysideqmetatype.h>\n"
             << "#include <pysideutils.h>\n"
             << "#include <feature_select.h>\n"
             << "QT_WARNING_DISABLE_DEPRECATED\n\n";
