@@ -131,7 +131,7 @@ LIBSHIBOKEN_API PyObject *_PepType_Lookup(PyTypeObject *type, PyObject *name);
 
 #else // Py_LIMITED_API
 
-#define _PepType_Lookup(type, name)       _PyType_Lookup(type, name)
+inline PyObject *_PepType_Lookup(PyTypeObject *type, PyObject *name) { return _PyType_Lookup(type, name); }
 
 #endif // Py_LIMITED_API
 
@@ -264,11 +264,15 @@ enum PepUnicode_Kind : uint8_t {
 #ifdef Py_LIMITED_API
 
 using PyCFunctionObject = struct _pycfunc;
-#define PepCFunction_GET_NAMESTR(func) \
-    PyUnicode_AsUTF8AndSize(PyObject_GetAttrString(reinterpret_cast<PyObject *>(func), "__name__"), nullptr);
+inline const char *PepCFunction_GET_NAMESTR(PyObject *func)
+{
+    return PyUnicode_AsUTF8AndSize(PyObject_GetAttrString(func, "__name__"), nullptr);
+}
 #else
-#define PepCFunction_GET_NAMESTR(func) \
-    (reinterpret_cast<const PyCFunctionObject *>(func)->m_ml->ml_name)
+inline const char *PepCFunction_GET_NAMESTR(PyObject *func)
+{
+    return reinterpret_cast<const PyCFunctionObject *>(func)->m_ml->ml_name;
+}
 #endif
 
 /*****************************************************************************
@@ -286,19 +290,19 @@ LIBSHIBOKEN_API PyObject *PyRun_String(const char *, int, PyObject *, PyObject *
  *
  */
 #ifdef Py_LIMITED_API
-typedef struct _func PyFunctionObject;
+using PyFunctionObject = struct _func;
 
 extern LIBSHIBOKEN_API PyTypeObject *PepFunction_TypePtr;
 LIBSHIBOKEN_API PyObject *PepFunction_Get(PyObject *, const char *);
 
-#define PyFunction_Check(op)        (Py_TYPE(op) == PepFunction_TypePtr)
-#define PyFunction_GET_CODE(func)   PyFunction_GetCode(func)
+inline bool PyFunction_Check(PyObject *op) { return Py_TYPE(op) == PepFunction_TypePtr; }
 
-#define PyFunction_GetCode(func)    PepFunction_Get((PyObject *)func, "__code__")
-#define PepFunction_GetName(func)   PepFunction_Get((PyObject *)func, "__name__")
+inline PyObject *PyFunction_GetCode(PyObject *func)  { return  PepFunction_Get(func, "__code__"); }
+inline PyObject *PyFunction_GET_CODE(PyObject *func) { return PyFunction_GetCode(func); }
+inline PyObject *PepFunction_GetName(PyObject *func) { return PepFunction_Get(func, "__name__"); }
 #else
 #define PepFunction_TypePtr         (&PyFunction_Type)
-#define PepFunction_GetName(func)   (((PyFunctionObject *)func)->func_name)
+inline PyObject *PepFunction_GetName(PyObject *func)  { return reinterpret_cast<PyFunctionObject *>(func)->func_name; }
 #endif
 
 /*****************************************************************************
@@ -308,7 +312,7 @@ LIBSHIBOKEN_API PyObject *PepFunction_Get(PyObject *, const char *);
  */
 #ifdef Py_LIMITED_API
 
-typedef struct _meth PyMethodObject;
+using PyMethodObject = struct _meth;
 
 extern LIBSHIBOKEN_API PyTypeObject *PepMethod_TypePtr;
 
@@ -316,10 +320,10 @@ LIBSHIBOKEN_API PyObject *PyMethod_New(PyObject *, PyObject *);
 LIBSHIBOKEN_API PyObject *PyMethod_Function(PyObject *);
 LIBSHIBOKEN_API PyObject *PyMethod_Self(PyObject *);
 
-#define PyMethod_Check(op) ((op)->ob_type == PepMethod_TypePtr)
+inline bool PyMethod_Check(PyObject *op) { return op->ob_type == PepMethod_TypePtr; }
 
-#define PyMethod_GET_SELF(op)       PyMethod_Self(op)
-#define PyMethod_GET_FUNCTION(op)   PyMethod_Function(op)
+inline PyObject *PyMethod_GET_SELF(PyObject *op) { return PyMethod_Self(op); }
+inline PyObject *PyMethod_GET_FUNCTION(PyObject *op) { return PyMethod_Function(op); }
 #endif
 
 /*****************************************************************************
@@ -331,13 +335,13 @@ LIBSHIBOKEN_API PyObject *PyMethod_Self(PyObject *);
 /* Bytecode object */
 
 // we have to grab the code object from python
-typedef struct _code PepCodeObject;
+using PepCodeObject = struct _code;
 
 LIBSHIBOKEN_API int PepCode_Get(PepCodeObject *co, const char *name);
 LIBSHIBOKEN_API int PepCode_Check(PyObject *o);
 
-#  define PepCode_GET_FLAGS(o)         PepCode_Get(o, "co_flags")
-#  define PepCode_GET_ARGCOUNT(o)      PepCode_Get(o, "co_argcount")
+inline int PepCode_GET_FLAGS(PepCodeObject *o) { return PepCode_Get(o, "co_flags"); }
+inline int PepCode_GET_ARGCOUNT(PepCodeObject *o) { return PepCode_Get(o, "co_argcount"); }
 
 LIBSHIBOKEN_API PyObject *PepFunction_GetDefaults(PyObject *function);
 
@@ -351,10 +355,11 @@ LIBSHIBOKEN_API PyObject *PepFunction_GetDefaults(PyObject *function);
 
 #else
 
-#  define PepCodeObject                PyCodeObject
-#  define PepCode_GET_FLAGS(o)         ((o)->co_flags)
-#  define PepCode_GET_ARGCOUNT(o)      ((o)->co_argcount)
-#  define PepCode_Check PyCode_Check
+using PepCodeObject = PyCodeObject;
+
+inline int PepCode_GET_FLAGS(PepCodeObject *o) { return o->co_flags; }
+inline int PepCode_GET_ARGCOUNT(PepCodeObject *o) { return o->co_argcount; }
+inline int PepCode_Check(PyObject *o) { return PyCode_Check(o); }
 
 #  ifdef PYPY_VERSION
 
@@ -362,7 +367,7 @@ LIBSHIBOKEN_API PyObject *PepFunction_GetDefaults(PyObject *function);
 
 #    else
 #    define PepFunction_GetDefaults PyFunction_GetDefaults
-#  endif
+#  endif // PYPY_VERSION
 #endif
 
 /*****************************************************************************
@@ -374,30 +379,30 @@ LIBSHIBOKEN_API PyObject *PepFunction_GetDefaults(PyObject *function);
 
 LIBSHIBOKEN_API int PyDateTime_Get(PyObject *ob, const char *name);
 
-#define PyDateTime_GetYear(o)         PyDateTime_Get(o, "year")
-#define PyDateTime_GetMonth(o)        PyDateTime_Get(o, "month")
-#define PyDateTime_GetDay(o)          PyDateTime_Get(o, "day")
-#define PyDateTime_GetHour(o)         PyDateTime_Get(o, "hour")
-#define PyDateTime_GetMinute(o)       PyDateTime_Get(o, "minute")
-#define PyDateTime_GetSecond(o)       PyDateTime_Get(o, "second")
-#define PyDateTime_GetMicrosecond(o)  PyDateTime_Get(o, "microsecond")
-#define PyDateTime_GetFold(o)         PyDateTime_Get(o, "fold")
+inline int PyDateTime_GetYear(PyObject *o)        { return PyDateTime_Get(o, "year"); }
+inline int PyDateTime_GetMonth(PyObject *o)       { return PyDateTime_Get(o, "month"); }
+inline int PyDateTime_GetDay(PyObject *o)         { return PyDateTime_Get(o, "day"); }
+inline int PyDateTime_GetHour(PyObject *o)        { return PyDateTime_Get(o, "hour"); }
+inline int PyDateTime_GetMinute(PyObject *o)      { return PyDateTime_Get(o, "minute"); }
+inline int PyDateTime_GetSecond(PyObject *o)      { return PyDateTime_Get(o, "second"); }
+inline int PyDateTime_GetMicrosecond(PyObject *o) { return PyDateTime_Get(o, "microsecond"); }
+inline int PyDateTime_GetFold(PyObject *o)        { return PyDateTime_Get(o, "fold"); }
 
-#define PyDateTime_GET_YEAR(o)              PyDateTime_GetYear(o)
-#define PyDateTime_GET_MONTH(o)             PyDateTime_GetMonth(o)
-#define PyDateTime_GET_DAY(o)               PyDateTime_GetDay(o)
+inline int PyDateTime_GET_YEAR(PyObject *o)  { return PyDateTime_GetYear(o); }
+inline int PyDateTime_GET_MONTH(PyObject *o) { return PyDateTime_GetMonth(o); }
+inline int PyDateTime_GET_DAY(PyObject *o)   { return PyDateTime_GetDay(o); }
 
-#define PyDateTime_DATE_GET_HOUR(o)         PyDateTime_GetHour(o)
-#define PyDateTime_DATE_GET_MINUTE(o)       PyDateTime_GetMinute(o)
-#define PyDateTime_DATE_GET_SECOND(o)       PyDateTime_GetSecond(o)
-#define PyDateTime_DATE_GET_MICROSECOND(o)  PyDateTime_GetMicrosecond(o)
-#define PyDateTime_DATE_GET_FOLD(o)         PyDateTime_GetFold(o)
+inline int PyDateTime_DATE_GET_HOUR(PyObject *o)        { return PyDateTime_GetHour(o); }
+inline int PyDateTime_DATE_GET_MINUTE(PyObject *o)      { return PyDateTime_GetMinute(o); }
+inline int PyDateTime_DATE_GET_SECOND(PyObject *o)      { return PyDateTime_GetSecond(o); }
+inline int PyDateTime_DATE_GET_MICROSECOND(PyObject *o) { return PyDateTime_GetMicrosecond(o); }
+inline int PyDateTime_DATE_GET_FOLD(PyObject *o)        { return PyDateTime_GetFold(o); }
 
-#define PyDateTime_TIME_GET_HOUR(o)         PyDateTime_GetHour(o)
-#define PyDateTime_TIME_GET_MINUTE(o)       PyDateTime_GetMinute(o)
-#define PyDateTime_TIME_GET_SECOND(o)       PyDateTime_GetSecond(o)
-#define PyDateTime_TIME_GET_MICROSECOND(o)  PyDateTime_GetMicrosecond(o)
-#define PyDateTime_TIME_GET_FOLD(o)         PyDateTime_GetFold(o)
+inline int PyDateTime_TIME_GET_HOUR(PyObject *o)        { return PyDateTime_GetHour(o); }
+inline int PyDateTime_TIME_GET_MINUTE(PyObject *o)      { return PyDateTime_GetMinute(o); }
+inline int PyDateTime_TIME_GET_SECOND(PyObject *o)      { return PyDateTime_GetSecond(o); }
+inline int PyDateTime_TIME_GET_MICROSECOND(PyObject *o) { return PyDateTime_GetMicrosecond(o); }
+inline int PyDateTime_TIME_GET_FOLD(PyObject *o)        { return PyDateTime_GetFold(o); }
 
 /* Define structure slightly similar to C API. */
 typedef struct {
@@ -416,9 +421,9 @@ LIBSHIBOKEN_API datetime_struc *init_DateTime(void);
 
 extern LIBSHIBOKEN_API datetime_struc *PyDateTimeAPI;
 
-#define PyDate_Check(op)      PyObject_TypeCheck(op, PyDateTimeAPI->DateType)
-#define PyDateTime_Check(op)  PyObject_TypeCheck(op, PyDateTimeAPI->DateTimeType)
-#define PyTime_Check(op)      PyObject_TypeCheck(op, PyDateTimeAPI->TimeType)
+inline bool PyDate_Check(PyObject *op)      { return PyObject_TypeCheck(op, PyDateTimeAPI->DateType); }
+inline bool PyDateTime_Check(PyObject *op)  { return PyObject_TypeCheck(op, PyDateTimeAPI->DateTimeType); }
+inline bool PyTime_Check(PyObject *op)      { return PyObject_TypeCheck(op, PyDateTimeAPI->TimeType); }
 
 LIBSHIBOKEN_API PyObject *PyDate_FromDate(int year, int month, int day);
 LIBSHIBOKEN_API PyObject *PyDateTime_FromDateAndTime(
