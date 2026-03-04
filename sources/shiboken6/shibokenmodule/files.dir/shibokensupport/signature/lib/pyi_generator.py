@@ -171,31 +171,6 @@ class Formatter(Writer):
         # Replace all "NoneType" strings by "None" which is a typing convention.
         return source.replace("NoneType", "None")
 
-    # To be removed when minimum version is 3.10:
-    @classmethod
-    def optional_replacer(cls, source):
-        # PYSIDE-2517: findChild/findChildren type hints:
-        # PlaceholderType fix to avoid the '~' from TypeVar.__repr__
-        if "~PlaceholderType" in source:
-            source = source.replace("~PlaceholderType", "PlaceholderType")
-        if "~_SlotFunc" in source:
-            source = source.replace("~_SlotFunc", "_SlotFunc")
-
-
-        while match := cls.opt_uni_searcher.search(source):
-            start = match.start()
-            end = match.end()
-            name = match.group(1)
-            body = match.group(2).strip()[1:-1]
-            # Note: this list is interspersed with "," and surrounded by "", see parser.py
-            parts = [x.strip() for x in cls.split(body) if x.strip() not in ("", ",")]
-            if name == "typing.Optional":
-                parts.append("None ")
-            res = " | ".join(parts)
-            source = source[: start] + res + source[end :]
-        # Replace all "NoneType" strings by "None" which is a typing convention.
-        return source.replace("NoneType", "None")
-
     # self.level is maintained by enum_sig.py
     # self.is_method() is true for non-plain functions.
 
