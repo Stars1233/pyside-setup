@@ -193,6 +193,33 @@
         <modify-function signature="loadUrl(QUrl)" allow-thread="yes"/>
         <modify-function signature="loadUrl(QUrl,QQmlComponent::CompilationMode)" allow-thread="yes"/>
         <modify-function signature="setData(QByteArray,QUrl)" allow-thread="yes"/>
+        <!-- createWithInitialProperties_withownership: like createWithInitialProperties() but
+             the returned QObject is Python owned -->
+        <add-function signature="createWithInitialProperties_withownership(QVariantMap@initialProperties@)"
+                      return-type="QObject*"
+                      allow-thread="yes">
+            <modify-argument index="return">
+                <define-ownership class="target" owner="target"/>
+            </modify-argument>
+            <inject-code class="target" position="beginning"
+                         file="../glue/qtqml.cpp"
+                         snippet="qqmlcomponent-createwithinitialpropertieswithownership"/>
+            <inject-documentation format="target" mode="append" file="../doc/qtqml.rst"
+                                  snippet="qqmlcomponent-createwithinitialproperties_withownership"/>
+        </add-function>
+        <!-- create_withownership: like create() but the returned QObject is Python owned -->
+        <add-function signature="create_withownership(QQmlContext*@context@=nullptr)"
+                      return-type="QObject*"
+                      allow-thread="yes">
+            <modify-argument index="return">
+                <define-ownership class="target" owner="target"/>
+            </modify-argument>
+            <inject-code class="target" position="beginning"
+                         file="../glue/qtqml.cpp"
+                         snippet="qqmlcomponent-createwithownership"/>
+            <inject-documentation format="target" mode="append" file="../doc/qtqml.rst"
+                                  snippet="qqmlcomponent-create_withownership"/>
+        </add-function>
     </object-type>
     <object-type name="QQmlContext">
         <value-type name="PropertyPair"/>

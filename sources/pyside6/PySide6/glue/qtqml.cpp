@@ -76,6 +76,20 @@ if (instance.isNull()) {
 }
 // @snippet qqmlengine-singletoninstance-qmltypeid
 
+// @snippet qqmlcomponent-createwithinitialpropertieswithownership
+// Like createWithInitialProperties() but with Python ownership on the returned object.
+QObject *%0 = %CPPSELF.createWithInitialProperties(%1);
+%PYARG_0 = %CONVERTTOPYTHON[QObject*](%0);
+// @snippet qqmlcomponent-createwithinitialpropertieswithownership
+
+// @snippet qqmlcomponent-createwithownership
+// Create a QML component instance and transfer ownership to Python,
+// so no manual keep-alive bookkeeping is needed.
+// This is specifically created and useful for QtBridges
+QObject *%0 = %CPPSELF.create(%1);
+%PYARG_0 = %CONVERTTOPYTHON[QObject*](%0);
+// @snippet qqmlcomponent-createwithownership
+
 // @snippet qqmlengine-singletoninstance-typename
 QJSValue instance = %CPPSELF.singletonInstance<QJSValue>(%1, %2);
 if (instance.isNull()) {

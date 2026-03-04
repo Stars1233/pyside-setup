@@ -150,3 +150,17 @@ to do a one time setup of a singleton; if repeated access to the singleton is
 required, caching its typeId will allow faster subsequent access via the
 type-id based overload.
 // @snippet qqmlengine-singletoninstance-typename
+
+// @snippet qqmlcomponent-create_withownership
+Like :meth:`~PySide6.QtQml.QQmlComponent.create`, but the returned
+``QObject`` is owned by Python rather than C++. This removes the need to
+manually keep the object alive when the component is created from Python
+but controlled natively (like in QtBridges).
+// @snippet qqmlcomponent-create_withownership
+
+// @snippet qqmlcomponent-createwithinitialproperties_withownership
+Like :meth:`~PySide6.QtQml.QQmlComponent.createWithInitialProperties`, but
+the returned ``QObject`` is owned by Python rather than C++. This removes
+the need to manually keep the object alive when the component is created from
+Python but controlled natively (like in QtBridges).
+// @snippet qqmlcomponent-createwithinitialproperties_withownership
