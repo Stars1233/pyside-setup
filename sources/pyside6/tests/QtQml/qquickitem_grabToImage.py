@@ -64,6 +64,7 @@ class TestGrabToSharedPointerImage(TimedQGuiApplication):
         # Compare the grabbed color with the one we set in the rectangle.
         blueColor = QColor("blue")
         self.assertEqual(self.grabbedColor, blueColor)
+        del grabResultSharedPtr  # QTBUG-145036
 
 
 if __name__ == '__main__':
