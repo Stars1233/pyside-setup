@@ -12,6 +12,7 @@ import typing
 import warnings
 import collections.abc
 import abc
+import datetime # noqa F:401
 
 from types import SimpleNamespace
 from shibokensupport.signature.mapping import (type_map, type_map_tuple, update_mapping,

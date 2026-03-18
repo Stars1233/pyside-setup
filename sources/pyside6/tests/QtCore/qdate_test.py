@@ -5,6 +5,7 @@ from __future__ import annotations
 
 '''Test cases for QDate'''
 
+import datetime
 import os
 import sys
 import unittest
@@ -40,6 +41,18 @@ class TestQDate (unittest.TestCase):
         self.assertTrue(today)
         nodate = QDate()
         self.assertFalse(nodate)
+
+
+class TestQDateConversion(unittest.TestCase):
+    def testDateConversion(self):
+        qdate = QDate(1993, 5, 1)
+        qdatePy = QDate(datetime.date(1993, 5, 1))
+        self.assertEqual(qdate, qdatePy)
+
+    def testDateTimeConversion(self):
+        qdate = QDate(2003, 5, 1)
+        qdatePy = QDate(datetime.datetime(2003, 5, 1, 11, 1, 14))
+        self.assertEqual(qdate, qdatePy)
 
 
 if __name__ == '__main__':

@@ -896,6 +896,9 @@
     <add-function signature="toPython()" return-type="PyObject">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdate-topython"/>
     </add-function>
+    <modify-function signature="QDate(QDate)">
+        <modify-argument index="1" pyi-type="Union[PySide6.QtCore.QDate, datetime.datetime, datetime.date]"/>
+    </modify-function>
     <modify-function signature="getDate(int*,int*,int*)const" >
         <modify-argument index="1">
             <remove-argument/>
@@ -969,6 +972,9 @@
     <add-function signature="toPython()" return-type="PyObject">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdatetime-topython"/>
     </add-function>
+    <modify-function signature="QDateTime(QDateTime)">
+        <modify-argument index="1" pyi-type="Union[PySide6.QtCore.QDateTime, datetime.datetime]"/>
+    </modify-function>
   </value-type>
 
   <value-type name="QDir">

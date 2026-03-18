@@ -281,6 +281,7 @@ FROM_IMPORTS = [
     (None, ["enum"]),
     (None, ["typing"]),
     (None, ["collections.abc"]),
+    (None, ["datetime"]),
     ("PySide6.QtCore", ["PyClassProperty", "Signal", "SignalInstance"]),
     ("shiboken6", ["Shiboken"]),
     ]
