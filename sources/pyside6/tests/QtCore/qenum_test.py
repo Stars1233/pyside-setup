@@ -224,9 +224,7 @@ class TestQEnumMacro(unittest.TestCase):
 
         moi = SomeClass.InnerClass.staticMetaObject
         self.assertEqual(moi.enumerator(0).name(), "InnerEnum")
-        # Question: Should that scope not better be  "SomeClass.InnerClass"?
-        # But we have __qualname__ already:
-        self.assertEqual(moi.enumerator(0).scope(), "InnerClass")
+        self.assertEqual(moi.enumerator(0).scope(), "SomeClass.InnerClass")
 
 
 if __name__ == '__main__':

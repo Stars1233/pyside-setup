@@ -15,6 +15,7 @@
 #include <basewrapper.h>
 #include <gilstate.h>
 #include <sbkpep.h>
+#include <pep384ext.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 
@@ -115,7 +116,7 @@ MetaObjectBuilder::MetaObjectBuilder(PyTypeObject *type, const QMetaObject *meta
 {
     m_d->m_baseObject = metaObject;
     m_d->m_builder = new QMetaObjectBuilder();
-    m_d->m_builder->setClassName(PepType_GetNameStr(type));
+    m_d->m_builder->setClassName(PepExt_TypeGetQualName(type));
     m_d->m_builder->setSuperClass(metaObject);
     m_d->parsePythonType(type);
 }
