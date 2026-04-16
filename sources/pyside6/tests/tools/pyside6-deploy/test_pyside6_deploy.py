@@ -254,6 +254,33 @@ class TestPySide6DeployWidgets(DeployTestBase):
         project_file = self.temp_example_widgets / "tetrix.pyproject.bak"
         project_file.rename(self.temp_example_widgets / "tetrix.pyproject")
 
+    def testPyprojectTomlOverrides(self, mock_plugins):
+        mock_plugins.return_value = self.all_plugins
+
+        # Write a minimal pyproject.toml with deploy overrides in the project dir
+        pyproject = Path.cwd() / "pyproject.toml"
+        pyproject.write_text(
+            "[tool.pyside6.deploy]\n"
+            "title = \"TomlTitle\"\n"
+            "exec_directory = \"dist_toml\"\n"
+            "mode = \"standalone\"\n"
+            "extra_args = \"--quiet --noinclude-qt-translations --from-toml\"\n"
+        )
+
+        init_result = self.deploy.main(self.main_file, init=True, force=True)
+        self.assertEqual(None, init_result)
+
+        # Read produced spec and verify overrides were applied
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
+        self.assertEqual(config_obj.get_value("app", "title"), "TomlTitle")
+        self.assertEqual(config_obj.get_value("app", "exec_directory"), "dist_toml")
+        self.assertEqual(config_obj.get_value("nuitka", "mode"), "standalone")
+        self.assertIn("--from-toml", config_obj.get_value("nuitka", "extra_args"))
+
+        # Cleanup
+        self.config_file.unlink()
+        pyproject.unlink()
+
     @patch("deploy_lib.python_helper.PythonExecutable.install")
     def testNuitkaVersionOption(self, mock_install, mock_plugins):
         mock_plugins.return_value = self.all_plugins

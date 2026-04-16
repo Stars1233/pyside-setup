@@ -3,6 +3,6 @@
               "deploy_lib/default.spec", "deploy_lib/nuitka_helper.py", "deploy_lib/pyside_icon.ico",
               "deploy_lib/pyside_icon.icns","deploy_lib/pyside_icon.jpg",
               "deploy_lib/python_helper.py", "deploy_lib/deploy_util.py",
-              "deploy_lib/dependency_util.py"
+              "deploy_lib/dependency_util.py", "deploy_lib/pyproject_toml_deploy.py"
               ]
 }

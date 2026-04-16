@@ -80,6 +80,54 @@ two folds:
 This file is also used by the ``pyside6-android-deploy`` tool as a configuration file. The advantage
 here is that you can have one single file to control deployment to all platforms.
 
+Using with pyproject.toml
+-------------------------
+
+`pyside6-deploy` also supports a small, opt-in set of user-intent values stored in
+the project's ``pyproject.toml``. If present, the tool will read the
+``[tool.pyside6.deploy]`` table and apply those keys as overrides when creating or
+reading the generated ``pysidedeploy.spec`` file. This is intended to keep a few
+high-level deployment intent values alongside other project metadata without
+requiring users to hand edit the full ``pysidedeploy.spec``.
+
+Supported keys:
+
+- ``title`` — application name
+- ``input_file`` — path to main Python entry point (relative to project root)
+- ``exec_directory`` — directory where the final executable is generated
+- ``icon`` — path to application icon
+- ``mode`` — ``onefile`` or ``standalone`` (Nuitka mode)
+- ``extra_args`` — extra Nuitka CLI arguments (space-separated string)
+- ``macos_permissions`` — macOS usage description strings (comma-separated)
+
+Example ``pyproject.toml`` snippet::
+
+    [tool.pyside6.deploy]
+    title = "My App"
+    input_file = "main.py"
+    exec_directory = "dist"
+    icon = "assets/icon.icns"
+    mode = "standalone"
+    extra_args = "--quiet --noinclude-qt-translations"
+
+Notes:
+
+- Only user intent keys are supported in ``pyproject.toml``.
+  Machine-derived or build-state fields such as ``modules``, ``plugins``,
+  ``qml_files``, ``python_path``, ``packages`` and the Android/Buildozer sections
+  remain managed in ``pysidedeploy.spec`` and should not be placed in
+  ``pyproject.toml``.
+- Precedence order: command-line arguments override values in
+  ``[tool.pyside6.deploy]``, which in turn override values read from
+  ``pysidedeploy.spec``.
+- To apply pyproject values when creating the spec file, run ``pyside6-deploy --init``
+  from the project directory; the tool merges the pyproject values into the
+  generated ``pysidedeploy.spec``.
+
+
+pysidedeploy.spec parameters
+----------------------------
+
 The relevant parameters for ``pyside6-deploy`` are:
 
 **app**
