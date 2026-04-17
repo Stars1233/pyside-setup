@@ -113,10 +113,12 @@ void disassembleFrame(const char *marker)
 
 // OpCodes: Adapt for each Python version by checking the defines in the generated header opcode_ids.h
 // egrep '( LOAD_ATTR | CALL | PUSH_NULL )' opcode_ids.h
-// See also test sources/pyside6/tests/pysidetest/enum_test.py
+// See also test sources/pyside6/tests/pysidetest/enum_test.py, sbkmodule.cpp:300
 
 static int constexpr LOAD_ATTR_OpCode(long pyVersion)
 {
+    if (pyVersion >= 0x030F00) // 3.15
+        return 79;
     if (pyVersion >= 0x030E00) // 3.14
         return 80;
     if (pyVersion >= 0x030D00) // 3.13
@@ -126,6 +128,8 @@ static int constexpr LOAD_ATTR_OpCode(long pyVersion)
 
 static int constexpr CALL_OpCode(long pyVersion)
 {
+    if (pyVersion >= 0x030F00) // 3.15
+        return 50;
     if (pyVersion >= 0x030E00) // 3.14
         return 52;
     if (pyVersion >= 0x030D00) // 3.13
@@ -135,6 +139,8 @@ static int constexpr CALL_OpCode(long pyVersion)
 
 static int constexpr PUSH_NULL_OpCode(long pyVersion)
 {
+    if (pyVersion >= 0x030F00) // 3.15
+        return 31;
     if (pyVersion >= 0x030E00) // 3.14
         return 33;
     return 34;

@@ -209,8 +209,27 @@ class InvestigateOpcodesTest(unittest.TestCase):
                         ('LOAD_CONST',    82, 0),
                         ('RETURN_VALUE',  35, None)]
 
-        self.assertEqual(self.read_code(self.probe_function1), result_1)
-        self.assertEqual(self.read_code(self.probe_function2), result_2)
+        if sys.version_info[:2] >= (3, 15):
+            result_1 = [('RESUME', 128, 0),
+                        ('LOAD_GLOBAL', 91, 0),
+                        ('LOAD_ATTR', 79, 2),
+                        ('STORE_FAST', 111, 1),
+                        ('LOAD_CONST', 81, 0),
+                        ('RETURN_VALUE', 33, None)
+                        ]
+            result_2 = [('RESUME', 128, 0),
+                        ('LOAD_GLOBAL', 91, 0),
+                        ('LOAD_ATTR', 79, 2),
+                        ('PUSH_NULL', 31, None),
+                        ('CALL', 50, 0),
+                        ('STORE_FAST', 111, 1),
+                        ('LOAD_CONST', 81, 0),
+                        ('RETURN_VALUE', 33, None)]
+
+        actual1 = self.read_code(self.probe_function1)
+        actual2 = self.read_code(self.probe_function2)
+        self.assertEqual(actual1, result_1)
+        self.assertEqual(actual2, result_2)
 
 
 if __name__ == '__main__':

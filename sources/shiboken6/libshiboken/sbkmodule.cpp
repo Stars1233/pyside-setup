@@ -308,6 +308,8 @@ static int constexpr LOAD_CONST_OpCode(long pyVersion)
 
 static int constexpr IMPORT_NAME_OpCode(long pyVersion)
 {
+    if (pyVersion >= 0x030F00) // 3.15
+        return 72;
     if (pyVersion >= 0x030E00) // 3.14
         return 73;
     if (pyVersion >= 0x030D00) // 3.13
