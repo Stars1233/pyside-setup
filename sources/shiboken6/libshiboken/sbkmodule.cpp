@@ -296,9 +296,12 @@ static PyMethodDef module_methods[] = {
 
 // OpCodes: Adapt for each Python version by checking the defines in the generated header opcode_ids.h
 // egrep '( LOAD_CONST | IMPORT_NAME )' opcode_ids.h
+// See also sbkfeature_base.cpp:115
 
 static int constexpr LOAD_CONST_OpCode(long pyVersion)
 {
+    if (pyVersion >= 0x030F00) // 3.15
+        return 81;
     if (pyVersion >= 0x030E00) // 3.14
         return 82;
     if (pyVersion >= 0x030D00) // 3.13
@@ -360,6 +363,10 @@ static bool detectImportStar(PyObject *dec_frame, PyObject *module)
     }
 
     Py_ssize_t oparg2 = uint8_t(co_code[f_lasti + 1]);
+    // Cf cpython/46d5106cfa903329821c097c3bf309e3efcd718f, Lazy import in 3.15,
+    //cpython/Python/generated_cases.c.h:6410
+    if (pyVersion >= 0x030F00) // 3.15
+        oparg2 >>= 2;
     AutoDecRef dec_co_names(PyObject_GetAttr(dec_f_code, _co_names));
     if (dec_co_names.isNull() || PyTuple_Check(dec_co_names.object()) == 0
         || oparg2 >= PyTuple_Size(dec_co_names.object())) {
