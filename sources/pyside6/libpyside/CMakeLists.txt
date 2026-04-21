@@ -103,7 +103,6 @@ append_size_optimization_flags(pyside6)
 
 target_include_directories(pyside6 PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-  $<INSTALL_INTERFACE:PySide6/include>
 )
 
 target_compile_definitions(pyside6 PRIVATE -DQT_LEAN_HEADERS=1 -DQT_NO_KEYWORDS=1)
@@ -191,13 +190,14 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/PySide6ConfigVersion.cmake.in"
                "${CMAKE_CURRENT_BINARY_DIR}/PySide6ConfigVersion.cmake" @ONLY)
 
 install(FILES ${libpyside_HEADERS}
-        DESTINATION ${BINDING_NAME}${pyside6_SUFFIX}/include)
+        DESTINATION include/${BINDING_NAME}${pyside6_SUFFIX})
 
 # build-time installation
 install(TARGETS pyside6 EXPORT PySide6Targets
                         LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
                         ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
-                        RUNTIME DESTINATION bin)
+                        RUNTIME DESTINATION bin
+                        INCLUDES DESTINATION "include/PySide6")
 
 # wheel installation
 set_target_properties(pyside6 PROPERTIES
@@ -207,7 +207,8 @@ if(NOT is_pyside6_superproject_build)
     install(TARGETS pyside6 EXPORT PySide6WheelTargets
                             LIBRARY DESTINATION "PySide6"
                             ARCHIVE DESTINATION "PySide6"
-                            RUNTIME DESTINATION "PySide6")
+                            RUNTIME DESTINATION "PySide6"
+                            INCLUDES DESTINATION "pyside6/include/PySide6")
 
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/wheel/PySide6Config${SHIBOKEN_PYTHON_CONFIG_SUFFIX}.cmake"
             DESTINATION "${LIB_INSTALL_DIR}/wheels/cmake/PySide6")

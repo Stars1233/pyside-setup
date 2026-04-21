@@ -80,7 +80,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D QT_NO_CAST_FROM_ASCII -D QT_NO_CAST_T
 #
 
 install(FILES ${libpysideremoteobjects_HEADERS}
-        DESTINATION ${BINDING_NAME}${pyside6remoteobjects_SUFFIX}/include)
+        DESTINATION include/${BINDING_NAME}${pyside6remoteobjects_SUFFIX})
 
 install(TARGETS pyside6remoteobjects EXPORT PySide6RemoteObjectsTargets
                            LIBRARY DESTINATION "${LIB_INSTALL_DIR}"

@@ -273,9 +273,12 @@ def get_package_include_path(which_package):
     if package_path is None:
         return None
 
-    includes = f"{package_path}/include"
-
-    return includes
+    # TODO: Switch to pathlib. Using this for consistency
+    pkg_name = os.path.basename(package_path)
+    subdir_path = f"{package_path}/include/{pkg_name}"
+    if os.path.isdir(subdir_path):
+        return subdir_path
+    return f"{package_path}/include"
 
 
 def get_package_qmake_lflags(which_package):

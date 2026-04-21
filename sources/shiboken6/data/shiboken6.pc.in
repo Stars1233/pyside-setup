@@ -1,7 +1,7 @@
 prefix=@CMAKE_INSTALL_PREFIX@
 exec_prefix=@CMAKE_INSTALL_PREFIX@
 libdir=@CMAKE_INSTALL_PREFIX@/@LIB_INSTALL_DIR@
-includedir=@CMAKE_INSTALL_PREFIX@/shiboken6/include
+includedir=@CMAKE_INSTALL_PREFIX@/include/shiboken6
 python_interpreter=@Python_EXECUTABLE@
 python_include_dir=@Python_INCLUDE_DIRS@
 

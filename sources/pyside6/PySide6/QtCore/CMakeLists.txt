@@ -307,4 +307,4 @@ if (APPLE)
 endif()
 
 install(FILES ${pyside6_SOURCE_DIR}/qtcorehelper.h ${pyside6_SOURCE_DIR}/qiopipe.h
-        DESTINATION PySide6/include/QtCore/)
+        DESTINATION include/PySide6/QtCore/)

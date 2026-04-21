@@ -97,10 +97,11 @@ def prepare_packages_win32(pyside_build, _vars):
             recursive=False, _vars=_vars)
 
     if config.is_internal_shiboken_module_build() or config.is_internal_pyside_build():
-        # <install>/{cmake_package_name}/include/* -> <package_for_wheels>/{st_package_name}/include
+        # <install>/include/{cmake_package_name}/* ->
+        # <package_for_wheels>/{st_package_name}/include/{cmake_package_name}
         copydir(
-            "{install_dir}/{cmake_package_name}/include",
-            destination_dir / "include",
+            "{install_dir}/include/{cmake_package_name}",
+            destination_dir / "include" / _vars["cmake_package_name"],
             _vars=_vars)
 
     if config.is_internal_pyside_build():

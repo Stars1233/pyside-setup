@@ -67,4 +67,4 @@ create_pyside_module(NAME QtDesigner
                      STATIC_SOURCES QtDesigner_static_src
                      TYPESYSTEM_NAME ${QtDesigner_BINARY_DIR}/typesystem_designer.xml)
 
-install(FILES ${pyside6_SOURCE_DIR}/qpydesignerextensions.h DESTINATION PySide6/include/QtDesigner)
+install(FILES ${pyside6_SOURCE_DIR}/qpydesignerextensions.h DESTINATION include/PySide6/QtDesigner)

@@ -86,7 +86,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D QT_NO_CAST_FROM_ASCII -D QT_NO_CAST_T
 qfp_strip_library("pyside6qml")
 
 install(FILES ${libpysideqml_HEADERS}
-        DESTINATION ${BINDING_NAME}${pyside6qml_SUFFIX}/include)
+        DESTINATION include/${BINDING_NAME}${pyside6qml_SUFFIX})
 
 #built-time installation
 install(TARGETS pyside6qml EXPORT PySide6Targets

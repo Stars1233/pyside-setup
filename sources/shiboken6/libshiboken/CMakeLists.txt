@@ -115,7 +115,6 @@ endif()
 target_include_directories(libshiboken PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-  $<INSTALL_INTERFACE:shiboken6/include>
 )
 
 if (NOT "${NUMPY_INCLUDE_DIR}" STREQUAL "")
@@ -203,11 +202,12 @@ install(FILES
         signature.h
         signature_p.h
 
-        DESTINATION shiboken6${shiboken6_SUFFIX}/include)
+        DESTINATION include/shiboken6${shiboken6_SUFFIX})
 install(TARGETS libshiboken EXPORT Shiboken6Targets
                             LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
                             ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
-                            RUNTIME DESTINATION bin)
+                            RUNTIME DESTINATION bin
+                            INCLUDES DESTINATION "include/shiboken6")
 install(EXPORT Shiboken6Targets NAMESPACE Shiboken6::
         DESTINATION ${LIB_INSTALL_DIR}/cmake/Shiboken6)
 
@@ -220,7 +220,8 @@ if(NOT is_pyside6_superproject_build)
     install(TARGETS libshiboken EXPORT Shiboken6WheelTargets
             LIBRARY DESTINATION "shiboken6"
             ARCHIVE DESTINATION "shiboken6"
-            RUNTIME DESTINATION "shiboken6")
+            RUNTIME DESTINATION "shiboken6"
+            INCLUDES DESTINATION "shiboken6/include/shiboken6")
 
     install(EXPORT Shiboken6WheelTargets
             NAMESPACE Shiboken6::
