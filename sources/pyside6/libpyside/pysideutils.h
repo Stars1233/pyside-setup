@@ -39,6 +39,9 @@ PYSIDE_API QString pyPathToQString(PyObject *path);
 /// \sa Shiboken::isCompiledMethod()
 PYSIDE_API bool isCompiledMethod(PyObject *callback);
 
+/// Returns the Python binary (value of sys.executable).
+PYSIDE_API QString sysExecutable();
+
 struct debugPyTypeObject
 {
     PYSIDE_API explicit debugPyTypeObject(PyTypeObject *o) noexcept;

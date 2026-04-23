@@ -31,6 +31,7 @@
 #include <bindingmanager.h>
 #include <gilstate.h>
 #include <helper.h>
+#include <pep384ext.h>
 #include <sbkconverter.h>
 #include <sbkerrors.h>
 #include <sbkpep.h>
@@ -904,6 +905,24 @@ QString pyPathToQString(PyObject *path)
 bool isCompiledMethod(PyObject *callback)
 {
     return Shiboken::isCompiledMethod(callback);
+}
+
+QString sysExecutable()
+{
+#if defined(Py_LIMITED_API)
+    Shiboken::AutoDecRef result(PepExt_EvalString("sys", "executable"));
+    if (result.isNull()) {
+        qWarning("libpyside: Unable to determine sys.executable.");
+        PyErr_Print();
+        return {};
+    }
+    return QDir::cleanPath(pyUnicodeToQString(result.object()));
+#else
+    PyConfig config;
+    PyConfig_InitPythonConfig(&config);
+    PyConfig_Read(&config);
+    return QDir::cleanPath(QString::fromWCharArray(config.executable));
+#endif
 }
 
 static const unsigned char qt_resource_name[] = {
