@@ -10,9 +10,36 @@
 #include <sbkpython.h>
 #include <sbkconverter.h>
 
+#include <pysideutils.h>
+
 #include <QtUiTools/QUiLoader>
 #include <QtWidgets/QWidget>
+
 #include <QtCore/QFile>
+#include <QtCore/QFileInfo>
+#include <QtCore/QOperatingSystemVersion>
+
+// Use the 'pyside6-uic' wrapper instead of 'uic', located next to
+// sys.executable.
+// This approach is better than rely on 'uic' since installing
+// the wheels cover this case.
+static QString getUicBinary()
+{
+    QString binary = QStringLiteral("pyside6-uic");
+    if constexpr (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows)
+        binary += QStringLiteral(".exe");
+
+    QString result = PySide::sysExecutable();
+    if (auto pos = result.lastIndexOf(u'/'); pos != -1) {
+        ++pos;
+        result.replace(pos, result.size() - pos, binary);
+        if (!QFileInfo::exists(result))
+            result = binary;
+    } else {
+        result = binary;
+    }
+    return result;
+}
 
 static void createChildrenNameAttributes(PyObject *root, QObject *object)
 {
@@ -100,10 +127,13 @@ if (!uiFile.exists()) {
     Py_RETURN_NONE;
 }
 
-// Use the 'pyside6-uic' wrapper instead of 'uic'
-// This approach is better than rely on 'uic' since installing
-// the wheels cover this case.
-QString uicBin(QStringLiteral("pyside6-uic"));
+static const QString uicBin = getUicBinary();
+if (!uicBin.contains(u'/')) {
+    qWarning("QUiLoader::loadUiType(): \"%s\" could not be found in the Python installation, "
+             "falling back to using a relative path. This poses a security risk. "
+             "Please contact the application vendor to fix the issue.", qPrintable(uicBin));
+}
+
 QStringList uicArgs = {QString::fromUtf8(uiFileName)};
 
 QProcess uicProcess;
