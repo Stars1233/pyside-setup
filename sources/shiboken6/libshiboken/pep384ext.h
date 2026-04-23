@@ -88,4 +88,11 @@ inline void PepExt_TypeCallFree(PyObject *object)
 
 LIBSHIBOKEN_API const char *PepExt_TypeGetQualName(PyTypeObject *type);
 
+/// Runs a script
+LIBSHIBOKEN_API PyObject *PepExt_RunString(const char *script);
+
+/// Evaluates an expression with no side effects
+LIBSHIBOKEN_API PyObject *PepExt_EvalString(const char *script);
+LIBSHIBOKEN_API PyObject *PepExt_EvalString(const char *module, const char *script);
+
 #endif // PEP384EXT_H
