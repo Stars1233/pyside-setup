@@ -276,9 +276,13 @@ def get_package_include_path(which_package):
     # TODO: Switch to pathlib. Using this for consistency
     pkg_name = os.path.basename(package_path)
     subdir_path = f"{package_path}/include/{pkg_name}"
+    base_path = f"{package_path}/include"
     if os.path.isdir(subdir_path):
-        return subdir_path
-    return f"{package_path}/include"
+        # Return both the sub-package dir and the base include dir so
+        # that both new and old wheel layout works (also system installation
+        # paths)
+        return f"{subdir_path} {base_path}"
+    return base_path
 
 
 def get_package_qmake_lflags(which_package):

@@ -87,7 +87,7 @@ class ModuleData:
             self.qml.append(f"Qt{self.name}")
         self.pyi.append(f"Qt{self.name}.pyi")
         self.typesystems.append(f"typesystem_{_lo}.xml")
-        self.include.append(f"Qt{self.name}/*.h")
+        self.include.append(f"PySide6/Qt{self.name}/*.h")
         self.glue.append(f"qt{_lo}.cpp")
         self.doc_glue.append(f"qt{_lo}.rst")
         if not len(self.metatypes):
@@ -250,7 +250,7 @@ def module_QtCore() -> ModuleData:
     ]
 
     data.typesystems.extend(_typesystems)
-    data.include.append("*.h")
+    data.include.append("PySide6/*.h")
     if sys.platform == "win32":
         data.qtlib.append("pyside6.*")
         data.extra_files.append("qt.conf")
@@ -319,7 +319,7 @@ def module_QtCore() -> ModuleData:
 
     # add the include folders for libpyside binaries
     # this is useful for downstream cmake projects like QtBridges
-    data.include.append("pyside6/*.h")
+    data.include.append("PySide6/*.h")
 
     return data
 
@@ -485,9 +485,9 @@ def module_QtQml() -> ModuleData:
     ]
 
     _include = [
-        "pysideqml.h",
-        "pysideqmlmacros.h",
-        "pysideqmlregistertype.h",
+        "PySide6/pysideqml.h",
+        "PySide6/pysideqmlmacros.h",
+        "PySide6/pysideqmlregistertype.h",
     ]
 
     _metatypes = [

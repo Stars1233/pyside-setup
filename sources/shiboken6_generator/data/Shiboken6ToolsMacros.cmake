@@ -25,11 +25,18 @@ function(shiboken_generator_create_binding)
 
     get_target_property(shiboken_include_dirs Shiboken6::libshiboken INTERFACE_INCLUDE_DIRECTORIES)
 
-    # Get Shiboken path based on build type
+    # Get Shiboken path, falling back to the other config if the requested one is absent
+    # (e.g. consumer project is Release but wheel was built as Debug, or vice versa).
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         get_target_property(shiboken_path Shiboken6::shiboken6 IMPORTED_LOCATION_DEBUG)
+        if(NOT shiboken_path)
+            get_target_property(shiboken_path Shiboken6::shiboken6 IMPORTED_LOCATION_RELEASE)
+        endif()
     else()
         get_target_property(shiboken_path Shiboken6::shiboken6 IMPORTED_LOCATION_RELEASE)
+        if(NOT shiboken_path)
+            get_target_property(shiboken_path Shiboken6::shiboken6 IMPORTED_LOCATION_DEBUG)
+        endif()
     endif()
 
     # Basic shiboken options

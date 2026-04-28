@@ -208,7 +208,7 @@ if(NOT is_pyside6_superproject_build)
                             LIBRARY DESTINATION "PySide6"
                             ARCHIVE DESTINATION "PySide6"
                             RUNTIME DESTINATION "PySide6"
-                            INCLUDES DESTINATION "pyside6/include/PySide6")
+                            INCLUDES DESTINATION "PySide6/include/PySide6")
 
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/wheel/PySide6Config${SHIBOKEN_PYTHON_CONFIG_SUFFIX}.cmake"
             DESTINATION "${LIB_INSTALL_DIR}/wheels/cmake/PySide6")
