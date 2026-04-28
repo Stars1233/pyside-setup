@@ -12,7 +12,7 @@ extern "C"
 
 LIBSHIBOKEN_API int currentSelectId(PyTypeObject *type);
 LIBSHIBOKEN_API PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name);
-LIBSHIBOKEN_API PyObject *Sbk_TypeGet___dict__(PyTypeObject *type, void *context);
+LIBSHIBOKEN_API PyObject *Sbk_TypeGet___dict__(PyObject *obType, void *context);
 LIBSHIBOKEN_API PyObject *SbkObject_GenericGetAttr(PyObject *obj, PyObject *name);
 LIBSHIBOKEN_API int SbkObject_GenericSetAttr(PyObject *obj, PyObject *name, PyObject *value);
 

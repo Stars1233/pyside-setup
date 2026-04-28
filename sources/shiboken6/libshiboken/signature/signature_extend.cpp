@@ -145,17 +145,17 @@ static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
     Py_RETURN_NONE;
 }
 
-static PyObject *pyside_cf_get___doc__(PyObject *cf)
+static PyObject *pyside_cf_get___doc__(PyObject *cf, void *)
 {
     return handle_doc(cf, old_cf_doc_descr);
 }
 
-static PyObject *pyside_sm_get___doc__(PyObject *sm)
+static PyObject *pyside_sm_get___doc__(PyObject *sm, void *)
 {
     return handle_doc(sm, old_sm_doc_descr);
 }
 
-static PyObject *pyside_md_get___doc__(PyObject *md)
+static PyObject *pyside_md_get___doc__(PyObject *md, void *)
 {
     return handle_doc(md, old_md_doc_descr);
 }
@@ -165,7 +165,7 @@ PyObject *pyside_tp_get___doc__(PyObject *tp)
     return handle_doc(tp, old_tp_doc_descr);
 }
 
-static PyObject *pyside_wd_get___doc__(PyObject *wd)
+static PyObject *pyside_wd_get___doc__(PyObject *wd, void *)
 {
     return handle_doc(wd, old_wd_doc_descr);
 }
@@ -173,26 +173,22 @@ static PyObject *pyside_wd_get___doc__(PyObject *wd)
 // PYSIDE-535: We cannot patch types easily in PyPy.
 //             Let's use the `get_signature` function, instead.
 static PyGetSetDef new_PyCFunction_getsets[] = {
-    {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_cf_get___doc__),
-                                          nullptr, nullptr, nullptr},
+    {"__doc__", pyside_cf_get___doc__, nullptr, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 static PyGetSetDef new_PyStaticMethod_getsets[] = {
-    {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_sm_get___doc__),
-                                          nullptr, nullptr, nullptr},
+    {"__doc__", pyside_sm_get___doc__, nullptr, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 static PyGetSetDef new_PyMethodDescr_getsets[] = {
-    {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_md_get___doc__),
-                                          nullptr, nullptr, nullptr},
+    {"__doc__", pyside_md_get___doc__, nullptr, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 static PyGetSetDef new_PyWrapperDescr_getsets[] = {
-    {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(pyside_wd_get___doc__),
-                                          nullptr, nullptr, nullptr},
+    {"__doc__", pyside_wd_get___doc__, nullptr, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 

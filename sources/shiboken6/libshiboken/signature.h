@@ -15,7 +15,7 @@ LIBSHIBOKEN_API int InitSignatureBytes(PyTypeObject *, const uint8_t[], size_t);
 LIBSHIBOKEN_API int FinishSignatureInitialization(PyObject *, const char *[]);
 LIBSHIBOKEN_API int FinishSignatureInitBytes(PyObject *, const uint8_t [], size_t);
 LIBSHIBOKEN_API void SetError_Argument(PyObject *, const char *, PyObject *);
-LIBSHIBOKEN_API PyObject *Sbk_TypeGet___doc__(PyObject *);
+LIBSHIBOKEN_API PyObject *Sbk_TypeGet___doc__(PyObject *, void *);
 LIBSHIBOKEN_API PyObject *GetFeatureDict();
 
 } // extern "C"

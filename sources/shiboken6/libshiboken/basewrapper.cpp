@@ -188,8 +188,9 @@ check_set_special_type_attr(PyTypeObject *type, PyObject *value, const char *nam
 
 // PYSIDE-1177: Add a setter to allow setting type doc.
 static int
-type_set_doc(PyTypeObject *type, PyObject *value, void * /* context */)
+type_set_doc(PyObject *obType, PyObject *value, void * /* context */)
 {
+    auto *type = reinterpret_cast<PyTypeObject *>(obType);
     if (!check_set_special_type_attr(type, value, "__doc__"))
         return -1;
     PyType_Modified(type);
@@ -200,10 +201,8 @@ type_set_doc(PyTypeObject *type, PyObject *value, void * /* context */)
 // PYSIDE-908: The function PyType_Modified does not work in PySide, so we need to
 // explicitly pass __doc__.
 static PyGetSetDef SbkObjectType_tp_getset[] = {
-    {const_cast<char *>("__doc__"),       reinterpret_cast<getter>(Sbk_TypeGet___doc__),
-                                          reinterpret_cast<setter>(type_set_doc), nullptr, nullptr},
-    {const_cast<char *>("__dict__"),      reinterpret_cast<getter>(Sbk_TypeGet___dict__),
-                                          nullptr, nullptr, nullptr},
+    {"__doc__",  Sbk_TypeGet___doc__, type_set_doc, nullptr, nullptr},
+    {"__dict__",  Sbk_TypeGet___dict__, nullptr, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}  // Sentinel
 };
 

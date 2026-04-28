@@ -415,11 +415,12 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
     return ret;
 }
 
-PyObject *Sbk_TypeGet___dict__(PyTypeObject *type, void * /* context */)
+PyObject *Sbk_TypeGet___dict__(PyObject *obType, void * /* context */)
 {
     /*
      * This is the override for getting a dict.
      */
+    auto *type = reinterpret_cast<PyTypeObject *>(obType);
     AutoDecRef tpDict(PepType_GetDict(type));
     auto *dict = tpDict.object();;
     if (dict == nullptr)

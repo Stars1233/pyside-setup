@@ -809,7 +809,7 @@ void SetError_Argument(PyObject *args, const char *func_name, PyObject *info)
  * PYSIDE-2101: The __signature__ attribute is gone due to rlcompleter.
  */
 
-PyObject *Sbk_TypeGet___doc__(PyObject *ob)
+PyObject *Sbk_TypeGet___doc__(PyObject *ob, void *)
 {
     init_shibokensupport_module();
     return pyside_tp_get___doc__(ob);
