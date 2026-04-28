@@ -40,6 +40,7 @@
 #include <QtCore/qxmlstream.h>
 
 #include <algorithm>
+#include <array>
 #include <optional>
 #include <memory>
 
@@ -191,248 +192,285 @@ struct EnumLookup
     EnumType value;
 };
 
-// Helper macros to define lookup functions that take a QStringView needle
-// and an optional default return value.
-#define ENUM_LOOKUP_BEGIN(EnumType, caseSensitivity, functionName) \
-static std::optional<EnumType> functionName(QStringView needle) \
-{ \
-    using HaystackEntry = EnumLookup<EnumType>; \
-    constexpr auto cs = caseSensitivity; \
-    static constexpr HaystackEntry haystack[] =
-
-#define ENUM_LOOKUP_LINEAR_SEARCH \
-    auto pred = [cs, needle](const HaystackEntry &he) { \
-        return he.name.compare(needle, cs) == 0; \
-    }; \
-    auto end = std::cend(haystack); \
-    auto it = std::find_if(std::cbegin(haystack), end, pred); \
-    if (it != end) \
-        return it->value; \
-    return std::nullopt; \
+template <Qt::CaseSensitivity cs, class EnumType, long unsigned N>
+static std::optional<EnumType>
+    lookupEnum(const std::array<EnumLookup<EnumType>, N> &haystack, QStringView needle)
+{
+    auto pred = [needle](const EnumLookup<EnumType> &candidate) {
+        return candidate.name.compare(needle, cs) == 0;
+    };
+    auto it = std::find_if(haystack.begin(), haystack.end(), pred);
+    if (it != haystack.end())
+        return it->value;
+    return std::nullopt;
 }
 
-ENUM_LOOKUP_BEGIN(TypeSystem::AllowThread, Qt::CaseInsensitive,
-                  allowThreadFromAttribute)
-    {
-        {u"yes", TypeSystem::AllowThread::Allow},
-        {u"true", TypeSystem::AllowThread::Allow},
-        {u"auto", TypeSystem::AllowThread::Auto},
-        {u"no", TypeSystem::AllowThread::Disallow},
-        {u"false", TypeSystem::AllowThread::Disallow},
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-
-ENUM_LOOKUP_BEGIN(TypeSystem::BoolCast, Qt::CaseInsensitive,
-                  boolCastFromAttribute)
-    {
-        {u"yes", TypeSystem::BoolCast::Enabled},
-        {u"true", TypeSystem::BoolCast::Enabled},
-        {u"no", TypeSystem::BoolCast::Disabled},
-        {u"false", TypeSystem::BoolCast::Disabled},
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(TypeSystem::PythonEnumType, Qt::CaseSensitive,
-                  pythonEnumTypeFromAttribute)
-    {
-        {u"Enum", TypeSystem::PythonEnumType::Enum},
-        {u"IntEnum", TypeSystem::PythonEnumType::IntEnum},
-        {u"Flag", TypeSystem::PythonEnumType::Flag},
-        {u"IntFlag", TypeSystem::PythonEnumType::IntFlag},
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(TypeSystem::DocMode, Qt::CaseSensitive,
-                  docModeFromAttribute)
+static std::optional<TypeSystem::AllowThread> allowThreadFromAttribute(QStringView needle)
 {
-        {u"nested", TypeSystem::DocMode::Nested},
-        {u"flat", TypeSystem::DocMode::Flat},
-};
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(TypeSystem::QtMetaTypeRegistration, Qt::CaseSensitive,
-                  qtMetaTypeFromAttribute)
-    {
-        {u"yes", TypeSystem::QtMetaTypeRegistration::Enabled},
-        {u"true", TypeSystem::QtMetaTypeRegistration::Enabled},
-        {u"base", TypeSystem::QtMetaTypeRegistration::BaseEnabled},
-        {u"no", TypeSystem::QtMetaTypeRegistration::Disabled},
-        {u"false", TypeSystem::QtMetaTypeRegistration::Disabled},
+    using AllowThreadLookup = EnumLookup<TypeSystem::AllowThread>;
+    static const std::array haystack{
+        AllowThreadLookup{u"yes", TypeSystem::AllowThread::Allow},
+        AllowThreadLookup{u"true", TypeSystem::AllowThread::Allow},
+        AllowThreadLookup{u"auto", TypeSystem::AllowThread::Auto},
+        AllowThreadLookup{u"no", TypeSystem::AllowThread::Disallow},
+        AllowThreadLookup{u"false", TypeSystem::AllowThread::Disallow}
     };
-ENUM_LOOKUP_LINEAR_SEARCH
+    return lookupEnum<Qt::CaseInsensitive>(haystack, needle);
+}
 
-ENUM_LOOKUP_BEGIN(TypeSystem::Language, Qt::CaseInsensitive,
-                  languageFromAttribute)
-    {
-        {u"all", TypeSystem::All}, // sorted!
-        {u"native", TypeSystem::NativeCode}, // em algum lugar do cpp
-        {u"shell", TypeSystem::ShellCode}, // coloca no header, mas antes da declaracao da classe
-        {u"target", TypeSystem::TargetLangCode}  // em algum lugar do cpp
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(DocumentationFormat, Qt::CaseInsensitive,
-                  documentationFormatFromAttribute)
-    {
-        {u"native", DocumentationFormat::Native},
-        {u"target",  DocumentationFormat::Target}
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(DocumentationEmphasis, Qt::CaseSensitive,
-                  documentationEmphasisFromAttribute)
-    {
-        {u"none", DocumentationEmphasis::None},
-        {u"language-note", DocumentationEmphasis::LanguageNote}
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(TypeSystem::Ownership, Qt::CaseInsensitive,
-                   ownershipFromFromAttribute)
-    {
-        {u"target", TypeSystem::TargetLangOwnership},
-        {u"c++", TypeSystem::CppOwnership},
-        {u"default", TypeSystem::DefaultOwnership}
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(AddedFunction::Access, Qt::CaseInsensitive,
-                  addedFunctionAccessFromAttribute)
-    {
-        {u"public", AddedFunction::Public},
-        {u"protected", AddedFunction::Protected},
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(FunctionModification::ModifierFlag, Qt::CaseSensitive,
-                  modifierFromAttribute)
-    {
-        {u"private", FunctionModification::Private},
-        {u"public", FunctionModification::Public},
-        {u"protected", FunctionModification::Protected},
-        {u"rename", FunctionModification::Rename},
-        {u"final", FunctionModification::Final},
-        {u"non-final", FunctionModification::NonFinal}
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(ReferenceCount::Action, Qt::CaseInsensitive,
-                  referenceCountFromAttribute)
-    {
-        {u"add", ReferenceCount::Add},
-        {u"add-all", ReferenceCount::AddAll},
-        {u"remove", ReferenceCount::Remove},
-        {u"set", ReferenceCount::Set},
-        {u"ignore", ReferenceCount::Ignore}
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(ArgumentOwner::Action, Qt::CaseInsensitive,
-                  argumentOwnerActionFromAttribute)
-    {
-        {u"add", ArgumentOwner::Add},
-        {u"remove", ArgumentOwner::Remove}
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(TypeSystem::CodeSnipPosition, Qt::CaseInsensitive,
-                  codeSnipPositionFromAttribute)
-    {
-        {u"beginning", TypeSystem::CodeSnipPositionBeginning},
-        {u"end", TypeSystem::CodeSnipPositionEnd},
-        {u"declaration", TypeSystem::CodeSnipPositionDeclaration},
-        {u"override", TypeSystem::CodeSnipPositionPyOverride},
-        {u"wrapper-declaration", TypeSystem::CodeSnipPositionWrapperDeclaration}
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(Include::IncludeType, Qt::CaseInsensitive,
-                  locationFromAttribute)
-    {
-        {u"global", Include::IncludePath},
-        {u"local", Include::LocalPath},
-        {u"target", Include::TargetLangImport}
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(TypeSystem::DocModificationMode, Qt::CaseInsensitive,
-                  docModificationFromAttribute)
-    {
-        {u"append", TypeSystem::DocModificationAppend},
-        {u"prepend", TypeSystem::DocModificationPrepend},
-        {u"replace", TypeSystem::DocModificationReplace}
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(DocumentationTarget, Qt::CaseSensitive,
-                  docTargetFromAttribute)
-    {
-        {u"documentation", DocumentationTarget::Documentation},
-        {u"docstring", DocumentationTarget::DocString}
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(ContainerTypeEntry::ContainerKind, Qt::CaseSensitive,
-                  containerTypeFromAttribute)
-    {
-        {u"list", ContainerTypeEntry::ListContainer},
-        {u"string-list", ContainerTypeEntry::ListContainer},
-        {u"linked-list", ContainerTypeEntry::ListContainer},
-        {u"vector", ContainerTypeEntry::ListContainer},
-        {u"stack", ContainerTypeEntry::ListContainer},
-        {u"queue", ContainerTypeEntry::ListContainer},
-        {u"set", ContainerTypeEntry::SetContainer},
-        {u"map", ContainerTypeEntry::MapContainer},
-        {u"multi-map", ContainerTypeEntry::MultiMapContainer},
-        {u"hash", ContainerTypeEntry::MapContainer},
-        {u"multi-hash", ContainerTypeEntry::MultiMapContainer},
-        {u"pair", ContainerTypeEntry::PairContainer},
-        {u"span", ContainerTypeEntry::SpanContainer}
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(TypeRejection::MatchType, Qt::CaseSensitive,
-                  typeRejectionFromAttribute)
-    {
-        {u"class", TypeRejection::ExcludeClass},
-        {u"function-name", TypeRejection::Function},
-        {u"field-name", TypeRejection::Field},
-        {u"enum-name", TypeRejection::Enum },
-        {u"argument-type", TypeRejection::ArgumentType},
-        {u"return-type", TypeRejection::ReturnType}
-    };
-ENUM_LOOKUP_LINEAR_SEARCH
-
-ENUM_LOOKUP_BEGIN(TypeSystem::ExceptionHandling, Qt::CaseSensitive,
-                  exceptionHandlingFromAttribute)
+static std::optional<TypeSystem::BoolCast> boolCastFromAttribute(QStringView needle)
 {
-    {u"no", TypeSystem::ExceptionHandling::Off},
-    {u"false", TypeSystem::ExceptionHandling::Off},
-    {u"auto-off", TypeSystem::ExceptionHandling::AutoDefaultToOff},
-    {u"auto-on", TypeSystem::ExceptionHandling::AutoDefaultToOn},
-    {u"yes", TypeSystem::ExceptionHandling::On},
-    {u"true", TypeSystem::ExceptionHandling::On},
-};
-ENUM_LOOKUP_LINEAR_SEARCH
+    using BoolCastLookup = EnumLookup<TypeSystem::BoolCast>;
+    static const std::array haystack{
+        BoolCastLookup{u"yes", TypeSystem::BoolCast::Enabled},
+        BoolCastLookup{u"true", TypeSystem::BoolCast::Enabled},
+        BoolCastLookup{u"no", TypeSystem::BoolCast::Disabled},
+        BoolCastLookup{u"false", TypeSystem::BoolCast::Disabled},
+    };
+    return lookupEnum<Qt::CaseInsensitive>(haystack, needle);
+}
 
-ENUM_LOOKUP_BEGIN(TypeSystem::SmartPointerType, Qt::CaseSensitive,
-                  smartPointerTypeFromAttribute)
+static std::optional<TypeSystem::PythonEnumType> pythonEnumTypeFromAttribute(QStringView needle)
 {
-    {u"handle", TypeSystem::SmartPointerType::Handle},
-    {u"unique", TypeSystem::SmartPointerType::Unique},
-    {u"value-handle", TypeSystem::SmartPointerType::ValueHandle},
-    {u"shared", TypeSystem::SmartPointerType::Shared}
-};
-ENUM_LOOKUP_LINEAR_SEARCH
+    using PythonEnumTypeLookup = EnumLookup<TypeSystem::PythonEnumType>;
+    static const std::array haystack{
+        PythonEnumTypeLookup{u"Enum", TypeSystem::PythonEnumType::Enum},
+        PythonEnumTypeLookup{u"IntEnum", TypeSystem::PythonEnumType::IntEnum},
+        PythonEnumTypeLookup{u"Flag", TypeSystem::PythonEnumType::Flag},
+        PythonEnumTypeLookup{u"IntFlag", TypeSystem::PythonEnumType::IntFlag},
+    };
+    return lookupEnum<Qt::CaseSensitive>(haystack, needle);
+}
 
-ENUM_LOOKUP_BEGIN(TypeSystem::SmartPointerToPythonConversion, Qt::CaseSensitive,
-                  smartPointerToPythonConversionFromAttribute)
+static std::optional<TypeSystem::DocMode> docModeFromAttribute(QStringView needle)
 {
-    {u"default", TypeSystem::SmartPointerToPythonConversion::Default},
-    {u"null-as-none", TypeSystem::SmartPointerToPythonConversion::NullAsNone}
-};
-ENUM_LOOKUP_LINEAR_SEARCH
+    using DocModeLookup = EnumLookup<TypeSystem::DocMode>;
+    static const std::array haystack{
+        DocModeLookup{u"nested", TypeSystem::DocMode::Nested},
+        DocModeLookup{u"flat", TypeSystem::DocMode::Flat},
+    };
+    return lookupEnum<Qt::CaseSensitive>(haystack, needle);
+}
+
+static std::optional<TypeSystem::QtMetaTypeRegistration> qtMetaTypeFromAttribute(QStringView needle)
+{
+    using QtMetaTypeRegistrationLookup = EnumLookup<TypeSystem::QtMetaTypeRegistration>;
+    static const std::array haystack{
+        QtMetaTypeRegistrationLookup{u"yes", TypeSystem::QtMetaTypeRegistration::Enabled},
+        QtMetaTypeRegistrationLookup{u"true", TypeSystem::QtMetaTypeRegistration::Enabled},
+        QtMetaTypeRegistrationLookup{u"base", TypeSystem::QtMetaTypeRegistration::BaseEnabled},
+        QtMetaTypeRegistrationLookup{u"no", TypeSystem::QtMetaTypeRegistration::Disabled},
+        QtMetaTypeRegistrationLookup{u"false", TypeSystem::QtMetaTypeRegistration::Disabled},
+    };
+    return lookupEnum<Qt::CaseSensitive>(haystack, needle);
+}
+
+static std::optional<TypeSystem::Language> languageFromAttribute(QStringView needle)
+{
+    using LanguageLookup = EnumLookup<TypeSystem::Language>;
+    static const std::array haystack{
+        LanguageLookup{u"all", TypeSystem::All}, // sorted!
+        LanguageLookup{u"native", TypeSystem::NativeCode}, // em algum lugar do cpp
+        LanguageLookup{u"shell", TypeSystem::ShellCode}, // coloca no header, mas antes da declaracao da classe
+        LanguageLookup{u"target", TypeSystem::TargetLangCode}  // em algum lugar do cpp
+    };
+    return lookupEnum<Qt::CaseInsensitive>(haystack, needle);
+}
+
+static std::optional<DocumentationFormat> documentationFormatFromAttribute(QStringView needle)
+{
+    using DocumentationFormatLookup = EnumLookup<DocumentationFormat>;
+    static const std::array haystack{
+        DocumentationFormatLookup{u"native", DocumentationFormat::Native},
+        DocumentationFormatLookup{u"target", DocumentationFormat::Target}
+    };
+    return lookupEnum<Qt::CaseInsensitive>(haystack, needle);
+}
+
+static std::optional<DocumentationEmphasis> documentationEmphasisFromAttribute(QStringView needle)
+{
+    using DocumentationEmphasisLookup = EnumLookup<DocumentationEmphasis>;
+    static const std::array haystack{
+        DocumentationEmphasisLookup{u"none", DocumentationEmphasis::None},
+        DocumentationEmphasisLookup{u"language-note", DocumentationEmphasis::LanguageNote}
+    };
+    return lookupEnum<Qt::CaseSensitive>(haystack, needle);
+}
+
+static std::optional<TypeSystem::Ownership> ownershipFromFromAttribute(QStringView needle)
+{
+    using OwnershipLookup = EnumLookup<TypeSystem::Ownership>;
+    static const std::array haystack{
+        OwnershipLookup{u"target", TypeSystem::TargetLangOwnership},
+        OwnershipLookup{u"c++", TypeSystem::CppOwnership},
+        OwnershipLookup{u"default", TypeSystem::DefaultOwnership}
+    };
+    return lookupEnum<Qt::CaseInsensitive>(haystack, needle);
+}
+
+static std::optional<AddedFunction::Access> addedFunctionAccessFromAttribute(QStringView needle)
+{
+    using AddedFunctionAccessLookup = EnumLookup<AddedFunction::Access>;
+    static const std::array haystack{
+        AddedFunctionAccessLookup{u"public", AddedFunction::Public},
+        AddedFunctionAccessLookup{u"protected", AddedFunction::Protected},
+    };
+    return lookupEnum<Qt::CaseInsensitive>(haystack, needle);
+}
+
+static std::optional<FunctionModification::ModifierFlag> modifierFromAttribute(QStringView needle)
+{
+    using ModifierFlagLookup = EnumLookup<FunctionModification::ModifierFlag>;
+    static const std::array haystack{
+        ModifierFlagLookup{u"private", FunctionModification::Private},
+        ModifierFlagLookup{u"public", FunctionModification::Public},
+        ModifierFlagLookup{u"protected", FunctionModification::Protected},
+        ModifierFlagLookup{u"rename", FunctionModification::Rename},
+        ModifierFlagLookup{u"final", FunctionModification::Final},
+        ModifierFlagLookup{u"non-final", FunctionModification::NonFinal}
+    };
+    return lookupEnum<Qt::CaseSensitive>(haystack, needle);
+}
+
+static std::optional<ReferenceCount::Action> referenceCountFromAttribute(QStringView needle)
+{
+    using ReferenceCountActionLookup = EnumLookup<ReferenceCount::Action>;
+    static const std::array haystack{
+        ReferenceCountActionLookup{u"add", ReferenceCount::Add},
+        ReferenceCountActionLookup{u"add-all", ReferenceCount::AddAll},
+        ReferenceCountActionLookup{u"remove", ReferenceCount::Remove},
+        ReferenceCountActionLookup{u"set", ReferenceCount::Set},
+        ReferenceCountActionLookup{u"ignore", ReferenceCount::Ignore}
+    };
+    return lookupEnum<Qt::CaseInsensitive>(haystack, needle);
+}
+
+static std::optional<ArgumentOwner::Action> argumentOwnerActionFromAttribute(QStringView needle)
+{
+    using ArgumentOwnerActionLookup = EnumLookup<ArgumentOwner::Action>;
+    static const std::array haystack{
+        ArgumentOwnerActionLookup{u"add", ArgumentOwner::Add},
+        ArgumentOwnerActionLookup{u"remove", ArgumentOwner::Remove}
+    };
+    return lookupEnum<Qt::CaseInsensitive>(haystack, needle);
+}
+
+static std::optional<TypeSystem::CodeSnipPosition> codeSnipPositionFromAttribute(QStringView needle)
+{
+    using CodeSnipPositionLookup = EnumLookup<TypeSystem::CodeSnipPosition>;
+    static const std::array haystack{
+        CodeSnipPositionLookup{u"beginning", TypeSystem::CodeSnipPositionBeginning},
+        CodeSnipPositionLookup{u"end", TypeSystem::CodeSnipPositionEnd},
+        CodeSnipPositionLookup{u"declaration", TypeSystem::CodeSnipPositionDeclaration},
+        CodeSnipPositionLookup{u"override", TypeSystem::CodeSnipPositionPyOverride},
+        CodeSnipPositionLookup{u"wrapper-declaration", TypeSystem::CodeSnipPositionWrapperDeclaration}
+    };
+    return lookupEnum<Qt::CaseInsensitive>(haystack, needle);
+}
+
+static std::optional<Include::IncludeType> locationFromAttribute(QStringView needle)
+{
+    using IncludeTypeLookup = EnumLookup<Include::IncludeType>;
+    static const std::array haystack{
+        IncludeTypeLookup{u"global", Include::IncludePath},
+        IncludeTypeLookup{u"local", Include::LocalPath},
+        IncludeTypeLookup{u"target", Include::TargetLangImport}
+    };
+    return lookupEnum<Qt::CaseInsensitive>(haystack, needle);
+}
+
+static std::optional<TypeSystem::DocModificationMode> docModificationFromAttribute(QStringView needle)
+{
+    using DocModificationModeLookup = EnumLookup<TypeSystem::DocModificationMode>;
+    static const std::array haystack{
+        DocModificationModeLookup{u"append", TypeSystem::DocModificationAppend},
+        DocModificationModeLookup{u"prepend", TypeSystem::DocModificationPrepend},
+        DocModificationModeLookup{u"replace", TypeSystem::DocModificationReplace}
+    };
+    return lookupEnum<Qt::CaseInsensitive>(haystack, needle);
+}
+
+static std::optional<DocumentationTarget> docTargetFromAttribute(QStringView needle)
+{
+    using DocumentationTargetLookup = EnumLookup<DocumentationTarget>;
+    static const std::array haystack{
+        DocumentationTargetLookup{u"documentation", DocumentationTarget::Documentation},
+        DocumentationTargetLookup{u"docstring", DocumentationTarget::DocString}
+    };
+    return lookupEnum<Qt::CaseSensitive>(haystack, needle);
+}
+
+static std::optional<ContainerTypeEntry::ContainerKind> containerTypeFromAttribute(QStringView needle)
+{
+    using ContainerKindLookup = EnumLookup<ContainerTypeEntry::ContainerKind>;
+    static const std::array haystack{
+        ContainerKindLookup{u"list", ContainerTypeEntry::ListContainer},
+        ContainerKindLookup{u"string-list", ContainerTypeEntry::ListContainer},
+        ContainerKindLookup{u"linked-list", ContainerTypeEntry::ListContainer},
+        ContainerKindLookup{u"vector", ContainerTypeEntry::ListContainer},
+        ContainerKindLookup{u"stack", ContainerTypeEntry::ListContainer},
+        ContainerKindLookup{u"queue", ContainerTypeEntry::ListContainer},
+        ContainerKindLookup{u"set", ContainerTypeEntry::SetContainer},
+        ContainerKindLookup{u"map", ContainerTypeEntry::MapContainer},
+        ContainerKindLookup{u"multi-map", ContainerTypeEntry::MultiMapContainer},
+        ContainerKindLookup{u"hash", ContainerTypeEntry::MapContainer},
+        ContainerKindLookup{u"multi-hash", ContainerTypeEntry::MultiMapContainer},
+        ContainerKindLookup{u"pair", ContainerTypeEntry::PairContainer},
+        ContainerKindLookup{u"span", ContainerTypeEntry::SpanContainer}
+    };
+    return lookupEnum<Qt::CaseSensitive>(haystack, needle);
+}
+
+static std::optional<TypeRejection::MatchType> typeRejectionFromAttribute(QStringView needle)
+{
+    using TypeRejectionLookup = EnumLookup<TypeRejection::MatchType>;
+    static const std::array haystack{
+        TypeRejectionLookup{u"class", TypeRejection::ExcludeClass},
+        TypeRejectionLookup{u"function-name", TypeRejection::Function},
+        TypeRejectionLookup{u"field-name", TypeRejection::Field},
+        TypeRejectionLookup{u"enum-name", TypeRejection::Enum},
+        TypeRejectionLookup{u"argument-type", TypeRejection::ArgumentType},
+        TypeRejectionLookup{u"return-type", TypeRejection::ReturnType}
+    };
+    return lookupEnum<Qt::CaseSensitive>(haystack, needle);
+}
+
+static std::optional<TypeSystem::ExceptionHandling> exceptionHandlingFromAttribute(QStringView needle)
+{
+    using ExceptionHandlingLookup = EnumLookup<TypeSystem::ExceptionHandling>;
+    static const std::array haystack{
+        ExceptionHandlingLookup{u"no", TypeSystem::ExceptionHandling::Off},
+        ExceptionHandlingLookup{u"false", TypeSystem::ExceptionHandling::Off},
+        ExceptionHandlingLookup{u"auto-off", TypeSystem::ExceptionHandling::AutoDefaultToOff},
+        ExceptionHandlingLookup{u"auto-on", TypeSystem::ExceptionHandling::AutoDefaultToOn},
+        ExceptionHandlingLookup{u"yes", TypeSystem::ExceptionHandling::On},
+        ExceptionHandlingLookup{u"true", TypeSystem::ExceptionHandling::On},
+    };
+    return lookupEnum<Qt::CaseSensitive>(haystack, needle);
+}
+
+static std::optional<TypeSystem::SmartPointerType> smartPointerTypeFromAttribute(QStringView needle)
+{
+    using SmartPointerTypeLookup = EnumLookup<TypeSystem::SmartPointerType>;
+    static const std::array haystack{
+        SmartPointerTypeLookup{u"handle", TypeSystem::SmartPointerType::Handle},
+        SmartPointerTypeLookup{u"unique", TypeSystem::SmartPointerType::Unique},
+        SmartPointerTypeLookup{u"value-handle", TypeSystem::SmartPointerType::ValueHandle},
+        SmartPointerTypeLookup{u"shared", TypeSystem::SmartPointerType::Shared}
+    };
+    return lookupEnum<Qt::CaseSensitive>(haystack, needle);
+}
+
+static std::optional<TypeSystem::SmartPointerToPythonConversion>
+    smartPointerToPythonConversionFromAttribute(QStringView needle)
+{
+    using SmartPointerConversionLookup = EnumLookup<TypeSystem::SmartPointerToPythonConversion>;
+    static const std::array haystack{
+        SmartPointerConversionLookup{u"default", TypeSystem::SmartPointerToPythonConversion::Default},
+        SmartPointerConversionLookup{u"null-as-none", TypeSystem::SmartPointerToPythonConversion::NullAsNone}
+    };
+    return lookupEnum<Qt::CaseSensitive>(haystack, needle);
+}
 
 template <class EnumType>
 static std::optional<EnumType>
@@ -535,27 +573,31 @@ QDebug operator<<(QDebug d, StackElement st)
 }
 #endif // QT_NO_DEBUG_STREAM
 
-ENUM_LOOKUP_BEGIN(TypeSystem::SnakeCase, Qt::CaseSensitive,
-                  snakeCaseFromAttribute)
+static std::optional<TypeSystem::SnakeCase> snakeCaseFromAttribute(QStringView needle)
 {
-    {u"no", TypeSystem::SnakeCase::Disabled},
-    {u"false", TypeSystem::SnakeCase::Disabled},
-    {u"yes", TypeSystem::SnakeCase::Enabled},
-    {u"true", TypeSystem::SnakeCase::Enabled},
-    {u"both", TypeSystem::SnakeCase::Both},
-};
-ENUM_LOOKUP_LINEAR_SEARCH
+    using SnakeCaseLookup = EnumLookup<TypeSystem::SnakeCase>;
+    static const std::array haystack{
+        SnakeCaseLookup{u"no", TypeSystem::SnakeCase::Disabled},
+        SnakeCaseLookup{u"false", TypeSystem::SnakeCase::Disabled},
+        SnakeCaseLookup{u"yes", TypeSystem::SnakeCase::Enabled},
+        SnakeCaseLookup{u"true", TypeSystem::SnakeCase::Enabled},
+        SnakeCaseLookup{u"both", TypeSystem::SnakeCase::Both},
+    };
+    return lookupEnum<Qt::CaseSensitive>(haystack, needle);
+}
 
-ENUM_LOOKUP_BEGIN(TypeSystem::Visibility, Qt::CaseSensitive,
-                  visibilityFromAttribute)
+static std::optional<TypeSystem::Visibility> visibilityFromAttribute(QStringView needle)
 {
-    {u"no", TypeSystem::Visibility::Invisible},
-    {u"false", TypeSystem::Visibility::Invisible},
-    {u"auto", TypeSystem::Visibility::Auto},
-    {u"yes", TypeSystem::Visibility::Visible},
-    {u"true", TypeSystem::Visibility::Visible},
-};
-ENUM_LOOKUP_LINEAR_SEARCH
+    using VisibilityLookup = EnumLookup<TypeSystem::Visibility>;
+    static const std::array haystack{
+        VisibilityLookup{u"no", TypeSystem::Visibility::Invisible},
+        VisibilityLookup{u"false", TypeSystem::Visibility::Invisible},
+        VisibilityLookup{u"auto", TypeSystem::Visibility::Auto},
+        VisibilityLookup{u"yes", TypeSystem::Visibility::Visible},
+        VisibilityLookup{u"true", TypeSystem::Visibility::Visible},
+    };
+    return lookupEnum<Qt::CaseSensitive>(haystack, needle);
+}
 
 static qsizetype indexOfAttribute(const QXmlStreamAttributes &atts,
                                   QAnyStringView name)
