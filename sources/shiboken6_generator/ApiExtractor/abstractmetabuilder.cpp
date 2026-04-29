@@ -318,6 +318,9 @@ void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionMode
     Q_ASSERT(!currentClass || currentClass->isNamespace());
     Q_ASSERT(item->accessPolicy() == Access::Public);
 
+    if (item->isTemplate())
+        return;
+
     const ArgumentList &itemArguments = item->arguments();
     bool firstArgumentIsSelf = true;
     bool unaryOperator = false;
@@ -419,6 +422,9 @@ void AbstractMetaBuilderPrivate::traverseFreeOperatorFunction(const FunctionMode
 bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem &item,
                                                         const AbstractMetaClassPtr &currentClass)
 {
+    if (item->isTemplate())
+        return false;
+
     ArgumentList itemArguments = item->arguments();
     if (itemArguments.size() != 2 || item->accessPolicy() != Access::Public)
         return false;
