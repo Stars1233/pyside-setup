@@ -7033,24 +7033,7 @@ void CppGenerator::writeModuleInitFunction(TextStream &s, const QString &moduleD
      s << convInitFunc << "();\n" << containerConvInitFunc << "();\n";
      if (!qtEnumRegisterMetaTypeFunc.isEmpty())
          s << qtEnumRegisterMetaTypeFunc << "();\n";
-     s << '\n';
-
-     // As of 8/25, Nuitka does not support multi-phase initialization. Fall back
-     s << "PyObject *module = nullptr;\n"
-         << "if (Shiboken::isCompiled()) {\n" << indent
-         << moduleDef << ".m_size = -1;\n"
-         << moduleDef << ".m_slots = nullptr;\n"
-         << "module = Shiboken::Module::createOnly(\""  << moduleName()
-         << "\", &" << moduleDef << ");\n"
-         << "if (module == nullptr)\n" << indent << "return nullptr;\n" << outdent
-         << "#ifdef Py_GIL_DISABLED\n"
-         << "PyUnstable_Module_SetGIL(module, Py_MOD_GIL_NOT_USED);\n"
-         << "#endif\n"
-         << "if (" << execFunc << "(module) != 0)\n" << indent << "return nullptr;\n" << outdent
-         << outdent << "} else {\n" << indent;
-      // Multi-phase initialization (exec() will be called by CPython).
-      s  << "module = PyModuleDef_Init(&" << moduleDef << ");\n" << outdent << "}\n"
-         << "return module;\n" << outdent << "}\n\n";
+     s << "\nreturn PyModuleDef_Init(&" << moduleDef << ");\n" << outdent << "}\n";
 }
 
 void CppGenerator::writeQtEnumRegisterMetaTypeFunction(TextStream &s,
