@@ -6,6 +6,7 @@
 #include <abstractmetalang.h>
 #include "apiextractorresult.h"
 #include "ctypenames.h"
+#include "pymethoddefentry.h"
 #include "containertypeentry.h"
 #include "textstream.h"
 #include "typedatabase.h"
@@ -18,27 +19,20 @@ using namespace Qt::StringLiterals;
 
 // Write a PyMethodDef entry, allowing for registering C++ functions
 // under different names for Python.
-static void writeMethod(TextStream &s, const QString &privateObjType,
-                        const char *cppName, const char *pythonName,
-                        const char *flags)
-{
-    if (pythonName == nullptr)
-        pythonName = cppName;
-    s << "{\"" << pythonName << "\", reinterpret_cast<PyCFunction>("
-       << privateObjType << "::" << cppName << "), "<< flags
-       << ", \"" << /* doc */ pythonName << "\"},\n";
-}
-
 static inline void writeMethod(TextStream &s, const QString &privateObjType,
-                               const char *cppName, const char *pythonName = nullptr)
+                               const QString &cppName, const QString &pythonName = {})
 {
-    writeMethod(s, privateObjType, cppName, pythonName, "METH_O");
+    s << PyMethodDefEntry{pythonName, privateObjType + "::"_L1 + cppName,
+                          PyMethodFlag::SingleObject, cppName}
+        << ",\n";
 }
 
 static inline void writeNoArgsMethod(TextStream &s, const QString &privateObjType,
-                                     const char *cppName, const char *pythonName = nullptr)
+                                     const  QString &cppName, const QString &pythonName = {})
 {
-    writeMethod(s, privateObjType, cppName, pythonName, "METH_NOARGS");
+    s << PyMethodDefEntry{pythonName, privateObjType + "::"_L1 + cppName,
+                          PyMethodFlag::NoArgs, cppName}
+        << ",\n";
 }
 
 static void writeSlot(TextStream &s, const char *tpName, const char *value)
@@ -197,22 +191,22 @@ CppGenerator::OpaqueContainerData
     const QString methods = result.name + u"_methods"_s;
     s << "static PyMethodDef " << methods << "[] = {\n" << indent;
     if (!isFixed) {
-        writeMethod(s, privateObjType, "push_back");
-        writeMethod(s, privateObjType, "push_back", "append"); // Qt convention
-        writeNoArgsMethod(s, privateObjType, "clear");
-        writeNoArgsMethod(s, privateObjType, "pop_back");
-        writeNoArgsMethod(s, privateObjType, "pop_back", "removeLast"); // Qt convention
+        writeMethod(s, privateObjType, u"push_back"_s);
+        writeMethod(s, privateObjType, u"push_back"_s, u"append"_s); // Qt convention
+        writeNoArgsMethod(s, privateObjType, u"clear"_s);
+        writeNoArgsMethod(s, privateObjType, u"pop_back"_s);
+        writeNoArgsMethod(s, privateObjType, u"pop_back"_s, u"removeLast"_s); // Qt convention
         if (!isStdVector) {
-            writeMethod(s, privateObjType, "push_front");
-            writeMethod(s, privateObjType, "push_front", "prepend"); // Qt convention
-            writeNoArgsMethod(s, privateObjType, "pop_front");
-            writeMethod(s, privateObjType, "pop_front", "removeFirst"); // Qt convention
+            writeMethod(s, privateObjType, u"push_front"_s);
+            writeMethod(s, privateObjType, u"push_front"_s, u"prepend"_s); // Qt convention
+            writeNoArgsMethod(s, privateObjType, u"pop_front"_s);
+            writeNoArgsMethod(s, privateObjType, u"pop_front"_s, u"removeFirst"_s); // Qt convention
         }
-        writeMethod(s, privateObjType, "reserve"); // SFINAE'd out for list
-        writeNoArgsMethod(s, privateObjType, "capacity");
+        writeMethod(s, privateObjType, u"reserve"_s); // SFINAE'd out for list
+        writeNoArgsMethod(s, privateObjType, u"capacity"_s);
     }
-    writeNoArgsMethod(s, privateObjType, "data");
-    writeNoArgsMethod(s, privateObjType, "constData");
+    writeNoArgsMethod(s, privateObjType, u"data"_s);
+    writeNoArgsMethod(s, privateObjType, u"constData"_s);
     s << "{nullptr, nullptr, 0, nullptr} // Sentinel\n"
         << outdent << "};\n\n";
 
