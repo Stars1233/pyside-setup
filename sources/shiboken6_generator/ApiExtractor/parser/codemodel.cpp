@@ -990,6 +990,15 @@ QString _FunctionModelItem::classQualifiedSignature() const
 {
     QString result;
     QTextStream str(&result);
+    if (isTemplate()) {
+        str << "template <";
+        for (qsizetype i = 0, count = templateParameters().size(); i < count; ++i) {
+            if (i > 0)
+                str << ", ";
+            str << templateParameters().at(i)->toString();
+        }
+        str << "> ";
+    }
     if (m_attributes.testFlag(FunctionAttribute::Virtual))
         str << "virtual ";
     if (m_functionType != CodeModel::FunctionType::Constructor)
@@ -1459,6 +1468,27 @@ void _TemplateParameterModelItem::setType(const TypeInfo &type)
     m_type = type;
 }
 
+TemplateParameterKind  _TemplateParameterModelItem::parameterKind() const
+{
+    return m_parameterKind;
+}
+
+void _TemplateParameterModelItem::setParameterKind(TemplateParameterKind tk)
+{
+    m_parameterKind = tk;
+}
+
+QString _TemplateParameterModelItem::toString() const
+{
+    QString result;
+    if (m_parameterKind == TemplateParameterKind::Type)
+        result += "class "_L1;
+    result += name();
+    if (m_defaultValue)
+        result += " = {}"_L1;
+    return result;
+}
+
 bool _TemplateParameterModelItem::defaultValue() const
 {
     return m_defaultValue;
@@ -1473,6 +1503,8 @@ void _TemplateParameterModelItem::setDefaultValue(bool defaultValue)
 void _TemplateParameterModelItem::formatDebug(QDebug &d) const
 {
     _CodeModelItem::formatDebug(d);
+    if (m_parameterKind == TemplateParameterKind::NonType)
+        d << " [non-type]";
     d << ", type=" << m_type;
     if (m_defaultValue)
         d << " [defaultValue]";

@@ -399,8 +399,9 @@ public:
     Access accessPolicy() const;
     void setAccessPolicy(Access accessPolicy);
 
-    TemplateParameterList templateParameters() const { return m_templateParameters; }
+    const TemplateParameterList &templateParameters() const { return m_templateParameters; }
     void addTemplateParameter(const TemplateParameterModelItem &templateParameter);
+    bool isTemplate() const { return !m_templateParameters.isEmpty(); }
 
     TypeInfo type() const;
     void setType(const TypeInfo &type);
@@ -443,7 +444,6 @@ public:
     ~_FunctionModelItem() override;
 
     ArgumentList arguments() const;
-
     void addArgument(const ArgumentModelItem& item);
 
     CodeModel::FunctionType functionType() const;
@@ -661,6 +661,11 @@ public:
     TypeInfo type() const;
     void setType(const TypeInfo &type);
 
+    TemplateParameterKind parameterKind() const;
+    void setParameterKind(TemplateParameterKind tk);
+
+    QString toString() const;
+
     bool defaultValue() const;
     void setDefaultValue(bool defaultValue);
 
@@ -670,6 +675,7 @@ public:
 
 private:
     TypeInfo m_type;
+    TemplateParameterKind m_parameterKind = TemplateParameterKind::Type;
     bool m_defaultValue = false;
 };
 

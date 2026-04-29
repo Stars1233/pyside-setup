@@ -435,6 +435,7 @@ TemplateParameterModelItem BuilderPrivate::createNonTypeTemplateParameter(const 
     if (!typeO.has_value())
         return {};
     TemplateParameterModelItem result = createTemplateParameter(cursor);
+    result->setParameterKind(TemplateParameterKind::NonType);
     result->setType(typeO.value());
     return result;
 }
@@ -1211,7 +1212,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         break;
     case CXCursor_TemplateTypeParameter:
     case CXCursor_NonTypeTemplateParameter: {
-        const TemplateParameterModelItem tItem = cursor.kind == CXCursor_TemplateTemplateParameter
+        const TemplateParameterModelItem tItem = cursor.kind == CXCursor_TemplateTypeParameter
             ? d->createTemplateParameter(cursor) : d->createNonTypeTemplateParameter(cursor);
         // Apply to function/member template?
         if (d->m_currentFunction) {

@@ -70,4 +70,9 @@ enum class TypeCategory : unsigned char {
     Void
 };
 
+enum class TemplateParameterKind : unsigned char {
+    Type, // template<class T>
+    NonType // template<int N>
+};
+
 #endif // CODEMODEL_ENUMS_H

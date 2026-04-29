@@ -2177,7 +2177,7 @@ AbstractMetaFunctionPtr
 {
     const auto *tdb = TypeDatabase::instance();
 
-    if (!functionItem->templateParameters().isEmpty())
+    if (functionItem->isTemplate())
         return {};
 
     if (functionItem->isDeleted()) {
