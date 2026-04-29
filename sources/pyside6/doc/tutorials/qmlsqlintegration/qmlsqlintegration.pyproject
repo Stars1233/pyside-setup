@@ -1,0 +1,3 @@
+{
+    "files": ["main.py", "sqlDialog.py", "App/Main.qml", "App/qmldir"]
+}
