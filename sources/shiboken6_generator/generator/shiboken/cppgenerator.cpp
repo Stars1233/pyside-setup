@@ -5088,7 +5088,7 @@ QString CppGenerator::writeCopyFunction(TextStream &s,
 
     // PYSIDE-3135 replace _Self by Self when the minimum Python version is 3.11
     signatureStream << fullPythonClassName(metaClass) << ".__copy__(self)->typing._Self\n";
-    definitionStream << PyMethodDefEntry{u"__copy__"_s, funcName, {"METH_NOARGS"_ba}, {}}
+    definitionStream << PyMethodDefEntry{u"__copy__"_s, funcName, PyMethodFlag::NoArgs, {}}
                      << ",\n";
 
     s << "static PyObject *" << funcName << "(PyObject *self)\n"
@@ -5403,20 +5403,19 @@ void CppGenerator::writeRichCompareFunction(TextStream &s, TextStream &t,
 }
 
 // Return a flag combination for PyMethodDef
-QByteArrayList CppGenerator::methodDefinitionParameters(const OverloadData &overloadData) const
+PyMethodFlags CppGenerator::methodDefinitionParameters(const OverloadData &overloadData) const
 {
     const bool usePyArgs = overloadData.pythonFunctionWrapperUsesListOfArguments();
     int min = overloadData.minArgs();
     int max = overloadData.maxArgs();
 
-    QByteArrayList result;
+    PyMethodFlags result;
     if ((min == max) && (max < 2) && !usePyArgs) {
-        result.append(max == 0 ? QByteArrayLiteral("METH_NOARGS")
-                               : QByteArrayLiteral("METH_O"));
+        result.setFlag(max == 0 ? PyMethodFlag::NoArgs : PyMethodFlag::SingleObject);
     } else {
-        result.append(QByteArrayLiteral("METH_VARARGS"));
+        result.setFlag(PyMethodFlag::Varargs);
         if (overloadData.hasArgumentWithDefaultValue())
-            result.append(QByteArrayLiteral("METH_KEYWORDS"));
+            result.setFlag(PyMethodFlag::Keywords);
     }
     // METH_STATIC causes a crash when used for global functions (also from
     // invisible namespaces).
@@ -5424,9 +5423,9 @@ QByteArrayList CppGenerator::methodDefinitionParameters(const OverloadData &over
     if (ownerClass
         && !invisibleTopNamespaces().contains(std::const_pointer_cast<AbstractMetaClass>(ownerClass))) {
         if (overloadData.hasStaticFunction())
-            result.append(QByteArrayLiteral("METH_STATIC"));
+            result.setFlag(PyMethodFlag::Static);
         if (overloadData.hasClassMethod())
-            result.append(QByteArrayLiteral("METH_CLASS"));
+            result.setFlag(PyMethodFlag::Class);
     }
     return result;
 }
@@ -5437,7 +5436,7 @@ QList<PyMethodDefEntry>
 
     const QStringList names = overloadData.referenceFunction()->definitionNames();
     const QString funcName = cpythonFunctionName(overloadData.referenceFunction());
-    const QByteArrayList parameters = methodDefinitionParameters(overloadData);
+    const PyMethodFlags parameters = methodDefinitionParameters(overloadData);
 
     QList<PyMethodDefEntry> result;
     result.reserve(names.size());

@@ -462,7 +462,7 @@ QString CppGenerator::writeSmartPointerDirFunction(TextStream &s, TextStream &de
     QString funcName = cpythonBaseName(context.metaClass()) + u"__dir__"_s;
 
     signatureStream << fullPythonClassName(context.metaClass()) << ".__dir__()\n";
-    definitionStream << PyMethodDefEntry{u"__dir__"_s, funcName, {"METH_NOARGS"_ba}, {}}
+    definitionStream << PyMethodDefEntry{u"__dir__"_s, funcName, PyMethodFlag::NoArgs, {}}
         << ",\n";
 
     s << "extern \"C\"\n{\n"

@@ -2872,10 +2872,13 @@ bool TypeSystemParser::parseAddPyMethodDef(const ConditionalStreamReader &,
         } else if (name == u"function") {
             def.function = attributes->takeAt(i).value().toString();
         } else if (name == u"flags") {
-            auto attribute = attributes->takeAt(i);
-            const auto flags = attribute.value().split(u'|', Qt::SkipEmptyParts);
-            for (const auto &flag : flags)
-                def.methFlags.append(flag.toString().toUtf8());
+            auto attribute = attributes->takeAt(i).value();
+            std::optional<PyMethodFlags> flagsO = pyMethodFlagsFromString(attribute);
+            if (!flagsO.has_value()) {
+                m_error = "Invalid method flags: "_L1 + attribute.toString();
+                return false;
+            }
+            def.flags = flagsO.value();
         } else if (name == u"signatures") {
             auto attribute = attributes->takeAt(i);
             const auto signatures = attribute.value().split(u';', Qt::SkipEmptyParts);

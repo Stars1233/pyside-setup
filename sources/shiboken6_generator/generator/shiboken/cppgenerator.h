@@ -7,6 +7,7 @@
 #include "shibokengenerator.h"
 #include "include.h"
 #include "modifications_typedefs.h"
+#include "pymethoddefentry.h"
 
 #include <QtCore/qflags.h>
 #include <QtCore/qset.h>
@@ -458,7 +459,7 @@ private:
                               const GeneratorContext &classContext);
     static void writeClassTypeFunction(TextStream &s,
                                        const GeneratorContext &classContext);
-    QByteArrayList methodDefinitionParameters(const OverloadData &overloadData) const;
+    PyMethodFlags methodDefinitionParameters(const OverloadData &overloadData) const;
     QList<PyMethodDefEntry> methodDefinitionEntries(const OverloadData &overloadData) const;
 
     void writeSignatureInfo(TextStream &s, const OverloadData &overloads,

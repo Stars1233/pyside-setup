@@ -5,11 +5,34 @@
 #define PYMETHODDEFENTRY_H
 
 #include <QtCore/qbytearraylist.h>
+#include <QtCore/qflags.h>
 #include <QtCore/qstring.h>
+
+#include <optional>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
 class TextStream;
+
+enum class PyMethodFlag : int
+{
+    Varargs      = 0x0001, // METH_VARARGS
+    Keywords     = 0x0002, // METH_KEYWORDS
+    NoArgs       = 0x0004, // METH_NOARGS
+    SingleObject = 0x0008, // METH_O
+    Class        = 0x0010, // METH_CLASS
+    Static       = 0x0020, // METH_STATIC
+    Coexist      = 0x0040, // METH_COEXIST
+    Fastcall     = 0x0080, // METH_FASTCALL
+    Stackless    = 0x0100, // METH_STACKLESS
+    Method       = 0x0200, // METH_METHOD
+};
+
+Q_DECLARE_FLAGS(PyMethodFlags,PyMethodFlag)
+Q_DECLARE_OPERATORS_FOR_FLAGS(PyMethodFlags)
+
+std::optional<PyMethodFlags> pyMethodFlagsFromString(QStringView v);
+QString pyMethodFlagsToString(PyMethodFlags flags);
 
 struct castToPyCFunction
 {
@@ -23,7 +46,7 @@ struct PyMethodDefEntry
 {
     QString name;
     QString function;
-    QByteArrayList methFlags; // "METH_O" etc.
+    PyMethodFlags flags;
     QString doc;
 };
 
