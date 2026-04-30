@@ -74,8 +74,15 @@ TextStream &operator<<(TextStream &str, const castToPyCFunction &c)
 
 TextStream &operator<<(TextStream &s, const PyMethodDefEntry &e)
 {
-    s <<  "{\"" << e.name << "\", " << castToPyCFunction(e.function) <<", "
-        << pyMethodFlagsToString(e.flags);
+
+    const bool signatureMismatch = e.flags.testFlag(PyMethodFlag::NoArgs)
+                                   || e.flags.testFlag(PyMethodFlag::Keywords);
+    s <<  "{\"" << e.name << "\", ";
+    if (signatureMismatch)
+        s << castToPyCFunction(e.function);
+    else
+        s << e.function;
+    s << ", " << pyMethodFlagsToString(e.flags);
     if (e.doc.isEmpty())
         s << ", nullptr";
     else
