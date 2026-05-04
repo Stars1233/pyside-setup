@@ -43,6 +43,9 @@ PYSIDE_API bool isCompiledMethod(PyObject *callback);
 /// Returns the Python binary (value of sys.executable).
 PYSIDE_API QString sysExecutable();
 
+/// Returns whether name is a valid class name in a .ui file (C++ or Python)
+PYSIDE_API bool isUiClassName(QStringView name);
+
 struct debugPyTypeObject
 {
     PYSIDE_API explicit debugPyTypeObject(PyTypeObject *o) noexcept;

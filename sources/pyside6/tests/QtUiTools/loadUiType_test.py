@@ -22,8 +22,9 @@ class loadUiTypeTester(UsesQApplication):
 
     @unittest.skipUnless(bool(QStandardPaths.findExecutable("pyside6-uic")), "pyside6-uic missing")
     def testFunction(self):
-        filePath = os.path.join(os.path.dirname(__file__), "minimal.ui")
-        loaded = loadUiType(filePath)
+        test_dir = Path(__file__).parent.resolve()
+        filePath = test_dir / "minimal.ui"
+        loaded = loadUiType(os.fspath(filePath))
         self.assertNotEqual(loaded, None)
 
         # (<class '__main__.Ui_Form'>, <class 'PySide6.QtWidgets.QFrame'>)
@@ -35,8 +36,8 @@ class loadUiTypeTester(UsesQApplication):
         # Base class instance will be QFrame for this example
         self.assertTrue(isinstance(base(), QFrame))
 
-        anotherFileName = os.path.join(os.path.dirname(__file__), "test.ui")
-        another = loadUiType(anotherFileName)
+        anotherFileName = test_dir / "test.ui"
+        another = loadUiType(os.fspath(anotherFileName))
         self.assertNotEqual(another, None)
 
         generated, base = another
@@ -49,6 +50,10 @@ class loadUiTypeTester(UsesQApplication):
 
         self.assertTrue(isinstance(ui.child_object, QFrame))
         self.assertTrue(isinstance(ui.grandson_object, QPushButton))
+
+        invalidFileName = test_dir / "invalid.ui"
+        loaded = loadUiType(os.fspath(invalidFileName))
+        self.assertEqual(loaded, None)
 
 
 if __name__ == '__main__':

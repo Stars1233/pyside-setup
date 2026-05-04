@@ -12,8 +12,12 @@
 
 #include <QtCore/qdir.h>
 #include <QtCore/qstring.h>
+#include <QtCore/qstringview.h>
 
+#include <algorithm>
 #include <cstring>
+
+using namespace Qt::StringLiterals;
 
 namespace PySide
 {
@@ -110,6 +114,60 @@ QString sysExecutable()
     PyConfig_Read(&config);
     return QDir::cleanPath(QString::fromWCharArray(config.executable));
 #endif
+}
+
+// An approximation of "Unicode Standard Annex #31" for language identifiers to prevent code
+// injection attacks (cf uic). FIXME Simplify according to QTBUG-126860?
+static bool isIdStart(QChar c)
+{
+    bool result = false;
+    switch (c.category()) {
+    case QChar::Letter_Uppercase:
+    case QChar::Letter_Lowercase:
+    case QChar::Letter_Titlecase:
+    case QChar::Letter_Modifier:
+    case QChar::Letter_Other:
+    case QChar::Number_Letter:
+        result = true;
+        break;
+    default:
+        result = c == u'_';
+        break;
+    }
+    return result;
+}
+
+static bool isIdContinuation(QChar c)
+{
+    bool result = false;
+    switch (c.category()) {
+    case QChar::Letter_Uppercase:
+    case QChar::Letter_Lowercase:
+    case QChar::Letter_Titlecase:
+    case QChar::Letter_Modifier:
+    case QChar::Letter_Other:
+    case QChar::Number_Letter:
+    case QChar::Mark_NonSpacing:
+    case QChar::Mark_SpacingCombining:
+    case QChar::Number_DecimalDigit:
+    case QChar::Punctuation_Connector: // '_'
+        result = true;
+        break;
+    default:
+        break;
+    }
+    return result;
+}
+
+static bool isUiClassNameContinuation(QChar c)
+{
+    return c == u':' || c == u'.' || isIdContinuation(c);
+}
+
+bool isUiClassName(QStringView name)
+{
+    return !name.isEmpty() && isIdStart(name.at(0))
+    && std::all_of(name.cbegin() + 1, name.cend(), isUiClassNameContinuation);
 }
 
 debugPyTypeObject::debugPyTypeObject(PyTypeObject *o) noexcept

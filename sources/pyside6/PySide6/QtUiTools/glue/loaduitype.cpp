@@ -85,6 +85,18 @@ static std::optional<XmlClassNames> getXmlClassNames(const QString &uiFileName)
         return std::nullopt;
     }
 
+    if (!PySide::isUiClassName(baseClassName)) {
+        qCritical("loadUiType: The base class name \"%s\" is not a valid identifier.",
+                  qPrintable(baseClassName));
+        return std::nullopt;
+    }
+
+    if (!PySide::isUiClassName(className)) {
+        qCritical("loadUiType: The class name \"%s\" is not a valid identifier.",
+                  qPrintable(className));
+        return std::nullopt;
+    }
+
     return XmlClassNames{className, baseClassName};
 }
 
