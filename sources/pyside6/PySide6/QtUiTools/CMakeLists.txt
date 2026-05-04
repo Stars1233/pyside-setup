@@ -13,6 +13,11 @@ set(QtUiTools_glue_sources
     "${QtUiTools_SOURCE_DIR}/glue/plugins.h"
 )
 
+set(QtUiTools_static_sources
+    "${QtUiTools_SOURCE_DIR}/glue/loaduitype.h"
+    "${QtUiTools_SOURCE_DIR}/glue/loaduitype.cpp"
+)
+
 set(QtUiTools_include_dirs  ${QtUiTools_SOURCE_DIR}
                             ${QtUiTools_BINARY_DIR}
                             ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
@@ -41,5 +46,6 @@ create_pyside_module(NAME QtUiTools
                      LIBRARIES QtUiTools_libraries
                      DEPS QtUiTools_deps
                      TYPESYSTEM_PATH QtUiTools_SOURCE_DIR
+                     STATIC_SOURCES QtUiTools_static_sources
                      SOURCES QtUiTools_SRC
                      GLUE_SOURCES QtUiTools_glue_sources)

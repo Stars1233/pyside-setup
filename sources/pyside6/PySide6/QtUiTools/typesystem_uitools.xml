@@ -79,6 +79,9 @@
     This function was created to provide an equivalent solution to the 'loadUiType' function from
     Riverbank's PyQt.
     -->
+    <extra-includes>
+      <include file-name="glue/loaduitype.h" location="global"/>
+    </extra-includes>
     <add-function signature="loadUiType(const QString&amp; @uifile@)" return-type="PyObject*">
       <inject-code file="../glue/qtuitools.cpp" snippet="loaduitype"/>
       <inject-documentation format="target" mode="append" file="../doc/qtuitools.rst"
