@@ -23,7 +23,7 @@ ANDROID_NDK_VERSION_NUMBER_SUFFIX = "12479018"
 
 def run_command(command: list[str], cwd: str | None = None, ignore_fail: bool = False,
                 dry_run: bool = False, accept_prompts: bool = False, show_stdout: bool = False,
-                capture_stdout: bool = False):
+                capture_stdout: bool = False, env: dict | None = None):
 
     if capture_stdout and not show_stdout:
         raise RuntimeError("capture_stdout should always be used together with show_stdout")
@@ -42,13 +42,40 @@ def run_command(command: list[str], cwd: str | None = None, ignore_fail: bool = 
         stdout = subprocess.DEVNULL
 
     result = subprocess.run(command, cwd=cwd, input=input, stdout=stdout,
-                            capture_output=capture_stdout)
+                            capture_output=capture_stdout, env=env)
 
     if result.returncode != 0 and not ignore_fail:
         sys.exit(result.returncode)
 
     if capture_stdout and not result.returncode:
         return result.stdout.decode("utf-8")
+
+    return None
+
+
+def _find_java_home() -> str | None:
+    # Prefer an explicit JAVA_HOME already set in the environment.
+    java_home = os.environ.get("JAVA_HOME")
+    if java_home and Path(java_home).exists():
+        return java_home
+
+    # macOS ships /usr/libexec/java_home which returns the active JDK path.
+    if sys.platform == "darwin":
+        try:
+            result = subprocess.run(
+                ["/usr/libexec/java_home"], capture_output=True, text=True
+            )
+            if result.returncode == 0:
+                candidate = result.stdout.strip()
+                if candidate and Path(candidate).exists():
+                    return candidate
+        except FileNotFoundError:
+            pass
+
+    # Common Homebrew JDK install locations (Apple Silicon and Intel).
+    for candidate in ["/opt/homebrew/opt/openjdk", "/usr/local/opt/openjdk"]:
+        if Path(candidate).exists():
+            return candidate
 
     return None
 
@@ -74,15 +101,29 @@ class SdkManager:
         self._android_sdk_dir = android_sdk_dir
         self._dry_run = dry_run
 
+        # sdkmanager is a JVM tool; ensure JAVA_HOME is set so it can find the runtime.
+        self._env = dict(os.environ)
+        java_home = _find_java_home()
+        if java_home:
+            self._env["JAVA_HOME"] = java_home
+            logging.info(f"Using Java from: {java_home}")
+        else:
+            raise RuntimeError(
+                "Java Runtime not found. sdkmanager requires a JDK to run.\n"
+                "Install one with:\n"
+                "  brew install --cask temurin\n"
+                "or set the JAVA_HOME environment variable to your JDK installation."
+            )
+
     def list_packages(self):
         command = [self._sdk_manager, f"--sdk_root={self._android_sdk_dir}", "--list"]
         return run_command(command=command, dry_run=self._dry_run, show_stdout=True,
-                           capture_stdout=True)
+                           capture_stdout=True, env=self._env)
 
     def install(self, *args, accept_license: bool = False, show_stdout=False):
         command = [str(self._sdk_manager), f"--sdk_root={self._android_sdk_dir}", *args]
         run_command(command=command, dry_run=self._dry_run,
-                    accept_prompts=accept_license, show_stdout=show_stdout)
+                    accept_prompts=accept_license, show_stdout=show_stdout, env=self._env)
 
 
 def extract_zip(file: Path, destination: Path):
@@ -115,8 +156,10 @@ def extract_dmg(file: Path, destination: Path):
     if not mounted_vol_name:
         raise RuntimeError(f"Unable to find mounted volume for file {file}")
 
-    # copy files
-    shutil.copytree(f'/Volumes/{mounted_vol_name}/', destination, dirs_exist_ok=True)
+    # Copy files with `ditto --noqtn` so the destination .app does not inherit
+    # com.apple.quarantine from the mounted DMG
+    run_command(['ditto', '--noqtn',
+                 f'/Volumes/{mounted_vol_name}/', str(destination)])
 
     # Detach mounted volume
     run_command(['hdiutil', 'detach', f'/Volumes/{mounted_vol_name}'])
@@ -171,6 +214,11 @@ def download_android_ndk(ndk_path: Path):
             if ndk_path.exists():
                 shutil.rmtree(ndk_path)
             sys.exit(1)
+
+    # strip Gatekeeper quarantine on every macOS invocation of the NDK, since it contains
+    # executables that may be blocked from running until the quarantine is removed.
+    if sys.platform == "darwin" and ndk_version_path.exists():
+        run_command(['xattr', '-cr', str(ndk_version_path)], ignore_fail=True)
 
     return ndk_version_path
 
