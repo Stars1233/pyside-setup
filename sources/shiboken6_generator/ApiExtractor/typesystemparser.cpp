@@ -2941,6 +2941,11 @@ bool TypeSystemParser::parseBasicModifyFunctionAttributes(QXmlStreamAttributes *
             if (!parseOverloadNumber(attributes->takeAt(i), &overloadNumber, &m_error))
                 return false;
             mod->setOverloadNumber(overloadNumber);
+        } else if (name == deprecatedAttribute) {
+            const bool deprecated = convertBoolean(attributes->takeAt(i).value(),
+                                                   deprecatedAttribute, false);
+            mod->setModifierFlag(deprecated ? FunctionModification::Deprecated
+                                            : FunctionModification::Undeprecated);
         }
     }
     return true;
@@ -2980,11 +2985,6 @@ bool TypeSystemParser::parseModifyFunctionAttributes(QXmlStreamAttributes *attri
                 return false;
             }
             mod->setSnakeCase(snakeCaseOpt.value());
-        } else if (name == deprecatedAttribute) {
-            const bool deprecated = convertBoolean(attributes->takeAt(i).value(),
-                                                   deprecatedAttribute, false);
-            mod->setModifierFlag(deprecated ? FunctionModification::Deprecated
-                                            : FunctionModification::Undeprecated);
         }
     }
     return true;
