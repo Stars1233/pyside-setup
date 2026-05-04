@@ -13,7 +13,7 @@ from pkginfo import Wheel
 
 from . import (extract_and_copy_jar, get_wheel_android_arch, find_lib_dependencies,
                get_llvm_readobj, find_qtlibs_in_wheel, platform_map, create_recipe,
-               ANDROID_DEPLOY_CACHE)
+               ANDROID_DEPLOY_CACHE, safe_extractall)
 from .. import (Config, get_all_pyside_modules, MAJOR_VERSION)
 from .android_utilities import (ANDROID_NDK_VERSION, ANDROID_NDK_VERSION_NUMBER_SUFFIX,
                                 download_android_ndk)
@@ -307,7 +307,7 @@ class AndroidConfig(Config):
         lib_path_suffix = Path(str(self.qt_libs_path)).relative_to(self.wheel_pyside)
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            archive.extractall(tmpdir)
+            safe_extractall(archive, Path(tmpdir))
             qt_libs_tmpdir = Path(tmpdir) / lib_path_suffix
             # find the lib folder where Qt libraries are stored
             for module_name in sorted(modules):

@@ -59,6 +59,22 @@ def create_recipe(version: str, component: str, wheel_path: str, generated_files
         recipe.write(content)
 
 
+def safe_extractall(archive: ZipFile, target_path: Path) -> None:
+    """
+    Extract all members of a zip archive into target_path, checking that each entry
+    resolves inside target_path to prevent path traversal attacks.
+    """
+    resolved_target = target_path.resolve()
+    for member in archive.infolist():
+        member_path = (target_path / member.filename).resolve()
+        if not member_path.is_relative_to(resolved_target):
+            raise RuntimeError(
+                f"[DEPLOY] Refusing to extract '{member.filename}': "
+                f"path resolves outside the extraction directory"
+            )
+        archive.extract(member, target_path)
+
+
 def extract_and_copy_jar(wheel_path: Path, generated_files_path: Path) -> str:
     '''
     extracts the PySide6 wheel and copies the 'jar' folder to 'generated_files_path'.
