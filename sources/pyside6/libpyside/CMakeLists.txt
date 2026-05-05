@@ -62,6 +62,7 @@ set(libpyside_SRC
     pysidesignal.cpp
     pysideslot.cpp
     pysideproperty.cpp
+    pysideutils.cpp
     pysidevariantutils.cpp
     pysideweakref.cpp
     pyside.cpp
