@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
-import sys
 from pathlib import Path
 from functools import lru_cache
 from . import DEFAULT_IGNORE_DIRS
@@ -18,13 +18,21 @@ All utility functions for deployment
 def run_command(command, dry_run: bool, fetch_output: bool = False):
     command_str = " ".join([str(cmd) for cmd in command])
     output = None
-    is_windows = (sys.platform == "win32")
+
+    # Resolve the full path to the executable to help prevent command injection.
+    # shell=True is avoided because it passes the command through a shell interpreter,
+    # enabling injection when unsanitized input (e.g., fields from pysidedeploy.spec)
+    # is present.
+    executable = shutil.which(str(command[0]))
+    if executable:
+        command = [executable] + [str(c) for c in command[1:]]
+
     try:
         if not dry_run:
             if fetch_output:
-                output = subprocess.check_output(command, shell=is_windows)
+                output = subprocess.check_output(command)
             else:
-                subprocess.check_call(command, shell=is_windows)
+                subprocess.check_call(command)
         else:
             print(command_str + "\n")
     except FileNotFoundError as error:
