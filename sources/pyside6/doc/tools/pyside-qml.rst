@@ -78,6 +78,24 @@ Options that align with the `qml`_ runtime utility
 
 * **--disable-context-sharing**: Disable the use of a shared GL context for QtQuick Windows".
 
+Security Considerations
+-----------------------
+
+``pyside6-qml`` automatically imports every Python file it finds in the QML file's
+parent directory (or under the paths given with ``-I``/``--module-paths``) and
+executes them in the current process.  This is by design: QML elements backed by
+Python classes must be registered before the QML engine loads the file.
+
+Because of this, **treat a QML project the same way you would treat a Python
+project**: do not run ``pyside6-qml`` on files from an untrusted source unless you
+are willing to execute the accompanying Python code with your own privileges.  In
+particular, be cautious when:
+
+- opening QML files received by e-mail, downloaded from the internet, or checked
+  out from an unfamiliar repository, or
+- running ``pyside6-qml`` inside a CI pipeline on code submitted by external
+  contributors.
+
 .. _`qml`: https://doc.qt.io/qt-6/qtquick-qml-runtime.html
 .. _`QQmlApplicationEngine`: https://doc.qt.io/qt-6/qqmlapplicationengine.html
 .. _`QQuickView`: https://doc.qt.io/qt-6/qquickview.html

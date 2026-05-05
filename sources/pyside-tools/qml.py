@@ -3,7 +3,14 @@
 from __future__ import annotations
 
 """pyside6-qml tool implementation. This tool mimics the capabilities of qml runtime utility
-for python and enables quick protyping with python modules"""
+for python and enables quick protyping with python modules
+
+Security note: pyside6-qml imports Python files found alongside the QML file (or under
+--module-paths) and executes them in the current process.  Treat any QML project the same
+way you would treat a Python project: do not run pyside6-qml on files from an untrusted
+source unless you are willing to execute the accompanying Python code with your privileges.
+"""
+
 
 import argparse
 import importlib.util
@@ -89,7 +96,9 @@ if __name__ == "__main__":
         help="Specify space separated folder/file paths where the Qml classes are defined. By"
              " default,the parent directory of the qml_path is searched recursively for all .py"
              " files and they are imported. Otherwise only the paths give in module paths are"
-             " searched",
+             " searched."
+             " Warning: all discovered .py files are imported and executed in the current"
+             " process. Only use paths from sources you trust.",
     )
     parser.add_argument(
         "--list-conf",
@@ -160,6 +169,9 @@ if __name__ == "__main__":
     if not qquick_present:
         apptype = "core"
 
+    print("Warning: pyside6-qml will import and execute Python files found in the QML "
+          "project directory. Only run this tool on QML files from sources you trust.",
+          file=sys.stderr)
     import_qml_modules(args.file.parent, args.module_paths)
 
     logging.basicConfig(level=args.loglevel)
