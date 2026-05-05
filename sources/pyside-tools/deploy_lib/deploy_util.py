@@ -27,13 +27,21 @@ def cleanup(config: Config, is_android: bool = False):
     config (Config): The configuration object containing paths and settings.
     is_android (bool): Flag indicating if the cleanup is for an Android project. Default is False.
     """
-    if config.generated_files_path.exists():
+    generated_files_path = config.generated_files_path.resolve()
+    project_dir = config.project_dir.resolve()
+    logging.info(f"[DEPLOY] Cleaning up generated files in {generated_files_path}")
+    if not generated_files_path.is_relative_to(project_dir):
+        raise RuntimeError(
+            f"[DEPLOY] Refusing to delete '{generated_files_path}': "
+            f"path is outside the project directory '{project_dir}'"
+        )
+    if generated_files_path.exists():
         try:
-            shutil.rmtree(config.generated_files_path)
+            shutil.rmtree(generated_files_path)
             logging.info("[DEPLOY] Deployment directory purged")
         except PermissionError as e:
             print(f"{type(e).__name__}: {e}")
-            logging.warning(f"[DEPLOY] Could not delete {config.generated_files_path}")
+            logging.warning(f"[DEPLOY] Could not delete {generated_files_path}")
 
     if is_android:
         buildozer_spec: Path = config.project_dir / "buildozer.spec"
