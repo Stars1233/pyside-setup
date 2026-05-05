@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
+import hashlib
 import logging
 import shutil
 import re
@@ -16,9 +17,32 @@ from packaging import version
 from tqdm import tqdm
 
 # the tag number does not matter much since we update the sdk later
-DEFAULT_SDK_TAG = 6514223
+DEFAULT_SDK_TAG = 14742923
 ANDROID_NDK_VERSION = "27c"
 ANDROID_NDK_VERSION_NUMBER_SUFFIX = "12479018"
+
+# Official SHA-1 checksums for the pinned NDK/SDK versions.
+_NDK_SHA1: dict[str, str] = {
+    "linux": "090e8083a715fdb1a3e402d0763c388abb03fb4e",
+    "darwin": "04d8c43eb4e884c4b16bbf7733ac9179a13b7b20",
+}
+_CLTOOLS_SHA1: dict[str, str] = {
+    "linux": "48833c34b761c10cb20bcd16582129395d121b27",
+    "mac": "cc27cca4b84bfdbc7df17e3d0a01d0c640d8ee71",
+}
+
+
+def _verify_sha1(file_path: Path, expected: str) -> None:
+    h = hashlib.sha1()
+    with open(file_path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(65536), b""):
+            h.update(chunk)
+    actual = h.hexdigest()
+    if actual != expected:
+        raise RuntimeError(
+            f"[DEPLOY] Checksum mismatch for '{file_path.name}': "
+            f"expected {expected}, got {actual}"
+        )
 
 
 def run_command(command: list[str], cwd: str | None = None, ignore_fail: bool = False,
@@ -59,7 +83,7 @@ def _find_java_home() -> str | None:
     if java_home and Path(java_home).exists():
         return java_home
 
-    # macOS ships /usr/libexec/java_home which returns the active JDK path.
+    # macOS ships /usr/libexec/java_home
     if sys.platform == "darwin":
         try:
             result = subprocess.run(
@@ -72,7 +96,7 @@ def _find_java_home() -> str | None:
         except FileNotFoundError:
             pass
 
-    # Common Homebrew JDK install locations (Apple Silicon and Intel).
+    # Common Homebrew JDK install paths
     for candidate in ["/opt/homebrew/opt/openjdk", "/usr/local/opt/openjdk"]:
         if Path(candidate).exists():
             return candidate
@@ -89,7 +113,7 @@ class DownloadProgressBar(tqdm):
 
 class SdkManager:
     def __init__(self, android_sdk_dir: Path, dry_run: bool = False):
-        self._sdk_manager = android_sdk_dir / "tools" / "bin" / "sdkmanager"
+        self._sdk_manager = android_sdk_dir / "cmdline-tools" / "bin" / "sdkmanager"
 
         if not self._sdk_manager.exists():
             raise RuntimeError(f"Unable to find SdkManager in {str(self._sdk_manager)}")
@@ -101,7 +125,8 @@ class SdkManager:
         self._android_sdk_dir = android_sdk_dir
         self._dry_run = dry_run
 
-        # sdkmanager is a JVM tool; ensure JAVA_HOME is set so it can find the runtime.
+        # sdkmanager is a JVM tool
+        # ensure JAVA_HOME is set so it can find the runtime.
         self._env = dict(os.environ)
         java_home = _find_java_home()
         if java_home:
@@ -174,7 +199,11 @@ def _download(url: str, destination: Path):
     with DownloadProgressBar(unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1]) as t:
         download_path, headers = request.urlretrieve(url=url, filename=destination,
                                                      reporthook=t.update_to)
-    assert Path(download_path).resolve() == destination
+    if Path(download_path).resolve() != destination:
+        raise RuntimeError(
+            f"[DEPLOY] Downloaded file path '{download_path}' does not match "
+            f"expected destination '{destination}'"
+        )
 
 
 def download_android_ndk(ndk_path: Path):
@@ -203,6 +232,7 @@ def download_android_ndk(ndk_path: Path):
 
             print(f"Downloading Android Ndk version r{ANDROID_NDK_VERSION}")
             _download(url=url, destination=ndk_zip_path)
+            _verify_sha1(ndk_zip_path, _NDK_SHA1[sys.platform])
 
             print("Unpacking Android Ndk")
             if sys.platform == "darwin":
@@ -233,7 +263,7 @@ def download_android_commandlinetools(android_sdk_dir: Path):
            f"commandlinetools-{sdk_platform}-{DEFAULT_SDK_TAG}_latest.zip")
     cltools_zip_path = (android_sdk_dir
                         / f"commandlinetools-{sdk_platform}-{DEFAULT_SDK_TAG}_latest.zip")
-    cltools_path = android_sdk_dir / "tools"
+    cltools_path = android_sdk_dir / "cmdline-tools"
 
     if cltools_path.exists():
         print(f"Command-line tools found in {str(cltools_path)}")
@@ -244,6 +274,7 @@ def download_android_commandlinetools(android_sdk_dir: Path):
             print("Download Android Command Line Tools: "
                   f"commandlinetools-{sys.platform}-{DEFAULT_SDK_TAG}_latest.zip")
             _download(url=url, destination=cltools_zip_path)
+            _verify_sha1(cltools_zip_path, _CLTOOLS_SHA1[sdk_platform])
 
             print("Unpacking Android Command Line Tools")
             extract_zip(file=cltools_zip_path, destination=android_sdk_dir)
@@ -308,7 +339,7 @@ def install_android_packages(android_sdk_dir: Path, android_api: str, dry_run: b
     """
     Use the sdk manager to install build-tools, platform-tools and platform API
     """
-    tools_dir = android_sdk_dir / "tools"
+    tools_dir = android_sdk_dir / "cmdline-tools"
     if not tools_dir.exists():
         raise RuntimeError("Unable to find Android command-line tools in "
                            f"{str(tools_dir)}")
