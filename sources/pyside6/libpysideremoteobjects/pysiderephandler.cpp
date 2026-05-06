@@ -459,12 +459,15 @@ void init(PyObject *module)
     PepModule_AddType(module, repType);
 
     // Add a test helper to verify type reference counting
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_CLANG("-Wcast-function-type-mismatch")
     static PyMethodDef get_capsule_count_def = {
         "getCapsuleCount",                                 // name of the function in Python
         reinterpret_cast<PyCFunction>(get_capsule_count),  // C function pointer
         METH_NOARGS,                                       // flags indicating parameters
         "Returns the current count of PyCapsule objects"   // docstring
     };
+QT_WARNING_POP
 
     PepModule_Add(module, "getCapsuleCount", PyCFunction_New(&get_capsule_count_def, nullptr));
 }

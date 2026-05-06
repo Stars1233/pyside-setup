@@ -356,7 +356,7 @@ static int DynamicType_clear(PyObject *self)
 }
 
 static PyMethodDef DynamicClass_methods[] = {
-    {"get_enum", reinterpret_cast<PyCFunction>(DynamicType_get_enum), METH_O | METH_CLASS,
+    {"get_enum", DynamicType_get_enum, METH_O | METH_CLASS,
      "Get enum type by name"},
     {nullptr, nullptr, 0, nullptr}
 };
@@ -404,10 +404,7 @@ PyTypeObject *createDynamicClassImpl(QMetaObject *meta)
     PySide::initDynamicMetaObject(type, meta, 0);  // Size 0?
 
     PyMethodDef method = {
-        nullptr,
-        reinterpret_cast<PyCFunction>(T::capsule_method_handler),
-        METH_VARARGS,
-        nullptr
+        nullptr, T::capsule_method_handler, METH_VARARGS, nullptr
     };
 
     auto *obType = reinterpret_cast<PyObject *>(type);

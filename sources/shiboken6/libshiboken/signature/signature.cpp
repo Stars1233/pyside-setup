@@ -338,15 +338,22 @@ static PyObject *feature_import(PyObject * /* self */, PyObject *args, PyObject 
     return ret;
 }
 
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
+#endif
 PyMethodDef signature_methods[] = {
     {"__feature_import__", reinterpret_cast<PyCFunction>(feature_import),
         METH_VARARGS | METH_KEYWORDS, nullptr},
-    {"get_signature", reinterpret_cast<PyCFunction>(get_signature), METH_VARARGS,
+    {"get_signature", get_signature, METH_VARARGS,
         "get the signature, passing an optional string parameter"},
-    {"make_snake_case_name", reinterpret_cast<PyCFunction>(make_snake_case_name), METH_O,
+    {"make_snake_case_name", make_snake_case_name, METH_O,
         "turn a camelCase name into snake_case"},
     {nullptr, nullptr, 0, nullptr}
 };
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
 
 ////////////////////////////////////////////////////////////////////////////
 //

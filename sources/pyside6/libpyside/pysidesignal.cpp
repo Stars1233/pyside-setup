@@ -169,8 +169,7 @@ static PyObject *metaSignalCheck(PyObject *, PyObject *);
 
 
 static PyMethodDef MetaSignal_tp_methods[] = {
-    {"__instancecheck__", reinterpret_cast<PyCFunction>(metaSignalCheck),
-                          METH_O|METH_STATIC, nullptr},
+    {"__instancecheck__", metaSignalCheck, METH_O|METH_STATIC, nullptr},
     {nullptr, nullptr, 0, nullptr}
 };
 
@@ -244,6 +243,8 @@ static PyObject *signalInstanceRepr(PyObject *obSelf)
                                                 : "(no signature)", obSelf);
 }
 
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_CLANG("-Wcast-function-type-mismatch")
 static PyMethodDef SignalInstance_methods[] = {
     {"connect", reinterpret_cast<PyCFunction>(signalInstanceConnect),
                 METH_VARARGS|METH_KEYWORDS, nullptr},
@@ -251,6 +252,7 @@ static PyMethodDef SignalInstance_methods[] = {
     {"emit", signalInstanceEmit, METH_VARARGS, nullptr},
     {nullptr, nullptr, 0, nullptr}  /* Sentinel */
 };
+QT_WARNING_POP
 
 static PyTypeObject *createSignalInstanceType()
 {

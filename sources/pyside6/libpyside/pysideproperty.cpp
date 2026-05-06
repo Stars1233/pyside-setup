@@ -50,14 +50,14 @@ static PyObject *qProperty_freset(PyObject *, void *);
 static PyObject *qProperty_fdel(PyObject *, void *);
 
 static PyMethodDef PySidePropertyMethods[] = {
-    {"getter", reinterpret_cast<PyCFunction>(qPropertyGetter), METH_O, nullptr},
+    {"getter", qPropertyGetter, METH_O, nullptr},
     // "name@setter" handling
-    {"setter", reinterpret_cast<PyCFunction>(qPropertySetter), METH_O,  nullptr},
-    {"resetter", reinterpret_cast<PyCFunction>(qPropertyResetter), METH_O,  nullptr},
-    {"deleter", reinterpret_cast<PyCFunction>(qPropertyDeleter), METH_O, nullptr},
+    {"setter", qPropertySetter, METH_O, nullptr},
+    {"resetter", qPropertyResetter, METH_O, nullptr},
+    {"deleter", qPropertyDeleter, METH_O, nullptr},
     // Synonyms from Qt
-    {"read", reinterpret_cast<PyCFunction>(qPropertyGetter), METH_O, nullptr},
-    {"write", reinterpret_cast<PyCFunction>(qPropertySetter), METH_O, nullptr},
+    {"read", qPropertyGetter, METH_O, nullptr},
+    {"write", qPropertySetter, METH_O, nullptr},
     {nullptr, nullptr, 0, nullptr}
 };
 

@@ -169,10 +169,17 @@ PyObject *toBytes(PyObject *self, PyObject * /* args */)
     return bytes;
 }
 
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
+#endif
 static struct PyMethodDef SbkVoidPtrObject_methods[] = {
     {"toBytes", toBytes, METH_NOARGS, nullptr},
     {nullptr, nullptr, 0, nullptr}
 };
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
 
 static Py_ssize_t SbkVoidPtrObject_length(PyObject *v)
 {

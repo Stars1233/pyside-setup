@@ -291,7 +291,7 @@ static PyObject *_module_dir_template(PyObject * /* self */, PyObject *args)
 }
 
 static PyMethodDef module_methods[] = {
-    {"__dir__", (PyCFunction)_module_dir_template, METH_VARARGS, nullptr},
+    {"__dir__", _module_dir_template, METH_VARARGS, nullptr},
     {nullptr, nullptr, 0, nullptr}
 };
 
@@ -550,10 +550,17 @@ static PyObject *lazy_import(PyObject * /* self */, PyObject *args, PyObject *kw
     return ret;
 }
 
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
+#endif
 static PyMethodDef lazy_methods[] = {
-    {"__lazy_import__", (PyCFunction)lazy_import, METH_VARARGS | METH_KEYWORDS, nullptr},
+    {"__lazy_import__", reinterpret_cast<PyCFunction>(lazy_import), METH_VARARGS | METH_KEYWORDS, nullptr},
     {nullptr, nullptr, 0, nullptr}
 };
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
 
 PyObject *createOnly(const char * /* moduleName */, PyModuleDef *moduleData)
 

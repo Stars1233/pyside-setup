@@ -207,7 +207,7 @@ static PyObject *missing_func(PyObject * /* self */ , PyObject *args)
 }
 
 static struct PyMethodDef dummy_methods[] = {
-    {"_missing_", reinterpret_cast<PyCFunction>(missing_func), METH_VARARGS|METH_STATIC, nullptr},
+    {"_missing_", missing_func, METH_VARARGS|METH_STATIC, nullptr},
     {nullptr, nullptr, 0, nullptr}
 };
 

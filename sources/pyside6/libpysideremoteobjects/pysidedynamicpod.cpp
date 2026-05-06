@@ -119,8 +119,7 @@ struct PodDefs
 };
 
 static PyMethodDef DynamicPod_tp_methods[] = {
-    {"get_enum", reinterpret_cast<PyCFunction>(DynamicType_get_enum), METH_O | METH_CLASS,
-                 "Get enum type by name"},
+    {"get_enum", DynamicType_get_enum, METH_O | METH_CLASS, "Get enum type by name"},
     {nullptr, nullptr, 0, nullptr}
 };
 
@@ -211,10 +210,7 @@ PyTypeObject *createPodType(QMetaObject *meta)
 
     auto *type = reinterpret_cast<PyTypeObject *>(obType);
     PyMethodDef method = {
-        nullptr,
-        reinterpret_cast<PyCFunction>(PodDefs::CapsuleMethod_handler),
-        METH_VARARGS,
-        nullptr
+        nullptr, PodDefs::CapsuleMethod_handler, METH_VARARGS, nullptr
     };
     for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
         // Create a PropertyCapsule for each property to store the info needed

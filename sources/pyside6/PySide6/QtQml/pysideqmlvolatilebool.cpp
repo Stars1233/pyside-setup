@@ -77,6 +77,8 @@ QtQml_VolatileBoolObject_set(QtQml_VolatileBoolObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_CLANG("-Wcast-function-type-mismatch")
 static PyMethodDef QtQml_VolatileBoolObject_methods[] = {
     {"get", reinterpret_cast<PyCFunction>(QtQml_VolatileBoolObject_get), METH_NOARGS,
      "B.get() -> Bool. Returns the value of the volatile boolean"
@@ -86,6 +88,7 @@ static PyMethodDef QtQml_VolatileBoolObject_methods[] = {
     },
     {nullptr, nullptr, 0, nullptr}  /* Sentinel */
 };
+QT_WARNING_POP
 
 static PyObject *
 QtQml_VolatileBoolObject_repr(QtQml_VolatileBoolObject *self)
