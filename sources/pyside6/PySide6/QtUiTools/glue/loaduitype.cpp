@@ -143,9 +143,6 @@ PyObject *loadUiType(PyObject *obFileName)
 
     QByteArray pyClassName("Ui_" + classNamesOpt->className.toUtf8());
 
-    PyObject *module = PyImport_ImportModule("__main__");
-    PyObject *loc = PyModule_GetDict(module);
-
     // 3. exec() the code so the class exists in the context: exec(uiFileContent)
     // The context of PyRun_SimpleString is __main__.
     // 'Py_file_input' is the equivalent to using exec(), since it will execute
@@ -156,7 +153,9 @@ PyObject *loadUiType(PyObject *obFileName)
         qCritical("loadUiType: Error while compiling the generated Python file");
         Py_RETURN_NONE;
     }
-    PyObject *uiObj = PyEval_EvalCode(codeUi, loc, loc);
+
+    Shiboken::AutoDecRef loc(PyDict_New());
+    PyObject *uiObj = PyEval_EvalCode(codeUi, loc.object(), loc.object());
 
     if (uiObj == nullptr) {
         qCritical("loadUiType: Error while running exec() on the generated code");
@@ -180,8 +179,8 @@ PyObject *loadUiType(PyObject *obFileName)
         Py_RETURN_NONE;
     }
 
-    PyObject *classObj = PyEval_EvalCode(codeClass, loc, loc);
-    PyObject *baseClassObj = PyEval_EvalCode(codeBaseClass, loc, loc);
+    PyObject *classObj = PyEval_EvalCode(codeClass, loc.object(), loc.object());
+    PyObject *baseClassObj = PyEval_EvalCode(codeBaseClass, loc.object(), loc.object());
 
     PyObject *result = PyTuple_Pack(2, classObj, baseClassObj);
     if (result == nullptr) {
