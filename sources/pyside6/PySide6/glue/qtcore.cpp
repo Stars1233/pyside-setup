@@ -1585,10 +1585,6 @@ int usec = PyDateTime_TIME_GET_MICROSECOND(%in);
 %out = %OUTTYPE(PyByteArray_AsString(%in), PyByteArray_Size(%in));
 // @snippet conversion-qbytearray-pybytearray
 
-// @snippet conversion-qbytearray-pystring
-%out = %OUTTYPE(Shiboken::String::toCString(%in), Shiboken::String::len(%in));
-// @snippet conversion-qbytearray-pystring
-
 /*********************************************************************
  * NATIVE TO TARGET CONVERSIONS
  ********************************************************************/

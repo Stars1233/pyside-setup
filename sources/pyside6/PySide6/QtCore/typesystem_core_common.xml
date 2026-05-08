@@ -2099,7 +2099,6 @@
             <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
             <add-conversion type="PyBytes" file="../glue/qtcore.cpp" snippet="conversion-qbytearray-pybytes"/>
             <add-conversion type="PyByteArray" file="../glue/qtcore.cpp" snippet="conversion-qbytearray-pybytearray"/>
-            <add-conversion type="PyString" check="Shiboken::String::check(%in) &amp;&amp; !PyUnicode_Check(%in)" file="../glue/qtcore.cpp" snippet="conversion-qbytearray-pystring"/>
         </target-to-native>
     </conversion-rule>
 
