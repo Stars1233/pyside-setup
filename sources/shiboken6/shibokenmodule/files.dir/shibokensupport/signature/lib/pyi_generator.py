@@ -283,7 +283,8 @@ FROM_IMPORTS = [
     (None, ["collections.abc"]),
     (None, ["datetime"]),
     ("PySide6.QtCore", ["PyClassProperty", "Signal", "SignalInstance"]),
-    ("shiboken6", ["Shiboken"]),
+    ("shiboken6", ["Shiboken"]),  # FIXME PYSIDE7: Remove (see PYSIDE-3336)
+    (None, ["shiboken6.Shiboken"]),
     ]
 
 

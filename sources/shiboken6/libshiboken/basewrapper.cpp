@@ -231,7 +231,11 @@ static PyTypeObject *createObjectTypeType()
     //              selects the wrong metatype.
     //
     PyType_Spec SbkObjectType_Type_spec = {
+#if SHIBOKEN_MAJOR_VERSION >= 7 // PYSIDE-3336
+        "2:shiboken6.Shiboken.ObjectType",
+#else
         "1:Shiboken.ObjectType",
+#endif
         static_cast<int>(PyType_Type.tp_basicsize) + 1,           // see above
         0, // sizeof(PyMemberDef), not for PyPy without a __len__ defined
         Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_TYPE_SUBCLASS,
@@ -239,7 +243,11 @@ static PyTypeObject *createObjectTypeType()
     };
 
     PyType_Spec SbkObjectType_Type_spec_312 = {
+#if SHIBOKEN_MAJOR_VERSION >= 7 // PYSIDE-3336
+        "2:shiboken6.Shiboken.ObjectType",
+#else
         "1:Shiboken.ObjectType",
+#endif
         -long(sizeof(SbkObjectTypePrivate)),
         0, // sizeof(PyMemberDef), not for PyPy without a __len__ defined
         Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_TYPE_SUBCLASS,
@@ -326,7 +334,11 @@ static PyTypeObject *createObjectType()
     };
 
     PyType_Spec SbkObject_Type_spec = {
+#if SHIBOKEN_MAJOR_VERSION >= 7 // PYSIDE-3336
+        "2:shiboken6.Shiboken.Object",
+#else
         "1:Shiboken.Object",
+#endif
         sizeof(SbkObject),
         0,
         Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,
