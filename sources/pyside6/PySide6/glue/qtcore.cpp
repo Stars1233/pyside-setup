@@ -539,6 +539,26 @@ Py_XDECREF(result);
 return !result ? -1 : 0;
 // @snippet qbitarray-setitem
 
+// @snippet qbitarray-bits
+const char *bits = %CPPSELF.%FUNCTION_NAME();
+const auto size = %CPPSELF.size();
+Py_ssize_t byteCount = size / 8;
+if ((size % 8) != 0)
+    ++byteCount;
+%PYARG_0 = PyBytes_FromStringAndSize(bits, byteCount);
+// @snippet qbitarray-bits
+
+// @snippet qbitarray-fromBits
+Py_ssize_t size{};
+void *vptr = Shiboken::Buffer::getPointer(%PYARG_1, &size);
+if (vptr == nullptr)
+    return nullptr;
+const char *ptr = reinterpret_cast<const char *>(vptr);
+const qsizetype maxBits = 8 * size;
+%RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(ptr, qMin(%2, maxBits));
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+// @snippet qbitarray-fromBits
+
 // @snippet qmodelroledata-setdata
 // Call template <typename T> void QModelRoleData::setData(T &&value)
 %CPPSELF.%FUNCTION_NAME(%1);

@@ -48,6 +48,10 @@ class QBitArrayIsIterableTest(unittest.TestCase):
         for i in range(len(self.other_qbitarray_values)):
             self.other_qbitarray.setBit(i, self.other_qbitarray_values[i])
 
+        bits = self.qbitarray.bits()
+        bitarray2 = QBitArray.fromBits(bits, 3)
+        self.assertEqual(bitarray2, self.qbitarray)
+
     def tearDown(self):
         # Release resources
         del self.qbitarray

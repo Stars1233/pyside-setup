@@ -1594,6 +1594,15 @@
     <add-function signature="__setitem__">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbitarray-setitem"/>
     </add-function>
+    <modify-function signature="bits()const" remove="yes"/>
+    <add-function signature="bits()" return-type="PyBytes">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                     snippet="qbitarray-bits"/>
+    </add-function>
+    <add-function signature="fromBits(PyBuffer@data@,qsizetype@length@)" static="true" return-type="QBitArray">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                     snippet="qbitarray-fromBits"/>
+    </add-function>
   </value-type>
   <object-type name="QLockFile">
       <enum-type name="LockError"/>
