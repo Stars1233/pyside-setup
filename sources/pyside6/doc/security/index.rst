@@ -31,6 +31,41 @@ Security-relevant Topics in Qt for Python
 * `Shiboken.VoidPtr`_
 * :func:`PySide6.QtUiTools.loadUiType`
 * :ref:`Qt Widgets Designer Custom Widgets<designer-tool-custom-widgets>`
+* :ref:`pyobject-serialization`
+
+.. _pyobject-serialization:
+
+Python Object Serialization in Qt Data Streams
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PySide6 can store Python objects as arguments of queued signal connections or as values written to
+:class:`~PySide6.QtCore.QSettings`. Internally, PySide6 serializes them using Python's pickle module
+into a :class:`~PySide6.QtCore.QDataStream` byte sequence.
+
+**Only Python builtin types can be read back.** Deserialization is restricted
+to ``dict``, ``list``, ``tuple``, ``set``, ``frozenset``, ``str``, ``int``,
+``float``, ``bool``, ``bytes``, ``bytearray``, and ``complex``. Attempting to
+deserialize any other type raises a ``RuntimeError``.
+
+This restriction prevents an attacker who can supply a crafted data stream (for
+example via a :mod:`~PySide6.QtRemoteObjects` connection or a tampered settings file) from
+achieving remote code execution, while still supporting the common use cases of
+storing plain data structures in :class:`~PySide6.QtCore.QSettings`.
+
+When a :class:`~PySide6.QtCore.QDataStream` containing an unsupported Python object type is read,
+the following happens:
+
+* :meth:`~PySide6.QtCore.QSettings.value` raises a ``RuntimeError``.
+* :mod:`~PySide6.QtRemoteObjects` marks the stream as corrupt and drops the connection.
+
+.. warning::
+
+    Do not pass custom Python class instances to :meth:`~PySide6.QtCore.QSettings.setValue` or
+    use them as :mod:`~PySide6.QtRemoteObjects` property values. Writing such objects
+    succeeds (serialization is unrestricted), but reading them back will raise
+    a ``RuntimeError``. Use only the builtin types listed above, or serialize
+    your custom objects to a builtin representation (e.g. a ``dict``) before
+    storing.
 
 Security in Qt
 --------------

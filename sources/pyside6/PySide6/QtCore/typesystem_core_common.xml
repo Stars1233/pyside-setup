@@ -2859,6 +2859,7 @@
     <enum-type name="Status"/>
     <extra-includes>
       <include file-name="QStringList" location="global"/>
+      <include file-name="pyobjectwrapper.h" location="global"/>
     </extra-includes>
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
                  snippet="settings-value-helpers"/>

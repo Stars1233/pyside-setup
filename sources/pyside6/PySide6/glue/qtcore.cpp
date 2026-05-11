@@ -191,6 +191,15 @@ if ((kwds && PyDict_Size(kwds) > 0) || numArgs > 1) {
     out = %CPPSELF.value(%1);
     Py_END_ALLOW_THREADS
 }
+// GIL is re-held here. Check whether safe_loads rejected a non-builtin type.
+// (PyErr_SetString cannot be called inside Py_BEGIN_ALLOW_THREADS because GilState
+// creates a temporary thread state that is destroyed on release, taking the exception.)
+if (PySide::PyObjectWrapper::checkAndClearPickleRejected()) {
+    PyErr_SetString(PyExc_RuntimeError,
+                    "Failed to deserialize Python object from QDataStream. "
+                    "Only builtin types (dict, list, str, int, ...) are supported.");
+    break;
+}
 
 PyTypeObject *typeObj = reinterpret_cast<PyTypeObject*>(%PYARG_3);
 

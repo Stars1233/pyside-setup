@@ -19,7 +19,47 @@ using namespace Qt::StringLiterals;
 
 static int pyObjectWrapperMetaTypeId = QMetaType::UnknownType;
 
+// Builds a callable _safe_loads(bytes) -> object restricted to Python builtin types.
+static PyObject *createSafeLoadsFunc()
+{
+    const char *code = R"(import pickle as _P, builtins as _B, io as _I
+_S = frozenset({'dict','list','tuple','set','frozenset','str','int','float','bool','bytes','bytearray','complex'})
+class _U(_P.Unpickler):
+    def find_class(self, m, n):
+        if m == 'builtins' and n in _S: return getattr(_B, n)
+        raise _P.UnpicklingError(
+            f"Deserializing '{m}.{n}' is not allowed. "
+            'Only Python builtin types (dict, list, str, int, ...) '
+            'can be deserialized from QDataStream.')
+def _safe_loads(d): return _U(_I.BytesIO(d)).load()
+)";
+    Shiboken::AutoDecRef ns(PyDict_New());
+    PyDict_SetItemString(ns, "__builtins__", PyEval_GetBuiltins());
+    Shiboken::AutoDecRef result(PyRun_String(code, Py_file_input, ns, ns));
+    if (result.isNull()) {
+        PyErr_Print();
+        return nullptr;
+    }
+    PyObject *func = PyDict_GetItemString(ns, "_safe_loads");
+    Py_XINCREF(func);
+    return func;
+}
+
 namespace PySide {
+
+// Set when safe_loads rejects a non-builtin type
+// Cleared via checkAndClearPickleRejected() in the qsettings-value glue (GIL held), or
+// as a fallback in CopyCppToPythonPyObject for other callers.
+// Exceptions set inside Shiboken::GilState (within Py_BEGIN_ALLOW_THREADS) are lost
+// when GilState releases because PyEval_SaveThread() detaches the thread state, causing
+// PyGILState_Ensure() to create a temporary one. This flag is the only reliable way to
+// communicate a deserialization failure back to the GIL-holding caller.
+static thread_local bool s_pickleRejected = false;
+
+bool PyObjectWrapper::checkAndClearPickleRejected()
+{
+    return std::exchange(s_pickleRejected, false);
+}
 
 PyObjectWrapper::PyObjectWrapper()
     :m_me(Py_None)
@@ -144,20 +184,27 @@ QDataStream &operator>>(QDataStream &in, PyObjectWrapper &myObj)
         return in;
     }
 
-    PyObject *&eval_func = PySide::globals()->pickleEvalFunc;
+    PyObject *&safe_loads = PySide::globals()->pickleSafeLoadsFunc;
 
     Shiboken::GilState gil;
-    if (!eval_func) {
-        Shiboken::AutoDecRef pickleModule(PyImport_ImportModule("pickle"));
-        eval_func = PyObject_GetAttr(pickleModule, Shiboken::PyName::loads());
-    }
+    if (!safe_loads)
+        safe_loads = createSafeLoadsFunc();
 
     QByteArray repr;
     in >> repr;
     Shiboken::AutoDecRef pyCode(PyBytes_FromStringAndSize(repr.data(), repr.size()));
-    Shiboken::AutoDecRef value(PyObject_CallFunctionObjArgs(eval_func, pyCode.object(), 0));
-    if (!value.object())
+    Shiboken::AutoDecRef value(PyObject_CallFunctionObjArgs(safe_loads, pyCode.object(), nullptr));
+    if (!value.object()) {
+        // _safe_loads raised UnpicklingError (non-builtin type) or another error.
+        // The exception is on the temporary thread state created by GilState inside
+        // Py_BEGIN_ALLOW_THREADS and will be lost when GilState releases. Set the
+        // C++-side flag and stream status so callers can raise from the real thread state.
+        PyErr_Clear();
+        in.setStatus(QDataStream::ReadCorruptData);
+        s_pickleRejected = true;
         value.reset(Py_None);
+        Py_INCREF(Py_None);
+    }
     myObj.reset(value);
     return in;
 }

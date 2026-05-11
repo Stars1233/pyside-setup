@@ -20,7 +20,7 @@ struct Globals // Per interpreter globals of libpyside
     PyTypeObject *qobjectType = nullptr;
     PyObject *emptyTuple = nullptr;
     PyObject *pickleReduceFunc;
-    PyObject *pickleEvalFunc;
+    PyObject *pickleSafeLoadsFunc;
 };
 
 Globals *globals();
