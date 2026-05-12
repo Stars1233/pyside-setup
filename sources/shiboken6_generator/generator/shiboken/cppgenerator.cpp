@@ -5105,9 +5105,10 @@ QString CppGenerator::writeCopyFunction(TextStream &s,
     const auto &metaClass = context.metaClass();
     const QString className = cpythonBaseName(metaClass);
     const QString funcName = className + u"__copy__"_s;
+    const QString pythonClassName = fullPythonClassName(metaClass);
 
     // PYSIDE-3135 replace _Self by Self when the minimum Python version is 3.11
-    signatureStream << fullPythonClassName(metaClass) << ".__copy__(self)->typing._Self\n";
+    signatureStream << pythonClassName << ".__copy__(self)->" << pythonClassName << "\n";
     definitionStream << PyMethodDefEntry{u"__copy__"_s, funcName, PyMethodFlag::NoArgs, {}}
                      << ",\n";
 
