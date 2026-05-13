@@ -1,6 +1,11 @@
 // Copyright (C) 2021 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
+// Security note: This plugin loads and executes Python files matching register*.py
+// from directories listed in PYSIDE_DESIGNER_PLUGINS. Treat PYSIDE_DESIGNER_PLUGINS
+// the same way you would treat PYTHONPATH: only include paths from trusted sources.
+// To disable plugin loading, set PYSIDE_DISABLE_DESIGNER_PLUGINS=1.
+
 #undef slots
 #include <Python.h> // Include before Qt headers due to 'slots' macro definition
 
@@ -13,10 +18,13 @@
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qloggingcategory.h>
 #include <QtCore/qoperatingsystemversion.h>
+#include <QtCore/qsettings.h>
 #include <QtCore/qtextstream.h>
 #include <QtCore/qvariant.h>
 
-#include <string_view>
+#include <QtWidgets/qcheckbox.h>
+#include <QtWidgets/qmessagebox.h>
+
 #include <utility>
 
 using namespace Qt::StringLiterals;
@@ -25,6 +33,48 @@ Q_LOGGING_CATEGORY(lcPySidePlugin, "qt.pysideplugin")
 
 static const char pathVar[] = "PYSIDE_DESIGNER_PLUGINS";
 static const char pythonPathVar[] = "PYTHONPATH";
+
+namespace {
+
+// On Windows, Designer is a GUI subsystem app (WIN32_EXECUTABLE TRUE), so
+// Qt's message handler routes qCWarning to OutputDebugString, never to
+// stderr, even when run from a console
+bool windowsPluginWarningAccepted(const QString &fileList)
+{
+    QSettings settings(QSettings::UserScope,
+                       u"QtProject"_s, u"PySide6Designer"_s);
+    if (settings.value(u"pluginWarningAcknowledged"_s, false).toBool())
+        return true;
+    QMessageBox msgBox(nullptr);
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setWindowTitle(
+        QCoreApplication::translate(
+            "PyDesignerPlugin",
+            "PySide Designer Plugin Security Warning"));
+    msgBox.setText(
+        QCoreApplication::translate(
+            "PyDesignerPlugin",
+            "The following Python files will be executed"
+            " in Designer's process:\n%1\n\n"
+            "Only continue if you trust these paths.\n"
+            "To disable, set"
+            " PYSIDE_DISABLE_DESIGNER_PLUGINS=1.")
+            .arg(fileList));
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    auto *cb = new QCheckBox(
+        QCoreApplication::translate(
+            "PyDesignerPlugin",
+            "Do not show this warning again"));
+    msgBox.setCheckBox(cb);
+    if (msgBox.exec() != QMessageBox::Ok)
+        return false;
+    if (cb->isChecked())
+        settings.setValue(u"pluginWarningAcknowledged"_s, true);
+    return true;
+}
+
+} // namespace
 
 // Find the static instance of 'QPyDesignerCustomWidgetCollection'
 // registered as a dynamic property of QCoreApplication.
@@ -207,6 +257,14 @@ PyDesignerCustomWidgets::PyDesignerCustomWidgets(QObject *parent) : QObject(pare
         return;
     }
 
+    static const char disableVar[] = "PYSIDE_DISABLE_DESIGNER_PLUGINS";
+    if (qEnvironmentVariableIsSet(disableVar)) {
+        qCInfo(lcPySidePlugin,
+            "PySide Designer plugin loading disabled via %s. "
+            "No Python files will be executed.", disableVar);
+        return;
+    }
+
     QStringList pythonFiles;
     const QString pathStr = qEnvironmentVariable(pathVar);
     const QChar listSeparator = QDir::listSeparator();
@@ -249,6 +307,27 @@ PyDesignerCustomWidgets::PyDesignerCustomWidgets(QObject *parent) : QObject(pare
     // Might be initialized already, for example, when loaded from QUiLoader.
     if (Py_IsInitialized() == 0)
         initPython();
+
+    // Print security warning
+    if (withinQtDesigner) {
+        QString fileList;
+        for (const auto &f : std::as_const(pythonFiles))
+            fileList += u"\n  " + QDir::toNativeSeparators(f);
+        qCWarning(lcPySidePlugin,
+                  "Loading Python files from PYSIDE_DESIGNER_PLUGINS.\n"
+                  "Warning: Each register*.py file found will be imported"
+                  " and executed in Designer's process.\n"
+                  "Only set PYSIDE_DESIGNER_PLUGINS to directories you"
+                  " fully trust.\n"
+                  "To disable, set PYSIDE_DISABLE_DESIGNER_PLUGINS=1.\n"
+                  "Files to be loaded:%s", qPrintable(fileList));
+
+        if constexpr (QOperatingSystemVersion::currentType()
+                      == QOperatingSystemVersion::Windows) {
+            if (!windowsPluginWarningAccepted(fileList))
+                return;
+        }
+    }
 
     // Run all register*py files
     QString errorMessage;

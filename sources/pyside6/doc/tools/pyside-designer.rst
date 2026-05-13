@@ -88,5 +88,26 @@ simplify the registration process.
 If you are interested in all the details of this specific case, you can
 check the :ref:`example_designer_taskmenuextension`.
 
+Security Considerations
+-----------------------
+
+The PySide Designer plugin automatically loads and executes Python files matching
+``register*.py`` from directories listed in the ``PYSIDE_DESIGNER_PLUGINS``
+environment variable.  This is by design. Custom widgets must be registered
+before Qt Designer can display them in the widget palette.
+
+Because of this, **treat ``PYSIDE_DESIGNER_PLUGINS`` the same way you would
+treat ``PYTHONPATH``**: only set it to directories containing files from sources
+you fully trust.  Malicious Python files can execute arbitrary code in Designer's
+process.  In particular, be cautious when:
+
+- setting ``PYSIDE_DESIGNER_PLUGINS`` to directories writable by other users or
+  processes, or
+- using Designer to open project files from unfamiliar sources that recommend
+  setting specific plugin paths.
+
+To disable plugin loading entirely, set ``PYSIDE_DISABLE_DESIGNER_PLUGINS=1``
+before launching Designer.
+
 .. _`Qt Widgets Designer`: https://doc.qt.io/qt-6/qtdesigner-manual.html
 .. _`Qt Widgets Designer Manual`: https://doc.qt.io/qt-6/qtdesigner-manual.html
