@@ -40,3 +40,4 @@ many features and implementation details that the project has:
    feature-motivation.rst
    remoteobjects.md
    fix_type_hints.rst
+   embed.rst
