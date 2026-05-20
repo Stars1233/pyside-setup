@@ -44,7 +44,7 @@ public:
         DestructorFunction,
         NormalFunction,
         SignalFunction,
-        EmptyFunction,
+        PrivateOverride, // public/protected virtual overridden with visibility private
         SlotFunction,
         GetAttroFunction,
         SetAttroFunction,
@@ -266,7 +266,7 @@ public:
     bool isInGlobalScope() const;
     bool isSignal() const { return functionType() == SignalFunction; }
     bool isSlot() const { return functionType() == SlotFunction; }
-    bool isEmptyFunction() const { return functionType() == EmptyFunction; }
+    bool isPrivateOverride() const { return functionType() == PrivateOverride; }
     bool maybeAccessor() const;
     FunctionType functionType() const;
     void setFunctionType(FunctionType type);

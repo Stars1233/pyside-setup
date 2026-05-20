@@ -1208,7 +1208,7 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunctionCPtr &fun
     const bool isStaticOverride = options.testFlag(Option::PythonOverrideImplementation);
     if (isDeclaration && (isStaticOverride || func->isStatic()))
         s << "static ";
-    if (func->isEmptyFunction() || func->needsReturnType())
+    if (func->isPrivateOverride() || func->needsReturnType())
         s << functionReturnType(func, options) << ' ';
     else
         options |= Generator::SkipReturnType;

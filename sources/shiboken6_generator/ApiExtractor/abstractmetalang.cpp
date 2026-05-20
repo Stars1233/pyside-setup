@@ -199,7 +199,7 @@ AbstractMetaFunctionCList AbstractMetaClass::functionsInTargetLang() const
                                | default_flags);
 
     // Empty, private functions, since they aren't caught by the other ones
-    returned += queryFunctions(FunctionQueryOption::Empty | FunctionQueryOption::Invisible);
+    returned += queryFunctions(FunctionQueryOption::PrivateOverride | FunctionQueryOption::Invisible);
 
     return returned;
 }
@@ -1236,7 +1236,7 @@ bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQue
     if (query.testFlag(FunctionQueryOption::Invisible) && !f->isPrivate())
         return false;
 
-    if (query.testFlag(FunctionQueryOption::Empty) && !f->isEmptyFunction())
+    if (query.testFlag(FunctionQueryOption::PrivateOverride) && !f->isPrivateOverride())
         return false;
 
     if (query.testFlag(FunctionQueryOption::ClassImplements) && f->ownerClass() != f->implementingClass())
@@ -1620,7 +1620,7 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass, bool avo
                             // the subclasses will not compile as non-abstract classes.
                             // But they don't need to be implemented, since they can never be called.
                             if (f->isPrivate())
-                                f->setFunctionType(AbstractMetaFunction::EmptyFunction);
+                                f->setFunctionType(AbstractMetaFunction::PrivateOverride);
                         }
 
                         // Set the class which first declares this function, afawk

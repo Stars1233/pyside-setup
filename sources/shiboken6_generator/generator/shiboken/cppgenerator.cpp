@@ -3431,7 +3431,7 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
     if (func->isDeprecated())
         writeDeprecationWarning(s, context, func, errorReturn);
 
-    if (func->functionType() == AbstractMetaFunction::EmptyFunction) {
+    if (func->functionType() == AbstractMetaFunction::PrivateOverride) {
         s << "Shiboken::Errors::setPrivateMethod(\""
           << func->signature().replace(u"::"_s, u"."_s) << "\");\n"
           << errorReturn;

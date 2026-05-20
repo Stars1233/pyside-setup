@@ -495,7 +495,7 @@ bool AbstractMetaFunction::generateBinding() const
         if (typeFlags.testFlag(ComplexTypeEntry::DisableWrapper))
             return false;
     }
-    if (isPrivate() && d->m_functionType != EmptyFunction)
+    if (isPrivate() && d->m_functionType != PrivateOverride)
         return false;
     // RValue references only for user-specified
     // functions (<add-function>/<declare-function>/<function>)
@@ -1609,7 +1609,7 @@ TypeSystem::SnakeCase AbstractMetaFunction::snakeCase() const
     switch (d->m_functionType) {
     case AbstractMetaFunction::NormalFunction:
     case AbstractMetaFunction::SignalFunction:
-    case AbstractMetaFunction::EmptyFunction:
+    case AbstractMetaFunction::PrivateOverride:
     case AbstractMetaFunction::SlotFunction:
         break;
     default:
