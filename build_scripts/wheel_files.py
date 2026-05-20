@@ -182,6 +182,7 @@ def wheel_files_pyside_essentials() -> list[ModuleData]:
         # required for qmlls
         module_QtLanguageServer(),
         module_QtJsonRpc(),
+        module_QtQmlFeatures()
     ]
     return files
 
@@ -1120,4 +1121,9 @@ def module_QtWebView() -> ModuleData:
 
 def module_QtWebViewQuick() -> ModuleData:
     data = ModuleData("WebViewQuick")
+    return data
+
+
+def module_QtQmlFeatures() -> ModuleData:
+    data = ModuleData("QmlFeatures")
     return data

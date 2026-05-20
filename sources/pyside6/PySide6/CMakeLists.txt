@@ -121,5 +121,9 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/datavisualization_common.xml
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/pyside6_global.h
         DESTINATION include/${BINDING_NAME}${pyside6_SUFFIX})
 
+if(NOT DISABLE_QtQmlFeatures)
+    add_subdirectory(QtQmlFeatures)
+endif()
+
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/QtAsyncio"
         DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside6_SUFFIX}")

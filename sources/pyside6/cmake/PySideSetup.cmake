@@ -171,10 +171,13 @@ collect_optional_modules()
 
 # Additional (non-Qt) modules implemented in PySide only
 set(PURE_PYTHON_MODULES Asyncio)
+# CPython extension modules that are not Qt bindings (no Qt prefix in short name)
+set(CPYTHON_MODULES QmlFeatures)
+set(NON_QT_MODULES ${PURE_PYTHON_MODULES} ${CPYTHON_MODULES})
 
 # Modules to be built unless specified by -DMODULES on command line
 if(NOT MODULES)
-    set(MODULES "${ALL_ESSENTIAL_MODULES};${ALL_OPTIONAL_MODULES};${PURE_PYTHON_MODULES}")
+    set(MODULES "${ALL_ESSENTIAL_MODULES};${ALL_OPTIONAL_MODULES};${NON_QT_MODULES}")
     set(required_modules ${ALL_ESSENTIAL_MODULES})
     set(optional_modules ${ALL_OPTIONAL_MODULES})
 else()
@@ -186,7 +189,7 @@ list(REMOVE_ITEM required_modules ${SKIP_MODULES})
 list(REMOVE_ITEM optional_modules ${SKIP_MODULES})
 
 # Non-Qt modules must be removed before find_packages tries to locate them.
-foreach(m IN LISTS PURE_PYTHON_MODULES)
+foreach(m IN LISTS NON_QT_MODULES)
     set(DISABLE_Qt${m} 1)
     if("Qt${m}" IN_LIST MODULES OR "${m}" IN_LIST MODULES)
         set(DISABLE_Qt${m} 0)
