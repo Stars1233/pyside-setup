@@ -3,7 +3,7 @@
 
 Include(icecc.cmake)
 
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.25)
 cmake_policy(VERSION 3.22)
 
 set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Type")

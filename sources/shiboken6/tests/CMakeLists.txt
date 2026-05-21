@@ -1,7 +1,7 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.25)
 
 if(BUILD_TESTS)
     find_package(Qt${QT_MAJOR_VERSION}Test 6.0 REQUIRED)

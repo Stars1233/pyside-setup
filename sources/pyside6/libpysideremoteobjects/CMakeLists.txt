@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 if (NOT CMAKE_MINIMUM_REQUIRED_VERSION)
-    cmake_minimum_required(VERSION 3.22)
+    cmake_minimum_required(VERSION 3.25)
     cmake_policy(VERSION 3.22)
 endif()
 
