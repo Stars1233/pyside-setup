@@ -505,12 +505,19 @@ static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, in
     // them with changed names.
 
     for (; meth != nullptr && meth->ml_name != nullptr; ++meth) {
-        const char *name = String::toCString(String::getSnakeCaseName(meth->ml_name, true));
-        AutoDecRef new_method(methodWithNewName(type, meth, name));
-        if (new_method.isNull())
-            return false;
-        if (PyDict_SetItemString(lower_dict, name, new_method) < 0)
-            return false;
+        PyObject *oldMethod = prev_dict ? PyDict_GetItemString(prev_dict, meth->ml_name) : nullptr;
+        const char *newName = String::toCString(String::getSnakeCaseName(meth->ml_name, true));
+        if (oldMethod != nullptr && PyCallable_Check(oldMethod) != 0) {
+            if (PyDict_SetItemString(lower_dict, newName, oldMethod) < 0)
+                return false;
+        } else {
+            // Code path appears to be obsolete?
+            AutoDecRef new_method(methodWithNewName(type, meth, newName));
+            if (new_method.isNull())
+                return false;
+            if (PyDict_SetItemString(lower_dict, newName, new_method) < 0)
+                return false;
+        }
     }
     return true;
 }
