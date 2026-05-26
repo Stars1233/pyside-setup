@@ -1631,12 +1631,14 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;)" allow-thread="yes"/>
-    <add-function signature="exec_(QFlags&lt;Qt::DropAction&gt; @supportedActions@ = Qt::MoveAction)" return-type="Qt::DropAction">
+    <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;)" allow-thread="yes" blocking="yes"/>
+    <add-function signature="exec_(QFlags&lt;Qt::DropAction&gt; @supportedActions@ = Qt::MoveAction)" return-type="Qt::DropAction"
+                  blocking="yes">
         <inject-code file="../glue/qtgui.cpp" snippet="qdrag-exec-arg1"/>
     </add-function>
-    <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;,Qt::DropAction)" allow-thread="yes"/>
-    <add-function signature="exec_(QFlags&lt;Qt::DropAction&gt;,Qt::DropAction)" return-type="Qt::DropAction">
+    <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;,Qt::DropAction)" allow-thread="yes" blocking="yes"/>
+    <add-function signature="exec_(QFlags&lt;Qt::DropAction&gt;,Qt::DropAction)" return-type="Qt::DropAction"
+                  blocking="yes">
         <inject-code file="../glue/qtgui.cpp" snippet="qdrag-exec-arg2"/>
     </add-function>
   </object-type>
@@ -2853,8 +2855,8 @@
         <inject-code file="../glue/qtgui.cpp" snippet="qguiapplication-2"/>
     </add-function>
     <inject-code class="native" position="beginning" file="../glue/qtgui.cpp" snippet="qguiapplication-init"/>
-    <modify-function signature="exec()" allow-thread="yes"/>
-    <add-function signature="exec_()" return-type="int">
+    <modify-function signature="exec()" allow-thread="yes" blocking="yes"/>
+    <add-function signature="exec_()" return-type="int" blocking="yes">
         <inject-code file="../glue/qtgui.cpp" snippet="qguiapplication-exec"/>
     </add-function>
     <add-function signature="nativeInterface()const" return-type="PyObject">

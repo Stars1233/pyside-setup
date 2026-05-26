@@ -1687,8 +1687,8 @@
         <inject-code file="../glue/qtcore.cpp" class="native" position="end"
                      snippet="qthread_pthread_cleanup_uninstall"/>
     </modify-function>
-    <modify-function signature="exec()" allow-thread="yes"/>
-    <add-function signature="exec_()" return-type="int">
+    <modify-function signature="exec()" allow-thread="yes" blocking="yes"/>
+    <add-function signature="exec_()" return-type="int" blocking="yes">
         <inject-code file="../glue/qtcore.cpp" snippet="qthread_exec_"/>
     </add-function>
     <modify-function signature="msleep(unsigned long)" allow-thread="yes"/>
@@ -2377,12 +2377,16 @@
 
   <object-type name="QEventLoop">
       <enum-type name="ProcessEventsFlag" flags="ProcessEventsFlags"/>
-      <modify-function signature="exec(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes"/>
-      <add-function signature="exec_(QFlags&lt;QEventLoop::ProcessEventsFlag> @flags@ = QEventLoop::AllEvents)" return-type="int">
+      <modify-function signature="exec(QFlags&lt;QEventLoop::ProcessEventsFlag>)"
+                       allow-thread="yes" blocking="yes"/>
+      <add-function signature="exec_(QFlags&lt;QEventLoop::ProcessEventsFlag> @flags@ = QEventLoop::AllEvents)" return-type="int"
+                    blocking="yes">
           <inject-code file="../glue/qtcore.cpp" snippet="exec_arg1"/>
       </add-function>
-      <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes"/>
-      <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>,int)" allow-thread="yes"/>
+      <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)"
+                       allow-thread="yes" blocking="yes"/>
+      <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>,int)"
+                       allow-thread="yes" blocking="yes"/>
   </object-type>
   <object-type name="QFileDevice">
     <enum-type name="FileError"/>
@@ -2786,8 +2790,10 @@
     </add-function>
 
     <!-- blocking functions -->
-    <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag&gt;,int)" allow-thread="yes"/>
-    <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag&gt;)" allow-thread="yes"/>
+    <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag&gt;,int)"
+                     allow-thread="yes" blocking="yes"/>
+    <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag&gt;)" allow-thread="yes"
+                     blocking="yes"/>
     <modify-function signature="sendEvent(QObject*,QEvent*)" allow-thread="yes"/>
     <modify-function signature="sendPostedEvents(QObject*,int)" allow-thread="yes"/>
     <modify-function signature="instance()">
@@ -2795,8 +2801,8 @@
       <inject-code class="target" file="../glue/qtcore.cpp" snippet="qcoreapplication-instance"/>
     </modify-function>
 
-    <modify-function signature="exec()" allow-thread="yes"/>
-    <add-function signature="exec_()" return-type="int">
+    <modify-function signature="exec()" allow-thread="yes" blocking="yes"/>
+    <add-function signature="exec_()" return-type="int" blocking="yes">
         <inject-code file="../glue/qtcore.cpp" snippet="exec_"/>
     </add-function>
     <modify-function signature="notify(QObject*,QEvent*)" allow-thread="yes">
@@ -3652,6 +3658,7 @@
     <add-function signature="create(PyObject* @functionToRun@)" static="yes" return-type="QRunnable*">
       <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qrunnable_create"/>
     </add-function>
+    <modify-function signature="run()" blocking="yes"/>
   </object-type>
 
   <object-type name="QPluginLoader"/>

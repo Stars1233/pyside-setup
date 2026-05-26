@@ -165,6 +165,7 @@ or return values.
                           remove="true | false"
                           access="public | private | protected"
                           allow-thread="true | auto | false"
+                          blocking="true | false"
                           exception-handling="no | auto-off | auto-on | yes"
                           final="true | false"
                           overload-number="number"
@@ -189,6 +190,13 @@ lengthy I/O operations or similar. It has performance costs, though.
 The value ``auto`` means that it will be turned off for functions for which
 it is deemed to be safe, for example, simple getters.
 The attribute defaults to ``false``.
+
+The optional ``blocking`` attribute specifies whether a function is blocking in
+the sense that it drives an event loop from which methods overridden in Python
+may be called repeatedly. If set to true, errors occurring in those overridden
+methods are immediately printed and cleared instead of propagating to the outer
+context, which may cause issues when processing the next event.
+The attribute also applies to overridden functions in derived classes.
 
 The ``exception-handling`` attribute specifies whether to generate exception
 handling code (nest the function call into try / catch statements). It accepts

@@ -180,7 +180,8 @@ public:
         Rename =                0x2000,
         Deprecated =            0x4000,
         Undeprecated =          0x8000,
-        ReplaceExpression =    0x10000
+        ReplaceExpression =    0x10000,
+        Blocking =             0x20000
     };
 
     Q_DECLARE_FLAGS(Modifiers, ModifierFlag);

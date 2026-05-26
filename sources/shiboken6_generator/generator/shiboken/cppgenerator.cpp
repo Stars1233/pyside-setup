@@ -2240,6 +2240,11 @@ void CppGenerator::writeConstructorWrapperPreamble(TextStream &s,
     writeCommonMethodWrapperPreamble(s, overloadData, context, initPythonArguments, errorReturn);
 }
 
+static inline bool isBlockingFunction(const FunctionModification &fm)
+{
+    return fm.modifiers().testFlag(FunctionModification::Blocking);
+}
+
 void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
                                               const OverloadData &overloadData,
                                               const GeneratorContext &context,
@@ -2269,10 +2274,13 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
     s << pythonContextMarker;
 
     // PYSIDE-2335: Mark blocking calls like `exec` or `run` as such.
-    bool isBlockingFunction = rfunc->name() == u"exec"_s || rfunc->name() == u"exec_"_s
-                              || rfunc->name() == u"run"_s || rfunc->name() == u"processEvents"_s;
-    if (isBlockingFunction)
-        s << "pcm.setBlocking();\n";
+    for (auto func = rfunc; func; func = func->overridden()) {
+        const auto &mods = func->modifications();
+        if (std::any_of(mods.cbegin(), mods.cend(), isBlockingFunction)) {
+            s << "pcm.setBlocking();\n";
+            break;
+        }
+    }
 
     const bool initPythonArguments = overloadData.minArgs() != maxArgs || maxArgs > 1;
     writeCommonMethodWrapperPreamble(s, overloadData, context, initPythonArguments, errorReturn);

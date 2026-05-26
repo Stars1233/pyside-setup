@@ -64,6 +64,7 @@ constexpr auto defaultSuperclassAttribute = "default-superclass"_L1;
 constexpr auto deleteInMainThreadAttribute = "delete-in-main-thread"_L1;
 constexpr auto deleteInOwnerThreadAttribute = "delete-in-owner-thread"_L1;
 constexpr auto deprecatedAttribute = "deprecated"_L1;
+constexpr auto blockingAttribute = "blocking"_L1;
 constexpr auto disableWrapperAttribute = "disable-wrapper"_L1;
 constexpr auto docFileAttribute = "doc-file"_L1;
 constexpr auto exceptionHandlingAttribute = "exception-handling"_L1;
@@ -2946,6 +2947,9 @@ bool TypeSystemParser::parseBasicModifyFunctionAttributes(QXmlStreamAttributes *
                                                    deprecatedAttribute, false);
             mod->setModifierFlag(deprecated ? FunctionModification::Deprecated
                                             : FunctionModification::Undeprecated);
+        } else if (name == blockingAttribute) {
+            if (convertBoolean(attributes->takeAt(i).value(), blockingAttribute, false))
+                mod->setModifierFlag(FunctionModification::Blocking);
         }
     }
     return true;
