@@ -49,6 +49,77 @@ macro(append_size_optimization_flags _module_name)
     endif()
 endmacro()
 
+# Sets the ld_prefix variable in the calling scope to the platform-specific library
+# path prefix (DYLD_LIBRARY_PATH / LD_LIBRARY_PATH / PATH) pointing at the build-tree
+# locations of libpyside, libpysideqml, libpysideremoteobjects, and libshiboken6.
+# Must be called after pysidebindings_BINARY_DIR and Shiboken6::libshiboken are available.
+# Used to set up the environment when invoking generate_pyi.py for .pyi stub generation.
+macro(pyside_setup_ld_prefix)
+    # Need to set the LD_ env vars before invoking the script, because it might use build-time
+    # libraries instead of install time libraries.
+    if (WIN32)
+        set(ld_prefix_var_name "PATH")
+    elseif(APPLE)
+        set(ld_prefix_var_name "DYLD_LIBRARY_PATH")
+    else()
+        set(ld_prefix_var_name "LD_LIBRARY_PATH")
+    endif()
+
+    # Get the build type, default to RELEASE if not set
+    if(CMAKE_BUILD_TYPE)
+        string(TOUPPER "${CMAKE_BUILD_TYPE}" _build_type)
+    else()
+        set(_build_type "RELEASE")
+    endif()
+
+    # Try to get the location for the current build type
+    get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_${_build_type})
+
+    # Fallback to RELEASE if not found
+    if(NOT _shiboken_lib_location)
+        get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_RELEASE)
+    endif()
+
+    # Get the directory containing the library file, which is the lib directory
+    get_filename_component(SHIBOKEN_SHARED_LIBRARY_DIR "${_shiboken_lib_location}" DIRECTORY)
+
+    set(ld_prefix_list "")
+    list(APPEND ld_prefix_list "${pysidebindings_BINARY_DIR}/libpyside")
+    list(APPEND ld_prefix_list "${pysidebindings_BINARY_DIR}/libpysideqml")
+    list(APPEND ld_prefix_list "${pysidebindings_BINARY_DIR}/libpysideremoteobjects")
+    list(APPEND ld_prefix_list "${SHIBOKEN_SHARED_LIBRARY_DIR}")
+    if(WIN32)
+        list(APPEND ld_prefix_list "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}")
+    endif()
+
+    list(JOIN ld_prefix_list "${PATH_SEP}" ld_prefix_values_string)
+    set(ld_prefix "${ld_prefix_var_name}=${ld_prefix_values_string}")
+
+    # Append any existing ld_prefix values, so existing PATH, LD_LIBRARY_PATH, etc.
+    # On Windows it is needed because pyside modules import Qt,
+    # and the Qt modules are found from PATH.
+    # On Linux and macOS, existing values might be set to find system libraries correctly.
+    # For example on openSUSE when compiling with icc, libimf.so from Intel has to be found.
+    if(WIN32)
+        # Get the value of PATH with CMake separators.
+        file(TO_CMAKE_PATH "$ENV{${ld_prefix_var_name}}" path_value)
+
+        # Replace the CMake list separators with "\;"s, to avoid the PATH values being
+        # interpreted as CMake list elements, we actually want to pass the whole string separated
+        # by ";" to the command line.
+        if(path_value)
+            make_path(path_value "${path_value}")
+            string(APPEND ld_prefix "${PATH_SEP}${path_value}")
+        endif()
+    else()
+        # Handles both macOS and Linux.
+        set(env_value "$ENV{${ld_prefix_var_name}}")
+        if(env_value)
+            string(APPEND ld_prefix ":${env_value}")
+        endif()
+    endif()
+endmacro()
+
 # Sample usage
 # create_pyside_module(NAME QtGui
 #                      INCLUDE_DIRS QtGui_include_dirs
@@ -275,70 +346,7 @@ macro(create_pyside_module)
     create_generator_target(${module_NAME})
 
     # build type hinting stubs
-
-    # Need to set the LD_ env vars before invoking the script, because it might use build-time
-    # libraries instead of install time libraries.
-    if (WIN32)
-        set(ld_prefix_var_name "PATH")
-    elseif(APPLE)
-        set(ld_prefix_var_name "DYLD_LIBRARY_PATH")
-    else()
-        set(ld_prefix_var_name "LD_LIBRARY_PATH")
-    endif()
-
-    # Get the build type, default to RELEASE if not set
-    if(CMAKE_BUILD_TYPE)
-        string(TOUPPER "${CMAKE_BUILD_TYPE}" _build_type)
-    else()
-        set(_build_type "RELEASE")
-    endif()
-
-    # Try to get the location for the current build type
-    get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_${_build_type})
-
-    # Fallback to RELEASE if not found
-    if(NOT _shiboken_lib_location)
-        get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_RELEASE)
-    endif()
-
-    # Get the directory containing the library file, which is the lib directory
-    get_filename_component(SHIBOKEN_SHARED_LIBRARY_DIR "${_shiboken_lib_location}" DIRECTORY)
-
-    set(ld_prefix_list "")
-    list(APPEND ld_prefix_list "${pysidebindings_BINARY_DIR}/libpyside")
-    list(APPEND ld_prefix_list "${pysidebindings_BINARY_DIR}/libpysideqml")
-    list(APPEND ld_prefix_list "${pysidebindings_BINARY_DIR}/libpysideremoteobjects")
-    list(APPEND ld_prefix_list "${SHIBOKEN_SHARED_LIBRARY_DIR}")
-    if(WIN32)
-        list(APPEND ld_prefix_list "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}")
-    endif()
-
-    list(JOIN ld_prefix_list "${PATH_SEP}" ld_prefix_values_string)
-    set(ld_prefix "${ld_prefix_var_name}=${ld_prefix_values_string}")
-
-    # Append any existing ld_prefix values, so existing PATH, LD_LIBRARY_PATH, etc.
-    # On Windows it is needed because pyside modules import Qt,
-    # and the Qt modules are found from PATH.
-    # On Linux and macOS, existing values might be set to find system libraries correctly.
-    # For example on openSUSE when compiling with icc, libimf.so from Intel has to be found.
-    if(WIN32)
-        # Get the value of PATH with CMake separators.
-        file(TO_CMAKE_PATH "$ENV{${ld_prefix_var_name}}" path_value)
-
-        # Replace the CMake list separators with "\;"s, to avoid the PATH values being
-        # interpreted as CMake list elements, we actually want to pass the whole string separated
-        # by ";" to the command line.
-        if(path_value)
-            make_path(path_value "${path_value}")
-            string(APPEND ld_prefix "${PATH_SEP}${path_value}")
-        endif()
-    else()
-        # Handles both macOS and Linux.
-        set(env_value "$ENV{${ld_prefix_var_name}}")
-        if(env_value)
-            string(APPEND ld_prefix ":${env_value}")
-        endif()
-    endif()
+    pyside_setup_ld_prefix()
 
     qfp_strip_library("${module_NAME}")
 
