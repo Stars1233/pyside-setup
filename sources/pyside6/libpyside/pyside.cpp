@@ -47,6 +47,7 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qdir.h>
 #include <QtCore/qfileinfo.h>
+#include <QtCore/qhash.h>
 #include <QtCore/qmetaobject.h>
 #include <QtCore/qmutex.h>
 #include <QtCore/qstack.h>
@@ -1006,6 +1007,59 @@ QObject *convertToQObject(PyObject *object, bool raiseError)
     }
     return reinterpret_cast<QObject*>(ptr);
 }
+
+using MetaTypeIf2QMetaObjectHash = QHash<const QtPrivate::QMetaTypeInterface *, const QMetaObject *>;
+
+Q_GLOBAL_STATIC(MetaTypeIf2QMetaObjectHash, metaTypeIf2QMetaObjectHash);
+
+static const QMetaObject *metaObjectFunc(const QtPrivate::QMetaTypeInterface *mif)
+{
+    return metaTypeIf2QMetaObjectHash()->value(mif);
+}
+
+QMetaType createQObjectPtrMetaType(const QMetaObject *metaObject)
+{
+    const char *className = metaObject->className();
+    const auto nameLen = std::strlen(className);
+    char *ptrName = new char[nameLen + 2];
+    std::strcpy(ptrName, className);
+    ptrName[nameLen] = '*';
+    ptrName[nameLen + 1] = '\0';
+
+    if (auto existing = QMetaType::fromName(ptrName); existing.isValid()) {
+        delete [] ptrName;
+        return existing;
+    }
+
+    auto *mti = new QtPrivate::QMetaTypeInterface {
+        1,       // revision
+        ushort(std::alignment_of<QObject*>()),
+        sizeof(QObject*),
+        uint(QMetaType::IsPointer | QMetaType::RelocatableType | QMetaType::PointerToQObject),
+        {},      // typeId
+        metaObjectFunc,
+        ptrName,
+        nullptr, // ctr
+        nullptr, // copyCtr
+        nullptr, // moveCtr
+        nullptr, // dtor
+        QtPrivate::QEqualityOperatorForType<QObject*>::equals,
+        QtPrivate::QLessThanOperatorForType<QObject*>::lessThan,
+        nullptr, // qDebug
+        nullptr, // dataStreamOut
+        nullptr, // dataStreamIn
+        nullptr  // legacyRegisterOp
+    };
+
+    metaTypeIf2QMetaObjectHash()->insert(mti, metaObject);
+
+    QMetaType metaType(mti);
+    [[maybe_unused]] const int id = metaType.id(); // enforce registration
+    return metaType;
+}
+
+// -----------------------------------------------------------------------------
+
 
 QMetaType qMetaTypeFromPyType(PyTypeObject *pyType)
 {
