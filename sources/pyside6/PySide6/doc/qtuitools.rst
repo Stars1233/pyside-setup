@@ -35,9 +35,10 @@ overriding :class:`~PySide6.QtGui.QWidget`'s :meth:`~PySide6.QtGui.QWidget.paint
 
 loadUiType
 ***********
-.. py:function:: loadUiType(uifile: str) -> tuple(object, object)
+.. py:function:: loadUiType(uifile: str, path_search: bool=False) -> tuple(object, object)
 
    :param str uifile: The name of the `.ui` file
+   :param bool path_search: Wether to search the `pyside6-uic` in path in case it is not found
    :return: tuple(object, object)
 
 This function generates and loads a `.ui` file at runtime, and it returns
@@ -74,6 +75,10 @@ We strongly advise against using this function in security-critical environments
 
 The function runs the external tool :ref:`pyside6-uic` to convert the ``.ui``
 files into Python code, which is then executed to create the return types.
+
+In particular, the parameter ``path_search`` should always be left at its
+default value `False` to ensure that the correct version of ``pyside6-uic``
+is used.
 
 Manipulation of the executable or loading ``.ui`` files from untrusted sources
 can lead to security threats in your application, such as denial of service

@@ -88,5 +88,5 @@ auto str = PySide::pyPathToQString(%1);
 Arguments:
     %PYARG_1 (uifile)
 */
-%PYARG_0 = loadUiType(%PYARG_1);
+%PYARG_0 = loadUiType(%PYARG_1, %PYARG_2);
 // @snippet loaduitype

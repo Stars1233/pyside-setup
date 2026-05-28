@@ -10,7 +10,7 @@
 
 QT_BEGIN_NAMESPACE
 
-PyObject *loadUiType(PyObject *obFileName);
+PyObject *loadUiType(PyObject *obFileName, PyObject *obPathSearch = nullptr);
 
 QT_END_NAMESPACE
 

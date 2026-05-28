@@ -82,7 +82,8 @@
     <extra-includes>
       <include file-name="glue/loaduitype.h" location="global"/>
     </extra-includes>
-    <add-function signature="loadUiType(const QString&amp; @uifile@)" return-type="PyObject*">
+    <add-function signature="loadUiType(const QString&amp; @uifile@,bool @path_search@=false)"
+                  return-type="PyObject*">
       <inject-code file="../glue/qtuitools.cpp" snippet="loaduitype"/>
       <inject-documentation format="target" mode="append" file="../doc/qtuitools.rst"
                             snippet="loaduitype"/>

@@ -100,9 +100,10 @@ static std::optional<XmlClassNames> getXmlClassNames(const QString &uiFileName)
     return XmlClassNames{className, baseClassName};
 }
 
-PyObject *loadUiType(PyObject *obFileName)
+PyObject *loadUiType(PyObject *obFileName, PyObject *obPathSearch)
 {
     // 1. Generate the Python code from the UI file
+    const bool pathSearch = obPathSearch != nullptr && PyBool_Check(obPathSearch) && Py_IsTrue(obPathSearch);
     const QString uiFileName = PySide::pyUnicodeToQString(obFileName);
     if (uiFileName.isEmpty()) {
         qCritical("loadUiType: Error converting the UI filename");
@@ -117,6 +118,11 @@ PyObject *loadUiType(PyObject *obFileName)
 
     static const QString uicBin = getUicBinary();
     if (!uicBin.contains(u'/')) {
+        if (!pathSearch) {
+            qCritical("loadUiType: %s could not be found in the standard location.",
+                      qPrintable(uicBin));
+            Py_RETURN_NONE;
+        }
         qWarning("loadUiType(): \"%s\" could not be found in the Python installation, "
                  "falling back to using a relative path. This poses a security risk. "
                  "Please contact the application vendor to fix the issue.", qPrintable(uicBin));
