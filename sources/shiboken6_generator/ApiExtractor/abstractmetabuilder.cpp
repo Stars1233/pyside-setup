@@ -792,8 +792,8 @@ bool AbstractMetaBuilder::build(const QByteArrayList &arguments,
                                 LanguageLevel level,
                                 unsigned clangFlags)
 {
-    const FileModelItem dom = d->buildDom(arguments, addCompilerSupportArguments,
-                                          level, clangFlags);
+    const FileModelItem dom =
+        AbstractMetaBuilderPrivate::buildDom(arguments, addCompilerSupportArguments, level, clangFlags);
     if (!dom)
         return false;
     if (ReportHandler::isDebug(ReportHandler::MediumDebug))
@@ -1605,7 +1605,7 @@ void AbstractMetaBuilderPrivate::traverseClassFunction(const AbstractMetaFunctio
 void AbstractMetaBuilderPrivate::traverseClassFunction(const ScopeModelItem& scopeItem,
                                                        const FunctionModelItem &function,
                                                        const AbstractMetaFunctionPtr &metaFunction,
-                                                       const AbstractMetaClassPtr &metaClass) const
+                                                       const AbstractMetaClassPtr &metaClass)
 {
     if (function->isSpaceshipOperator()) {
         // For spaceship, the traverse mechanism is only used to handle rejections
@@ -3143,9 +3143,7 @@ void AbstractMetaBuilder::setCodeModelTestMode(bool b)
 QString AbstractMetaBuilderPrivate::fixSimpleDefaultValue(QStringView expr,
                                                           const AbstractMetaClassCPtr &klass) const
 {
-    const QString field = qualifyStaticField(klass, expr);
-
-    if (!field.isEmpty())
+    if (QString field = qualifyStaticField(klass, expr); !field.isEmpty())
         return field;
     const auto cit = m_classToItem.constFind(klass);
     if (cit == m_classToItem.cend())
