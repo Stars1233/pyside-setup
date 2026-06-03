@@ -546,8 +546,7 @@ private:
                                                      const AbstractMetaClassCList &conversions);
 
     void writeTypeArrays(TextStream &s);
-    void writeModuleInitFunction(TextStream &s, const QString &moduleDef,
-                                 const QString &execFunc, const QString &convInitFunc,
+    void writeModuleInitFunction(TextStream &s, const QString &moduleDef, const QString &convInitFunc,
                                  const QString &containerConvInitFunc,
                                  const QString &qtEnumRegisterMetaTypeFunc);
     void writeModuleExecFunction(TextStream &s, const QString &name,

@@ -6882,7 +6882,7 @@ bool CppGenerator::finishGeneration()
 
     const QString moduleDef = writeModuleDef(s, modName, execFunc);
 
-    writeModuleInitFunction(s, moduleDef, execFunc, convInitFunc, containerConvInitFunc, qtEnumRegisterMetaTypeFunc);
+    writeModuleInitFunction(s, moduleDef, convInitFunc, containerConvInitFunc, qtEnumRegisterMetaTypeFunc);
 
     file.done();
     return true;
@@ -7001,7 +7001,7 @@ void CppGenerator::writeTypeArrays(TextStream &s)
 }
 
 void CppGenerator::writeModuleInitFunction(TextStream &s, const QString &moduleDef,
-                                           const QString &execFunc, const QString &convInitFunc,
+                                           const QString &convInitFunc,
                                            const QString &containerConvInitFunc,
                                            const QString &qtEnumRegisterMetaTypeFunc)
 {
