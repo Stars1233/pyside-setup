@@ -534,6 +534,41 @@ static PySideSignalInstance *findSignalInstanceForSlot(PySideSignalInstance *sou
     return source;
 }
 
+static PyObject *connectSignalToSignal(PySideSignalInstance *source, PySideSignalInstance *target,
+                                       Qt::ConnectionType connectionType)
+{
+    // find best match
+    for (PySideSignalInstance *sourceWalk = source; sourceWalk != nullptr; ) {
+        for (auto *targetWalk = target; targetWalk != nullptr; ) {
+            const char *sourceSignature = sourceWalk->d->signature.constData();
+            const char *targetSignature = targetWalk->d->signature.constData();
+            if (QMetaObject::checkConnectArgs(sourceSignature, targetSignature)) {
+                if (isSourceDeleted(sourceWalk))
+                    return PyErr_Format(PyExc_RuntimeError, msgSourceDeleted);
+                if (isSourceDeleted(targetWalk))
+                    return PyErr_Format(PyExc_RuntimeError, msgTargetSignalDeleted);
+
+                auto *senderObj = sender(sourceWalk);
+                const auto *senderMo = senderObj->metaObject();
+                const int senderIndex = senderMo->indexOfSignal(sourceSignature);
+                auto *receiver = sender(targetWalk);
+                const auto *receiverMo = receiver->metaObject();
+                const int receiverIndex = receiverMo->indexOfSignal(targetSignature);
+                if (senderIndex == -1 || receiverIndex == -1)
+                    break; // Should not happen
+                auto conn = QObject::connect(senderObj, senderMo->method(senderIndex),
+                                             receiver, receiverMo->method(receiverIndex),
+                                             connectionType);
+                return Shiboken::Conversions::copyToPython(metaObjConnectionConverter(), &conn);
+            }
+            targetWalk = targetWalk->d->next;
+        }
+        sourceWalk = sourceWalk->d->next;
+    }
+    return PyErr_Format(PyExc_RuntimeError, R"(Failed to connect signal "%s" to signal "%s".)",
+                        source->d->signature.constData(), target->d->signature.constData());
+}
+
 static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject *kwds)
 {
     PyObject *slot = nullptr;
@@ -557,32 +592,8 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
     if (!source->d)
         return PyErr_Format(PyExc_RuntimeError, "cannot connect uninitialized SignalInstance");
 
-    if (Py_TYPE(slot) == PySideSignalInstance_TypeF()) { // Connect signal to signal
-        auto *firstTarget = reinterpret_cast<PySideSignalInstance *>(slot);
-        // find best match
-        for (PySideSignalInstance *sourceWalk = source; sourceWalk != nullptr; ) {
-            for (auto *targetWalk = firstTarget; targetWalk != nullptr; ) {
-                if (QMetaObject::checkConnectArgs(sourceWalk->d->signature,
-                                                  targetWalk->d->signature)) {
-                    if (isSourceDeleted(sourceWalk))
-                        return PyErr_Format(PyExc_RuntimeError, msgSourceDeleted);
-                    if (isSourceDeleted(targetWalk))
-                        return PyErr_Format(PyExc_RuntimeError, msgTargetSignalDeleted);
-
-                    auto conn = PySide::qobjectConnect(sender(sourceWalk),
-                                                       qSignalSignature(sourceWalk).constData(),
-                                                       sender(targetWalk),
-                                                       qSignalSignature(targetWalk).constData(),
-                                                       connectionType);
-                    return Shiboken::Conversions::copyToPython(metaObjConnectionConverter(), &conn);
-                }
-                targetWalk = targetWalk->d->next;
-            }
-            sourceWalk = sourceWalk->d->next;
-        }
-        return PyErr_Format(PyExc_RuntimeError, "Failed to connect signal \"%s\" to signal \"%s\".",
-                            source->d->signature.constData(), firstTarget->d->signature.constData());
-    }
+    if (Py_TYPE(slot) == PySideSignalInstance_TypeF()) // Connect signal to signal
+        return connectSignalToSignal(source, reinterpret_cast<PySideSignalInstance *>(slot), connectionType);
 
     if (PyCallable_Check(slot) == 0) {
         return PyErr_Format(PyExc_TypeError, "Expected signal or callable, got \"%s\"",
