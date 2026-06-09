@@ -1045,11 +1045,20 @@ static QByteArray buildSignature(const QByteArray &name, const QByteArray &signa
     return QMetaObject::normalizedSignature(name + '(' + signature + ')');
 }
 
+static void warnInvalidSignature(PyObject *args, Py_ssize_t argNumber)
+{
+    PyErr_WarnFormat(PyExc_RuntimeWarning, 0,
+                     R"(libpyside: Ignoring invalid signal parameter %zd ("%S"/%T).)",
+                     argNumber + 1, args, args);
+}
+
 static PySideSignalData::Signature parseSignature(PyObject *args)
 {
     PySideSignalData::Signature result{{}, QMetaMethod::Compatibility, 0};
     if (args && (Shiboken::String::check(args) || !PyTuple_Check(args))) {
         result.signature = getTypeName(args);
+        if (result.signature.isEmpty()) // FIXME PYSIDE7: Turn into error (PYSIDE-3364)?
+            warnInvalidSignature(args, 0);
         result.argCount = 1;
         return result;
     }
@@ -1057,7 +1066,9 @@ static PySideSignalData::Signature parseSignature(PyObject *args)
     for (Py_ssize_t i = 0, i_max = PySequence_Size(args); i < i_max; i++) {
         Shiboken::AutoDecRef arg(PySequence_GetItem(args, i));
         const auto typeName = getTypeName(arg);
-        if (!typeName.isEmpty()) {
+        if (typeName.isEmpty()) {
+            warnInvalidSignature(args, i); // FIXME PYSIDE7: Turn into error (PYSIDE-3364)?
+        } else {
             if (!result.signature.isEmpty())
                 result.signature += ',';
             result.signature += typeName;
