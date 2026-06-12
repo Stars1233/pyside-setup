@@ -56,7 +56,7 @@ EXAMPLE_MAPPING = {
     "qtwebengine": ["pdfwidgets/pdfviewer", "webenginequick/nanobrowser",
                     "webenginewidgets/notifications", "webenginewidgets/simplebrowser"],
     "qtwebview": ["webview/minibrowser"],
-    "qtdoc": ["demos/colorpaletteclient", "demos/documentviewer"]
+    "qtdoc": ["demos/colorpaletteclient", "demos/documentviewer", "demos/osmbuildings"]
 }
 
 
@@ -111,6 +111,9 @@ def detect_qml_module(pyside_example, sources):
        located in the example root, PySide has an additional directory
        since it loads the QML files from the file system.
        Read the qmldir file and check whether a module directory exists."""
+    # Hardcoded cases, where the C++ example does not have a "qmldir"
+    if pyside_example.name == "osmbuildings":
+        return "OSMBuildings"
     qml_dir_file = None
     for source in sources:
         if source.name.startswith("qmldir"):  # "qmldir"/"qmldir.in"
