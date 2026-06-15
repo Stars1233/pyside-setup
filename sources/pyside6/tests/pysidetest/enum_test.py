@@ -214,7 +214,7 @@ class InvestigateOpcodesTest(unittest.TestCase):
                         ('LOAD_GLOBAL', 91, 0),
                         ('LOAD_ATTR', 79, 2),
                         ('STORE_FAST', 111, 1),
-                        ('LOAD_CONST', 81, 0),
+                        ('LOAD_COMMON_CONSTANT', 80, 7),
                         ('RETURN_VALUE', 33, None)
                         ]
             result_2 = [('RESUME', 128, 0),
@@ -223,7 +223,7 @@ class InvestigateOpcodesTest(unittest.TestCase):
                         ('PUSH_NULL', 31, None),
                         ('CALL', 50, 0),
                         ('STORE_FAST', 111, 1),
-                        ('LOAD_CONST', 81, 0),
+                        ('LOAD_COMMON_CONSTANT', 80, 7),
                         ('RETURN_VALUE', 33, None)]
 
         actual1 = self.read_code(self.probe_function1)
