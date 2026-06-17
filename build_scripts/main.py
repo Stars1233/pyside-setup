@@ -1114,7 +1114,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         recursively)"""
         return self._find_shared_libraries(initial_path, recursive=True)
 
-    def update_rpath(self, executables, libexec=False, message=None):
+    def update_rpath(self, executables, libexec=False):
         ROOT = '@loader_path' if sys.platform == 'darwin' else '$ORIGIN'
         QT_PATH = '/../lib' if libexec else '/Qt/lib'
 
