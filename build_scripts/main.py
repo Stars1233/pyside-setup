@@ -548,8 +548,6 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         return sys.platform != 'win32' or self.build_type.lower() != 'debug'
 
     def build_extension(self, extension):
-        # calculate the subrepos folder name
-
         log.info(f"Building module {extension}...")
 
         # Prepare folders
@@ -560,8 +558,16 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             log.info(f"Skipping {extension} because {skipflag_file} exists")
             return
 
-        module_build_exists = module_build_dir.exists()
-        if module_build_exists:
+        module_src_dir = self._setup_build_dir(extension, module_build_dir)
+        cmake_cmd = self._build_cmake_command(extension, module_src_dir)
+        self._run_cmake_and_make(extension, cmake_cmd, module_src_dir)
+        self._build_docs(extension)
+        self._run_make_install(extension)
+        os.chdir(self.script_dir)
+
+    def _setup_build_dir(self, extension, module_build_dir):
+        """Prepare the module build folder and return the module source dir."""
+        if module_build_dir.exists():
             if not OPTION["REUSE_BUILD"]:
                 log.info(f"Deleting module build folder {module_build_dir}...")
                 try:
@@ -575,10 +581,10 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             log.info(f"Creating module build folder {module_build_dir}...")
             os.makedirs(module_build_dir)
         os.chdir(module_build_dir)
+        return self.sources_dir / extension
 
-        module_src_dir = self.sources_dir / extension
-
-        # Build module
+    def _build_cmake_command(self, extension, module_src_dir):
+        """Construct and return the full CMake configuration command."""
         cmake_cmd = [str(OPTION["CMAKE"])]
         cmake_quiet_build = 1
         cmake_rule_messages = 0
@@ -641,7 +647,6 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                 log.info(f"Using custom provided {SHIBOKEN} installation: {config_dir}")
                 cmake_cmd.append(f"-DShiboken6_DIR={config_dir}")
             else:
-
                 log.info(f"Custom provided {SHIBOKEN} installation not found. "
                          f"Path given: {config_dir}")
 
@@ -843,6 +848,10 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         if self.cmake_toolchain_file:
             cmake_cmd.append(f"-DCMAKE_TOOLCHAIN_FILE={self.cmake_toolchain_file}")
 
+        return cmake_cmd
+
+    def _run_cmake_and_make(self, extension, cmake_cmd, module_src_dir):
+        """Configure with CMake then compile with make/ninja."""
         if not OPTION["SKIP_CMAKE"]:
             log.info(f"Configuring module {extension} ({module_src_dir})...")
             if run_process(cmake_cmd) != 0:
@@ -859,6 +868,8 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         if run_process(cmd_make) != 0:
             raise SetupError(f"Error compiling {extension}")
 
+    def _build_docs(self, extension):
+        """Optionally build Sphinx documentation for the given extension."""
         if OPTION["BUILD_DOCS"]:
             if extension.lower() == SHIBOKEN:
                 found = importlib.util.find_spec("sphinx")
@@ -873,8 +884,9 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                     log.info("Sphinx not found, skipping documentation build")
         else:
             log.info("-- Skipped documentation generation. Enable with '--build-docs'")
-            cmake_cmd.append("-DBUILD_DOCS=no")
 
+    def _run_make_install(self, extension):
+        """Run make install, or skip if SKIP_MAKE_INSTALL is set."""
         if not OPTION["SKIP_MAKE_INSTALL"]:
             log.info(f"Installing module {extension}...")
             # Need to wait a second, so installed file timestamps are
@@ -890,8 +902,6 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                 raise SetupError(f"Error pseudo installing {extension}")
         else:
             log.info(f"Skipped installing module {extension}")
-
-        os.chdir(self.script_dir)
 
     def prepare_packages(self):
         """
