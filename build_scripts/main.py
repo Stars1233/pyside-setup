@@ -41,7 +41,7 @@ from .utils import (copydir, copyfile, detect_clang,
                     get_numpy_location, get_python_dict,
                     linux_fix_rpaths_for_library, macos_fix_rpaths_for_library, parse_modules,
                     platform_cmake_options, remove_tree, run_process,
-                    run_process_output, update_env_path, which)
+                    run_process_output, RpathTargetType, update_env_path, which)
 from . import PYSIDE, PYSIDE_MODULE, SHIBOKEN, SHIBOKEN_GENERATOR
 from .wheel_override import get_bdist_wheel_override, wheel_module_exists
 from .wheel_utils import (get_package_timestamp, get_package_version,
@@ -1173,61 +1173,45 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             rpath_cmd(executable)
             log.debug(f"{message} {executable}.")
 
-    def update_rpath_for_linux_plugins(
-            self,
-            plugin_paths,
-            qt_lib_dir=None,
-            is_qml_plugin=False):
-
-        # If the linux sysroot (where the plugins are copied from)
+    def update_rpath_for_linux(self, target_type: RpathTargetType, paths=None, qt_lib_dir=None):
+        # If the linux sysroot (where the plugins/libraries are copied from)
         # is from a mainline distribution, it might have a different
-        # directory layout than then one we expect to have in the
-        # wheel.
-        # We have to ensure that any plugins copied have rpath
-        # values that can find Qt libs in the newly assembled wheel
-        # dir layout.
-        if not (self.is_cross_compile and sys.platform.startswith('linux') and self.standalone):
-            return
-
-        log.info("Patching rpath for Qt and QML plugins.")
-        for plugin in plugin_paths:
-            if plugin.is_dir() or plugin.is_symlink():
-                continue
-            if not plugin.exists():
-                continue
-
-            if is_qml_plugin:
-                plugin_dir = plugin.parent
-                # FIXME: there is no os.path.relpath equivalent on pathlib.
-                # The Path.relative_to is not equivalent and raises ValueError when the paths
-                # are not subpaths, so it doesn't generate "../../something".
-                rel_path_from_qml_plugin_qt_lib_dir = os.path.relpath(qt_lib_dir, plugin_dir)
-                rpath_value = Path("$ORIGIN") / rel_path_from_qml_plugin_qt_lib_dir
-            else:
-                rpath_value = "$ORIGIN/../../lib"
-
-            linux_fix_rpaths_for_library(self._patchelf_path, plugin, rpath_value,
-                                         override=True)
-            log.debug(f"Patched rpath to '{rpath_value}' in {plugin}.")
-
-    def update_rpath_for_linux_qt_libraries(self, qt_lib_dir):
-        # Ensure that Qt libs and ICU libs have $ORIGIN in their rpath.
-        # Especially important for ICU lib, so that they don't
+        # directory layout than the one we expect to have in the wheel.
+        # We have to ensure that any copied files have rpath values that
+        # can find Qt libs in the newly assembled wheel dir layout.
+        # Especially important for ICU libs, so that they don't
         # accidentally load dependencies from the system.
         if not (self.is_cross_compile and sys.platform.startswith('linux') and self.standalone):
             return
 
-        qt_lib_dir = Path(qt_lib_dir)
-        rpath_value = "$ORIGIN"
-        log.info(f"Patching rpath for Qt and ICU libraries in {qt_lib_dir}.")
-        for library in self.package_libraries(qt_lib_dir):
-            if library.is_dir() or library.is_symlink():
+        if target_type == RpathTargetType.qt_libraries:
+            qt_lib_dir = Path(qt_lib_dir)
+            log.info(f"Patching rpath for Qt and ICU libraries in {qt_lib_dir}.")
+            file_list = self.package_libraries(qt_lib_dir)
+            fixed_rpath = "$ORIGIN"
+        else:
+            log.info("Patching rpath for Qt and QML plugins.")
+            file_list = paths
+            fixed_rpath = "$ORIGIN/../../lib" if target_type == RpathTargetType.plugins else None
+
+        for item in file_list:
+            if item.is_dir() or item.is_symlink():
                 continue
-            if not library.exists():
+            if not item.exists():
                 continue
 
-            linux_fix_rpaths_for_library(self._patchelf_path, library, rpath_value, override=True)
-            log.debug(f"Patched rpath to '{rpath_value}' in {library}.")
+            if target_type == RpathTargetType.qml_plugins:
+                plugin_dir = item.parent
+                # FIXME: there is no os.path.relpath equivalent on pathlib.
+                # The Path.relative_to is not equivalent and raises ValueError when the paths
+                # are not subpaths, so it doesn't generate "../../something".
+                rel_path = os.path.relpath(qt_lib_dir, plugin_dir)
+                rpath_value = Path("$ORIGIN") / rel_path
+            else:
+                rpath_value = fixed_rpath
+
+            linux_fix_rpaths_for_library(self._patchelf_path, item, rpath_value, override=True)
+            log.debug(f"Patched rpath to '{rpath_value}' in {item}.")
 
 
 class PysideBaseDocs(Command, CommandMixin):

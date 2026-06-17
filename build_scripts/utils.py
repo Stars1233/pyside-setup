@@ -15,12 +15,19 @@ import tempfile
 import urllib.request
 import urllib.error
 from collections import defaultdict
+from enum import Enum
 from pathlib import Path
 from textwrap import dedent, indent
 
 from .log import log
 from . import (PYSIDE_PYTHON_TOOLS, PYSIDE_LINUX_BIN_TOOLS, PYSIDE_UNIX_LIBEXEC_TOOLS,
                PYSIDE_WINDOWS_BIN_TOOLS, PYSIDE_UNIX_BIN_TOOLS, PYSIDE_UNIX_BUNDLED_TOOLS)
+
+
+class RpathTargetType(Enum):
+    plugins = "plugins"
+    qml_plugins = "qml_plugins"
+    qt_libraries = "qt_libraries"
 
 
 try:
