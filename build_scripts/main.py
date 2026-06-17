@@ -146,22 +146,20 @@ def check_allowed_python_version():
         log.warning("*" * 80)
 
 
-qt_src_dir = ''
-
-
 def prepare_build():
     # locate Qt sources for the documentation
-    if OPTION["QT_SRC"] is None:
-        install_prefix = QtInfo().prefix_dir
-        if install_prefix:
-            global qt_src_dir
-            # In-source, developer build
-            if install_prefix.endswith("qtbase"):
-                qt_src_dir = install_prefix
-            else:  # SDK: Use 'Src' directory
-                maybe_qt_src_dir = Path(install_prefix).parent / 'Src' / 'qtbase'
-                if maybe_qt_src_dir.exists():
-                    qt_src_dir = maybe_qt_src_dir
+    if OPTION["QT_SRC"]:
+        return OPTION["QT_SRC"]
+    install_prefix = QtInfo().prefix_dir
+    if install_prefix:
+        # In-source, developer build
+        if install_prefix.endswith("qtbase"):
+            return install_prefix
+        else:  # SDK: Use 'Src' directory
+            maybe_qt_src_dir = Path(install_prefix).parent / 'Src' / 'qtbase'
+            if maybe_qt_src_dir.exists():
+                return maybe_qt_src_dir
+    return ''
 
 
 def get_soname(clang_lib_path: Path) -> str:
@@ -335,9 +333,10 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         self.qtinfo = None
         self.build_tests = False
         self.python_target_info = {}
+        self.qt_src_dir = ''
 
     def run(self):
-        prepare_build()
+        self.qt_src_dir = prepare_build()
 
         # Check env
         make_path = None
@@ -657,9 +656,8 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             cmake_cmd.append(f"-DSKIP_MODULES={parse_modules(OPTION['SKIP_MODULES'])}")
 
         # Add source location for generating documentation
-        cmake_src_dir = OPTION["QT_SRC"] if OPTION["QT_SRC"] else qt_src_dir
-        if cmake_src_dir:
-            cmake_cmd.append(f"-DQT_SRC_DIR={cmake_src_dir}")
+        if self.qt_src_dir:
+            cmake_cmd.append(f"-DQT_SRC_DIR={self.qt_src_dir}")
         if OPTION['NO_QT_TOOLS']:
             cmake_cmd.append("-DNO_QT_TOOLS=yes")
         if OPTION['SKIP_DOCS']:
@@ -667,7 +665,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                      "The documentation is not built by default")
         if OPTION['BUILD_DOCS']:
             cmake_cmd.append("-DBUILD_DOCS=yes")
-        log.info(f"Qt Source dir: {cmake_src_dir}")
+        log.info(f"Qt Source dir: {self.qt_src_dir}")
 
         # Use Legacy OpenGL to avoid issues on systems like Ubuntu 20.04
         # which require to manually install the libraries which
@@ -1327,9 +1325,9 @@ class PysideBaseDocs(Command, CommandMixin):
                     example_gallery_args = []
                     if OPTION["LOG_LEVEL"] == LogLevel.QUIET:
                         example_gallery_args.append("--quiet")
-                    qt_src_dir = OPTION['QT_SRC']
-                    if qt_src_dir:
-                        example_gallery_args.extend(["--qt-src-dir", qt_src_dir])
+                    qt_src = OPTION['QT_SRC']
+                    if qt_src:
+                        example_gallery_args.extend(["--qt-src-dir", qt_src])
                     run_script(example_gallery, example_gallery_args)
                 else:
                     log.warning("Example gallery script for generating .rst for examples"
