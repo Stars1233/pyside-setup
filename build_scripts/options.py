@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from setuptools import Command
 
+import functools
 import sys
 import logging
 from pathlib import Path
 
 from .log import log, LogLevel
 from .qtinfo import QtInfo
-from .utils import memoize, which, Singleton
+from .utils import which, Singleton
 
 _AVAILABLE_MKSPECS = ["ninja", "msvc", "mingw"] if sys.platform == "win32" else ["ninja", "make"]
 
@@ -357,7 +358,7 @@ class CommandMixin:
         self.qtpaths = OPTION["QTPATHS"]
 
     @staticmethod
-    @memoize
+    @functools.cache
     def get_mixin_options_set():
         keys = set()
         for (name, _, _) in CommandMixin.mixin_user_options:

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
+import functools
 import time
 from pathlib import Path
 from sysconfig import get_config_var, get_platform
@@ -11,11 +12,11 @@ from setuptools.errors import SetupError
 
 from .options import OPTION
 from .qtinfo import QtInfo
-from .utils import memoize, parse_cmake_conf_assignments_by_key
+from .utils import parse_cmake_conf_assignments_by_key
 from . import PYSIDE
 
 
-@memoize
+@functools.cache
 def get_package_timestamp():
     """ In a Coin CI build the returned timestamp will be the
         Coin integration id timestamp. For regular builds it's
@@ -38,7 +39,7 @@ def get_qt_version():
     return qt_version
 
 
-@memoize
+@functools.cache
 def get_package_version():
     """ Returns the version string for the PySide6 package. """
     setup_script_dir = Path.cwd()
@@ -72,7 +73,7 @@ def macos_qt_min_deployment_target():
     return target
 
 
-@memoize
+@functools.cache
 def macos_pyside_min_deployment_target():
     """
     Compute and validate PySide6 MACOSX_DEPLOYMENT_TARGET value.
@@ -116,7 +117,7 @@ def macos_pyside_min_deployment_target():
     return maximum_target
 
 
-@memoize
+@functools.cache
 def macos_plat_name():
     deployment_target = macos_pyside_min_deployment_target()
     # Example triple "macosx-10.12-x86_64".

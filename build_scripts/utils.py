@@ -923,24 +923,6 @@ def linux_fix_rpaths_for_library(patchelf, executable_path, qt_rpath, override=F
     linux_set_rpaths(patchelf, executable_path, rpaths_string)
 
 
-def memoize(function):
-    """
-    Decorator to wrap a function with a memoizing callable.
-    It returns cached values when the wrapped function is called with
-    the same arguments.
-    """
-    memo = {}
-
-    def wrapper(*args):
-        if args in memo:
-            return memo[args]
-        else:
-            rv = function(*args)
-            memo[args] = rv
-            return rv
-    return wrapper
-
-
 def get_python_dict(python_script_path):
     try:
         with open(python_script_path) as f:
