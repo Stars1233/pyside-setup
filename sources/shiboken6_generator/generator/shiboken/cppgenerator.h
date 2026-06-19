@@ -549,6 +549,8 @@ private:
     QString writeCommonModuleInitFunction(TextStream &s, const QString &convInitFunc,
                                           const QString &containerConvInitFunc,
                                           const QString &qtEnumRegisterMetaTypeFunc);
+    void writeModuleExportFunction(TextStream &s, const QString &initFunc,
+                                   const QString &execFunc);
     void writeModuleInitFunction(TextStream &s, const QString &initFunc,
                                  const QString &moduleDef);
     void writeModuleExecFunction(TextStream &s, const QString &name,

@@ -6569,6 +6569,7 @@ static void writeSubModuleHandling(TextStream &s, const QString &moduleName,
         << indent << "return nullptr;\n" << outdent << outdent << "}\n";
 }
 
+// < 3.15
 static QString writeModuleDef(TextStream &s, const QString &moduleName,
                               const QString &execFunc)
 {
@@ -6880,12 +6881,16 @@ bool CppGenerator::finishGeneration()
                             opaqueContainerRegisterFunc, enumRegisterFunc,
                             s_classPythonDefines.toString(), classesWithStaticFields);
 
-    const QString moduleDef = writeModuleDef(s, modName, execFunc);
-
     auto initHelper = writeCommonModuleInitFunction(s, convInitFunc,
                                                     containerConvInitFunc,
                                                     qtEnumRegisterMetaTypeFunc);
+
+    s << "// >= 3.15\n#if !defined(PYPY_VERSION) && ((!defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030F0000) || (defined(Py_LIMITED_API) && Py_LIMITED_API >= 0x030F0000))\n\n";
+    writeModuleExportFunction(s, initHelper, execFunc);
+    s << "\n#else // < 3.15\n\n";
+    const QString moduleDef = writeModuleDef(s, modName, execFunc);
     writeModuleInitFunction(s, initHelper, moduleDef);
+    s << "\n#endif // < 3.15\n";
 
     file.done();
     return true;
@@ -7063,6 +7068,40 @@ QString CppGenerator::writeCommonModuleInitFunction(TextStream &s,
     return result;
 }
 
+// >= 3.15
+void CppGenerator::writeModuleExportFunction(TextStream &s,
+                                             const QString &initFunc,
+                                             const QString &execFunc)
+{
+    const QString &modName = moduleName();
+    const QString moduleSlots = modName + "ModuleSlots"_L1;
+
+    // ABIInfo / Slots FIXME: This should use PySlot_END for termination, but this
+    // causes warnings about missing fields. For C++ 20, port to new macros
+    // PySlot_DATA using designated initializers.
+
+    s << R"(PyABIInfo_VAR(abi_info);
+
+static PySlot )" << modName << R"(ModuleSlots[] = {
+    PySlot_PTR(Py_mod_abi, &abi_info),
+    PySlot_PTR(Py_mod_name, ")" << modName << R"("),
+    PySlot_PTR(Py_mod_exec, )" << execFunc << R"(),
+    PySlot_PTR_STATIC(Py_mod_methods, )" << modName << R"(Methods),
+    PySlot_PTR(Py_mod_multiple_interpreters, Py_MOD_MULTIPLE_INTERPRETERS_NOT_SUPPORTED),
+    PySlot_PTR(Py_mod_gil, Py_MOD_GIL_USED),
+    PySlot_PTR(0, nullptr)
+};
+
+)";
+
+    // export
+    s << "PyMODEXPORT_FUNC PyModExport_" << modName
+        << "()\n{\n" << indent << "return "
+        << initFunc << "() ? " << moduleSlots << " : nullptr;\n"
+        << outdent << "}\n";
+}
+
+// < 3.15
 void CppGenerator::writeModuleInitFunction(TextStream &s,
                                            const QString &initFunc,
                                            const QString &moduleDef)
