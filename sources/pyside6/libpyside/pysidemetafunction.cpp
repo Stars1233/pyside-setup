@@ -5,7 +5,7 @@
 #include "pysidemetafunction.h"
 #include "pysidemetafunction_p.h"
 
-#include <signalmanager.h>
+#include "pyobjectwrapper.h"
 
 #include <autodecref.h>
 #include <basewrapper.h>

@@ -3,11 +3,11 @@
 // Qt-Security score:significant reason:default
 
 #include <sbkpython.h>
+#include "pyobjectwrapper.h"
 #include "pysideproperty.h"
 #include "pysideproperty_p.h"
 #include "pysidesignal.h"
 #include "pysidesignal_p.h"
-#include "signalmanager.h"
 
 #include <autodecref.h>
 #include <pep384ext.h>

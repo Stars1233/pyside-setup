@@ -14,46 +14,8 @@
 
 #include <optional>
 
-QT_FORWARD_DECLARE_CLASS(QDataStream)
-QT_FORWARD_DECLARE_CLASS(QDebug)
-
 namespace PySide
 {
-
-/// Thin wrapper for PyObject which increases the reference count at the constructor but *NOT* at destructor.
-class PYSIDE_API PyObjectWrapper
-{
-public:
-
-    PyObjectWrapper();
-    explicit PyObjectWrapper(PyObject* me);
-    PyObjectWrapper(const PyObjectWrapper &other);
-    PyObjectWrapper& operator=(const PyObjectWrapper &other);
-    PyObjectWrapper(PyObjectWrapper&&) noexcept;
-    PyObjectWrapper &operator=(PyObjectWrapper &&) noexcept;
-
-    void reset(PyObject *o);
-
-    ~PyObjectWrapper();
-    operator PyObject*() const;
-
-    // FIXME: To be removed in Qt7
-    // This was done to make QAbstractItemModel::data() work without explicit conversion of
-    // QVariant(PyObjectWrapper) to QVariant(int). This works because QAbstractItemModel::data()
-    // inturn calls legacyEnumValueFromModelData(const QVariant &data). But this function will
-    // be removed in Qt7.
-    // The proper fix would be to associate PyObjectWrapper to the corresponding C++ Enum.
-    int toInt() const;
-
-    static int metaTypeId();
-
-private:
-    PyObject* m_me;
-};
-
-PYSIDE_API QDataStream &operator<<(QDataStream& out, const PyObjectWrapper& myObj);
-PYSIDE_API QDataStream &operator>>(QDataStream& in, PyObjectWrapper& myObj);
-PYSIDE_API QDebug operator<<(QDebug debug, const PyObjectWrapper &myObj);
 
 class PYSIDE_API SignalManager
 {
@@ -90,8 +52,6 @@ public:
     static void handleMetaCallError();
 };
 
-}
+} // namespace PySide
 
-Q_DECLARE_METATYPE(PySide::PyObjectWrapper)
-
-#endif
+#endif // SIGNALMANAGER_H

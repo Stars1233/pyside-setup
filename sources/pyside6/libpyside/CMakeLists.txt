@@ -14,6 +14,7 @@ set(libpyside_HEADERS # installed below
     dynamicqmetaobject.h
     dynamicslot_p.h
     feature_select.h
+    pyobjectwrapper.h
     pysideclassdecorator_p.h
     pysideclassinfo.h
     pysideclassinfo_p.h
@@ -53,6 +54,7 @@ set(libpyside_SRC
     dynamicslot.cpp
     feature_select.cpp
     signalmanager.cpp
+    pyobjectwrapper.cpp
     pysideclassdecorator.cpp
     pysideclassinfo.cpp
     pysideglobals.cpp
