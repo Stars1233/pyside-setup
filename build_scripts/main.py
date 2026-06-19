@@ -835,9 +835,10 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
         if self.shiboken_target_path:
             cmake_cmd.append(f"-DQFP_SHIBOKEN_TARGET_PATH={self.shiboken_target_path}")
-        elif self.cmake_toolchain_file and not extension.lower() == SHIBOKEN:
-            # Need to tell where to find target shiboken when
-            # cross-compiling pyside.
+        elif extension.lower() != SHIBOKEN:
+            # Always point cmake to the project's own shiboken install so the
+            # system-installed shiboken is not picked up, regardless of whether
+            # this is a cross-compile build or a native build.
             cmake_cmd.append(f"-DQFP_SHIBOKEN_TARGET_PATH={self.install_dir}")
 
         if OPTION["SKIP_MYPY_TEST"]:

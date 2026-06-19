@@ -75,19 +75,24 @@ macro(pyside_setup_ld_prefix)
     # Try to get the location for the current build type
     get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_${_build_type})
 
-    # Fallback to RELEASE if not found
+    # Fallback to RELEASE, then NONE (used by distros like Arch Linux)
     if(NOT _shiboken_lib_location)
         get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_RELEASE)
     endif()
-
-    # Get the directory containing the library file, which is the lib directory
-    get_filename_component(SHIBOKEN_SHARED_LIBRARY_DIR "${_shiboken_lib_location}" DIRECTORY)
+    if(NOT _shiboken_lib_location)
+        get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_NONE)
+    endif()
 
     set(ld_prefix_list "")
     list(APPEND ld_prefix_list "${pysidebindings_BINARY_DIR}/libpyside")
     list(APPEND ld_prefix_list "${pysidebindings_BINARY_DIR}/libpysideqml")
     list(APPEND ld_prefix_list "${pysidebindings_BINARY_DIR}/libpysideremoteobjects")
-    list(APPEND ld_prefix_list "${SHIBOKEN_SHARED_LIBRARY_DIR}")
+
+    # Get the directory containing the shiboken library and add it only if resolved
+    if(_shiboken_lib_location)
+        get_filename_component(SHIBOKEN_SHARED_LIBRARY_DIR "${_shiboken_lib_location}" DIRECTORY)
+        list(APPEND ld_prefix_list "${SHIBOKEN_SHARED_LIBRARY_DIR}")
+    endif()
     if(WIN32)
         list(APPEND ld_prefix_list "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}")
     endif()
