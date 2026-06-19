@@ -6882,7 +6882,10 @@ bool CppGenerator::finishGeneration()
 
     const QString moduleDef = writeModuleDef(s, modName, execFunc);
 
-    writeModuleInitFunction(s, moduleDef, convInitFunc, containerConvInitFunc, qtEnumRegisterMetaTypeFunc);
+    auto initHelper = writeCommonModuleInitFunction(s, convInitFunc,
+                                                    containerConvInitFunc,
+                                                    qtEnumRegisterMetaTypeFunc);
+    writeModuleInitFunction(s, initHelper, moduleDef);
 
     file.done();
     return true;
@@ -7000,63 +7003,76 @@ void CppGenerator::writeTypeArrays(TextStream &s)
         << "_CONVERTERS_IDX_COUNT" << "];\n\n";
 }
 
-void CppGenerator::writeModuleInitFunction(TextStream &s, const QString &moduleDef,
-                                           const QString &convInitFunc,
-                                           const QString &containerConvInitFunc,
-                                           const QString &qtEnumRegisterMetaTypeFunc)
+void CppGenerator::writeQtEnumRegisterMetaTypeFunction(TextStream &s,
+                                                      const QString &name,
+                                                      const AbstractMetaEnumList &globalEnums)
+{
+   s << "static void " << name << "()\n{\n" << indent;
+   for (const AbstractMetaEnum &metaEnum : globalEnums) {
+       if (!metaEnum.isAnonymous()) {
+           ConfigurableScope configScope(s, metaEnum.typeEntry());
+           s << "qRegisterMetaType< " << Generator::getFullTypeName(metaEnum.typeEntry())
+             << " >(\"" << metaEnum.name() << "\");\n";
+       }
+   }
+   s << outdent << "}\n\n";
+
+}
+
+QString CppGenerator::writeCommonModuleInitFunction(TextStream &s,
+                                                    const QString &convInitFunc,
+                                                    const QString &containerConvInitFunc,
+                                                    const QString &qtEnumRegisterMetaTypeFunc)
+{
+    QString result = "init_"_L1 + moduleName();
+    s << "static inline bool " << result << "()\n{\n" << indent
+        << "Shiboken::init();\n\n";
+
+    const int maxTypeIndex = getMaxTypeIndex() + api().instantiatedSmartPointers().size();
+    if (maxTypeIndex > 0) {
+        s << "// The global structure consisting of (type, name) pairs.\n"
+            << cppApiVariableName() << " = cppApi;\n";
+        s << '\n';
+    }
+
+    s << convertersVariableName() << " = sbkConverters;\n\n";
+
+    const TypeDatabase *typeDb = TypeDatabase::instance();
+    const CodeSnipList snips = typeDb->defaultTypeSystemType()->codeSnips();
+
+    writeModuleCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning,
+                         TypeSystem::TargetLangCode);
+
+    const QStringList &requiredModules = typeDb->requiredTargetImports();
+    for (const QString &requiredModule : requiredModules) {
+        s << "{\n" << indent
+             << "Shiboken::AutoDecRef requiredModule(Shiboken::Module::import(\"" << requiredModule << "\"));\n"
+             << "if (requiredModule.isNull())\n" << indent
+             << "return false;\n" << outdent
+             << cppApiVariableName(requiredModule)
+             << " = Shiboken::Module::getTypes(requiredModule);\n"
+             << convertersVariableName(requiredModule)
+             << " = Shiboken::Module::getTypeConverters(requiredModule);\n" << outdent
+             << "}\n\n";
+    }
+
+    s << convInitFunc << "();\n" << containerConvInitFunc << "();\n";
+    if (!qtEnumRegisterMetaTypeFunc.isEmpty())
+        s << qtEnumRegisterMetaTypeFunc << "();\n";
+    s << "return true;\n" << outdent << "}\n\n";
+    return result;
+}
+
+void CppGenerator::writeModuleInitFunction(TextStream &s,
+                                           const QString &initFunc,
+                                           const QString &moduleDef)
 {
 
      s << "extern \"C\" LIBSHIBOKEN_EXPORT PyObject *PyInit_"
          << moduleName() << "()\n{\n" << indent
-         << "Shiboken::init();\n\n";
-
-     const int maxTypeIndex = getMaxTypeIndex() + api().instantiatedSmartPointers().size();
-     if (maxTypeIndex > 0) {
-         s << "// The global structure consisting of (type, name) pairs.\n"
-             << cppApiVariableName() << " = cppApi;\n";
-         s << '\n';
-     }
-
-     s << convertersVariableName() << " = sbkConverters;\n\n";
-
-     const TypeDatabase *typeDb = TypeDatabase::instance();
-     const CodeSnipList snips = typeDb->defaultTypeSystemType()->codeSnips();
-
-     writeModuleCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning,
-                          TypeSystem::TargetLangCode);
-
-     const QStringList &requiredModules = typeDb->requiredTargetImports();
-     for (const QString &requiredModule : requiredModules) {
-         s << "{\n" << indent
-              << "Shiboken::AutoDecRef requiredModule(Shiboken::Module::import(\"" << requiredModule << "\"));\n"
-              << "if (requiredModule.isNull())\n" << indent
-              << "return nullptr;\n" << outdent
-              << cppApiVariableName(requiredModule)
-              << " = Shiboken::Module::getTypes(requiredModule);\n"
-              << convertersVariableName(requiredModule)
-              << " = Shiboken::Module::getTypeConverters(requiredModule);\n" << outdent
-              << "}\n\n";
-     }
-
-     s << convInitFunc << "();\n" << containerConvInitFunc << "();\n";
-     if (!qtEnumRegisterMetaTypeFunc.isEmpty())
-         s << qtEnumRegisterMetaTypeFunc << "();\n";
-     s << "\nreturn PyModuleDef_Init(&" << moduleDef << ");\n" << outdent << "}\n";
-}
-
-void CppGenerator::writeQtEnumRegisterMetaTypeFunction(TextStream &s,
-                                                       const QString &name,
-                                                       const AbstractMetaEnumList &globalEnums)
-{
-    s << "static void " << name << "()\n{\n" << indent;
-    for (const AbstractMetaEnum &metaEnum : globalEnums) {
-        if (!metaEnum.isAnonymous()) {
-            ConfigurableScope configScope(s, metaEnum.typeEntry());
-            s << "qRegisterMetaType< " << Generator::getFullTypeName(metaEnum.typeEntry())
-              << " >(\"" << metaEnum.name() << "\");\n";
-        }
-    }
-    s << outdent << "}\n\n";
+         << "if (!" << initFunc << "())\n"
+         << indent << "return nullptr;\n" << outdent << '\n'
+         << "return PyModuleDef_Init(&" << moduleDef << ");\n" << outdent << "}\n";
 }
 
 void CppGenerator::writeModuleExecFunction(TextStream &s, const QString &name,
