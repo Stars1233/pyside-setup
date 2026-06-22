@@ -2256,26 +2256,10 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
                                                const QVersionNumber &since,
                                                QXmlStreamAttributes *attributes)
 {
-    TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
-    QString subModuleOf;
-    QString namespaceBegin;
-    QString namespaceEnd;
-    QString docPackage;
-    std::optional<TypeSystem::DocMode> docModeOpt;
-
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == packageAttribute) {
             m_defaultPackage = attributes->takeAt(i).value().toString();
-        } else if (name == docPackageAttribute) {
-           docPackage = attributes->takeAt(i).value().toString();
-        } else if (name == docModeAttribute) {
-            const auto attribute = attributes->takeAt(i);
-            docModeOpt = docModeFromAttribute(attribute.value());
-            if (!docModeOpt.has_value()) {
-                qCWarning(lcShiboken, "%s",
-                          qPrintable(msgInvalidAttributeValue(attribute)));
-            }
         } else if (name == defaultSuperclassAttribute) {
             m_defaultSuperclass = attributes->takeAt(i).value().toString();
         } else if (name == exceptionHandlingAttribute) {
@@ -2296,21 +2280,6 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
-        } else if (name == snakeCaseAttribute) {
-            const auto attribute = attributes->takeAt(i);
-            const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
-            if (snakeCaseOpt.has_value()) {
-                snakeCase = snakeCaseOpt.value();
-            } else {
-                qCWarning(lcShiboken, "%s",
-                          qPrintable(msgInvalidAttributeValue(attribute)));
-            }
-        } else if (name == subModuleOfAttribute) {
-            subModuleOf = attributes->takeAt(i).value().toString();
-        } else if (name == "namespace-begin"_L1) {
-            namespaceBegin = attributes->takeAt(i).value().toString();
-        } else if (name == "namespace-end"_L1) {
-            namespaceEnd = attributes->takeAt(i).value().toString();
         }
     }
 
@@ -2330,18 +2299,40 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
     if (add) {
         moduleEntry = std::make_shared<TypeSystemTypeEntry>(m_defaultPackage, since,
                                                             currentParentTypeEntry());
-        moduleEntry->setSubModule(subModuleOf);
     }
-    if (!docPackage.isEmpty())
-        moduleEntry->setDocTargetLangPackage(docPackage);
-    if (docModeOpt.has_value())
-        moduleEntry->setDocMode(docModeOpt.value());
+
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
+        const auto name = attributes->at(i).qualifiedName();
+        if (name == docPackageAttribute) {
+            moduleEntry->setDocTargetLangPackage(attributes->takeAt(i).value().toString());
+        } else if (name == docModeAttribute) {
+            const auto attribute = attributes->takeAt(i);
+            auto docModeOpt = docModeFromAttribute(attribute.value());
+            if (docModeOpt.has_value()) {
+                  moduleEntry->setDocMode(docModeOpt.value());
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
+        } else if (name == snakeCaseAttribute) {
+            const auto attribute = attributes->takeAt(i);
+            const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
+            if (snakeCaseOpt.has_value()) {
+                moduleEntry->setSnakeCase(snakeCaseOpt.value());
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
+        } else if (name == subModuleOfAttribute) {
+            moduleEntry->setSubModule(attributes->takeAt(i).value().toString());
+        } else if (name == "namespace-begin"_L1) {
+            moduleEntry->setNamespaceBegin(attributes->takeAt(i).value().toString());
+        } else if (name == "namespace-end"_L1) {
+            moduleEntry->setNamespaceEnd(attributes->takeAt(i).value().toString());
+        }
+    }
+
     moduleEntry->setCodeGeneration(m_generate);
-    moduleEntry->setSnakeCase(snakeCase);
-    if (!namespaceBegin.isEmpty())
-        moduleEntry->setNamespaceBegin(namespaceBegin);
-    if (!namespaceEnd.isEmpty())
-        moduleEntry->setNamespaceEnd(namespaceEnd);
 
     if ((m_generate == TypeEntry::GenerateForSubclass ||
          m_generate == TypeEntry::GenerateNothing) && !m_defaultPackage.isEmpty())
