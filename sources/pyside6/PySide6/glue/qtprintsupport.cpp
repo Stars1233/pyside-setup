@@ -8,10 +8,7 @@ bool out = %CPPSELF.setPageSize(%1);
 // @snippet setpagesize
 
 // @snippet exec
-if (PyErr_WarnEx(PyExc_DeprecationWarning,
-                 "'exec_' will be removed in the future. "
-                 "Use 'exec' instead.",
-                 1)) {
+if (PyErr_WarnEx(PyExc_DeprecationWarning, PySide::execDeprecatedMsg, 1)) {
     return nullptr;
 }
 %BEGIN_ALLOW_THREADS

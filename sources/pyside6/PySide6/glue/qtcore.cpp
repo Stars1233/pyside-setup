@@ -1389,10 +1389,7 @@ PyEval_InitThreads();
 // @snippet qthread_init_pypy
 
 // @snippet qthread_exec_
-if (PyErr_WarnEx(PyExc_DeprecationWarning,
-                 "'exec_' will be removed in the future. "
-                 "Use 'exec' instead.",
-                 1)) {
+if (PyErr_WarnEx(PyExc_DeprecationWarning, PySide::execDeprecatedMsg, 1)) {
     return nullptr;
 }
 %BEGIN_ALLOW_THREADS
@@ -1406,10 +1403,7 @@ int cppResult = static_cast<::QThreadWrapper *>(cppSelf)->QThreadWrapper::exec_p
 // @snippet qthread_exec_
 
 // @snippet exec_
-if (PyErr_WarnEx(PyExc_DeprecationWarning,
-                 "'exec_' will be removed in the future. "
-                 "Use 'exec' instead.",
-                 1)) {
+if (PyErr_WarnEx(PyExc_DeprecationWarning, PySide::execDeprecatedMsg, 1)) {
     return nullptr;
 }
 %BEGIN_ALLOW_THREADS
@@ -1419,10 +1413,7 @@ int cppResult = %CPPSELF.exec();
 // @snippet exec_
 
 // @snippet exec_arg1
-if (PyErr_WarnEx(PyExc_DeprecationWarning,
-                 "'exec_' will be removed in the future. "
-                 "Use 'exec' instead.",
-                 1)) {
+if (PyErr_WarnEx(PyExc_DeprecationWarning, PySide::execDeprecatedMsg, 1)) {
     return nullptr;
 }
 %BEGIN_ALLOW_THREADS
@@ -1436,10 +1427,7 @@ else
 // @snippet exec_arg1
 
 // @snippet exec_arg1_noreturn
-if (PyErr_WarnEx(PyExc_DeprecationWarning,
-                 "'exec_' will be removed in the future. "
-                 "Use 'exec' instead.",
-                 1)) {
+if (PyErr_WarnEx(PyExc_DeprecationWarning, PySide::execDeprecatedMsg, 1)) {
     return nullptr;
 }
 %BEGIN_ALLOW_THREADS
@@ -1451,10 +1439,7 @@ else
 // @snippet exec_arg1_noreturn
 
 // @snippet qtextstreammanipulator-exec
-if (PyErr_WarnEx(PyExc_DeprecationWarning,
-                 "'exec_' will be removed in the future. "
-                 "Use 'exec' instead.",
-                 1)) {
+if (PyErr_WarnEx(PyExc_DeprecationWarning, PySide::execDeprecatedMsg, 1)) {
     return nullptr;
 }
 %CPPSELF.exec(%1);

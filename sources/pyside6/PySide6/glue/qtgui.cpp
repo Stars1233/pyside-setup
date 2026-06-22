@@ -966,10 +966,7 @@ if (!result.isNull())
 // @snippet qshortcut-2
 
 // @snippet qguiapplication-exec
-if (PyErr_WarnEx(PyExc_DeprecationWarning,
-                 "'exec_' will be removed in the future. "
-                 "Use 'exec' instead.",
-                 1)) {
+if (PyErr_WarnEx(PyExc_DeprecationWarning, PySide::execDeprecatedMsg, 1)) {
     return nullptr;
 }
 %BEGIN_ALLOW_THREADS
@@ -979,10 +976,7 @@ int cppResult = %CPPSELF.exec();
 // @snippet qguiapplication-exec
 
 // @snippet qdrag-exec-arg1
-if (PyErr_WarnEx(PyExc_DeprecationWarning,
-                 "'exec_' will be removed in the future. "
-                 "Use 'exec' instead.",
-                 1)) {
+if (PyErr_WarnEx(PyExc_DeprecationWarning, PySide::execDeprecatedMsg, 1)) {
     return nullptr;
 }
 %BEGIN_ALLOW_THREADS
@@ -992,10 +986,7 @@ int cppResult = %CPPSELF.exec(%1);
 // @snippet qdrag-exec-arg1
 
 // @snippet qdrag-exec-arg2
-if (PyErr_WarnEx(PyExc_DeprecationWarning,
-                 "'exec_' will be removed in the future. "
-                 "Use 'exec' instead.",
-                 1)) {
+if (PyErr_WarnEx(PyExc_DeprecationWarning, PySide::execDeprecatedMsg, 1)) {
     return nullptr;
 }
 %BEGIN_ALLOW_THREADS

@@ -22,6 +22,9 @@ using namespace Qt::StringLiterals;
 namespace PySide
 {
 
+const char *execDeprecatedMsg =
+    "'exec_' will be removed in the future. Use 'exec' instead.";
+
 bool inherits(PyTypeObject *objType, const char *class_name)
 {
     if (std::strcmp(PepType_GetFullyQualifiedNameStr(objType), class_name) == 0)
