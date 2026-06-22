@@ -75,15 +75,23 @@ static PyObject *convertToPrimitiveType(const QVariant &out, int metaTypeId)
     case QMetaType::QString:
         return PyUnicode_FromString(out.toByteArray().constData());
     case QMetaType::Short:
-    case QMetaType::Long:
-    case QMetaType::LongLong:
+        return PyLong_FromLong(out.value<short>());
     case QMetaType::UShort:
-    case QMetaType::ULong:
-    case QMetaType::ULongLong:
+        return PyLong_FromUnsignedLong(out.value<unsigned short>());
     case QMetaType::Int:
+        return PyLong_FromLong(out.toInt());
     case QMetaType::UInt:
-        return PyLong_FromDouble(out.toFloat());
+        return PyLong_FromUnsignedLong(out.toUInt());
+    case QMetaType::Long:
+        return PyLong_FromLong(out.value<long>());
+    case QMetaType::ULong:
+        return PyLong_FromUnsignedLong(out.value<unsigned long>());
+    case QMetaType::LongLong:
+        return PyLong_FromLongLong(out.toLongLong());
+    case QMetaType::ULongLong:
+        return PyLong_FromUnsignedLongLong(out.toULongLong());
     case QMetaType::Double:
+        return PyFloat_FromDouble(out.toDouble());
     case QMetaType::Float:
     case QMetaType::Float16:
         return PyFloat_FromDouble(out.toFloat());
