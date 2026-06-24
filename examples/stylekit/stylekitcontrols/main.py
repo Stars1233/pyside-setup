@@ -9,7 +9,7 @@ from pathlib import Path
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
-import rc_stylekit  # noqa: F401
+import rc_stylekitcontrols  # noqa: F401
 
 
 if __name__ == '__main__':
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     engine = QQmlApplicationEngine()
 
     engine.addImportPath(Path(__file__).parent)
-    engine.loadFromModule("StyleKitExampleModule", "Main")
+    engine.loadFromModule("StyleKitControlsExample", "Main")
 
     if not engine.rootObjects():
         sys.exit(-1)
