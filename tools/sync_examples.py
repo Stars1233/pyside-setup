@@ -44,7 +44,8 @@ EXAMPLE_MAPPING = {
                          "quick/scenegraph/openglunderqml",
                          "quick/scenegraph/scenegraph_customgeometry",
                          "quick/customitems/painteditem",
-                         "quickcontrols/filesystemexplorer", "quickcontrols/gallery"]),
+                         "quickcontrols/filesystemexplorer", "quickcontrols/gallery",
+                         "stylekit/stylekitcontrols"]),
     "qtgraphs": ["graphs/2d/hellographs", "graphs/3d/bars", "graphs/3d/widgetgraphgallery"],
     "qtlocation": ["location/mapviewer"],
     "qtmultimedia": ["multimedia/camera"],
@@ -114,6 +115,8 @@ def detect_qml_module(pyside_example, sources):
     # Hardcoded cases, where the C++ example does not have a "qmldir"
     if pyside_example.name == "osmbuildings":
         return "OSMBuildings"
+    if pyside_example.name == "stylekitcontrols":
+        return "StyleKitControlsExample"
     qml_dir_file = None
     for source in sources:
         if source.name.startswith("qmldir"):  # "qmldir"/"qmldir.in"
