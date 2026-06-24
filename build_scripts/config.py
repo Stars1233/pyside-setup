@@ -14,7 +14,7 @@ from .utils import available_pyside_tools, Singleton
 try:
     import tomllib
 except ModuleNotFoundError:
-    import tomli as tomllib
+    import tomli as tomllib  # type: ignore[no-redef]
 
 
 class Config(metaclass=Singleton):
@@ -25,7 +25,7 @@ class Config(metaclass=Singleton):
         self._invocation_type_internal = "internal"
 
         # The keyword arguments which will be given to setuptools.setup
-        self.setup_kwargs = {}
+        self.setup_kwargs: dict[str, Any] = {}
 
         # The setup.py invocation type.
         # top-level
@@ -64,7 +64,7 @@ class Config(metaclass=Singleton):
         # Store where host shiboken is built during a cross-build.
         self.shiboken_host_query_path: str = ""
 
-        self.setup_script_dir: str | os.PathLike = ""
+        self.setup_script_dir: Path = Path()
 
         # Getting data from base pyproject.toml file to be consistent
 
@@ -74,7 +74,6 @@ class Config(metaclass=Singleton):
         with open(PYPROJECT_PATH, "rb") as f:
             _pyproject_data = tomllib.load(f)["project"]
 
-        self.setup_kwargs: dict[str, Any] = {}
         self.setup_kwargs['long_description_content_type'] = 'text/markdown'
 
         self.setup_kwargs['keywords'] = _pyproject_data["keywords"]

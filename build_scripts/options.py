@@ -187,7 +187,7 @@ class CommandMixin:
 
     _static_class_finalized_once = False
 
-    mixin_user_options = [
+    mixin_user_options: list[tuple[str, str | None, str]] = [
         ('avoid-protected-hack', None, 'Force --avoid-protected-hack'),
         ('debug', None, 'Build with debug information'),
         ('relwithdebinfo', None, 'Build in release mode with debug information'),
@@ -506,6 +506,7 @@ class CommandMixin:
                               f"--qt-target-path={qt_target_path}\n")
                 raise e
 
+        assert self.cmake is not None
         OPTION['CMAKE'] = self.cmake.resolve()
         OPTION['OPENSSL'] = self.openssl
         OPTION['SHIBOKEN_CONFIG_DIR'] = self.shiboken_config_dir

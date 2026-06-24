@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+import importlib.util
 import os
 import platform
 import re
@@ -162,7 +163,7 @@ def prepare_build():
     return ''
 
 
-def get_soname(clang_lib_path: Path) -> str:
+def get_soname(clang_lib_path: Path) -> str | None:
     """Getting SONAME from a shared library using readelf. Works only on Linux.
     """
     clang_lib_path = Path(clang_lib_path)
@@ -612,7 +613,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             log.info(f"Shiboken will now process system headers from: {extra_include_paths}")
 
         cmake_cmd += [
-            "-G", self.make_generator,
+            "-G", self.make_generator,  # type: ignore[list-item]
             f"-DBUILD_TESTS={self.build_tests}",
             f"-DQt5Help_DIR={self.qtinfo.docs_dir}",
             f"-DCMAKE_BUILD_TYPE={self.build_type}",
@@ -1189,7 +1190,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             qt_lib_dir = Path(qt_lib_dir)
             log.info(f"Patching rpath for Qt and ICU libraries in {qt_lib_dir}.")
             file_list = self.package_libraries(qt_lib_dir)
-            fixed_rpath = "$ORIGIN"
+            fixed_rpath: str | None = "$ORIGIN"
         else:
             log.info("Patching rpath for Qt and QML plugins.")
             file_list = paths
@@ -1209,6 +1210,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                 rel_path = os.path.relpath(qt_lib_dir, plugin_dir)
                 rpath_value = Path("$ORIGIN") / rel_path
             else:
+                assert fixed_rpath is not None
                 rpath_value = fixed_rpath
 
             linux_fix_rpaths_for_library(self._patchelf_path, item, rpath_value, override=True)

@@ -155,12 +155,11 @@ class QtInfo(metaclass=Singleton):
         cmd.extend(args_list)
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False,
                                 cwd=cwd)
-        output = proc.communicate()[0]
+        raw_output = proc.communicate()[0]
         proc.wait()
         if proc.returncode != 0:
             return ""
-        output = str(output, "ascii").strip()
-        return output
+        return str(raw_output, "ascii").strip()
 
     def _parse_query_properties(self, process_output):
         props = {}
@@ -177,10 +176,8 @@ class QtInfo(metaclass=Singleton):
         if self._use_cmake:
             setup_script_dir = Path.cwd()
             sources_dir = setup_script_dir / "sources"
-            qt_target_info_dir = sources_dir / "shiboken6" / "config.tests" / "target_qt_info"
-            qt_target_info_dir = os.fspath(qt_target_info_dir)
-            config_tests_dir = setup_script_dir / "build" / "config.tests"
-            config_tests_dir = os.fspath(config_tests_dir)
+            qt_target_info_dir = str(sources_dir / "shiboken6" / "config.tests" / "target_qt_info")
+            config_tests_dir = str(setup_script_dir / "build" / "config.tests")
 
             cmake_cache_args = []
             if self._cmake_toolchain_file:
@@ -219,10 +216,8 @@ class QtInfo(metaclass=Singleton):
     def _get_cmake_mkspecs_variables(self):
         setup_script_dir = Path.cwd()
         sources_dir = setup_script_dir / "sources"
-        qt_target_mkspec_dir = sources_dir / "shiboken6" / "config.tests" / "target_qt_mkspec"
-        qt_target_mkspec_dir = qt_target_mkspec_dir.as_posix()
-        config_tests_dir = setup_script_dir / "build" / "config.tests"
-        config_tests_dir = config_tests_dir.as_posix()
+        qt_target_mkspec_dir = (sources_dir / "shiboken6" / "config.tests" / "target_qt_mkspec").as_posix()
+        config_tests_dir = (setup_script_dir / "build" / "config.tests").as_posix()
 
         cmake_cache_args = []
         if self._cmake_toolchain_file:

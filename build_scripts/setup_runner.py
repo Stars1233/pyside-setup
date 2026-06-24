@@ -273,4 +273,4 @@ class SetupRunner:
         """
 
         kwargs = config.setup_kwargs
-        setup(**kwargs)
+        setup(**kwargs)  # type: ignore[arg-type]

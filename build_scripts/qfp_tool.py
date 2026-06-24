@@ -123,8 +123,9 @@ def execute(args: list[str]):
 
 def run_process_output(args):
     """Run a process and return its output. Also run in dry_run mode"""
-    std_out = subprocess.Popen(args, universal_newlines=1,
+    std_out = subprocess.Popen(args, universal_newlines=True,
                                stdout=subprocess.PIPE).stdout
+    assert std_out is not None
     result = [line.rstrip() for line in std_out.readlines()]
     std_out.close()
     return result
@@ -162,6 +163,8 @@ def editor():
 
 
 def edit_config_file():
+    if config_file is None:
+        return -1
     exit_code = -1
     try:
         exit_code = subprocess.call([editor(), config_file])

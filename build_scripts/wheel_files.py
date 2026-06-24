@@ -24,6 +24,7 @@ def set_pyside_package_path(p):
 
 def get_module_json_data(module):
     """Read the JSON module data."""
+    assert _module_json_file_path is not None, "set_pyside_package_path() must be called first"
     json_path = _module_json_file_path / f"{module}.json"
     json_data = None
     if not json_path.is_file():  # Wayland is Linux only

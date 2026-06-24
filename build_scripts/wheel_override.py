@@ -19,14 +19,14 @@ wheel_module_exists = False
 try:
 
     from packaging import tags
-    from wheel import __version__ as wheel_version
+    from wheel import __version__ as wheel_version  # type: ignore[import-untyped]
     from setuptools.command.bdist_wheel import bdist_wheel as _bdist_wheel
     from setuptools.command.bdist_wheel import get_abi_tag, get_platform
-    from setuptools.command.bdist_wheel import safer_name as _safer_name
+    from setuptools.command.bdist_wheel import safer_name as _safer_name  # type: ignore[attr-defined]
 
     wheel_module_exists = True
 except Exception as e:
-    _bdist_wheel, wheel_version = type, ""  # dummy to make class statement happy
+    _bdist_wheel, wheel_version = type, ""  # type: ignore[misc,assignment]
     log.warning(f"***** Exception while trying to prepare bdist_wheel override class: {e}. "
                 "Skipping wheel overriding.")
 
@@ -37,7 +37,7 @@ def get_bdist_wheel_override():
 
 class PysideBuildWheel(_bdist_wheel, CommandMixin):
 
-    user_options = (_bdist_wheel.user_options + CommandMixin.mixin_user_options
+    user_options = (_bdist_wheel.user_options + CommandMixin.mixin_user_options  # type: ignore[assignment]
                     if wheel_module_exists else None)
 
     def __init__(self, *args, **kwargs):
@@ -76,7 +76,7 @@ class PysideBuildWheel(_bdist_wheel, CommandMixin):
         wheel_version = f"{self._package_version}-{get_qt_version()}"
         components = (_safer_name(self.distribution.get_name()), wheel_version)
         if self.build_number:
-            components += (self.build_number,)
+            components += (self.build_number,)  # type: ignore[assignment]
         return '-'.join(components)
 
     # Modify the returned wheel tag tuple to use correct python version
@@ -91,7 +91,7 @@ class PysideBuildWheel(_bdist_wheel, CommandMixin):
         # Compute tag from the python version that the build command
         # queried.
         build_command = self.get_finalized_command('build')
-        python_target_info = build_command.python_target_info['python_info']
+        python_target_info = build_command.python_target_info['python_info']  # type: ignore[attr-defined]
 
         impl = 'no-py-ver-impl-available'
         abi = 'no-abi-tag-info-available'
@@ -182,7 +182,7 @@ class PysideBuildWheel(_bdist_wheel, CommandMixin):
         # bdist sets self.plat_name if unset, we should only use it for purepy
         # wheels if the user supplied it.
         if self.plat_name_supplied:
-            plat_name = self.plat_name
+            plat_name = self.plat_name or ""
         elif self.root_is_pure:
             plat_name = 'any'
         else:

@@ -94,7 +94,7 @@ def prepare_standalone_package_macos(pyside_build, _vars, is_android=False):
             if pyside_build.qtinfo.build_type != 'debug_and_release':
                 return True
             dir_path = Path(file_full_path).parent
-            in_framework = dir_path.endswith("Versions/5")
+            in_framework = str(dir_path).endswith("Versions/5")
             if file_name.endswith('_debug') and in_framework and no_copy_debug:
                 return False
             return True

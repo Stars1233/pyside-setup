@@ -279,7 +279,7 @@ class BuildInfoCollectorMixin:
         #   build/lib.macosx-10.14-x86_64-3.7' with
         #   build/{venv_prefix}/package'
         setup_tools_build_lib_dir = common_prefix_dir / build_name / "package"
-        self.build_lib = setup_tools_build_lib_dir
+        self.build_lib = str(setup_tools_build_lib_dir)
 
         self.script_dir = Path(script_dir)
         self.sources_dir = Path(sources_dir)

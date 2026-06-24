@@ -30,14 +30,9 @@ class RpathTargetType(Enum):
     qt_libraries = "qt_libraries"
 
 
-try:
-    WindowsError
-except NameError:
-    WindowsError = None
-
 
 class Singleton(type):
-    _instances = {}
+    _instances: dict[type, object] = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
@@ -242,10 +237,8 @@ def copydir(src, dst, _filter=None, ignore=None, force=True, recursive=True, _va
         if dst.exists():
             shutil.copystat(str(src), str(dst))
     except OSError as why:
-        if WindowsError is not None and isinstance(why, WindowsError):
-            # Copying file access times may fail on Windows
-            pass
-        else:
+        # Copying file access times may fail on Windows; ignore these errors.
+        if sys.platform != "win32":
             copy_errors.extend((src, dst, str(why)))
     if copy_errors:
         raise EnvironmentError(copy_errors)
@@ -273,8 +266,9 @@ def run_process_output(args, initial_env=None):
     if initial_env is None:
         initial_env = os.environ
     result = []
-    with subprocess.Popen(args, env=initial_env, universal_newlines=1,
+    with subprocess.Popen(args, env=initial_env, universal_newlines=True,
                           stdout=subprocess.PIPE) as p:
+        assert p.stdout is not None
         for raw_line in p.stdout.readlines():
             result.append(raw_line.rstrip())
         p.stdout.close()
@@ -529,7 +523,7 @@ _7z_binary = None
 
 def download_and_extract_7z(fileurl, target):
     """ Downloads 7z file from fileurl and extract to target  """
-    info = ""
+    info: object = ""
     localfile = None
     for i in range(1, 10):
         try:
@@ -678,9 +672,9 @@ def _ldd_ldso(executable_path):
 
     # Choose appropriate runtime dynamic linker.
     for rtld in rtld_list:
-        rtld = Path(rtld)
-        if rtld.is_file() and os.access(rtld, os.X_OK):
-            (_, _, code) = back_tick(rtld, True)
+        rtld_path = Path(rtld)
+        if rtld_path.is_file() and os.access(rtld_path, os.X_OK):
+            (_, _, code) = back_tick(rtld_path, True)
             # Code 127 is returned by ld.so when called without any
             # arguments (some kind of sanity check I guess).
             if code == 127:
