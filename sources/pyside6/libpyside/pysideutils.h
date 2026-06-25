@@ -76,7 +76,7 @@ PYSIDE_API QDebug operator<<(QDebug debug, const debugPyBuffer &b);
 #endif // !Py_LIMITED_API || >= 3.11
 
 // Shared deprecation message for exec_() → exec() across all Qt module bindings.
-extern PYSIDE_API const char *execDeprecatedMsg;
+extern PYSIDE_API const char *const execDeprecatedMsg;
 
 } //namespace PySide
 

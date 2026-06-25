@@ -22,7 +22,7 @@ using namespace Qt::StringLiterals;
 namespace PySide
 {
 
-const char *execDeprecatedMsg =
+const char *const execDeprecatedMsg =
     "'exec_' will be removed in the future. Use 'exec' instead.";
 
 bool inherits(PyTypeObject *objType, const char *class_name)
