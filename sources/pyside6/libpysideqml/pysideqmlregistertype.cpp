@@ -9,6 +9,8 @@
 #include "pysideqmlextended_p.h"
 #include "pysideqmluncreatable.h"
 
+#include <pysidemetatype.h>
+
 #include <limits>
 #include <optional>
 
@@ -468,6 +470,7 @@ static int qmlRegisterSingletonTypeV2(PyObject *pyObj, PyObject *pyClassInfoObj,
     const QMetaObject *classInfoMetaObject = pyObj == pyClassInfoObj
         ? metaObject : PySide::retrieveMetaObject(pyClassInfoObj);
 
+    auto metaType = PySide::createQObjectPtrMetaType(metaObject);
     QList<int> ids;
     QQmlPrivate::RegisterSingletonTypeAndRevisions type {
         QQmlPrivate::RegisterType::StructVersion::Base, // structVersion
@@ -476,7 +479,7 @@ static int qmlRegisterSingletonTypeV2(PyObject *pyObj, PyObject *pyClassInfoObj,
         callback, // qObjectApi,
         metaObject,
         classInfoMetaObject,
-        QMetaType(QMetaType::QObjectStar), // typeId
+        metaType, // typeId
         nullptr, // extensionMetaObject
         nullptr, // extensionObjectCreate
         &ids
@@ -528,8 +531,7 @@ static int qmlRegisterSingletonType(PyObject *pyObj, const ImportData &importDat
     };
 
     if (isQObject) {
-        // FIXME: Fix this to assign new type ids each time.
-        type.typeId = QMetaType(QMetaType::QObjectStar);
+        type.typeId = PySide::createQObjectPtrMetaType(metaObject);
 
         if (hasCallback)
             type.qObjectApi = SingletonQObjectCallbackCreation(callback);
